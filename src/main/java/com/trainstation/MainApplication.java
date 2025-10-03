@@ -1,6 +1,7 @@
 package com.trainstation;
 
 import com.trainstation.gui.LoginFrame;
+import com.trainstation.util.DataInitializer;
 import javax.swing.*;
 
 public class MainApplication {
@@ -11,6 +12,9 @@ public class MainApplication {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // Initialize sample data
+        DataInitializer.initializeSampleData();
 
         // Start the application on the Event Dispatch Thread
         SwingUtilities.invokeLater(() -> {
