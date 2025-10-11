@@ -31,9 +31,26 @@ public class NavigationBar extends JPanel {
         JButton homeBtn = createNavButton("Trang chủ", "home");
         leftPanel.add(homeBtn);
         
-        // Ticket button
-        JButton ticketBtn = createNavButton("Vé", "ticket");
-        leftPanel.add(ticketBtn);
+        // Ticket management dropdown
+        JButton ticketMenuBtn = createNavButton("Quản lý vé ▾", null);
+        JPopupMenu ticketMenu = new JPopupMenu();
+        
+        JMenuItem bookTicketItem = new JMenuItem("Đặt vé");
+        bookTicketItem.addActionListener(e -> navigateTo("bookticket"));
+        ticketMenu.add(bookTicketItem);
+        
+        JMenuItem refundTicketItem = new JMenuItem("Hoàn vé");
+        refundTicketItem.addActionListener(e -> navigateTo("refundticket"));
+        ticketMenu.add(refundTicketItem);
+        
+        JMenuItem changeTicketItem = new JMenuItem("Đổi vé");
+        changeTicketItem.addActionListener(e -> navigateTo("changeticket"));
+        ticketMenu.add(changeTicketItem);
+        
+        ticketMenuBtn.addActionListener(e -> 
+            ticketMenu.show(ticketMenuBtn, 0, ticketMenuBtn.getHeight()));
+        
+        leftPanel.add(ticketMenuBtn);
         
         // Customer button
         JButton customerBtn = createNavButton("Khách hàng", "customer");
