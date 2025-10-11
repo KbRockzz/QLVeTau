@@ -9,6 +9,7 @@ public class Employee implements Serializable {
     private String phoneNumber;
     private String email;
     private String position;
+    private String maLoai; // Employee type: LNV01, LNV02, LNV03 (Manager)
     private LocalDate hireDate;
     private double salary;
 
@@ -16,12 +17,13 @@ public class Employee implements Serializable {
     }
 
     public Employee(String employeeId, String fullName, String phoneNumber, String email, 
-                    String position, LocalDate hireDate, double salary) {
+                    String position, String maLoai, LocalDate hireDate, double salary) {
         this.employeeId = employeeId;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.position = position;
+        this.maLoai = maLoai;
         this.hireDate = hireDate;
         this.salary = salary;
     }
@@ -66,6 +68,14 @@ public class Employee implements Serializable {
         this.position = position;
     }
 
+    public String getMaLoai() {
+        return maLoai;
+    }
+
+    public void setMaLoai(String maLoai) {
+        this.maLoai = maLoai;
+    }
+
     public LocalDate getHireDate() {
         return hireDate;
     }
@@ -90,6 +100,7 @@ public class Employee implements Serializable {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", email='" + email + '\'' +
                 ", position='" + position + '\'' +
+                ", maLoai='" + maLoai + '\'' +
                 ", hireDate=" + hireDate +
                 ", salary=" + salary +
                 '}';

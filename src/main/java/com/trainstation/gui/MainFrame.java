@@ -6,7 +6,9 @@ import java.awt.*;
 
 public class MainFrame extends JFrame {
     private Account currentAccount;
-    private JTabbedPane tabbedPane;
+    private JPanel contentPanel;
+    private CardLayout cardLayout;
+    private NavigationBar navigationBar;
 
     public MainFrame(Account account) {
         this.currentAccount = account;
@@ -18,57 +20,59 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1200, 700);
         setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-        // Menu bar
-        JMenuBar menuBar = new JMenuBar();
-        JMenu fileMenu = new JMenu("Hệ thống");
-        JMenuItem logoutItem = new JMenuItem("Đăng xuất");
-        logoutItem.addActionListener(e -> handleLogout());
-        JMenuItem exitItem = new JMenuItem("Thoát");
-        exitItem.addActionListener(e -> System.exit(0));
-        fileMenu.add(logoutItem);
-        fileMenu.addSeparator();
-        fileMenu.add(exitItem);
-        menuBar.add(fileMenu);
-        setJMenuBar(menuBar);
+        // Navigation bar at the top
+        navigationBar = new NavigationBar(currentAccount, this);
+        add(navigationBar, BorderLayout.NORTH);
 
-        // Header panel
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        JLabel welcomeLabel = new JLabel("Xin chào, " + currentAccount.getUsername() + " (" + currentAccount.getRole() + ")");
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        headerPanel.add(welcomeLabel, BorderLayout.WEST);
-        add(headerPanel, BorderLayout.NORTH);
-
-        // Tabbed pane
-        tabbedPane = new JTabbedPane();
+        // Content panel with CardLayout for switching between panels
+        cardLayout = new CardLayout();
+        contentPanel = new JPanel(cardLayout);
         
-        // Add tabs based on role
-        tabbedPane.addTab("🎫 Đặt vé", new TicketBookingPanel(currentAccount));
-        tabbedPane.addTab("👥 Khách hàng", new CustomerPanel());
-        tabbedPane.addTab("🚆 Chuyến tàu", new TrainPanel());
+        // Add all panels
+        contentPanel.add(new HomePanel(currentAccount, this), "home");
+        contentPanel.add(createPanelWithNav(new TicketBookingPanel(currentAccount)), "ticket");
+        contentPanel.add(createPanelWithNav(new CustomerPanel()), "customer");
+        contentPanel.add(createPanelWithNav(new TrainPanel()), "train");
         
-        if ("ADMIN".equals(currentAccount.getRole())) {
-            tabbedPane.addTab("👤 Nhân viên", new EmployeePanel());
-            tabbedPane.addTab("🔐 Tài khoản", new AccountPanel());
-            tabbedPane.addTab("📊 Thống kê", new StatisticsPanel());
+        // Only add employee and account panels for managers
+        if (currentAccount.isManager()) {
+            contentPanel.add(createPanelWithNav(new EmployeePanel()), "employee");
+            contentPanel.add(createPanelWithNav(new AccountPanel()), "account");
+            contentPanel.add(createPanelWithNav(new StatisticsPanel()), "statistics");
         }
 
-        add(tabbedPane, BorderLayout.CENTER);
+        add(contentPanel, BorderLayout.CENTER);
+        
+        // Show home page by default
+        cardLayout.show(contentPanel, "home");
+    }
+    
+    /**
+     * Wrap a panel to ensure consistent layout
+     */
+    private JPanel createPanelWithNav(JPanel panel) {
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.add(panel, BorderLayout.CENTER);
+        return wrapper;
     }
 
-    private void handleLogout() {
-        int result = JOptionPane.showConfirmDialog(this,
-                "Bạn có chắc muốn đăng xuất?",
-                "Xác nhận",
-                JOptionPane.YES_NO_OPTION);
-        
-        if (result == JOptionPane.YES_OPTION) {
-            dispose();
-            SwingUtilities.invokeLater(() -> {
-                LoginFrame loginFrame = new LoginFrame();
-                loginFrame.setVisible(true);
-            });
+    /**
+     * Navigate to a specific page
+     * @param page The page identifier
+     */
+    public void navigateToPage(String page) {
+        // Check if manager-only pages are accessed by non-managers
+        if (!currentAccount.isManager() && 
+            (page.equals("employee") || page.equals("account") || page.equals("statistics"))) {
+            JOptionPane.showMessageDialog(this,
+                "Bạn không có quyền truy cập trang này!\nChỉ quản lý (LNV03) mới có thể truy cập.",
+                "Từ chối truy cập",
+                JOptionPane.WARNING_MESSAGE);
+            return;
         }
+        
+        cardLayout.show(contentPanel, page);
     }
 }

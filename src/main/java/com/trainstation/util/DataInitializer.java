@@ -20,25 +20,27 @@ public class DataInitializer {
     private static void initializeEmployees() {
         EmployeeDAO employeeDAO = EmployeeDAO.getInstance();
         
-        // Admin employee
+        // Admin employee with manager role (LNV03)
         Employee admin = new Employee(
             "EMP001",
             "Nguyễn Văn Admin",
             "0901234567",
             "admin@trainstation.com",
             "Quản lý",
+            "LNV03", // Manager
             LocalDate.of(2020, 1, 1),
             15000000
         );
         employeeDAO.add(admin);
         
-        // Sample employees
+        // Sample employees with regular employee role (LNV01)
         Employee emp1 = new Employee(
             "EMP002",
             "Trần Thị Bình",
             "0902345678",
             "binh@trainstation.com",
             "Nhân viên bán vé",
+            "LNV01", // Regular employee
             LocalDate.of(2021, 3, 15),
             10000000
         );
@@ -50,6 +52,7 @@ public class DataInitializer {
             "0903456789",
             "cuong@trainstation.com",
             "Nhân viên bán vé",
+            "LNV02", // Senior employee
             LocalDate.of(2022, 6, 1),
             9500000
         );
