@@ -23,6 +23,28 @@ public class CustomerPanel extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // Search panel at the top
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchPanel.setBorder(BorderFactory.createTitledBorder("Tìm kiếm khách hàng"));
+        
+        JLabel searchLabel = new JLabel("Số điện thoại:");
+        JTextField searchField = new JTextField(20);
+        JButton searchButton = new JButton("Tìm kiếm");
+        JButton refreshButton = new JButton("Làm mới");
+        
+        searchButton.addActionListener(e -> searchByPhone(searchField.getText().trim()));
+        refreshButton.addActionListener(e -> {
+            searchField.setText("");
+            loadCustomers();
+        });
+        
+        searchPanel.add(searchLabel);
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+        searchPanel.add(refreshButton);
+        
+        add(searchPanel, BorderLayout.NORTH);
+
         // Table panel
         String[] columns = {"Mã KH", "Họ tên", "Số điện thoại", "Email", "CMND/CCCD", "Địa chỉ"};
         tableModel = new DefaultTableModel(columns, 0) {
@@ -40,7 +62,11 @@ public class CustomerPanel extends JPanel {
         });
 
         JScrollPane scrollPane = new JScrollPane(customerTable);
-        add(scrollPane, BorderLayout.CENTER);
+        
+        // Create a panel for table with CENTER layout
+        JPanel tablePanel = new JPanel(new BorderLayout());
+        tablePanel.add(scrollPane, BorderLayout.CENTER);
+        add(tablePanel, BorderLayout.CENTER);
 
         // Form panel
         JPanel formPanel = new JPanel(new GridBagLayout());
@@ -223,5 +249,40 @@ public class CustomerPanel extends JPanel {
         identityField.setText("");
         addressField.setText("");
         customerTable.clearSelection();
+    }
+    
+    private void searchByPhone(String phoneNumber) {
+        if (phoneNumber.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Vui lòng nhập số điện thoại cần tìm!", 
+                "Thông báo", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        tableModel.setRowCount(0);
+        List<Customer> customers = customerDAO.findAll();
+        boolean found = false;
+        
+        for (Customer customer : customers) {
+            if (customer.getPhoneNumber().contains(phoneNumber)) {
+                tableModel.addRow(new Object[]{
+                    customer.getCustomerId(),
+                    customer.getFullName(),
+                    customer.getPhoneNumber(),
+                    customer.getEmail(),
+                    customer.getIdentityNumber(),
+                    customer.getAddress()
+                });
+                found = true;
+            }
+        }
+        
+        if (!found) {
+            JOptionPane.showMessageDialog(this, 
+                "Không tìm thấy khách hàng với số điện thoại: " + phoneNumber, 
+                "Kết quả tìm kiếm", 
+                JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 }

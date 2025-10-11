@@ -1,0 +1,156 @@
+package com.trainstation.gui;
+
+import com.trainstation.model.Account;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
+
+/**
+ * Navigation bar component that will be displayed at the top of all panels
+ */
+public class NavigationBar extends JPanel {
+    private Account currentAccount;
+    private JFrame parentFrame;
+    
+    public NavigationBar(Account account, JFrame parentFrame) {
+        this.currentAccount = account;
+        this.parentFrame = parentFrame;
+        initComponents();
+    }
+    
+    private void initComponents() {
+        setLayout(new BorderLayout());
+        setBackground(new Color(52, 73, 94));
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        // Left panel with navigation buttons
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        leftPanel.setOpaque(false);
+        
+        // Home button
+        JButton homeBtn = createNavButton("Trang chủ", "home");
+        leftPanel.add(homeBtn);
+        
+        // Ticket button
+        JButton ticketBtn = createNavButton("Vé", "ticket");
+        leftPanel.add(ticketBtn);
+        
+        // Customer button
+        JButton customerBtn = createNavButton("Khách hàng", "customer");
+        leftPanel.add(customerBtn);
+        
+        // Train button
+        JButton trainBtn = createNavButton("Chuyến tàu", "train");
+        leftPanel.add(trainBtn);
+        
+        // Employee dropdown (if manager)
+        if (currentAccount.isManager()) {
+            JButton employeeMenuBtn = createNavButton("Nhân viên ▾", null);
+            JPopupMenu employeeMenu = new JPopupMenu();
+            
+            JMenuItem manageEmployeeItem = new JMenuItem("Quản lý nhân viên");
+            manageEmployeeItem.addActionListener(e -> navigateTo("employee"));
+            employeeMenu.add(manageEmployeeItem);
+            
+            JMenuItem statisticsItem = new JMenuItem("Thống kê");
+            statisticsItem.addActionListener(e -> navigateTo("statistics"));
+            employeeMenu.add(statisticsItem);
+            
+            employeeMenuBtn.addActionListener(e -> 
+                employeeMenu.show(employeeMenuBtn, 0, employeeMenuBtn.getHeight()));
+            
+            leftPanel.add(employeeMenuBtn);
+        }
+        
+        // Account button (if manager)
+        if (currentAccount.isManager()) {
+            JButton accountBtn = createNavButton("Tài khoản", "account");
+            leftPanel.add(accountBtn);
+        }
+        
+        // Logout button
+        JButton logoutBtn = createNavButton("Đăng xuất", "logout");
+        leftPanel.add(logoutBtn);
+        
+        add(leftPanel, BorderLayout.WEST);
+        
+        // Right panel with employee name
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        rightPanel.setOpaque(false);
+        JLabel userLabel = new JLabel("👤 " + getEmployeeName());
+        userLabel.setForeground(Color.WHITE);
+        userLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        rightPanel.add(userLabel);
+        
+        add(rightPanel, BorderLayout.EAST);
+    }
+    
+    private JButton createNavButton(String text, String action) {
+        JButton button = new JButton(text);
+        button.setForeground(Color.WHITE);
+        button.setBackground(new Color(41, 128, 185));
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setFont(new Font("Arial", Font.BOLD, 12));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setPreferredSize(new Dimension(120, 35));
+        
+        // Hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(52, 152, 219));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(41, 128, 185));
+            }
+        });
+        
+        if (action != null) {
+            button.addActionListener(e -> {
+                if ("logout".equals(action)) {
+                    handleLogout();
+                } else {
+                    navigateTo(action);
+                }
+            });
+        }
+        
+        return button;
+    }
+    
+    private void navigateTo(String page) {
+        if (parentFrame instanceof MainFrame) {
+            ((MainFrame) parentFrame).navigateToPage(page);
+        }
+    }
+    
+    private void handleLogout() {
+        int result = JOptionPane.showConfirmDialog(
+            parentFrame,
+            "Bạn có chắc muốn đăng xuất?",
+            "Xác nhận đăng xuất",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+        
+        if (result == JOptionPane.YES_OPTION) {
+            parentFrame.dispose();
+            SwingUtilities.invokeLater(() -> {
+                LoginFrame loginFrame = new LoginFrame();
+                loginFrame.setVisible(true);
+            });
+        }
+    }
+    
+    private String getEmployeeName() {
+        // Get employee name from EmployeeDAO using employeeId
+        if (currentAccount.getEmployeeId() != null) {
+            var employee = com.trainstation.dao.EmployeeDAO.getInstance()
+                .findById(currentAccount.getEmployeeId());
+            if (employee != null) {
+                return employee.getFullName();
+            }
+        }
+        return currentAccount.getUsername();
+    }
+}

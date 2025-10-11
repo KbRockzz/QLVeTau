@@ -14,6 +14,7 @@ public class EmployeePanel extends JPanel {
     private DefaultTableModel tableModel;
     private EmployeeDAO employeeDAO;
     private JTextField idField, nameField, phoneField, emailField, positionField, hireDateField, salaryField;
+    private JComboBox<String> maLoaiComboBox;
 
     public EmployeePanel() {
         employeeDAO = EmployeeDAO.getInstance();
@@ -26,7 +27,7 @@ public class EmployeePanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Table panel
-        String[] columns = {"Mã NV", "Họ tên", "Số điện thoại", "Email", "Chức vụ", "Ngày vào", "Lương"};
+        String[] columns = {"Mã NV", "Họ tên", "Số điện thoại", "Email", "Chức vụ", "Loại NV", "Ngày vào", "Lương"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -89,6 +90,13 @@ public class EmployeePanel extends JPanel {
 
         row++;
         gbc.gridx = 0; gbc.gridy = row;
+        formPanel.add(new JLabel("Loại nhân viên:"), gbc);
+        gbc.gridx = 1;
+        maLoaiComboBox = new JComboBox<>(new String[]{"LNV01", "LNV02", "LNV03"});
+        formPanel.add(maLoaiComboBox, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row;
         formPanel.add(new JLabel("Ngày vào (yyyy-MM-dd):"), gbc);
         gbc.gridx = 1;
         hireDateField = new JTextField(20);
@@ -137,6 +145,7 @@ public class EmployeePanel extends JPanel {
                 employee.getPhoneNumber(),
                 employee.getEmail(),
                 employee.getPosition(),
+                employee.getMaLoai(),
                 employee.getHireDate().format(formatter),
                 String.format("%.0f", employee.getSalary())
             });
@@ -151,8 +160,9 @@ public class EmployeePanel extends JPanel {
             phoneField.setText(tableModel.getValueAt(selectedRow, 2).toString());
             emailField.setText(tableModel.getValueAt(selectedRow, 3).toString());
             positionField.setText(tableModel.getValueAt(selectedRow, 4).toString());
-            hireDateField.setText(tableModel.getValueAt(selectedRow, 5).toString());
-            salaryField.setText(tableModel.getValueAt(selectedRow, 6).toString());
+            maLoaiComboBox.setSelectedItem(tableModel.getValueAt(selectedRow, 5).toString());
+            hireDateField.setText(tableModel.getValueAt(selectedRow, 6).toString());
+            salaryField.setText(tableModel.getValueAt(selectedRow, 7).toString());
         }
     }
 
@@ -173,6 +183,7 @@ public class EmployeePanel extends JPanel {
                 phoneField.getText().trim(),
                 emailField.getText().trim(),
                 positionField.getText().trim(),
+                (String) maLoaiComboBox.getSelectedItem(),
                 LocalDate.parse(hireDateField.getText().trim(), formatter),
                 Double.parseDouble(salaryField.getText().trim())
             );
@@ -202,6 +213,7 @@ public class EmployeePanel extends JPanel {
             employee.setPhoneNumber(phoneField.getText().trim());
             employee.setEmail(emailField.getText().trim());
             employee.setPosition(positionField.getText().trim());
+            employee.setMaLoai((String) maLoaiComboBox.getSelectedItem());
             employee.setHireDate(LocalDate.parse(hireDateField.getText().trim(), formatter));
             employee.setSalary(Double.parseDouble(salaryField.getText().trim()));
 
@@ -247,6 +259,7 @@ public class EmployeePanel extends JPanel {
         phoneField.setText("");
         emailField.setText("");
         positionField.setText("");
+        maLoaiComboBox.setSelectedIndex(0);
         hireDateField.setText("");
         salaryField.setText("");
         employeeTable.clearSelection();

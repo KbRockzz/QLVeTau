@@ -1,6 +1,7 @@
 package com.trainstation.dao;
 
 import com.trainstation.model.Account;
+import com.trainstation.model.Employee;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,8 +13,8 @@ public class AccountDAO implements GenericDAO<Account> {
 
     private AccountDAO() {
         accounts = new HashMap<>();
-        // Initialize with default admin account
-        Account admin = new Account("admin", "admin123", "ADMIN", "EMP001", true);
+        // Initialize with default admin account with manager role
+        Account admin = new Account("admin", "admin123", "ADMIN", "EMP001", "LNV03", true);
         accounts.put(admin.getUsername(), admin);
     }
 
@@ -26,11 +27,25 @@ public class AccountDAO implements GenericDAO<Account> {
 
     @Override
     public void add(Account account) {
+        // Get employee maLoai if not set
+        if (account.getMaLoai() == null && account.getEmployeeId() != null) {
+            Employee employee = EmployeeDAO.getInstance().findById(account.getEmployeeId());
+            if (employee != null) {
+                account.setMaLoai(employee.getMaLoai());
+            }
+        }
         accounts.put(account.getUsername(), account);
     }
 
     @Override
     public void update(Account account) {
+        // Get employee maLoai if not set
+        if (account.getMaLoai() == null && account.getEmployeeId() != null) {
+            Employee employee = EmployeeDAO.getInstance().findById(account.getEmployeeId());
+            if (employee != null) {
+                account.setMaLoai(employee.getMaLoai());
+            }
+        }
         accounts.put(account.getUsername(), account);
     }
 
@@ -52,6 +67,13 @@ public class AccountDAO implements GenericDAO<Account> {
     public Account authenticate(String username, String password) {
         Account account = accounts.get(username);
         if (account != null && account.getPassword().equals(password) && account.isActive()) {
+            // Update maLoai from employee if needed
+            if (account.getMaLoai() == null && account.getEmployeeId() != null) {
+                Employee employee = EmployeeDAO.getInstance().findById(account.getEmployeeId());
+                if (employee != null) {
+                    account.setMaLoai(employee.getMaLoai());
+                }
+            }
             return account;
         }
         return null;
