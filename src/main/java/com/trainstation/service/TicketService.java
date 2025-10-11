@@ -109,4 +109,44 @@ public class TicketService {
     public Ticket getTicketById(String ticketId) {
         return ticketDAO.findById(ticketId);
     }
+
+    public void changeTicket(String ticketId, String newTrainId, String newSeatNumber, String newSeatId, String newCarriageId) {
+        Ticket ticket = ticketDAO.findById(ticketId);
+        if (ticket == null) {
+            throw new IllegalArgumentException("Ticket not found");
+        }
+
+        if (ticket.getStatus() != TicketStatus.BOOKED) {
+            throw new IllegalStateException("Only booked tickets can be changed");
+        }
+
+        // Release old seat
+        Train oldTrain = trainDAO.findById(ticket.getTrainId());
+        if (oldTrain != null) {
+            oldTrain.setAvailableSeats(oldTrain.getAvailableSeats() + 1);
+            trainDAO.update(oldTrain);
+        }
+
+        // Get new train and check availability
+        Train newTrain = trainDAO.findById(newTrainId);
+        if (newTrain == null) {
+            throw new IllegalArgumentException("New train not found");
+        }
+
+        if (newTrain.getAvailableSeats() <= 0) {
+            throw new IllegalStateException("No available seats on new train");
+        }
+
+        // Update ticket with new train and seat
+        ticket.setTrainId(newTrainId);
+        ticket.setSeatNumber(newSeatNumber);
+        ticket.setSeatId(newSeatId);
+        ticket.setCarriageId(newCarriageId);
+        ticket.setPrice(newTrain.getTicketPrice());
+        ticketDAO.update(ticket);
+
+        // Update new train's available seats
+        newTrain.setAvailableSeats(newTrain.getAvailableSeats() - 1);
+        trainDAO.update(newTrain);
+    }
 }

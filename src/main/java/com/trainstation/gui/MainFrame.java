@@ -32,7 +32,9 @@ public class MainFrame extends JFrame {
         
         // Add all panels
         contentPanel.add(new HomePanel(currentAccount, this), "home");
-        contentPanel.add(createPanelWithNav(new TicketBookingPanel(currentAccount)), "ticket");
+        contentPanel.add(createPanelWithNav(new BookTicketPanel(currentAccount)), "bookticket");
+        contentPanel.add(createPanelWithNav(new RefundTicketPanel(currentAccount)), "refundticket");
+        contentPanel.add(createPanelWithNav(new ChangeTicketPanel(currentAccount)), "changeticket");
         contentPanel.add(createPanelWithNav(new CustomerPanel()), "customer");
         contentPanel.add(createPanelWithNav(new TrainPanel()), "train");
         
@@ -73,6 +75,13 @@ public class MainFrame extends JFrame {
             return;
         }
         
-        cardLayout.show(contentPanel, page);
+        try {
+            cardLayout.show(contentPanel, page);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                "Lỗi khi chuyển trang: " + e.getMessage(),
+                "Lỗi",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

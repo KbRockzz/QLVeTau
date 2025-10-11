@@ -14,6 +14,8 @@ public class Ticket implements Serializable {
     private String employeeId;
     private LocalDateTime bookingDate;
     private String seatNumber;
+    private String seatId;
+    private String carriageId;
     private double price;
     private TicketStatus status;
 
@@ -28,6 +30,21 @@ public class Ticket implements Serializable {
         this.employeeId = employeeId;
         this.bookingDate = bookingDate;
         this.seatNumber = seatNumber;
+        this.price = price;
+        this.status = status;
+    }
+
+    public Ticket(String ticketId, String trainId, String customerId, String employeeId, 
+                  LocalDateTime bookingDate, String seatNumber, String seatId, String carriageId,
+                  double price, TicketStatus status) {
+        this.ticketId = ticketId;
+        this.trainId = trainId;
+        this.customerId = customerId;
+        this.employeeId = employeeId;
+        this.bookingDate = bookingDate;
+        this.seatNumber = seatNumber;
+        this.seatId = seatId;
+        this.carriageId = carriageId;
         this.price = price;
         this.status = status;
     }
@@ -96,6 +113,22 @@ public class Ticket implements Serializable {
         this.status = status;
     }
 
+    public String getSeatId() {
+        return seatId;
+    }
+
+    public void setSeatId(String seatId) {
+        this.seatId = seatId;
+    }
+
+    public String getCarriageId() {
+        return carriageId;
+    }
+
+    public void setCarriageId(String carriageId) {
+        this.carriageId = carriageId;
+    }
+
     @Override
     public String toString() {
         return "Ticket{" +
@@ -105,6 +138,8 @@ public class Ticket implements Serializable {
                 ", employeeId='" + employeeId + '\'' +
                 ", bookingDate=" + bookingDate +
                 ", seatNumber='" + seatNumber + '\'' +
+                ", seatId='" + seatId + '\'' +
+                ", carriageId='" + carriageId + '\'' +
                 ", price=" + price +
                 ", status=" + status +
                 '}';
