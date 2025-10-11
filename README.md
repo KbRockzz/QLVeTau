@@ -6,38 +6,56 @@ QLVeTau là một ứng dụng Java Swing để quản lý việc bán vé của
 
 ## Tính năng mới nhất ✨
 
-### 🚀 Giao diện thanh điều hướng hiện đại
-- ✅ Thanh điều hướng trên cùng hiện diện ở **tất cả** các trang
-- ✅ Các trang: Trang chủ | Vé | Khách hàng | Chuyến tàu | Nhân viên (dropdown) | Tài khoản | Đăng xuất
-- ✅ Hiển thị tên nhân viên đang đăng nhập ở góc phải
-- ✅ Dropdown menu cho chức năng nhân viên (Quản lý nhân viên & Thống kê)
+### 🎨 Giao diện trang chủ mới
+- ✅ Hình nền nhà ga với gradient và silhouette
+- ✅ Lời chào mừng và hiển thị chức vụ
+- ✅ Giao diện đơn giản, tập trung
+
+### 🎫 Quản lý vé toàn diện
+- ✅ **Dropdown menu "Quản lý vé"** với 3 chức năng:
+  - 📝 **Đặt vé**: Giao diện mới với chọn toa và ghế trực quan
+  - 💰 **Hoàn vé**: Hoàn lại tiền cho khách hàng
+  - 🔄 **Đổi vé**: Thay đổi chuyến tàu và ghế ngồi
+- ✅ Bỏ chức năng hủy vé (thay bằng đổi vé)
+- ✅ Hiển thị danh sách toa tàu
+- ✅ Hiển thị sơ đồ ghế với màu sắc:
+  - 🟢 Xanh lá: Ghế trống
+  - 🔴 Đỏ: Ghế đã đặt
+
+### 🚂 Quản lý toa và ghế
+- ✅ Model mới: CarriageType (Loại toa), Carriage (Toa), Seat (Ghế)
+- ✅ DAO hỗ trợ SQL Server cho các entity mới
+- ✅ Quản lý trạng thái ghế tự động
+
+### 💾 Kết nối SQL Server
+- ✅ SQL Server JDBC Driver (mssql-jdbc 12.4.1)
+- ✅ Schema SQL đầy đủ (`database_schema.sql`)
+- ✅ DAOs hỗ trợ SQL Server
+- ✅ Dữ liệu mẫu tự động
+- ✅ Hướng dẫn thiết lập chi tiết (`DATABASE_SETUP.md`)
 
 ### 🔐 Phân quyền theo loại nhân viên (maLoai)
 - ✅ **LNV01**: Nhân viên thường - Truy cập cơ bản
 - ✅ **LNV02**: Nhân viên cao cấp - Truy cập cơ bản
 - ✅ **LNV03**: Quản lý - Truy cập đầy đủ (quản lý nhân viên, tài khoản, thống kê)
 
-### 🔍 Tìm kiếm nâng cao
-- ✅ Tìm kiếm khách hàng theo số điện thoại (hỗ trợ tìm kiếm một phần)
-- ✅ Nút "Làm mới" để trở về danh sách đầy đủ
-
-### ⚠️ Xác nhận thao tác
-- ✅ Tất cả thao tác xóa đều yêu cầu xác nhận
-- ✅ Đăng xuất có xác nhận
-- ✅ Hoàn vé và hủy vé có xác nhận
-
-### 💾 Kết nối SQL Server
-- ✅ Infrastructure sẵn sàng cho SQL Server (`MySQL/ConnectSql.java`)
-- ✅ Singleton pattern cho quản lý kết nối
-- ✅ Hỗ trợ connection pooling
-
 ## Tính năng chi tiết
 
 ### Quản lý vé
-- ✅ Đặt vé tàu
-- ✅ Hoàn vé (refund) - có xác nhận
-- ✅ Hủy vé (cancel) - có xác nhận
-- ✅ Xem danh sách vé đã đặt
+- ✅ **Đặt vé** - Giao diện mới với chọn toa và ghế
+  - Chọn chuyến tàu và khách hàng
+  - Hiển thị danh sách toa tàu
+  - Sơ đồ ghế với màu trạng thái
+  - Đặt vé với 1 click
+- ✅ **Hoàn vé** - Hoàn lại tiền cho khách hàng
+  - Xem danh sách vé đã đặt
+  - Chi tiết thông tin vé
+  - Xác nhận hoàn vé
+- ✅ **Đổi vé** - Thay đổi chuyến và ghế
+  - Chọn vé cần đổi
+  - Chọn chuyến tàu mới
+  - Chọn toa và ghế mới
+  - Tự động cập nhật giá
 
 ### Quản lý khách hàng
 - ✅ Thêm khách hàng mới
@@ -91,30 +109,43 @@ QLVeTau/
 │   │   │       │   ├── Customer.java
 │   │   │       │   ├── Employee.java
 │   │   │       │   ├── Ticket.java
-│   │   │       │   └── Train.java
+│   │   │       │   ├── Train.java
+│   │   │       │   ├── CarriageType.java  # MỚI
+│   │   │       │   ├── Carriage.java      # MỚI
+│   │   │       │   └── Seat.java          # MỚI
 │   │   │       ├── dao/            # Data Access Objects
 │   │   │       │   ├── GenericDAO.java
 │   │   │       │   ├── AccountDAO.java
 │   │   │       │   ├── CustomerDAO.java
 │   │   │       │   ├── EmployeeDAO.java
 │   │   │       │   ├── TicketDAO.java
-│   │   │       │   └── TrainDAO.java
+│   │   │       │   ├── TrainDAO.java
+│   │   │       │   ├── CarriageTypeDAO.java  # MỚI
+│   │   │       │   ├── CarriageDAO.java      # MỚI
+│   │   │       │   └── SeatDAO.java          # MỚI
 │   │   │       ├── service/        # Business Logic Layer
 │   │   │       │   ├── TicketService.java
 │   │   │       │   └── StatisticsService.java
 │   │   │       ├── gui/            # Giao diện người dùng
 │   │   │       │   ├── LoginFrame.java
 │   │   │       │   ├── MainFrame.java
+│   │   │       │   ├── HomePanel.java       # CẬP NHẬT
+│   │   │       │   ├── BookTicketPanel.java # MỚI
+│   │   │       │   ├── RefundTicketPanel.java # MỚI
+│   │   │       │   ├── ChangeTicketPanel.java # MỚI
 │   │   │       │   ├── CustomerPanel.java
 │   │   │       │   ├── TrainPanel.java
 │   │   │       │   ├── EmployeePanel.java
 │   │   │       │   ├── AccountPanel.java
-│   │   │       │   ├── TicketBookingPanel.java
 │   │   │       │   └── StatisticsPanel.java
+│   │   │       ├── MySQL/
+│   │   │       │   └── ConnectSql.java    # Kết nối SQL Server
 │   │   │       └── MainApplication.java
 │   │   └── resources/
 │   └── test/
 │       └── java/
+├── database_schema.sql      # MỚI - Script SQL
+├── DATABASE_SETUP.md        # MỚI - Hướng dẫn DB
 ├── pom.xml
 └── README.md
 ```
@@ -124,10 +155,26 @@ QLVeTau/
 ### Yêu cầu hệ thống
 - Java JDK 17 hoặc cao hơn
 - Apache Maven 3.6+
+- SQL Server 2019+ (khuyến nghị) hoặc SQL Server Express
 
 ### Hướng dẫn cài đặt
 
-1. Clone repository:
+#### 1. Thiết lập cơ sở dữ liệu (SQL Server)
+
+Xem hướng dẫn chi tiết trong file [DATABASE_SETUP.md](DATABASE_SETUP.md)
+
+**Tóm tắt:**
+- Cài đặt SQL Server
+- Chạy script `database_schema.sql` để tạo database và bảng
+- Cấu hình kết nối trong `src/main/java/com/trainstation/MySQL/ConnectSql.java`
+
+```java
+private static final String SERVER = "localhost";
+private static final String USERNAME = "sa";
+private static final String PASSWORD = "your_password";
+```
+
+#### 2. Clone repository:
 ```bash
 git clone https://github.com/KbRockzz/QLVeTau.git
 cd QLVeTau
@@ -201,30 +248,39 @@ Dự án có đầy đủ tài liệu tiếng Việt và tiếng Anh:
 - Nhập thông tin chuyến tàu (định dạng ngày: yyyy-MM-dd HH:mm)
 - Sử dụng các nút để thêm/sửa/xóa (có xác nhận)
 
-### 5. Đặt vé
-- Nhấn nút **Vé** trên thanh điều hướng
-- Chọn chuyến tàu từ danh sách
-- Chọn khách hàng
-- Nhập số ghế
+### 5. Đặt vé (Giao diện mới)
+- Nhấn **Quản lý vé ▾** trên thanh điều hướng
+- Chọn **Đặt vé**
+- Chọn chuyến tàu và khách hàng
+- Chọn toa tàu từ danh sách bên trái
+- Chọn ghế trống (màu xanh) từ sơ đồ ghế
 - Nhấn "Đặt vé"
 
-### 6. Hoàn/Hủy vé
-- Chọn vé trong bảng
-- Nhấn "Hoàn vé" hoặc "Hủy vé"
-- Xác nhận thao tác
+### 6. Hoàn vé
+- Nhấn **Quản lý vé ▾** → **Hoàn vé**
+- Chọn vé cần hoàn từ danh sách
+- Xem chi tiết vé
+- Nhấn "Hoàn vé" và xác nhận
 
-### 7. Quản lý nhân viên (Chỉ LNV03)
+### 7. Đổi vé (Tính năng mới)
+- Nhấn **Quản lý vé ▾** → **Đổi vé**
+- Chọn vé cần đổi từ danh sách
+- Chọn chuyến tàu mới
+- Chọn toa và ghế mới
+- Nhấn "Đổi vé" để xác nhận
+
+### 8. Quản lý nhân viên (Chỉ LNV03)
 - Nhấn **Nhân viên** trên thanh điều hướng
 - Chọn **Quản lý nhân viên**
 - Thêm nhân viên mới với loại nhân viên (LNV01/LNV02/LNV03)
 - Cập nhật hoặc xóa nhân viên (có xác nhận)
 
-### 8. Xem thống kê (Chỉ LNV03)
+### 9. Xem thống kê (Chỉ LNV03)
 - Nhấn **Nhân viên** trên thanh điều hướng
 - Chọn **Thống kê**
 - Xem tổng quan về doanh thu và số lượng vé
 
-### 9. Đăng xuất
+### 10. Đăng xuất
 - Nhấn nút **Đăng xuất** trên thanh điều hướng
 - Xác nhận để đăng xuất
 
