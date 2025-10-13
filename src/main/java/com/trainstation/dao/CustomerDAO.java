@@ -1,17 +1,17 @@
 package com.trainstation.dao;
 
 import com.trainstation.model.Customer;
+import com.trainstation.MySQL.ConnectSql;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class CustomerDAO implements GenericDAO<Customer> {
     private static CustomerDAO instance;
-    private Map<String, Customer> customers;
+    private Connection connection;
 
     private CustomerDAO() {
-        customers = new HashMap<>();
+        connection = ConnectSql.getInstance().getConnection();
     }
 
     public static synchronized CustomerDAO getInstance() {
@@ -23,33 +23,99 @@ public class CustomerDAO implements GenericDAO<Customer> {
 
     @Override
     public void add(Customer customer) {
-        customers.put(customer.getCustomerId(), customer);
+        String sql = "INSERT INTO Customer (CustomerID, FullName, PhoneNumber, Email, IDNumber, Address) VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, customer.getCustomerId());
+            pstmt.setString(2, customer.getFullName());
+            pstmt.setString(3, customer.getPhoneNumber());
+            pstmt.setString(4, customer.getEmail());
+            pstmt.setString(5, customer.getIdentityNumber());
+            pstmt.setString(6, customer.getAddress());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void update(Customer customer) {
-        customers.put(customer.getCustomerId(), customer);
+        String sql = "UPDATE Customer SET FullName = ?, PhoneNumber = ?, Email = ?, IDNumber = ?, Address = ? WHERE CustomerID = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, customer.getFullName());
+            pstmt.setString(2, customer.getPhoneNumber());
+            pstmt.setString(3, customer.getEmail());
+            pstmt.setString(4, customer.getIdentityNumber());
+            pstmt.setString(5, customer.getAddress());
+            pstmt.setString(6, customer.getCustomerId());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void delete(String id) {
-        customers.remove(id);
+        String sql = "DELETE FROM Customer WHERE CustomerID = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public Customer findById(String id) {
-        return customers.get(id);
+        String sql = "SELECT * FROM Customer WHERE CustomerID = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return extractCustomerFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
     public List<Customer> findAll() {
-        return new ArrayList<>(customers.values());
+        List<Customer> customers = new ArrayList<>();
+        String sql = "SELECT * FROM Customer";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                customers.add(extractCustomerFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return customers;
     }
 
     public Customer findByPhoneNumber(String phoneNumber) {
-        return customers.values().stream()
-                .filter(c -> c.getPhoneNumber().equals(phoneNumber))
-                .findFirst()
-                .orElse(null);
+        String sql = "SELECT * FROM Customer WHERE PhoneNumber = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, phoneNumber);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return extractCustomerFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Customer extractCustomerFromResultSet(ResultSet rs) throws SQLException {
+        Customer customer = new Customer();
+        customer.setCustomerId(rs.getString("CustomerID"));
+        customer.setFullName(rs.getString("FullName"));
+        customer.setPhoneNumber(rs.getString("PhoneNumber"));
+        customer.setEmail(rs.getString("Email"));
+        customer.setIdentityNumber(rs.getString("IDNumber"));
+        customer.setAddress(rs.getString("Address"));
+        return customer;
     }
 }

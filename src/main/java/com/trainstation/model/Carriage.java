@@ -8,6 +8,9 @@ public class Carriage implements Serializable {
     private String carriageTypeId;
     private String carriageName;
     private int carriageNumber;
+    
+    private Train train;
+    private CarriageType carriageType;
 
     public Carriage() {
     }
@@ -16,6 +19,20 @@ public class Carriage implements Serializable {
         this.carriageId = carriageId;
         this.trainId = trainId;
         this.carriageTypeId = carriageTypeId;
+        this.carriageName = carriageName;
+        this.carriageNumber = carriageNumber;
+    }
+
+    public Carriage(String carriageId, Train train, CarriageType carriageType, String carriageName, int carriageNumber) {
+        this.carriageId = carriageId;
+        this.train = train;
+        this.carriageType = carriageType;
+        if (train != null) {
+            this.trainId = train.getTrainId();
+        }
+        if (carriageType != null) {
+            this.carriageTypeId = carriageType.getCarriageTypeId();
+        }
         this.carriageName = carriageName;
         this.carriageNumber = carriageNumber;
     }
@@ -58,6 +75,28 @@ public class Carriage implements Serializable {
 
     public void setCarriageNumber(int carriageNumber) {
         this.carriageNumber = carriageNumber;
+    }
+
+    public Train getTrain() {
+        return train;
+    }
+
+    public void setTrain(Train train) {
+        this.train = train;
+        if (train != null) {
+            this.trainId = train.getTrainId();
+        }
+    }
+
+    public CarriageType getCarriageType() {
+        return carriageType;
+    }
+
+    public void setCarriageType(CarriageType carriageType) {
+        this.carriageType = carriageType;
+        if (carriageType != null) {
+            this.carriageTypeId = carriageType.getCarriageTypeId();
+        }
     }
 
     @Override

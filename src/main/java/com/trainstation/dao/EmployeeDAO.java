@@ -1,17 +1,17 @@
 package com.trainstation.dao;
 
 import com.trainstation.model.Employee;
+import com.trainstation.MySQL.ConnectSql;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class EmployeeDAO implements GenericDAO<Employee> {
     private static EmployeeDAO instance;
-    private Map<String, Employee> employees;
+    private Connection connection;
 
     private EmployeeDAO() {
-        employees = new HashMap<>();
+        connection = ConnectSql.getInstance().getConnection();
     }
 
     public static synchronized EmployeeDAO getInstance() {
@@ -23,36 +23,109 @@ public class EmployeeDAO implements GenericDAO<Employee> {
 
     @Override
     public void add(Employee employee) {
-        employees.put(employee.getEmployeeId(), employee);
+        String sql = "INSERT INTO Employee (EmployeeID, FullName, PhoneNumber, Email, Position, Salary, HireDate, MaLoai) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, employee.getEmployeeId());
+            pstmt.setString(2, employee.getFullName());
+            pstmt.setString(3, employee.getPhoneNumber());
+            pstmt.setString(4, employee.getEmail());
+            pstmt.setString(5, employee.getPosition());
+            pstmt.setDouble(6, employee.getSalary());
+            pstmt.setDate(7, employee.getHireDate() != null ? Date.valueOf(employee.getHireDate()) : null);
+            pstmt.setString(8, employee.getMaLoai());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void update(Employee employee) {
-        employees.put(employee.getEmployeeId(), employee);
+        String sql = "UPDATE Employee SET FullName = ?, PhoneNumber = ?, Email = ?, Position = ?, Salary = ?, HireDate = ?, MaLoai = ? WHERE EmployeeID = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, employee.getFullName());
+            pstmt.setString(2, employee.getPhoneNumber());
+            pstmt.setString(3, employee.getEmail());
+            pstmt.setString(4, employee.getPosition());
+            pstmt.setDouble(5, employee.getSalary());
+            pstmt.setDate(6, employee.getHireDate() != null ? Date.valueOf(employee.getHireDate()) : null);
+            pstmt.setString(7, employee.getMaLoai());
+            pstmt.setString(8, employee.getEmployeeId());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void delete(String id) {
-        employees.remove(id);
+        String sql = "DELETE FROM Employee WHERE EmployeeID = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public Employee findById(String id) {
-        return employees.get(id);
+        String sql = "SELECT * FROM Employee WHERE EmployeeID = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return extractEmployeeFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
     public List<Employee> findAll() {
-        return new ArrayList<>(employees.values());
+        List<Employee> employees = new ArrayList<>();
+        String sql = "SELECT * FROM Employee";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                employees.add(extractEmployeeFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return employees;
     }
 
     public List<Employee> findByPosition(String position) {
-        List<Employee> result = new ArrayList<>();
-        for (Employee employee : employees.values()) {
-            if (employee.getPosition().equals(position)) {
-                result.add(employee);
+        List<Employee> employees = new ArrayList<>();
+        String sql = "SELECT * FROM Employee WHERE Position = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, position);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                employees.add(extractEmployeeFromResultSet(rs));
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return result;
+        return employees;
+    }
+
+    private Employee extractEmployeeFromResultSet(ResultSet rs) throws SQLException {
+        Employee employee = new Employee();
+        employee.setEmployeeId(rs.getString("EmployeeID"));
+        employee.setFullName(rs.getString("FullName"));
+        employee.setPhoneNumber(rs.getString("PhoneNumber"));
+        employee.setEmail(rs.getString("Email"));
+        employee.setPosition(rs.getString("Position"));
+        employee.setSalary(rs.getDouble("Salary"));
+        Date hireDate = rs.getDate("HireDate");
+        if (hireDate != null) {
+            employee.setHireDate(hireDate.toLocalDate());
+        }
+        employee.setMaLoai(rs.getString("MaLoai"));
+        return employee;
     }
 }
