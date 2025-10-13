@@ -24,7 +24,7 @@ public class AccountDAO implements GenericDAO<Account> {
 
     @Override
     public void add(Account account) {
-        String sql = "INSERT INTO Account (Username, Password, EmployeeID, Role, IsActive) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO TaiKhoan (Username, Password, EmployeeID, Role, IsActive) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, account.getUsername());
             pstmt.setString(2, account.getPassword());
@@ -39,7 +39,7 @@ public class AccountDAO implements GenericDAO<Account> {
 
     @Override
     public void update(Account account) {
-        String sql = "UPDATE Account SET Password = ?, EmployeeID = ?, Role = ?, IsActive = ? WHERE Username = ?";
+        String sql = "UPDATE TaiKhoan SET Password = ?, EmployeeID = ?, Role = ?, IsActive = ? WHERE Username = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, account.getPassword());
             pstmt.setString(2, account.getEmployeeId());
@@ -54,7 +54,7 @@ public class AccountDAO implements GenericDAO<Account> {
 
     @Override
     public void delete(String username) {
-        String sql = "DELETE FROM Account WHERE Username = ?";
+        String sql = "DELETE FROM TaiKhoan WHERE Username = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
             pstmt.executeUpdate();
@@ -65,7 +65,7 @@ public class AccountDAO implements GenericDAO<Account> {
 
     @Override
     public Account findById(String username) {
-        String sql = "SELECT a.*, e.MaLoai FROM Account a LEFT JOIN Employee e ON a.EmployeeID = e.EmployeeID WHERE a.Username = ?";
+        String sql = "SELECT a.*, e.MaLoai FROM TaiKhoan a LEFT JOIN NhanVien e ON a.EmployeeID = e.EmployeeID WHERE a.Username = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
@@ -81,7 +81,7 @@ public class AccountDAO implements GenericDAO<Account> {
     @Override
     public List<Account> findAll() {
         List<Account> accounts = new ArrayList<>();
-        String sql = "SELECT a.*, e.MaLoai FROM Account a LEFT JOIN Employee e ON a.EmployeeID = e.EmployeeID";
+        String sql = "SELECT a.*, e.MaLoai FROM TaiKhoan a LEFT JOIN NhanVien e ON a.EmployeeID = e.EmployeeID";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -94,7 +94,7 @@ public class AccountDAO implements GenericDAO<Account> {
     }
 
     public Account authenticate(String username, String password) {
-        String sql = "SELECT a.*, e.MaLoai FROM Account a LEFT JOIN Employee e ON a.EmployeeID = e.EmployeeID WHERE a.Username = ? AND a.Password = ? AND a.IsActive = 1";
+        String sql = "SELECT a.*, e.MaLoai FROM TaiKhoan a LEFT JOIN NhanVien e ON a.EmployeeID = e.EmployeeID WHERE a.Username = ? AND a.Password = ? AND a.IsActive = 1";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
             pstmt.setString(2, password);
@@ -110,7 +110,7 @@ public class AccountDAO implements GenericDAO<Account> {
 
     public List<Account> findByRole(String role) {
         List<Account> accounts = new ArrayList<>();
-        String sql = "SELECT a.*, e.MaLoai FROM Account a LEFT JOIN Employee e ON a.EmployeeID = e.EmployeeID WHERE a.Role = ?";
+        String sql = "SELECT a.*, e.MaLoai FROM TaiKhoan a LEFT JOIN NhanVien e ON a.EmployeeID = e.EmployeeID WHERE a.Role = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, role);
             ResultSet rs = pstmt.executeQuery();

@@ -23,7 +23,7 @@ public class CarriageTypeDAO implements GenericDAO<CarriageType> {
 
     @Override
     public void add(CarriageType carriageType) {
-        String sql = "INSERT INTO CarriageType (CarriageTypeID, TypeName, SeatCount, PriceMultiplier) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO LoaiGhe (CarriageTypeID, TypeName, SeatCount, PriceMultiplier) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, carriageType.getCarriageTypeId());
             pstmt.setString(2, carriageType.getTypeName());
@@ -37,7 +37,7 @@ public class CarriageTypeDAO implements GenericDAO<CarriageType> {
 
     @Override
     public void update(CarriageType carriageType) {
-        String sql = "UPDATE CarriageType SET TypeName = ?, SeatCount = ?, PriceMultiplier = ? WHERE CarriageTypeID = ?";
+        String sql = "UPDATE LoaiGhe SET TypeName = ?, SeatCount = ?, PriceMultiplier = ? WHERE CarriageTypeID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, carriageType.getTypeName());
             pstmt.setInt(2, carriageType.getSeatCount());
@@ -51,7 +51,7 @@ public class CarriageTypeDAO implements GenericDAO<CarriageType> {
 
     @Override
     public void delete(String id) {
-        String sql = "DELETE FROM CarriageType WHERE CarriageTypeID = ?";
+        String sql = "DELETE FROM LoaiGhe WHERE CarriageTypeID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             pstmt.executeUpdate();
@@ -62,7 +62,7 @@ public class CarriageTypeDAO implements GenericDAO<CarriageType> {
 
     @Override
     public CarriageType findById(String id) {
-        String sql = "SELECT * FROM CarriageType WHERE CarriageTypeID = ?";
+        String sql = "SELECT * FROM LoaiGhe WHERE CarriageTypeID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             ResultSet rs = pstmt.executeQuery();
@@ -78,7 +78,7 @@ public class CarriageTypeDAO implements GenericDAO<CarriageType> {
     @Override
     public List<CarriageType> findAll() {
         List<CarriageType> carriageTypes = new ArrayList<>();
-        String sql = "SELECT * FROM CarriageType";
+        String sql = "SELECT * FROM LoaiGhe";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {

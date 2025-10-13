@@ -24,7 +24,7 @@ public class TicketDAO implements GenericDAO<Ticket> {
 
     @Override
     public void add(Ticket ticket) {
-        String sql = "INSERT INTO Ticket (TicketID, TrainID, CustomerID, EmployeeID, BookingDate, SeatNumber, SeatID, CarriageID, Price, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Ve (TicketID, TrainID, CustomerID, EmployeeID, BookingDate, SeatNumber, SeatID, CarriageID, Price, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, ticket.getTicketId());
             pstmt.setString(2, ticket.getTrainId());
@@ -44,7 +44,7 @@ public class TicketDAO implements GenericDAO<Ticket> {
 
     @Override
     public void update(Ticket ticket) {
-        String sql = "UPDATE Ticket SET TrainID = ?, CustomerID = ?, EmployeeID = ?, BookingDate = ?, SeatNumber = ?, SeatID = ?, CarriageID = ?, Price = ?, Status = ? WHERE TicketID = ?";
+        String sql = "UPDATE Ve SET TrainID = ?, CustomerID = ?, EmployeeID = ?, BookingDate = ?, SeatNumber = ?, SeatID = ?, CarriageID = ?, Price = ?, Status = ? WHERE TicketID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, ticket.getTrainId());
             pstmt.setString(2, ticket.getCustomerId());
@@ -64,7 +64,7 @@ public class TicketDAO implements GenericDAO<Ticket> {
 
     @Override
     public void delete(String id) {
-        String sql = "DELETE FROM Ticket WHERE TicketID = ?";
+        String sql = "DELETE FROM Ve WHERE TicketID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             pstmt.executeUpdate();
@@ -75,7 +75,7 @@ public class TicketDAO implements GenericDAO<Ticket> {
 
     @Override
     public Ticket findById(String id) {
-        String sql = "SELECT * FROM Ticket WHERE TicketID = ?";
+        String sql = "SELECT * FROM Ve WHERE TicketID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             ResultSet rs = pstmt.executeQuery();
@@ -91,7 +91,7 @@ public class TicketDAO implements GenericDAO<Ticket> {
     @Override
     public List<Ticket> findAll() {
         List<Ticket> tickets = new ArrayList<>();
-        String sql = "SELECT * FROM Ticket";
+        String sql = "SELECT * FROM Ve";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -105,7 +105,7 @@ public class TicketDAO implements GenericDAO<Ticket> {
 
     public List<Ticket> findByCustomerId(String customerId) {
         List<Ticket> tickets = new ArrayList<>();
-        String sql = "SELECT * FROM Ticket WHERE CustomerID = ?";
+        String sql = "SELECT * FROM Ve WHERE CustomerID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, customerId);
             ResultSet rs = pstmt.executeQuery();
@@ -120,7 +120,7 @@ public class TicketDAO implements GenericDAO<Ticket> {
 
     public List<Ticket> findByTrainId(String trainId) {
         List<Ticket> tickets = new ArrayList<>();
-        String sql = "SELECT * FROM Ticket WHERE TrainID = ?";
+        String sql = "SELECT * FROM Ve WHERE TrainID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, trainId);
             ResultSet rs = pstmt.executeQuery();
@@ -135,7 +135,7 @@ public class TicketDAO implements GenericDAO<Ticket> {
 
     public List<Ticket> findByStatus(TicketStatus status) {
         List<Ticket> tickets = new ArrayList<>();
-        String sql = "SELECT * FROM Ticket WHERE Status = ?";
+        String sql = "SELECT * FROM Ve WHERE Status = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, status.toString());
             ResultSet rs = pstmt.executeQuery();
