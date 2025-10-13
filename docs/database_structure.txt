@@ -1,0 +1,189 @@
+DATABASE: QLTauHoa
+-------------------------------------------
+
+TABLE: BangGia
+COLUMNS:
+- maBangGia (nvarchar(50)) PRIMARY KEY
+- maChang (nvarchar(50)) FOREIGN KEY REFERENCES ChangTau(maChang)
+- loaiGhe (nvarchar(50)) FOREIGN KEY REFERENCES LoaiGhe(maLoai)
+- giaCoBan (real)
+- ngayBatDau (datetime)
+- ngayKetThuc (datetime)
+SAMPLE DATA:
+('BG01', 'CH_NGAN', 'LG01', 100000, '2025-01-01', '2025-12-31')
+
+-------------------------------------------
+
+TABLE: ChangTau
+COLUMNS:
+- maChang (nvarchar(50)) PRIMARY KEY
+- soKMToiThieu (int)
+- soKMToiDa (int)
+- moTa (nvarchar(100))
+- giaTien (real)
+SAMPLE DATA:
+('CH_NGAN', 0, 199, N'Chặng ngắn dưới 200 km', 100000)
+
+-------------------------------------------
+
+TABLE: ChiTietHoaDon
+COLUMNS:
+- maHoaDon (nvarchar(50)) FOREIGN KEY REFERENCES HoaDon(maHoaDon)
+- maVe (nvarchar(50)) FOREIGN KEY REFERENCES Ve(maVe)
+- maLoaiVe (nvarchar(50)) FOREIGN KEY REFERENCES LoaiVe(maLoaiVe)
+- giaGoc (real)
+- giaDaKM (real)
+- moTa (nvarchar(100))
+PRIMARY KEY (maHoaDon, maVe)
+SAMPLE DATA:
+('HD001', 'VE001', 'LV01', 100000, 100000, N'Không giảm')
+
+-------------------------------------------
+
+TABLE: ChuyenTau
+COLUMNS:
+- maChuyen (nvarchar(50)) PRIMARY KEY
+- maTau (nvarchar(50)) FOREIGN KEY REFERENCES Tau(maTau)
+- maNV (nvarchar(50)) FOREIGN KEY REFERENCES NhanVien(maNV)
+- gaDi (nvarchar(100))
+- gaDen (nvarchar(100))
+- gioDi (datetime)
+- gioDen (datetime)
+- soKm (int)
+- maChang (nvarchar(50)) FOREIGN KEY REFERENCES ChangTau(maChang)
+SAMPLE DATA:
+('CT001', 'T001', 'NV05', N'Ga Sài Gòn', N'Ga Hà Nội', '2025-01-10 06:00', '2025-01-11 20:00', 1500, 'CH_DAI')
+
+-------------------------------------------
+
+TABLE: Ghe
+COLUMNS:
+- maGhe (nvarchar(50)) PRIMARY KEY
+- maToa (nvarchar(50)) FOREIGN KEY REFERENCES ToaTau(maToa)
+- loaiGhe (nvarchar(50)) FOREIGN KEY REFERENCES LoaiGhe(maLoai)
+- trangThai (nvarchar(50))
+SAMPLE DATA:
+('G_T001_TOA001_01', 'TOA001', 'LG01', N'Bận')
+
+-------------------------------------------
+
+TABLE: HoaDon
+COLUMNS:
+- maHoaDon (nvarchar(50)) PRIMARY KEY
+- maNV (nvarchar(50)) FOREIGN KEY REFERENCES NhanVien(maNV)
+- maKH (nvarchar(50)) FOREIGN KEY REFERENCES KhachHang(maKhachHang)
+- ngayLap (datetime)
+- phuongThucThanhToan (nvarchar(100))
+- trangThai (nvarchar(50))
+SAMPLE DATA:
+('HD001', 'NV01', 'KH001', '2025-01-05', N'Tiền mặt', N'Hoàn tất')
+
+-------------------------------------------
+
+TABLE: KhachHang
+COLUMNS:
+- maKhachHang (nvarchar(50)) PRIMARY KEY
+- tenKhachHang (nvarchar(100))
+- email (nvarchar(100))
+- soDienThoai (nvarchar(20))
+SAMPLE DATA:
+('KH001', N'Nguyễn Văn An', 'an.nguyen@example.com', '0901234567')
+
+-------------------------------------------
+
+TABLE: LoaiGhe
+COLUMNS:
+- maLoai (nvarchar(50)) PRIMARY KEY
+- tenLoai (nvarchar(50))
+- moTa (nvarchar(100))
+SAMPLE DATA:
+('LG01', N'Ghế ngồi', N'Ghế ngồi thông thường')
+
+-------------------------------------------
+
+TABLE: LoaiNV
+COLUMNS:
+- maLoai (nvarchar(50)) PRIMARY KEY
+- tenLoai (nvarchar(100))
+- moTa (nvarchar(100))
+SAMPLE DATA:
+('LNV01', N'Nhân viên quầy', N'Bán vé, đổi hoàn vé')
+
+-------------------------------------------
+
+TABLE: LoaiVe
+COLUMNS:
+- maLoaiVe (nvarchar(50)) PRIMARY KEY
+- tenLoai (nvarchar(100))
+- heSoGia (decimal(5,3))
+- moTa (nvarchar(100))
+SAMPLE DATA:
+('LV01', N'Người lớn', 1.000, N'Giá gốc, không giảm')
+
+-------------------------------------------
+
+TABLE: NhanVien
+COLUMNS:
+- maNV (nvarchar(50)) PRIMARY KEY
+- tenNV (nvarchar(100))
+- soDienThoai (nvarchar(10))
+- diaChi (nvarchar(100))
+- ngaySinh (date)
+- maLoaiNV (nvarchar(50)) FOREIGN KEY REFERENCES LoaiNV(maLoai)
+SAMPLE DATA:
+('NV01', N'Thùy Lý', '0905123456', N'1 Nguyễn Thông, Q3', '2005-05-12', 'LNV03')
+
+-------------------------------------------
+
+TABLE: TaiKhoan
+COLUMNS:
+- maTK (nvarchar(50)) PRIMARY KEY
+- maNV (nvarchar(50)) FOREIGN KEY REFERENCES NhanVien(maNV)
+- tenTaiKhoan (nvarchar(100))
+- matKhau (nvarchar(100))
+- trangThai (nvarchar(50))
+SAMPLE DATA:
+('TK01', 'NV01', 'thuyly', '123456', N'Hoạt động')
+
+-------------------------------------------
+
+TABLE: Tau
+COLUMNS:
+- maTau (nvarchar(50)) PRIMARY KEY
+- soToa (int)
+- tenTau (nvarchar(100))
+- trangThai (nvarchar(50))
+SAMPLE DATA:
+('T001', 6, N'Tàu SE1 - Bắc Nam Express', N'Đang hoạt động')
+
+-------------------------------------------
+
+TABLE: ToaTau
+COLUMNS:
+- maToa (nvarchar(50)) PRIMARY KEY
+- tenToa (nvarchar(100))
+- loaiToa (nvarchar(50))
+- maTau (nvarchar(50)) FOREIGN KEY REFERENCES Tau(maTau)
+- sucChua (int)
+SAMPLE DATA:
+('TOA001', N'Toa 1 - Ghế ngồi', 'TOANGOI', 'T001', 24)
+
+-------------------------------------------
+
+TABLE: Ve
+COLUMNS:
+- maVe (nvarchar(50)) PRIMARY KEY
+- maChuyen (nvarchar(50)) FOREIGN KEY REFERENCES ChuyenTau(maChuyen)
+- maLoaiVe (nvarchar(50)) FOREIGN KEY REFERENCES LoaiVe(maLoaiVe)
+- maSoGhe (nvarchar(50)) FOREIGN KEY REFERENCES Ghe(maGhe)
+- ngayIn (datetime)
+- trangThai (nvarchar(50))
+- gaDi (nvarchar(100))
+- gaDen (nvarchar(100))
+- gioDi (datetime)
+- soToa (nvarchar(50)) FOREIGN KEY REFERENCES ToaTau(maToa)
+- loaiCho (nvarchar(100))
+- loaiVe (nvarchar(100))
+- maBangGia (nvarchar(50)) FOREIGN KEY REFERENCES BangGia(maBangGia)
+SAMPLE DATA:
+('VE001', 'CT006', 'LV01', 'G_T001_TOA001_01', '2025-01-05 08:00', N'Đã thanh toán', N'Ga Sài Gòn', N'Ga Biên Hòa', '2025-01-10 08:00', 'TOA001', N'Ghế ngồi', N'Người lớn', 'BG01')

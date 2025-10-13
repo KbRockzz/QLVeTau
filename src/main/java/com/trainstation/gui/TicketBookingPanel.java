@@ -153,7 +153,7 @@ public class TicketBookingPanel extends JPanel {
                 ticket.getEmployeeId(),
                 ticket.getBookingDate().format(formatter),
                 ticket.getSeatNumber(),
-                String.format("%.0f", ticket.getPrice()),
+                ticket.getPrice().toString(),
                 ticket.getStatus()
             });
         }

@@ -151,7 +151,7 @@ public class CustomerPanel extends JPanel {
                 customer.getFullName(),
                 customer.getPhoneNumber(),
                 customer.getEmail(),
-                customer.getIdentityNumber(),
+                customer.getIdNumber(),
                 customer.getAddress()
             });
         }
@@ -206,7 +206,7 @@ public class CustomerPanel extends JPanel {
         customer.setFullName(nameField.getText().trim());
         customer.setPhoneNumber(phoneField.getText().trim());
         customer.setEmail(emailField.getText().trim());
-        customer.setIdentityNumber(identityField.getText().trim());
+        customer.setIdNumber(identityField.getText().trim());
         customer.setAddress(addressField.getText().trim());
 
         customerDAO.update(customer);
@@ -271,7 +271,7 @@ public class CustomerPanel extends JPanel {
                     customer.getFullName(),
                     customer.getPhoneNumber(),
                     customer.getEmail(),
-                    customer.getIdentityNumber(),
+                    customer.getIdNumber(),
                     customer.getAddress()
                 });
                 found = true;

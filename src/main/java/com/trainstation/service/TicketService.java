@@ -3,7 +3,6 @@ package com.trainstation.service;
 import com.trainstation.dao.TicketDAO;
 import com.trainstation.dao.TrainDAO;
 import com.trainstation.model.Ticket;
-import com.trainstation.model.Ticket.TicketStatus;
 import com.trainstation.model.Train;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,8 +42,10 @@ public class TicketService {
             employeeId,
             LocalDateTime.now(),
             seatNumber,
+            null,
+            null,
             train.getTicketPrice(),
-            TicketStatus.BOOKED
+            "BOOKED"
         );
 
         ticketDAO.add(ticket);
@@ -60,11 +61,11 @@ public class TicketService {
             throw new IllegalArgumentException("Ticket not found");
         }
 
-        if (ticket.getStatus() != TicketStatus.BOOKED) {
+        if (!"BOOKED".equals(ticket.getStatus())) {
             throw new IllegalStateException("Ticket cannot be refunded");
         }
 
-        ticket.setStatus(TicketStatus.REFUNDED);
+        ticket.setStatus("REFUNDED");
         ticketDAO.update(ticket);
 
         Train train = trainDAO.findById(ticket.getTrainId());
@@ -80,11 +81,11 @@ public class TicketService {
             throw new IllegalArgumentException("Ticket not found");
         }
 
-        if (ticket.getStatus() != TicketStatus.BOOKED) {
+        if (!"BOOKED".equals(ticket.getStatus())) {
             throw new IllegalStateException("Ticket cannot be cancelled");
         }
 
-        ticket.setStatus(TicketStatus.CANCELLED);
+        ticket.setStatus("CANCELLED");
         ticketDAO.update(ticket);
 
         Train train = trainDAO.findById(ticket.getTrainId());
@@ -116,7 +117,7 @@ public class TicketService {
             throw new IllegalArgumentException("Ticket not found");
         }
 
-        if (ticket.getStatus() != TicketStatus.BOOKED) {
+        if (!"BOOKED".equals(ticket.getStatus())) {
             throw new IllegalStateException("Only booked tickets can be changed");
         }
 

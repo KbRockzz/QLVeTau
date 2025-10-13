@@ -1,6 +1,7 @@
 package com.trainstation.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class Employee implements Serializable {
@@ -9,23 +10,23 @@ public class Employee implements Serializable {
     private String phoneNumber;
     private String email;
     private String position;
-    private String maLoai; // Employee type: LNV01, LNV02, LNV03 (Manager)
+    private BigDecimal salary;
     private LocalDate hireDate;
-    private double salary;
+    private String maLoai;
 
     public Employee() {
     }
 
     public Employee(String employeeId, String fullName, String phoneNumber, String email, 
-                    String position, String maLoai, LocalDate hireDate, double salary) {
+                    String position, BigDecimal salary, LocalDate hireDate, String maLoai) {
         this.employeeId = employeeId;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.position = position;
-        this.maLoai = maLoai;
-        this.hireDate = hireDate;
         this.salary = salary;
+        this.hireDate = hireDate;
+        this.maLoai = maLoai;
     }
 
     public String getEmployeeId() {
@@ -84,11 +85,11 @@ public class Employee implements Serializable {
         this.hireDate = hireDate;
     }
 
-    public double getSalary() {
+    public BigDecimal getSalary() {
         return salary;
     }
 
-    public void setSalary(double salary) {
+    public void setSalary(BigDecimal salary) {
         this.salary = salary;
     }
 

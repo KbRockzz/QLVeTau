@@ -1,6 +1,7 @@
 package com.trainstation.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Train implements Serializable {
@@ -12,13 +13,13 @@ public class Train implements Serializable {
     private LocalDateTime arrivalTime;
     private int totalSeats;
     private int availableSeats;
-    private double ticketPrice;
+    private BigDecimal ticketPrice;
 
     public Train() {
     }
 
     public Train(String trainId, String trainName, String departureStation, String arrivalStation, 
-                 LocalDateTime departureTime, LocalDateTime arrivalTime, int totalSeats, double ticketPrice) {
+                 LocalDateTime departureTime, LocalDateTime arrivalTime, int totalSeats, int availableSeats, BigDecimal ticketPrice) {
         this.trainId = trainId;
         this.trainName = trainName;
         this.departureStation = departureStation;
@@ -26,7 +27,7 @@ public class Train implements Serializable {
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
         this.totalSeats = totalSeats;
-        this.availableSeats = totalSeats;
+        this.availableSeats = availableSeats;
         this.ticketPrice = ticketPrice;
     }
 
@@ -94,11 +95,11 @@ public class Train implements Serializable {
         this.availableSeats = availableSeats;
     }
 
-    public double getTicketPrice() {
+    public BigDecimal getTicketPrice() {
         return ticketPrice;
     }
 
-    public void setTicketPrice(double ticketPrice) {
+    public void setTicketPrice(BigDecimal ticketPrice) {
         this.ticketPrice = ticketPrice;
     }
 

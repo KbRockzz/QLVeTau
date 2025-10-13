@@ -183,7 +183,7 @@ public class BookTicketPanel extends JPanel {
             JButton seatBtn = new JButton(seat.getSeatNumber());
             seatBtn.setPreferredSize(new Dimension(70, 70));
             
-            if (seat.getStatus() == Seat.SeatStatus.AVAILABLE) {
+            if ("AVAILABLE".equals(seat.getStatus())) {
                 seatBtn.setBackground(new Color(46, 204, 113));
                 seatBtn.setEnabled(true);
                 seatBtn.addActionListener(e -> selectSeat(seat));
@@ -234,7 +234,7 @@ public class BookTicketPanel extends JPanel {
             // Update seat status
             Seat seat = seatDAO.findById(selectedSeatId);
             if (seat != null) {
-                seat.setStatus(Seat.SeatStatus.BOOKED);
+                seat.setStatus("BOOKED");
                 seatDAO.update(seat);
             }
             

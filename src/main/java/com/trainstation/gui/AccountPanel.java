@@ -120,7 +120,7 @@ public class AccountPanel extends JPanel {
                 account.getUsername(),
                 account.getRole(),
                 account.getEmployeeId(),
-                account.isActive() ? "Kích hoạt" : "Vô hiệu hóa"
+                account.isIsActive() ? "Kích hoạt" : "Vô hiệu hóa"
             });
         }
     }
@@ -135,7 +135,7 @@ public class AccountPanel extends JPanel {
                 passwordField.setText(account.getPassword());
                 roleComboBox.setSelectedItem(account.getRole());
                 employeeIdField.setText(account.getEmployeeId());
-                activeCheckBox.setSelected(account.isActive());
+                activeCheckBox.setSelected(account.isIsActive());
             }
         }
     }
@@ -176,7 +176,7 @@ public class AccountPanel extends JPanel {
         account.setPassword(passwordField.getText().trim());
         account.setRole((String) roleComboBox.getSelectedItem());
         account.setEmployeeId(employeeIdField.getText().trim());
-        account.setActive(activeCheckBox.isSelected());
+        account.setIsActive(activeCheckBox.isSelected());
 
         accountDAO.update(account);
         loadAccounts();

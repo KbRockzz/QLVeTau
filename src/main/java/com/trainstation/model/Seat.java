@@ -3,33 +3,19 @@ package com.trainstation.model;
 import java.io.Serializable;
 
 public class Seat implements Serializable {
-    public enum SeatStatus {
-        AVAILABLE, BOOKED
-    }
-
     private String seatId;
     private String carriageId;
     private String seatNumber;
-    private SeatStatus status;
+    private String status;
     
     private Carriage carriage;
 
     public Seat() {
     }
 
-    public Seat(String seatId, String carriageId, String seatNumber, SeatStatus status) {
+    public Seat(String seatId, String carriageId, String seatNumber, String status) {
         this.seatId = seatId;
         this.carriageId = carriageId;
-        this.seatNumber = seatNumber;
-        this.status = status;
-    }
-
-    public Seat(String seatId, Carriage carriage, String seatNumber, SeatStatus status) {
-        this.seatId = seatId;
-        this.carriage = carriage;
-        if (carriage != null) {
-            this.carriageId = carriage.getCarriageId();
-        }
         this.seatNumber = seatNumber;
         this.status = status;
     }
@@ -58,11 +44,11 @@ public class Seat implements Serializable {
         this.seatNumber = seatNumber;
     }
 
-    public SeatStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(SeatStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

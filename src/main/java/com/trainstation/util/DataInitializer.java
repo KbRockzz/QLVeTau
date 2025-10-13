@@ -4,6 +4,7 @@ import com.trainstation.dao.*;
 import com.trainstation.model.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 /**
  * Utility class to initialize sample data for the application.
@@ -27,9 +28,9 @@ public class DataInitializer {
             "0901234567",
             "admin@trainstation.com",
             "Quản lý",
-            "LNV03", // Manager
+            new BigDecimal("15000000"),
             LocalDate.of(2020, 1, 1),
-            15000000
+            "LNV03"
         );
         employeeDAO.add(admin);
         
@@ -40,9 +41,9 @@ public class DataInitializer {
             "0902345678",
             "binh@trainstation.com",
             "Nhân viên bán vé",
-            "LNV01", // Regular employee
+            new BigDecimal("10000000"),
             LocalDate.of(2021, 3, 15),
-            10000000
+            "LNV01"
         );
         employeeDAO.add(emp1);
         
@@ -52,9 +53,9 @@ public class DataInitializer {
             "0903456789",
             "cuong@trainstation.com",
             "Nhân viên bán vé",
-            "LNV02", // Senior employee
+            new BigDecimal("9500000"),
             LocalDate.of(2022, 6, 1),
-            9500000
+            "LNV02"
         );
         employeeDAO.add(emp2);
     }
@@ -105,7 +106,8 @@ public class DataInitializer {
             LocalDateTime.of(2024, 12, 20, 19, 30),
             LocalDateTime.of(2024, 12, 21, 4, 0),
             200,
-            850000
+            200,
+            new BigDecimal("850000")
         );
         trainDAO.add(t1);
         
@@ -118,7 +120,8 @@ public class DataInitializer {
             LocalDateTime.of(2024, 12, 20, 19, 0),
             LocalDateTime.of(2024, 12, 21, 3, 30),
             200,
-            850000
+            200,
+            new BigDecimal("850000")
         );
         trainDAO.add(t2);
         
@@ -131,7 +134,8 @@ public class DataInitializer {
             LocalDateTime.of(2024, 12, 21, 6, 15),
             LocalDateTime.of(2024, 12, 21, 14, 0),
             150,
-            350000
+            150,
+            new BigDecimal("350000")
         );
         trainDAO.add(t3);
         
@@ -144,7 +148,8 @@ public class DataInitializer {
             LocalDateTime.of(2024, 12, 21, 8, 0),
             LocalDateTime.of(2024, 12, 21, 10, 30),
             120,
-            100000
+            120,
+            new BigDecimal("100000")
         );
         trainDAO.add(t4);
         
@@ -157,7 +162,8 @@ public class DataInitializer {
             LocalDateTime.of(2024, 12, 22, 7, 0),
             LocalDateTime.of(2024, 12, 22, 19, 30),
             180,
-            550000
+            180,
+            new BigDecimal("550000")
         );
         trainDAO.add(t5);
     }

@@ -30,7 +30,7 @@ public class EmployeeDAO implements GenericDAO<Employee> {
             pstmt.setString(3, employee.getPhoneNumber());
             pstmt.setString(4, employee.getEmail());
             pstmt.setString(5, employee.getPosition());
-            pstmt.setDouble(6, employee.getSalary());
+            pstmt.setBigDecimal(6, employee.getSalary());
             pstmt.setDate(7, employee.getHireDate() != null ? Date.valueOf(employee.getHireDate()) : null);
             pstmt.setString(8, employee.getMaLoai());
             pstmt.executeUpdate();
@@ -47,7 +47,7 @@ public class EmployeeDAO implements GenericDAO<Employee> {
             pstmt.setString(2, employee.getPhoneNumber());
             pstmt.setString(3, employee.getEmail());
             pstmt.setString(4, employee.getPosition());
-            pstmt.setDouble(5, employee.getSalary());
+            pstmt.setBigDecimal(5, employee.getSalary());
             pstmt.setDate(6, employee.getHireDate() != null ? Date.valueOf(employee.getHireDate()) : null);
             pstmt.setString(7, employee.getMaLoai());
             pstmt.setString(8, employee.getEmployeeId());
@@ -120,7 +120,7 @@ public class EmployeeDAO implements GenericDAO<Employee> {
         employee.setPhoneNumber(rs.getString("PhoneNumber"));
         employee.setEmail(rs.getString("Email"));
         employee.setPosition(rs.getString("Position"));
-        employee.setSalary(rs.getDouble("Salary"));
+        employee.setSalary(rs.getBigDecimal("Salary"));
         Date hireDate = rs.getDate("HireDate");
         if (hireDate != null) {
             employee.setHireDate(hireDate.toLocalDate());

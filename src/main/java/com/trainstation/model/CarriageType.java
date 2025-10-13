@@ -1,17 +1,18 @@
 package com.trainstation.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class CarriageType implements Serializable {
     private String carriageTypeId;
     private String typeName;
     private int seatCount;
-    private double priceMultiplier;
+    private BigDecimal priceMultiplier;
 
     public CarriageType() {
     }
 
-    public CarriageType(String carriageTypeId, String typeName, int seatCount, double priceMultiplier) {
+    public CarriageType(String carriageTypeId, String typeName, int seatCount, BigDecimal priceMultiplier) {
         this.carriageTypeId = carriageTypeId;
         this.typeName = typeName;
         this.seatCount = seatCount;
@@ -42,11 +43,11 @@ public class CarriageType implements Serializable {
         this.seatCount = seatCount;
     }
 
-    public double getPriceMultiplier() {
+    public BigDecimal getPriceMultiplier() {
         return priceMultiplier;
     }
 
-    public void setPriceMultiplier(double priceMultiplier) {
+    public void setPriceMultiplier(BigDecimal priceMultiplier) {
         this.priceMultiplier = priceMultiplier;
     }
 

@@ -5,6 +5,7 @@ import com.trainstation.model.Employee;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -183,9 +184,9 @@ public class EmployeePanel extends JPanel {
                 phoneField.getText().trim(),
                 emailField.getText().trim(),
                 positionField.getText().trim(),
-                (String) maLoaiComboBox.getSelectedItem(),
+                new BigDecimal(salaryField.getText().trim()),
                 LocalDate.parse(hireDateField.getText().trim(), formatter),
-                Double.parseDouble(salaryField.getText().trim())
+                (String) maLoaiComboBox.getSelectedItem()
             );
 
             employeeDAO.add(employee);
@@ -215,7 +216,7 @@ public class EmployeePanel extends JPanel {
             employee.setPosition(positionField.getText().trim());
             employee.setMaLoai((String) maLoaiComboBox.getSelectedItem());
             employee.setHireDate(LocalDate.parse(hireDateField.getText().trim(), formatter));
-            employee.setSalary(Double.parseDouble(salaryField.getText().trim()));
+            employee.setSalary(new BigDecimal(salaryField.getText().trim()));
 
             employeeDAO.update(employee);
             loadEmployees();

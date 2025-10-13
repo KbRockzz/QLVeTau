@@ -2,7 +2,6 @@ package com.trainstation.dao;
 
 import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.model.Seat;
-import com.trainstation.model.Seat.SeatStatus;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,7 @@ public class SeatDAO implements GenericDAO<Seat> {
             pstmt.setString(1, seat.getSeatId());
             pstmt.setString(2, seat.getCarriageId());
             pstmt.setString(3, seat.getSeatNumber());
-            pstmt.setString(4, seat.getStatus().toString());
+            pstmt.setString(4, seat.getStatus());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -42,7 +41,7 @@ public class SeatDAO implements GenericDAO<Seat> {
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, seat.getCarriageId());
             pstmt.setString(2, seat.getSeatNumber());
-            pstmt.setString(3, seat.getStatus().toString());
+            pstmt.setString(3, seat.getStatus());
             pstmt.setString(4, seat.getSeatId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -126,7 +125,7 @@ public class SeatDAO implements GenericDAO<Seat> {
         seat.setSeatId(rs.getString("SeatID"));
         seat.setCarriageId(rs.getString("CarriageID"));
         seat.setSeatNumber(rs.getString("SeatNumber"));
-        seat.setStatus(SeatStatus.valueOf(rs.getString("Status")));
+        seat.setStatus(rs.getString("Status"));
         return seat;
     }
 }

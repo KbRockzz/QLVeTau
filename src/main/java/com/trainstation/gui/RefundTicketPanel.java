@@ -115,14 +115,14 @@ public class RefundTicketPanel extends JPanel {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         
         for (Ticket ticket : tickets) {
-            if (ticket.getStatus() == Ticket.TicketStatus.BOOKED) {
+            if ("BOOKED".equals(ticket.getStatus())) {
                 tableModel.addRow(new Object[]{
                     ticket.getTicketId(),
                     ticket.getTrainId(),
                     ticket.getCustomerId(),
                     ticket.getBookingDate().format(formatter),
                     ticket.getSeatNumber(),
-                    String.format("%.0f", ticket.getPrice()),
+                    ticket.getPrice().toString(),
                     "Đã đặt"
                 });
             }
@@ -145,7 +145,7 @@ public class RefundTicketPanel extends JPanel {
                 details.append("Ngày đặt: ").append(ticket.getBookingDate().format(
                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
                 details.append("Số ghế: ").append(ticket.getSeatNumber()).append("\n");
-                details.append("Giá vé: ").append(String.format("%.0f VNĐ", ticket.getPrice())).append("\n");
+                details.append("Giá vé: ").append(ticket.getPrice().toString() + " VNĐ").append("\n");
                 details.append("Trạng thái: ").append(ticket.getStatus());
                 
                 ticketDetailsArea.setText(details.toString());
@@ -173,7 +173,7 @@ public class RefundTicketPanel extends JPanel {
                 if (ticket != null && ticket.getSeatId() != null) {
                     Seat seat = seatDAO.findById(ticket.getSeatId());
                     if (seat != null) {
-                        seat.setStatus(Seat.SeatStatus.AVAILABLE);
+                        seat.setStatus("AVAILABLE");
                         seatDAO.update(seat);
                     }
                 }
