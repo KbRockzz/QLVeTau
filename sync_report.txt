@@ -1,0 +1,165 @@
+SYNCHRONIZATION REPORT: Entity and DAO Classes with database_structure.txt
+===========================================================================
+Date: 2025-10-13
+Task: Synchronize all Entity and DAO classes with the database structure defined in docs/database_structure.txt
+
+SUMMARY OF CHANGES:
+===================
+
+CLASSES OVERWRITTEN (renamed/updated to match DB structure):
+-------------------------------------------------------------
+1. Employee.java → NhanVien.java
+   - Removed: email, position, salary, hireDate
+   - Updated fields: maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV
+
+2. Customer.java → KhachHang.java
+   - Removed: idNumber, address
+   - Updated fields: maKhachHang, tenKhachHang, email, soDienThoai
+
+3. Seat.java → Ghe.java
+   - Removed object mapping (carriage reference)
+   - Updated fields: maGhe, maToa, loaiGhe, trangThai
+
+4. Train.java → Tau.java
+   - Removed: departureStation, arrivalStation, departureTime, arrivalTime, totalSeats, availableSeats, ticketPrice
+   - Updated fields: maTau, soToa, tenTau, trangThai
+
+5. Carriage.java → ToaTau.java
+   - Removed object mappings (train, carriageType)
+   - Updated fields: maToa, tenToa, loaiToa, maTau, sucChua
+
+6. Ticket.java → Ve.java
+   - Removed: trainId, customerId, employeeId, bookingDate, seatNumber, seatId, carriageId, price
+   - Removed object mappings
+   - Updated fields: maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia
+
+CLASSES CREATED NEW:
+---------------------
+Models:
+1. TaiKhoan.java (replaces Account.java)
+   - Fields: maTK, maNV, tenTaiKhoan, matKhau, trangThai
+   
+2. BangGia.java
+   - Fields: maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc
+
+3. ChangTau.java
+   - Fields: maChang, soKMToiThieu, soKMToiDa, moTa, giaTien
+
+4. ChiTietHoaDon.java
+   - Fields: maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa
+   - Note: Composite primary key (maHoaDon, maVe)
+
+5. ChuyenTau.java
+   - Fields: maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang
+
+6. HoaDon.java
+   - Fields: maHoaDon, maNV, maKH, ngayLap, phuongThucThanhToan, trangThai
+
+7. LoaiGhe.java
+   - Fields: maLoai, tenLoai, moTa
+
+8. LoaiNV.java
+   - Fields: maLoai, tenLoai, moTa
+
+9. LoaiVe.java
+   - Fields: maLoaiVe, tenLoai, heSoGia, moTa
+
+DAOs:
+1. TaiKhoanDAO.java (replaces AccountDAO.java)
+2. NhanVienDAO.java (replaces EmployeeDAO.java)
+3. KhachHangDAO.java (replaces CustomerDAO.java)
+4. GheDAO.java (replaces SeatDAO.java)
+5. TauDAO.java (replaces TrainDAO.java)
+6. ToaTauDAO.java (replaces CarriageDAO.java)
+7. VeDAO.java (replaces TicketDAO.java)
+8. BangGiaDAO.java
+9. ChangTauDAO.java
+10. ChiTietHoaDonDAO.java
+11. ChuyenTauDAO.java
+12. HoaDonDAO.java
+13. LoaiGheDAO.java
+14. LoaiNVDAO.java
+15. LoaiVeDAO.java
+
+All DAOs implement GenericDAO<T> interface with methods:
+- List<T> getAll()
+- T findById(String id)
+- boolean insert(T entity)
+- boolean update(T entity)
+- boolean delete(String id)
+
+CLASSES DELETED:
+----------------
+Models:
+1. Account.java - replaced by TaiKhoan.java
+2. CarriageType.java - not present in database_structure.txt
+
+DAOs:
+1. AccountDAO.java - replaced by TaiKhoanDAO.java
+2. EmployeeDAO.java - replaced by NhanVienDAO.java
+3. CustomerDAO.java - replaced by KhachHangDAO.java
+4. TrainDAO.java - replaced by TauDAO.java
+5. CarriageDAO.java - replaced by ToaTauDAO.java
+6. SeatDAO.java - replaced by GheDAO.java
+7. TicketDAO.java - replaced by VeDAO.java
+8. CarriageTypeDAO.java - not needed
+
+INTERFACE CHANGES:
+------------------
+GenericDAO<T> interface updated:
+- OLD: void add(T entity)
+  NEW: boolean insert(T entity)
+
+- OLD: void update(T entity)
+  NEW: boolean update(T entity)
+
+- OLD: void delete(String id)
+  NEW: boolean delete(String id)
+
+- OLD: List<T> findAll()
+  NEW: List<T> getAll()
+
+- Kept: T findById(String id)
+
+DATABASE MAPPING ACCURACY:
+--------------------------
+All Entity classes now have:
+✓ Exact field names matching database column names
+✓ Correct Java types for SQL types:
+  - nvarchar → String
+  - int → int
+  - real → float
+  - decimal(5,3) → BigDecimal
+  - datetime → LocalDateTime
+  - date → LocalDate
+✓ No additional fields beyond database schema
+✓ Standard constructors (default + full parameter)
+✓ Standard getters and setters
+✓ toString() method
+
+All DAO classes now have:
+✓ Correct table names in SQL queries
+✓ Correct column names in SQL queries
+✓ PreparedStatement for SQL injection prevention
+✓ Proper parameter mapping
+✓ Proper NULL handling for datetime/date fields
+✓ Singleton pattern implementation
+
+IMPORTANT NOTES:
+----------------
+1. All foreign keys are stored as String IDs (e.g., maNV, maTau) without object mapping
+2. Composite primary key in ChiTietHoaDon handled with comma-separated ID in findById/delete
+3. All datetime columns mapped to LocalDateTime
+4. All date columns mapped to LocalDate
+5. decimal(5,3) mapped to BigDecimal for precision
+6. real columns mapped to float
+
+VERIFICATION STATUS:
+--------------------
+☐ Service layer classes need to be updated to use new model/DAO names
+☐ GUI classes need to be updated to use new model/DAO names
+☑ All Entity classes match database_structure.txt exactly
+☑ All DAO classes use correct SQL queries with proper table/column names
+☑ GenericDAO interface properly defines required methods
+
+END OF REPORT
