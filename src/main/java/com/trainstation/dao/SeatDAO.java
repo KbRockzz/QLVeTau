@@ -9,8 +9,10 @@ import java.util.List;
 
 public class SeatDAO implements GenericDAO<Seat> {
     private static SeatDAO instance;
+    private Connection connection;
 
     private SeatDAO() {
+        connection = ConnectSql.getInstance().getConnection();
     }
 
     public static synchronized SeatDAO getInstance() {
@@ -23,13 +25,12 @@ public class SeatDAO implements GenericDAO<Seat> {
     @Override
     public void add(Seat seat) {
         String sql = "INSERT INTO Seat (SeatID, CarriageID, SeatNumber, Status) VALUES (?, ?, ?, ?)";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, seat.getSeatId());
-            stmt.setString(2, seat.getCarriageId());
-            stmt.setString(3, seat.getSeatNumber());
-            stmt.setString(4, seat.getStatus().toString());
-            stmt.executeUpdate();
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, seat.getSeatId());
+            pstmt.setString(2, seat.getCarriageId());
+            pstmt.setString(3, seat.getSeatNumber());
+            pstmt.setString(4, seat.getStatus().toString());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -38,13 +39,12 @@ public class SeatDAO implements GenericDAO<Seat> {
     @Override
     public void update(Seat seat) {
         String sql = "UPDATE Seat SET CarriageID = ?, SeatNumber = ?, Status = ? WHERE SeatID = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, seat.getCarriageId());
-            stmt.setString(2, seat.getSeatNumber());
-            stmt.setString(3, seat.getStatus().toString());
-            stmt.setString(4, seat.getSeatId());
-            stmt.executeUpdate();
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, seat.getCarriageId());
+            pstmt.setString(2, seat.getSeatNumber());
+            pstmt.setString(3, seat.getStatus().toString());
+            pstmt.setString(4, seat.getSeatId());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -53,10 +53,9 @@ public class SeatDAO implements GenericDAO<Seat> {
     @Override
     public void delete(String id) {
         String sql = "DELETE FROM Seat WHERE SeatID = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, id);
-            stmt.executeUpdate();
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -65,12 +64,11 @@ public class SeatDAO implements GenericDAO<Seat> {
     @Override
     public Seat findById(String id) {
         String sql = "SELECT * FROM Seat WHERE SeatID = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, id);
-            ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return mapResultSet(rs);
+                return extractSeatFromResultSet(rs);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -82,11 +80,10 @@ public class SeatDAO implements GenericDAO<Seat> {
     public List<Seat> findAll() {
         List<Seat> seats = new ArrayList<>();
         String sql = "SELECT * FROM Seat";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             Statement stmt = conn.createStatement();
+        try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                seats.add(mapResultSet(rs));
+                seats.add(extractSeatFromResultSet(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -97,12 +94,11 @@ public class SeatDAO implements GenericDAO<Seat> {
     public List<Seat> findByCarriageId(String carriageId) {
         List<Seat> seats = new ArrayList<>();
         String sql = "SELECT * FROM Seat WHERE CarriageID = ? ORDER BY SeatNumber";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, carriageId);
-            ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, carriageId);
+            ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                seats.add(mapResultSet(rs));
+                seats.add(extractSeatFromResultSet(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -113,12 +109,11 @@ public class SeatDAO implements GenericDAO<Seat> {
     public List<Seat> findAvailableByCarriageId(String carriageId) {
         List<Seat> seats = new ArrayList<>();
         String sql = "SELECT * FROM Seat WHERE CarriageID = ? AND Status = 'AVAILABLE' ORDER BY SeatNumber";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, carriageId);
-            ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, carriageId);
+            ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                seats.add(mapResultSet(rs));
+                seats.add(extractSeatFromResultSet(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -126,12 +121,12 @@ public class SeatDAO implements GenericDAO<Seat> {
         return seats;
     }
 
-    private Seat mapResultSet(ResultSet rs) throws SQLException {
-        return new Seat(
-            rs.getString("SeatID"),
-            rs.getString("CarriageID"),
-            rs.getString("SeatNumber"),
-            SeatStatus.valueOf(rs.getString("Status"))
-        );
+    private Seat extractSeatFromResultSet(ResultSet rs) throws SQLException {
+        Seat seat = new Seat();
+        seat.setSeatId(rs.getString("SeatID"));
+        seat.setCarriageId(rs.getString("CarriageID"));
+        seat.setSeatNumber(rs.getString("SeatNumber"));
+        seat.setStatus(SeatStatus.valueOf(rs.getString("Status")));
+        return seat;
     }
 }
