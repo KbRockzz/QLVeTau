@@ -1,7 +1,7 @@
 package com.trainstation.gui;
 
-import com.trainstation.dao.AccountDAO;
-import com.trainstation.model.Account;
+import com.trainstation.dao.TaiKhoanDAO;
+import com.trainstation.model.TaiKhoan;
 import javax.swing.*;
 import java.awt.*;
 
@@ -9,10 +9,10 @@ public class LoginFrame extends JFrame {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton loginButton;
-    private AccountDAO accountDAO;
+    private TaiKhoanDAO accountDAO;
 
     public LoginFrame() {
-        accountDAO = AccountDAO.getInstance();
+        accountDAO = TaiKhoanDAO.getInstance();
         initComponents();
     }
 
@@ -96,7 +96,7 @@ public class LoginFrame extends JFrame {
             return;
         }
 
-        Account account = accountDAO.authenticate(username, password);
+        TaiKhoan account = accountDAO.authenticate(username, password);
         if (account != null) {
             dispose();
             SwingUtilities.invokeLater(() -> {

@@ -1,7 +1,7 @@
 package com.trainstation.gui;
 
-import com.trainstation.dao.TrainDAO;
-import com.trainstation.model.Train;
+import com.trainstation.dao.TauDAO;
+import com.trainstation.model.Tau;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -13,12 +13,12 @@ import java.util.List;
 public class TrainPanel extends JPanel {
     private JTable trainTable;
     private DefaultTableModel tableModel;
-    private TrainDAO trainDAO;
+    private TauDAO trainDAO;
     private JTextField idField, nameField, departureField, arrivalField, seatsField, priceField;
     private JTextField departureDateField, arrivalDateField;
 
     public TrainPanel() {
-        trainDAO = TrainDAO.getInstance();
+        trainDAO = TauDAO.getInstance();
         initComponents();
         loadTrains();
     }
@@ -136,10 +136,10 @@ public class TrainPanel extends JPanel {
 
     private void loadTrains() {
         tableModel.setRowCount(0);
-        List<Train> trains = trainDAO.findAll();
+        List<Tau> trains = trainDAO.findAll();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         
-        for (Train train : trains) {
+        for (Tau train : trains) {
             tableModel.addRow(new Object[]{
                 train.getTrainId(),
                 train.getTrainName(),
@@ -180,7 +180,7 @@ public class TrainPanel extends JPanel {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             int totalSeats = Integer.parseInt(seatsField.getText().trim());
-            Train train = new Train(
+            Tau train = new Tau(
                 id,
                 nameField.getText().trim(),
                 departureField.getText().trim(),
@@ -205,7 +205,7 @@ public class TrainPanel extends JPanel {
         if (!validateForm()) return;
 
         String id = idField.getText().trim();
-        Train train = trainDAO.findById(id);
+        Tau train = trainDAO.findById(id);
         if (train == null) {
             JOptionPane.showMessageDialog(this, "Không tìm thấy chuyến tàu!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;

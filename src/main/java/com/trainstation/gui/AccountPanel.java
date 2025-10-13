@@ -1,7 +1,7 @@
 package com.trainstation.gui;
 
-import com.trainstation.dao.AccountDAO;
-import com.trainstation.model.Account;
+import com.trainstation.dao.TaiKhoanDAO;
+import com.trainstation.model.TaiKhoan;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -10,13 +10,13 @@ import java.util.List;
 public class AccountPanel extends JPanel {
     private JTable accountTable;
     private DefaultTableModel tableModel;
-    private AccountDAO accountDAO;
+    private TaiKhoanDAO accountDAO;
     private JTextField usernameField, passwordField, employeeIdField;
     private JComboBox<String> roleComboBox;
     private JCheckBox activeCheckBox;
 
     public AccountPanel() {
-        accountDAO = AccountDAO.getInstance();
+        accountDAO = TaiKhoanDAO.getInstance();
         initComponents();
         loadAccounts();
     }
@@ -114,8 +114,8 @@ public class AccountPanel extends JPanel {
 
     private void loadAccounts() {
         tableModel.setRowCount(0);
-        List<Account> accounts = accountDAO.findAll();
-        for (Account account : accounts) {
+        List<TaiKhoan> accounts = accountDAO.findAll();
+        for (TaiKhoan account : accounts) {
             tableModel.addRow(new Object[]{
                 account.getUsername(),
                 account.getRole(),
@@ -129,7 +129,7 @@ public class AccountPanel extends JPanel {
         int selectedRow = accountTable.getSelectedRow();
         if (selectedRow >= 0) {
             String username = tableModel.getValueAt(selectedRow, 0).toString();
-            Account account = accountDAO.findById(username);
+            TaiKhoan account = accountDAO.findById(username);
             if (account != null) {
                 usernameField.setText(account.getUsername());
                 passwordField.setText(account.getPassword());
@@ -149,7 +149,7 @@ public class AccountPanel extends JPanel {
             return;
         }
 
-        Account account = new Account(
+        TaiKhoan account = new TaiKhoan(
             username,
             passwordField.getText().trim(),
             (String) roleComboBox.getSelectedItem(),
@@ -167,7 +167,7 @@ public class AccountPanel extends JPanel {
         if (!validateForm()) return;
 
         String username = usernameField.getText().trim();
-        Account account = accountDAO.findById(username);
+        TaiKhoan account = accountDAO.findById(username);
         if (account == null) {
             JOptionPane.showMessageDialog(this, "Không tìm thấy tài khoản!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;

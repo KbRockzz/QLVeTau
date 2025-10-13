@@ -10,21 +10,21 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class RefundTicketPanel extends JPanel {
-    private Account currentAccount;
+    private TaiKhoan currentAccount;
     private TicketService ticketService;
-    private TicketDAO ticketDAO;
-    private SeatDAO seatDAO;
+    private VeDAO ticketDAO;
+    private GheDAO seatDAO;
     
     private JTable ticketTable;
     private DefaultTableModel tableModel;
     private JTextField ticketIdField;
     private JTextArea ticketDetailsArea;
 
-    public RefundTicketPanel(Account account) {
+    public RefundTicketPanel(TaiKhoan account) {
         this.currentAccount = account;
         this.ticketService = TicketService.getInstance();
-        this.ticketDAO = TicketDAO.getInstance();
-        this.seatDAO = SeatDAO.getInstance();
+        this.ticketDAO = VeDAO.getInstance();
+        this.seatDAO = GheDAO.getInstance();
         initComponents();
         loadTickets();
     }
@@ -111,10 +111,10 @@ public class RefundTicketPanel extends JPanel {
 
     private void loadTickets() {
         tableModel.setRowCount(0);
-        List<Ticket> tickets = ticketService.getAllTickets();
+        List<Ve> tickets = ticketService.getAllTickets();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         
-        for (Ticket ticket : tickets) {
+        for (Ve ticket : tickets) {
             if ("BOOKED".equals(ticket.getStatus())) {
                 tableModel.addRow(new Object[]{
                     ticket.getTicketId(),
@@ -135,7 +135,7 @@ public class RefundTicketPanel extends JPanel {
             String ticketId = tableModel.getValueAt(selectedRow, 0).toString();
             ticketIdField.setText(ticketId);
             
-            Ticket ticket = ticketDAO.findById(ticketId);
+            Ve ticket = ticketDAO.findById(ticketId);
             if (ticket != null) {
                 StringBuilder details = new StringBuilder();
                 details.append("Mã vé: ").append(ticket.getTicketId()).append("\n");
@@ -169,9 +169,9 @@ public class RefundTicketPanel extends JPanel {
         if (result == JOptionPane.YES_OPTION) {
             try {
                 // Get ticket to release seat
-                Ticket ticket = ticketDAO.findById(ticketId);
+                Ve ticket = ticketDAO.findById(ticketId);
                 if (ticket != null && ticket.getSeatId() != null) {
-                    Seat seat = seatDAO.findById(ticket.getSeatId());
+                    Ghe seat = seatDAO.findById(ticket.getSeatId());
                     if (seat != null) {
                         seat.setStatus("AVAILABLE");
                         seatDAO.update(seat);

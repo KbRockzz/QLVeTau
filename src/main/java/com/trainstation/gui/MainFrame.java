@@ -1,16 +1,16 @@
 package com.trainstation.gui;
 
-import com.trainstation.model.Account;
+import com.trainstation.model.TaiKhoan;
 import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
-    private Account currentAccount;
+    private TaiKhoan currentAccount;
     private JPanel contentPanel;
     private CardLayout cardLayout;
     private NavigationBar navigationBar;
 
-    public MainFrame(Account account) {
+    public MainFrame(TaiKhoan account) {
         this.currentAccount = account;
         initComponents();
     }

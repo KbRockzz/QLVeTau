@@ -1,0 +1,116 @@
+================================================================================
+ REFACTORING SUMMARY: Service và GUI Layer - Đồng bộ tên class tiếng Việt
+================================================================================
+
+ĐÃ HOÀN THÀNH:
+===============
+
+1. Thay thế TOÀN BỘ tên class cũ (tiếng Anh) → mới (tiếng Việt):
+   
+   Account → TaiKhoan
+   AccountDAO → TaiKhoanDAO
+   Employee → NhanVien  
+   EmployeeDAO → NhanVienDAO
+   Customer → KhachHang
+   CustomerDAO → KhachHangDAO
+   Train → Tau
+   TrainDAO → TauDAO
+   Seat → Ghe
+   SeatDAO → GheDAO
+   Carriage → ToaTau
+   CarriageDAO → ToaTauDAO
+   Ticket → Ve
+   TicketDAO → VeDAO
+
+2. Cập nhật 14 files:
+   - Service: TicketService.java, StatisticsService.java
+   - GUI: LoginFrame, MainFrame, NavigationBar, HomePanel, AccountPanel, 
+          EmployeePanel, CustomerPanel, TrainPanel, BookTicketPanel, 
+          TicketBookingPanel, ChangeTicketPanel, RefundTicketPanel
+
+3. Tất cả import statements đã được cập nhật
+4. Tất cả type declarations đã được cập nhật  
+5. Tất cả object instantiations đã được cập nhật
+
+VẤN ĐỀ PHÁT HIỆN:
+==================
+
+❌ Project KHÔNG COMPILE được sau khi đổi tên!
+
+Nguyên nhân: Vietnamese entities có CẤU TRÚC hoàn toàn KHÁC so với English entities cũ.
+
+Ví dụ:
+------
+KhachHang chỉ có 4 fields: maKhachHang, tenKhachHang, email, soDienThoai
+GUI mong đợi 6 fields: customerId, fullName, phoneNumber, email, idNumber, address
+
+Tau chỉ có 4 fields: maTau, soToa, tenTau, trangThai  
+GUI mong đợi 9 fields: trainId, trainName, departureStation, arrivalStation, 
+                       departureTime, arrivalTime, totalSeats, availableSeats, ticketPrice
+
+TaiKhoan có 5 fields: maTK, maNV, tenTaiKhoan, matKhau, trangThai
+GUI mong đợi: username, password, role, employeeId, isActive, isManager()
+
+KẾT LUẬN:
+=========
+
+✅ Đã hoàn thành: Đổi TÊN class và imports (theo yêu cầu)
+❌ Chưa hoàn thành: Đồng bộ API calls và business logic
+
+LÝ DO: Vietnamese entities follow database schema thực tế (database_structure.txt)
+       nhưng GUI/Service được thiết kế cho schema hoàn toàn khác.
+
+KHUYẾN NGHỊ:
+============
+
+Có 2 lựa chọn:
+
+OPTION 1 (Khuyến nghị): Rewrite Service và GUI layers
+   - Viết lại business logic để phù hợp với Vietnamese entity structure
+   - Thời gian: ~24-38 giờ
+   - Ưu điểm: Clean, đồng bộ hoàn toàn với database
+   - Nhược điểm: Công việc lớn
+
+OPTION 2: Tạo Adapter/Wrapper layer
+   - Tạo class adapter để convert Vietnamese entities → English API
+   - Thời gian: ~8-12 giờ
+   - Ưu điểm: Ít thay đổi GUI
+   - Nhược điểm: Thêm complexity, không tận dụng được database structure mới
+
+CHI TIẾT TECHNICAL:
+===================
+
+Xem file REFACTORING_REPORT.md để biết:
+- Danh sách đầy đủ các method không tồn tại
+- So sánh chi tiết entity structures
+- Compilation errors cụ thể
+- Roadmap chi tiết cho từng option
+
+FILES CHƯA CẬP NHẬT:
+====================
+
+- DataInitializer.java (vẫn dùng tên class cũ)
+- MainApplication.java (có thể cần update)
+
+TRẠNG THÁI CODE:
+================
+
+✅ Git commits: 2 commits đã push
+✅ Branch: copilot/refactor-service-and-gui-names  
+✅ Files changed: 15 files
+❌ Build status: COMPILATION FAILED
+❌ Tests status: CANNOT RUN (không compile được)
+
+NEXT STEPS:
+===========
+
+1. Review REFACTORING_REPORT.md
+2. Quyết định chọn Option 1 hay Option 2
+3. Nếu Option 1: Bắt đầu rewrite Service layer trước
+4. Nếu Option 2: Thiết kế adapter layer structure
+5. Update DataInitializer.java
+6. Fix compilation errors
+7. Run tests
+8. Verify GUI functionality
+
+================================================================================

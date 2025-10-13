@@ -1,20 +1,20 @@
 package com.trainstation.service;
 
-import com.trainstation.dao.TicketDAO;
-import com.trainstation.dao.TrainDAO;
-import com.trainstation.model.Ticket;
-import com.trainstation.model.Train;
+import com.trainstation.dao.VeDAO;
+import com.trainstation.dao.TauDAO;
+import com.trainstation.model.Ve;
+import com.trainstation.model.Tau;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class TicketService {
     private static TicketService instance;
-    private final TicketDAO ticketDAO;
-    private final TrainDAO trainDAO;
+    private final VeDAO ticketDAO;
+    private final TauDAO trainDAO;
 
     private TicketService() {
-        this.ticketDAO = TicketDAO.getInstance();
-        this.trainDAO = TrainDAO.getInstance();
+        this.ticketDAO = VeDAO.getInstance();
+        this.trainDAO = TauDAO.getInstance();
     }
 
     public static synchronized TicketService getInstance() {
@@ -24,8 +24,8 @@ public class TicketService {
         return instance;
     }
 
-    public Ticket bookTicket(String trainId, String customerId, String employeeId, String seatNumber) {
-        Train train = trainDAO.findById(trainId);
+    public Ve bookTicket(String trainId, String customerId, String employeeId, String seatNumber) {
+        Tau train = trainDAO.findById(trainId);
         if (train == null) {
             throw new IllegalArgumentException("Train not found");
         }
@@ -35,7 +35,7 @@ public class TicketService {
         }
 
         String ticketId = "TKT" + System.currentTimeMillis();
-        Ticket ticket = new Ticket(
+        Ve ticket = new Ve(
             ticketId,
             trainId,
             customerId,
@@ -56,7 +56,7 @@ public class TicketService {
     }
 
     public void refundTicket(String ticketId) {
-        Ticket ticket = ticketDAO.findById(ticketId);
+        Ve ticket = ticketDAO.findById(ticketId);
         if (ticket == null) {
             throw new IllegalArgumentException("Ticket not found");
         }
@@ -68,7 +68,7 @@ public class TicketService {
         ticket.setStatus("REFUNDED");
         ticketDAO.update(ticket);
 
-        Train train = trainDAO.findById(ticket.getTrainId());
+        Tau train = trainDAO.findById(ticket.getTrainId());
         if (train != null) {
             train.setAvailableSeats(train.getAvailableSeats() + 1);
             trainDAO.update(train);
@@ -76,7 +76,7 @@ public class TicketService {
     }
 
     public void cancelTicket(String ticketId) {
-        Ticket ticket = ticketDAO.findById(ticketId);
+        Ve ticket = ticketDAO.findById(ticketId);
         if (ticket == null) {
             throw new IllegalArgumentException("Ticket not found");
         }
@@ -88,31 +88,31 @@ public class TicketService {
         ticket.setStatus("CANCELLED");
         ticketDAO.update(ticket);
 
-        Train train = trainDAO.findById(ticket.getTrainId());
+        Tau train = trainDAO.findById(ticket.getTrainId());
         if (train != null) {
             train.setAvailableSeats(train.getAvailableSeats() + 1);
             trainDAO.update(train);
         }
     }
 
-    public List<Ticket> getAllTickets() {
+    public List<Ve> getAllTickets() {
         return ticketDAO.findAll();
     }
 
-    public List<Ticket> getTicketsByCustomer(String customerId) {
+    public List<Ve> getTicketsByCustomer(String customerId) {
         return ticketDAO.findByCustomerId(customerId);
     }
 
-    public List<Ticket> getTicketsByTrain(String trainId) {
+    public List<Ve> getTicketsByTrain(String trainId) {
         return ticketDAO.findByTrainId(trainId);
     }
 
-    public Ticket getTicketById(String ticketId) {
+    public Ve getTicketById(String ticketId) {
         return ticketDAO.findById(ticketId);
     }
 
     public void changeTicket(String ticketId, String newTrainId, String newSeatNumber, String newSeatId, String newCarriageId) {
-        Ticket ticket = ticketDAO.findById(ticketId);
+        Ve ticket = ticketDAO.findById(ticketId);
         if (ticket == null) {
             throw new IllegalArgumentException("Ticket not found");
         }
@@ -122,14 +122,14 @@ public class TicketService {
         }
 
         // Release old seat
-        Train oldTrain = trainDAO.findById(ticket.getTrainId());
+        Tau oldTrain = trainDAO.findById(ticket.getTrainId());
         if (oldTrain != null) {
             oldTrain.setAvailableSeats(oldTrain.getAvailableSeats() + 1);
             trainDAO.update(oldTrain);
         }
 
         // Get new train and check availability
-        Train newTrain = trainDAO.findById(newTrainId);
+        Tau newTrain = trainDAO.findById(newTrainId);
         if (newTrain == null) {
             throw new IllegalArgumentException("New train not found");
         }
