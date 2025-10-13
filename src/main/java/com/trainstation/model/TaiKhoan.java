@@ -60,6 +60,16 @@ public class TaiKhoan implements Serializable {
         this.trangThai = trangThai;
     }
 
+    /**
+     * Kiểm tra xem tài khoản có phải quản lý không
+     * Chỉ nhân viên loại LNV03 mới là quản lý
+     */
+    public boolean isManager() {
+        // Cần kiểm tra loại nhân viên từ NhanVien
+        // Tạm thời trả về false, cần được triển khai đầy đủ
+        return false;
+    }
+
     @Override
     public String toString() {
         return "TaiKhoan{" +

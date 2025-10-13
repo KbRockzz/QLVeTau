@@ -108,7 +108,7 @@ public class VeService {
     /**
      * Đổi vé
      */
-    public boolean doiVe(String maVeCu, Ve veM moi) {
+    public boolean doiVe(String maVeCu, Ve veMoi) {
         Ve veCu = veDAO.findById(maVeCu);
         if (veCu == null) {
             throw new IllegalArgumentException("Không tìm thấy vé cũ");

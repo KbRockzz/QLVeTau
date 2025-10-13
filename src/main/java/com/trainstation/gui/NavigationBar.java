@@ -136,8 +136,8 @@ public class NavigationBar extends JPanel {
     }
     
     private void navigateTo(String page) {
-        if (parentFrame instanceof MainFrame) {
-            ((MainFrame) parentFrame).navigateToPage(page);
+        if (parentFrame instanceof FrmChinh) {
+            ((FrmChinh) parentFrame).navigateToPage(page);
         }
     }
     
@@ -153,21 +153,21 @@ public class NavigationBar extends JPanel {
         if (result == JOptionPane.YES_OPTION) {
             parentFrame.dispose();
             SwingUtilities.invokeLater(() -> {
-                LoginFrame loginFrame = new LoginFrame();
-                loginFrame.setVisible(true);
+                FrmDangNhap frmDangNhap = new FrmDangNhap();
+                frmDangNhap.setVisible(true);
             });
         }
     }
     
     private String getEmployeeName() {
         // Get employee name from NhanVienDAO using employeeId
-        if (currentAccount.getEmployeeId() != null) {
+        if (currentAccount.getMaNV() != null) {
             var employee = com.trainstation.dao.NhanVienDAO.getInstance()
-                .findById(currentAccount.getEmployeeId());
+                .findById(currentAccount.getMaNV());
             if (employee != null) {
-                return employee.getFullName();
+                return employee.getTenNV();
             }
         }
-        return currentAccount.getUsername();
+        return currentAccount.getTenTaiKhoan();
     }
 }

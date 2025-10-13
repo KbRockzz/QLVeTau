@@ -40,7 +40,7 @@ public class ThongKeService {
     public double tinhTongDoanhThu() {
         List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.getAll();
         return chiTietList.stream()
-                .mapToDouble(ct -> ct.getGiaDaKM() != null ? ct.getGiaDaKM() : 0.0)
+                .mapToDouble(ChiTietHoaDon::getGiaDaKM)
                 .sum();
     }
 
@@ -61,7 +61,7 @@ public class ThongKeService {
         List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.getAll();
         return chiTietList.stream()
                 .filter(ct -> maHoaDonTheoThang.contains(ct.getMaHoaDon()))
-                .mapToDouble(ct -> ct.getGiaDaKM() != null ? ct.getGiaDaKM() : 0.0)
+                .mapToDouble(ChiTietHoaDon::getGiaDaKM)
                 .sum();
     }
 
@@ -142,7 +142,7 @@ public class ThongKeService {
                 String ngay = hoaDon.getNgayLap().toLocalDate().toString();
                 double tongTien = chiTietList.stream()
                         .filter(ct -> ct.getMaHoaDon().equals(hoaDon.getMaHoaDon()))
-                        .mapToDouble(ct -> ct.getGiaDaKM() != null ? ct.getGiaDaKM() : 0.0)
+                        .mapToDouble(ChiTietHoaDon::getGiaDaKM)
                         .sum();
                 
                 thongKe.put(ngay, thongKe.getOrDefault(ngay, 0.0) + tongTien);
