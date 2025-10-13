@@ -11,6 +11,8 @@ public class Seat implements Serializable {
     private String carriageId;
     private String seatNumber;
     private SeatStatus status;
+    
+    private Carriage carriage;
 
     public Seat() {
     }
@@ -18,6 +20,16 @@ public class Seat implements Serializable {
     public Seat(String seatId, String carriageId, String seatNumber, SeatStatus status) {
         this.seatId = seatId;
         this.carriageId = carriageId;
+        this.seatNumber = seatNumber;
+        this.status = status;
+    }
+
+    public Seat(String seatId, Carriage carriage, String seatNumber, SeatStatus status) {
+        this.seatId = seatId;
+        this.carriage = carriage;
+        if (carriage != null) {
+            this.carriageId = carriage.getCarriageId();
+        }
         this.seatNumber = seatNumber;
         this.status = status;
     }
@@ -52,6 +64,17 @@ public class Seat implements Serializable {
 
     public void setStatus(SeatStatus status) {
         this.status = status;
+    }
+
+    public Carriage getCarriage() {
+        return carriage;
+    }
+
+    public void setCarriage(Carriage carriage) {
+        this.carriage = carriage;
+        if (carriage != null) {
+            this.carriageId = carriage.getCarriageId();
+        }
     }
 
     @Override

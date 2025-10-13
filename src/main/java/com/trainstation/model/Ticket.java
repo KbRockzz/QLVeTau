@@ -18,6 +18,12 @@ public class Ticket implements Serializable {
     private String carriageId;
     private double price;
     private TicketStatus status;
+    
+    private Train train;
+    private Customer customer;
+    private Employee employee;
+    private Seat seat;
+    private Carriage carriage;
 
     public Ticket() {
     }
@@ -45,6 +51,35 @@ public class Ticket implements Serializable {
         this.seatNumber = seatNumber;
         this.seatId = seatId;
         this.carriageId = carriageId;
+        this.price = price;
+        this.status = status;
+    }
+
+    public Ticket(String ticketId, Train train, Customer customer, Employee employee,
+                  LocalDateTime bookingDate, Seat seat, Carriage carriage, double price, TicketStatus status) {
+        this.ticketId = ticketId;
+        this.train = train;
+        this.customer = customer;
+        this.employee = employee;
+        this.seat = seat;
+        this.carriage = carriage;
+        if (train != null) {
+            this.trainId = train.getTrainId();
+        }
+        if (customer != null) {
+            this.customerId = customer.getCustomerId();
+        }
+        if (employee != null) {
+            this.employeeId = employee.getEmployeeId();
+        }
+        if (seat != null) {
+            this.seatId = seat.getSeatId();
+            this.seatNumber = seat.getSeatNumber();
+        }
+        if (carriage != null) {
+            this.carriageId = carriage.getCarriageId();
+        }
+        this.bookingDate = bookingDate;
         this.price = price;
         this.status = status;
     }
@@ -127,6 +162,62 @@ public class Ticket implements Serializable {
 
     public void setCarriageId(String carriageId) {
         this.carriageId = carriageId;
+    }
+
+    public Train getTrain() {
+        return train;
+    }
+
+    public void setTrain(Train train) {
+        this.train = train;
+        if (train != null) {
+            this.trainId = train.getTrainId();
+        }
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+        if (customer != null) {
+            this.customerId = customer.getCustomerId();
+        }
+    }
+
+    public Employee getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
+        if (employee != null) {
+            this.employeeId = employee.getEmployeeId();
+        }
+    }
+
+    public Seat getSeat() {
+        return seat;
+    }
+
+    public void setSeat(Seat seat) {
+        this.seat = seat;
+        if (seat != null) {
+            this.seatId = seat.getSeatId();
+            this.seatNumber = seat.getSeatNumber();
+        }
+    }
+
+    public Carriage getCarriage() {
+        return carriage;
+    }
+
+    public void setCarriage(Carriage carriage) {
+        this.carriage = carriage;
+        if (carriage != null) {
+            this.carriageId = carriage.getCarriageId();
+        }
     }
 
     @Override

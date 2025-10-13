@@ -5,10 +5,12 @@ import java.io.Serializable;
 public class Account implements Serializable {
     private String username;
     private String password;
-    private String role; // "ADMIN" or "EMPLOYEE"
+    private String role;
     private String employeeId;
-    private String maLoai; // Employee type from Employee: LNV01, LNV02, LNV03 (Manager)
+    private String maLoai;
     private boolean active;
+    
+    private Employee employee;
 
     public Account() {
     }
@@ -28,6 +30,18 @@ public class Account implements Serializable {
         this.role = role;
         this.employeeId = employeeId;
         this.maLoai = maLoai;
+        this.active = active;
+    }
+
+    public Account(String username, String password, String role, Employee employee, boolean active) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.employee = employee;
+        if (employee != null) {
+            this.employeeId = employee.getEmployeeId();
+            this.maLoai = employee.getMaLoai();
+        }
         this.active = active;
     }
 
@@ -79,10 +93,18 @@ public class Account implements Serializable {
         this.active = active;
     }
 
-    /**
-     * Check if the account is a manager (LNV03)
-     * @return true if maLoai is LNV03, false otherwise
-     */
+    public Employee getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
+        if (employee != null) {
+            this.employeeId = employee.getEmployeeId();
+            this.maLoai = employee.getMaLoai();
+        }
+    }
+
     public boolean isManager() {
         return "LNV03".equals(maLoai);
     }
