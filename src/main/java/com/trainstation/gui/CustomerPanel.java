@@ -1,7 +1,7 @@
 package com.trainstation.gui;
 
-import com.trainstation.dao.CustomerDAO;
-import com.trainstation.model.Customer;
+import com.trainstation.dao.KhachHangDAO;
+import com.trainstation.model.KhachHang;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -10,11 +10,11 @@ import java.util.List;
 public class CustomerPanel extends JPanel {
     private JTable customerTable;
     private DefaultTableModel tableModel;
-    private CustomerDAO customerDAO;
+    private KhachHangDAO customerDAO;
     private JTextField idField, nameField, phoneField, emailField, identityField, addressField;
 
     public CustomerPanel() {
-        customerDAO = CustomerDAO.getInstance();
+        customerDAO = KhachHangDAO.getInstance();
         initComponents();
         loadCustomers();
     }
@@ -144,8 +144,8 @@ public class CustomerPanel extends JPanel {
 
     private void loadCustomers() {
         tableModel.setRowCount(0);
-        List<Customer> customers = customerDAO.findAll();
-        for (Customer customer : customers) {
+        List<KhachHang> customers = customerDAO.findAll();
+        for (KhachHang customer : customers) {
             tableModel.addRow(new Object[]{
                 customer.getCustomerId(),
                 customer.getFullName(),
@@ -178,7 +178,7 @@ public class CustomerPanel extends JPanel {
             return;
         }
 
-        Customer customer = new Customer(
+        KhachHang customer = new KhachHang(
             id,
             nameField.getText().trim(),
             phoneField.getText().trim(),
@@ -197,7 +197,7 @@ public class CustomerPanel extends JPanel {
         if (!validateForm()) return;
 
         String id = idField.getText().trim();
-        Customer customer = customerDAO.findById(id);
+        KhachHang customer = customerDAO.findById(id);
         if (customer == null) {
             JOptionPane.showMessageDialog(this, "Không tìm thấy khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
@@ -261,10 +261,10 @@ public class CustomerPanel extends JPanel {
         }
         
         tableModel.setRowCount(0);
-        List<Customer> customers = customerDAO.findAll();
+        List<KhachHang> customers = customerDAO.findAll();
         boolean found = false;
         
-        for (Customer customer : customers) {
+        for (KhachHang customer : customers) {
             if (customer.getPhoneNumber().contains(phoneNumber)) {
                 tableModel.addRow(new Object[]{
                     customer.getCustomerId(),

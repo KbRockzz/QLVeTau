@@ -1,6 +1,6 @@
 package com.trainstation.gui;
 
-import com.trainstation.model.Account;
+import com.trainstation.model.TaiKhoan;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
@@ -9,10 +9,10 @@ import java.awt.geom.*;
  * Home panel displaying welcome message and quick access buttons
  */
 public class HomePanel extends JPanel {
-    private Account currentAccount;
+    private TaiKhoan currentAccount;
     private JFrame parentFrame;
     
-    public HomePanel(Account account, JFrame parentFrame) {
+    public HomePanel(TaiKhoan account, JFrame parentFrame) {
         this.currentAccount = account;
         this.parentFrame = parentFrame;
         initComponents();
@@ -100,7 +100,7 @@ public class HomePanel extends JPanel {
     
     private String getEmployeeName() {
         if (currentAccount.getEmployeeId() != null) {
-            var employee = com.trainstation.dao.EmployeeDAO.getInstance()
+            var employee = com.trainstation.dao.NhanVienDAO.getInstance()
                 .findById(currentAccount.getEmployeeId());
             if (employee != null) {
                 return employee.getFullName();

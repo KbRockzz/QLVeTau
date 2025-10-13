@@ -1,7 +1,7 @@
 package com.trainstation.gui;
 
-import com.trainstation.dao.EmployeeDAO;
-import com.trainstation.model.Employee;
+import com.trainstation.dao.NhanVienDAO;
+import com.trainstation.model.NhanVien;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -13,12 +13,12 @@ import java.util.List;
 public class EmployeePanel extends JPanel {
     private JTable employeeTable;
     private DefaultTableModel tableModel;
-    private EmployeeDAO employeeDAO;
+    private NhanVienDAO employeeDAO;
     private JTextField idField, nameField, phoneField, emailField, positionField, hireDateField, salaryField;
     private JComboBox<String> maLoaiComboBox;
 
     public EmployeePanel() {
-        employeeDAO = EmployeeDAO.getInstance();
+        employeeDAO = NhanVienDAO.getInstance();
         initComponents();
         loadEmployees();
     }
@@ -136,10 +136,10 @@ public class EmployeePanel extends JPanel {
 
     private void loadEmployees() {
         tableModel.setRowCount(0);
-        List<Employee> employees = employeeDAO.findAll();
+        List<NhanVien> employees = employeeDAO.findAll();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         
-        for (Employee employee : employees) {
+        for (NhanVien employee : employees) {
             tableModel.addRow(new Object[]{
                 employee.getEmployeeId(),
                 employee.getFullName(),
@@ -178,7 +178,7 @@ public class EmployeePanel extends JPanel {
 
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            Employee employee = new Employee(
+            NhanVien employee = new NhanVien(
                 id,
                 nameField.getText().trim(),
                 phoneField.getText().trim(),
@@ -202,7 +202,7 @@ public class EmployeePanel extends JPanel {
         if (!validateForm()) return;
 
         String id = idField.getText().trim();
-        Employee employee = employeeDAO.findById(id);
+        NhanVien employee = employeeDAO.findById(id);
         if (employee == null) {
             JOptionPane.showMessageDialog(this, "Không tìm thấy nhân viên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;

@@ -1,7 +1,7 @@
 package com.trainstation.service;
 
-import com.trainstation.dao.TicketDAO;
-import com.trainstation.model.Ticket;
+import com.trainstation.dao.VeDAO;
+import com.trainstation.model.Ve;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -9,10 +9,10 @@ import java.util.Map;
 
 public class StatisticsService {
     private static StatisticsService instance;
-    private final TicketDAO ticketDAO;
+    private final VeDAO ticketDAO;
 
     private StatisticsService() {
-        this.ticketDAO = TicketDAO.getInstance();
+        this.ticketDAO = VeDAO.getInstance();
     }
 
     public static synchronized StatisticsService getInstance() {
@@ -23,9 +23,9 @@ public class StatisticsService {
     }
 
     public BigDecimal getTotalRevenue() {
-        List<Ticket> tickets = ticketDAO.findByStatus("BOOKED");
+        List<Ve> tickets = ticketDAO.findByStatus("BOOKED");
         return tickets.stream()
-                .map(Ticket::getPrice)
+                .map(Ve::getPrice)
                 .filter(price -> price != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
@@ -44,9 +44,9 @@ public class StatisticsService {
 
     public Map<String, Integer> getTicketsByTrain() {
         Map<String, Integer> trainTickets = new HashMap<>();
-        List<Ticket> allTickets = ticketDAO.findAll();
+        List<Ve> allTickets = ticketDAO.findAll();
         
-        for (Ticket ticket : allTickets) {
+        for (Ve ticket : allTickets) {
             if ("BOOKED".equals(ticket.getStatus())) {
                 String trainId = ticket.getTrainId();
                 trainTickets.put(trainId, trainTickets.getOrDefault(trainId, 0) + 1);

@@ -11,12 +11,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class ChangeTicketPanel extends JPanel {
-    private Account currentAccount;
+    private TaiKhoan currentAccount;
     private TicketService ticketService;
-    private TicketDAO ticketDAO;
-    private TrainDAO trainDAO;
-    private CarriageDAO carriageDAO;
-    private SeatDAO seatDAO;
+    private VeDAO ticketDAO;
+    private TauDAO trainDAO;
+    private ToaTauDAO carriageDAO;
+    private GheDAO seatDAO;
     
     private JTable ticketTable;
     private DefaultTableModel tableModel;
@@ -32,13 +32,13 @@ public class ChangeTicketPanel extends JPanel {
     private String selectedNewSeatId;
     private String selectedNewSeatNumber;
 
-    public ChangeTicketPanel(Account account) {
+    public ChangeTicketPanel(TaiKhoan account) {
         this.currentAccount = account;
         this.ticketService = TicketService.getInstance();
-        this.ticketDAO = TicketDAO.getInstance();
-        this.trainDAO = TrainDAO.getInstance();
-        this.carriageDAO = CarriageDAO.getInstance();
-        this.seatDAO = SeatDAO.getInstance();
+        this.ticketDAO = VeDAO.getInstance();
+        this.trainDAO = TauDAO.getInstance();
+        this.carriageDAO = ToaTauDAO.getInstance();
+        this.seatDAO = GheDAO.getInstance();
         initComponents();
     }
 
@@ -162,10 +162,10 @@ public class ChangeTicketPanel extends JPanel {
 
     private void loadTickets() {
         tableModel.setRowCount(0);
-        List<Ticket> tickets = ticketService.getAllTickets();
+        List<Ve> tickets = ticketService.getAllTickets();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         
-        for (Ticket ticket : tickets) {
+        for (Ve ticket : tickets) {
             if ("BOOKED".equals(ticket.getStatus())) {
                 tableModel.addRow(new Object[]{
                     ticket.getTicketId(),
@@ -190,8 +190,8 @@ public class ChangeTicketPanel extends JPanel {
 
     private void loadTrains() {
         newTrainComboBox.removeAllItems();
-        List<Train> trains = trainDAO.findAll();
-        for (Train train : trains) {
+        List<Tau> trains = trainDAO.findAll();
+        for (Tau train : trains) {
             newTrainComboBox.addItem(train.getTrainId() + " - " + train.getTrainName() + 
                 " (" + train.getDepartureStation() + " → " + train.getArrivalStation() + ")");
         }
@@ -210,9 +210,9 @@ public class ChangeTicketPanel extends JPanel {
         }
         
         selectedNewTrainId = newTrainComboBox.getSelectedItem().toString().split(" - ")[0];
-        List<Carriage> carriages = carriageDAO.findByTrainId(selectedNewTrainId);
+        List<ToaTau> carriages = carriageDAO.findByTrainId(selectedNewTrainId);
         
-        for (Carriage carriage : carriages) {
+        for (ToaTau carriage : carriages) {
             JButton carriageBtn = new JButton("Toa " + carriage.getCarriageNumber() + ": " + carriage.getCarriageName());
             carriageBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
             carriageBtn.addActionListener(e -> loadSeats(carriage.getCarriageId()));
@@ -228,9 +228,9 @@ public class ChangeTicketPanel extends JPanel {
         selectedNewCarriageId = carriageId;
         seatGridPanel.removeAll();
         
-        List<Seat> seats = seatDAO.findByCarriageId(carriageId);
+        List<Ghe> seats = seatDAO.findByCarriageId(carriageId);
         
-        for (Seat seat : seats) {
+        for (Ghe seat : seats) {
             JButton seatBtn = new JButton(seat.getSeatNumber());
             seatBtn.setPreferredSize(new Dimension(70, 70));
             
@@ -256,7 +256,7 @@ public class ChangeTicketPanel extends JPanel {
         seatGridPanel.repaint();
     }
 
-    private void selectSeat(Seat seat) {
+    private void selectSeat(Ghe seat) {
         selectedNewSeatId = seat.getSeatId();
         selectedNewSeatNumber = seat.getSeatNumber();
         selectedInfoLabel.setText("Đã chọn ghế mới: " + selectedNewSeatNumber);
@@ -284,9 +284,9 @@ public class ChangeTicketPanel extends JPanel {
         if (result == JOptionPane.YES_OPTION) {
             try {
                 // Get old ticket to release old seat
-                Ticket oldTicket = ticketDAO.findById(selectedTicketId);
+                Ve oldTicket = ticketDAO.findById(selectedTicketId);
                 if (oldTicket != null && oldTicket.getSeatId() != null) {
-                    Seat oldSeat = seatDAO.findById(oldTicket.getSeatId());
+                    Ghe oldSeat = seatDAO.findById(oldTicket.getSeatId());
                     if (oldSeat != null) {
                         oldSeat.setStatus("AVAILABLE");
                         seatDAO.update(oldSeat);
@@ -303,7 +303,7 @@ public class ChangeTicketPanel extends JPanel {
                 );
                 
                 // Update new seat status
-                Seat newSeat = seatDAO.findById(selectedNewSeatId);
+                Ghe newSeat = seatDAO.findById(selectedNewSeatId);
                 if (newSeat != null) {
                     newSeat.setStatus("BOOKED");
                     seatDAO.update(newSeat);

@@ -9,12 +9,12 @@ import java.awt.*;
 import java.util.List;
 
 public class BookTicketPanel extends JPanel {
-    private Account currentAccount;
+    private TaiKhoan currentAccount;
     private TicketService ticketService;
-    private TrainDAO trainDAO;
-    private CarriageDAO carriageDAO;
-    private SeatDAO seatDAO;
-    private CustomerDAO customerDAO;
+    private TauDAO trainDAO;
+    private ToaTauDAO carriageDAO;
+    private GheDAO seatDAO;
+    private KhachHangDAO customerDAO;
     
     private JComboBox<String> trainComboBox;
     private JComboBox<String> customerComboBox;
@@ -27,13 +27,13 @@ public class BookTicketPanel extends JPanel {
     private String selectedSeatId;
     private String selectedSeatNumber;
 
-    public BookTicketPanel(Account account) {
+    public BookTicketPanel(TaiKhoan account) {
         this.currentAccount = account;
         this.ticketService = TicketService.getInstance();
-        this.trainDAO = TrainDAO.getInstance();
-        this.carriageDAO = CarriageDAO.getInstance();
-        this.seatDAO = SeatDAO.getInstance();
-        this.customerDAO = CustomerDAO.getInstance();
+        this.trainDAO = TauDAO.getInstance();
+        this.carriageDAO = ToaTauDAO.getInstance();
+        this.seatDAO = GheDAO.getInstance();
+        this.customerDAO = KhachHangDAO.getInstance();
         initComponents();
     }
 
@@ -131,8 +131,8 @@ public class BookTicketPanel extends JPanel {
 
     private void loadTrains() {
         trainComboBox.removeAllItems();
-        List<Train> trains = trainDAO.findAll();
-        for (Train train : trains) {
+        List<Tau> trains = trainDAO.findAll();
+        for (Tau train : trains) {
             trainComboBox.addItem(train.getTrainId() + " - " + train.getTrainName() + 
                 " (" + train.getDepartureStation() + " → " + train.getArrivalStation() + ")");
         }
@@ -140,8 +140,8 @@ public class BookTicketPanel extends JPanel {
 
     private void loadCustomers() {
         customerComboBox.removeAllItems();
-        List<Customer> customers = customerDAO.findAll();
-        for (Customer customer : customers) {
+        List<KhachHang> customers = customerDAO.findAll();
+        for (KhachHang customer : customers) {
             customerComboBox.addItem(customer.getCustomerId() + " - " + customer.getFullName());
         }
     }
@@ -159,9 +159,9 @@ public class BookTicketPanel extends JPanel {
         }
         
         selectedTrainId = trainComboBox.getSelectedItem().toString().split(" - ")[0];
-        List<Carriage> carriages = carriageDAO.findByTrainId(selectedTrainId);
+        List<ToaTau> carriages = carriageDAO.findByTrainId(selectedTrainId);
         
-        for (Carriage carriage : carriages) {
+        for (ToaTau carriage : carriages) {
             JButton carriageBtn = new JButton("Toa " + carriage.getCarriageNumber() + ": " + carriage.getCarriageName());
             carriageBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
             carriageBtn.addActionListener(e -> loadSeats(carriage.getCarriageId()));
@@ -177,9 +177,9 @@ public class BookTicketPanel extends JPanel {
         selectedCarriageId = carriageId;
         seatGridPanel.removeAll();
         
-        List<Seat> seats = seatDAO.findByCarriageId(carriageId);
+        List<Ghe> seats = seatDAO.findByCarriageId(carriageId);
         
-        for (Seat seat : seats) {
+        for (Ghe seat : seats) {
             JButton seatBtn = new JButton(seat.getSeatNumber());
             seatBtn.setPreferredSize(new Dimension(70, 70));
             
@@ -205,7 +205,7 @@ public class BookTicketPanel extends JPanel {
         seatGridPanel.repaint();
     }
 
-    private void selectSeat(Seat seat) {
+    private void selectSeat(Ghe seat) {
         selectedSeatId = seat.getSeatId();
         selectedSeatNumber = seat.getSeatNumber();
         selectedInfoLabel.setText("Đã chọn: " + selectedSeatNumber + " (Toa " + selectedCarriageId + ")");
@@ -224,7 +224,7 @@ public class BookTicketPanel extends JPanel {
         try {
             String customerId = customerComboBox.getSelectedItem().toString().split(" - ")[0];
             
-            Ticket ticket = ticketService.bookTicket(
+            Ve ticket = ticketService.bookTicket(
                 selectedTrainId, 
                 customerId, 
                 currentAccount.getEmployeeId(), 
@@ -232,7 +232,7 @@ public class BookTicketPanel extends JPanel {
             );
             
             // Update seat status
-            Seat seat = seatDAO.findById(selectedSeatId);
+            Ghe seat = seatDAO.findById(selectedSeatId);
             if (seat != null) {
                 seat.setStatus("BOOKED");
                 seatDAO.update(seat);

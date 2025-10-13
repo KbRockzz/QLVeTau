@@ -1,11 +1,11 @@
 package com.trainstation.gui;
 
-import com.trainstation.dao.CustomerDAO;
-import com.trainstation.dao.TrainDAO;
-import com.trainstation.model.Account;
-import com.trainstation.model.Customer;
-import com.trainstation.model.Ticket;
-import com.trainstation.model.Train;
+import com.trainstation.dao.KhachHangDAO;
+import com.trainstation.dao.TauDAO;
+import com.trainstation.model.TaiKhoan;
+import com.trainstation.model.KhachHang;
+import com.trainstation.model.Ve;
+import com.trainstation.model.Tau;
 import com.trainstation.service.TicketService;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -17,17 +17,17 @@ public class TicketBookingPanel extends JPanel {
     private JTable ticketTable;
     private DefaultTableModel tableModel;
     private TicketService ticketService;
-    private CustomerDAO customerDAO;
-    private TrainDAO trainDAO;
-    private Account currentAccount;
+    private KhachHangDAO customerDAO;
+    private TauDAO trainDAO;
+    private TaiKhoan currentAccount;
     private JTextField ticketIdField, customerIdField, trainIdField, seatField;
     private JComboBox<String> trainComboBox, customerComboBox;
 
-    public TicketBookingPanel(Account account) {
+    public TicketBookingPanel(TaiKhoan account) {
         this.currentAccount = account;
         ticketService = TicketService.getInstance();
-        customerDAO = CustomerDAO.getInstance();
-        trainDAO = TrainDAO.getInstance();
+        customerDAO = KhachHangDAO.getInstance();
+        trainDAO = TauDAO.getInstance();
         initComponents();
         loadTickets();
     }
@@ -125,8 +125,8 @@ public class TicketBookingPanel extends JPanel {
 
     private void updateTrainComboBox() {
         trainComboBox.removeAllItems();
-        List<Train> trains = trainDAO.findAll();
-        for (Train train : trains) {
+        List<Tau> trains = trainDAO.findAll();
+        for (Tau train : trains) {
             trainComboBox.addItem(train.getTrainId() + " - " + train.getTrainName() + 
                 " (" + train.getDepartureStation() + " → " + train.getArrivalStation() + ")");
         }
@@ -134,18 +134,18 @@ public class TicketBookingPanel extends JPanel {
 
     private void updateCustomerComboBox() {
         customerComboBox.removeAllItems();
-        List<Customer> customers = customerDAO.findAll();
-        for (Customer customer : customers) {
+        List<KhachHang> customers = customerDAO.findAll();
+        for (KhachHang customer : customers) {
             customerComboBox.addItem(customer.getCustomerId() + " - " + customer.getFullName());
         }
     }
 
     private void loadTickets() {
         tableModel.setRowCount(0);
-        List<Ticket> tickets = ticketService.getAllTickets();
+        List<Ve> tickets = ticketService.getAllTickets();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         
-        for (Ticket ticket : tickets) {
+        for (Ve ticket : tickets) {
             tableModel.addRow(new Object[]{
                 ticket.getTicketId(),
                 ticket.getTrainId(),
@@ -178,7 +178,7 @@ public class TicketBookingPanel extends JPanel {
             String customerId = customerComboBox.getSelectedItem().toString().split(" - ")[0];
             String seatNumber = seatField.getText().trim();
 
-            Ticket ticket = ticketService.bookTicket(trainId, customerId, currentAccount.getEmployeeId(), seatNumber);
+            Ve ticket = ticketService.bookTicket(trainId, customerId, currentAccount.getEmployeeId(), seatNumber);
             loadTickets();
             clearForm();
             updateTrainComboBox();
