@@ -1,7 +1,6 @@
 package com.trainstation.dao;
 
 import com.trainstation.model.Ticket;
-import com.trainstation.model.Ticket.TicketStatus;
 import com.trainstation.MySQL.ConnectSql;
 import java.sql.*;
 import java.util.ArrayList;
@@ -34,8 +33,8 @@ public class TicketDAO implements GenericDAO<Ticket> {
             pstmt.setString(6, ticket.getSeatNumber());
             pstmt.setString(7, ticket.getSeatId());
             pstmt.setString(8, ticket.getCarriageId());
-            pstmt.setDouble(9, ticket.getPrice());
-            pstmt.setString(10, ticket.getStatus().toString());
+            pstmt.setBigDecimal(9, ticket.getPrice());
+            pstmt.setString(10, ticket.getStatus());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -53,8 +52,8 @@ public class TicketDAO implements GenericDAO<Ticket> {
             pstmt.setString(5, ticket.getSeatNumber());
             pstmt.setString(6, ticket.getSeatId());
             pstmt.setString(7, ticket.getCarriageId());
-            pstmt.setDouble(8, ticket.getPrice());
-            pstmt.setString(9, ticket.getStatus().toString());
+            pstmt.setBigDecimal(8, ticket.getPrice());
+            pstmt.setString(9, ticket.getStatus());
             pstmt.setString(10, ticket.getTicketId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -133,11 +132,11 @@ public class TicketDAO implements GenericDAO<Ticket> {
         return tickets;
     }
 
-    public List<Ticket> findByStatus(TicketStatus status) {
+    public List<Ticket> findByStatus(String status) {
         List<Ticket> tickets = new ArrayList<>();
         String sql = "SELECT * FROM Ticket WHERE Status = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, status.toString());
+            pstmt.setString(1, status);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 tickets.add(extractTicketFromResultSet(rs));
@@ -161,8 +160,8 @@ public class TicketDAO implements GenericDAO<Ticket> {
         ticket.setSeatNumber(rs.getString("SeatNumber"));
         ticket.setSeatId(rs.getString("SeatID"));
         ticket.setCarriageId(rs.getString("CarriageID"));
-        ticket.setPrice(rs.getDouble("Price"));
-        ticket.setStatus(TicketStatus.valueOf(rs.getString("Status")));
+        ticket.setPrice(rs.getBigDecimal("Price"));
+        ticket.setStatus(rs.getString("Status"));
         return ticket;
     }
 }

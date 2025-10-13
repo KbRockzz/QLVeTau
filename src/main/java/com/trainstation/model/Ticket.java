@@ -1,13 +1,10 @@
 package com.trainstation.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Ticket implements Serializable {
-    public enum TicketStatus {
-        BOOKED, CANCELLED, REFUNDED
-    }
-
     private String ticketId;
     private String trainId;
     private String customerId;
@@ -16,8 +13,8 @@ public class Ticket implements Serializable {
     private String seatNumber;
     private String seatId;
     private String carriageId;
-    private double price;
-    private TicketStatus status;
+    private BigDecimal price;
+    private String status;
     
     private Train train;
     private Customer customer;
@@ -29,20 +26,8 @@ public class Ticket implements Serializable {
     }
 
     public Ticket(String ticketId, String trainId, String customerId, String employeeId, 
-                  LocalDateTime bookingDate, String seatNumber, double price, TicketStatus status) {
-        this.ticketId = ticketId;
-        this.trainId = trainId;
-        this.customerId = customerId;
-        this.employeeId = employeeId;
-        this.bookingDate = bookingDate;
-        this.seatNumber = seatNumber;
-        this.price = price;
-        this.status = status;
-    }
-
-    public Ticket(String ticketId, String trainId, String customerId, String employeeId, 
                   LocalDateTime bookingDate, String seatNumber, String seatId, String carriageId,
-                  double price, TicketStatus status) {
+                  BigDecimal price, String status) {
         this.ticketId = ticketId;
         this.trainId = trainId;
         this.customerId = customerId;
@@ -51,35 +36,6 @@ public class Ticket implements Serializable {
         this.seatNumber = seatNumber;
         this.seatId = seatId;
         this.carriageId = carriageId;
-        this.price = price;
-        this.status = status;
-    }
-
-    public Ticket(String ticketId, Train train, Customer customer, Employee employee,
-                  LocalDateTime bookingDate, Seat seat, Carriage carriage, double price, TicketStatus status) {
-        this.ticketId = ticketId;
-        this.train = train;
-        this.customer = customer;
-        this.employee = employee;
-        this.seat = seat;
-        this.carriage = carriage;
-        if (train != null) {
-            this.trainId = train.getTrainId();
-        }
-        if (customer != null) {
-            this.customerId = customer.getCustomerId();
-        }
-        if (employee != null) {
-            this.employeeId = employee.getEmployeeId();
-        }
-        if (seat != null) {
-            this.seatId = seat.getSeatId();
-            this.seatNumber = seat.getSeatNumber();
-        }
-        if (carriage != null) {
-            this.carriageId = carriage.getCarriageId();
-        }
-        this.bookingDate = bookingDate;
         this.price = price;
         this.status = status;
     }
@@ -132,19 +88,19 @@ public class Ticket implements Serializable {
         this.seatNumber = seatNumber;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
-    public TicketStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(TicketStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

@@ -29,7 +29,7 @@ public class CustomerDAO implements GenericDAO<Customer> {
             pstmt.setString(2, customer.getFullName());
             pstmt.setString(3, customer.getPhoneNumber());
             pstmt.setString(4, customer.getEmail());
-            pstmt.setString(5, customer.getIdentityNumber());
+            pstmt.setString(5, customer.getIdNumber());
             pstmt.setString(6, customer.getAddress());
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -44,7 +44,7 @@ public class CustomerDAO implements GenericDAO<Customer> {
             pstmt.setString(1, customer.getFullName());
             pstmt.setString(2, customer.getPhoneNumber());
             pstmt.setString(3, customer.getEmail());
-            pstmt.setString(4, customer.getIdentityNumber());
+            pstmt.setString(4, customer.getIdNumber());
             pstmt.setString(5, customer.getAddress());
             pstmt.setString(6, customer.getCustomerId());
             pstmt.executeUpdate();
@@ -114,7 +114,7 @@ public class CustomerDAO implements GenericDAO<Customer> {
         customer.setFullName(rs.getString("FullName"));
         customer.setPhoneNumber(rs.getString("PhoneNumber"));
         customer.setEmail(rs.getString("Email"));
-        customer.setIdentityNumber(rs.getString("IDNumber"));
+        customer.setIdNumber(rs.getString("IDNumber"));
         customer.setAddress(rs.getString("Address"));
         return customer;
     }

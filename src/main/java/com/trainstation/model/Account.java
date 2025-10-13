@@ -5,44 +5,21 @@ import java.io.Serializable;
 public class Account implements Serializable {
     private String username;
     private String password;
-    private String role;
     private String employeeId;
-    private String maLoai;
-    private boolean active;
+    private String role;
+    private boolean isActive;
     
     private Employee employee;
 
     public Account() {
     }
 
-    public Account(String username, String password, String role, String employeeId, boolean active) {
+    public Account(String username, String password, String employeeId, String role, boolean isActive) {
         this.username = username;
         this.password = password;
-        this.role = role;
         this.employeeId = employeeId;
-        this.maLoai = null;
-        this.active = active;
-    }
-
-    public Account(String username, String password, String role, String employeeId, String maLoai, boolean active) {
-        this.username = username;
-        this.password = password;
         this.role = role;
-        this.employeeId = employeeId;
-        this.maLoai = maLoai;
-        this.active = active;
-    }
-
-    public Account(String username, String password, String role, Employee employee, boolean active) {
-        this.username = username;
-        this.password = password;
-        this.role = role;
-        this.employee = employee;
-        if (employee != null) {
-            this.employeeId = employee.getEmployeeId();
-            this.maLoai = employee.getMaLoai();
-        }
-        this.active = active;
+        this.isActive = isActive;
     }
 
     public String getUsername() {
@@ -77,20 +54,12 @@ public class Account implements Serializable {
         this.employeeId = employeeId;
     }
 
-    public String getMaLoai() {
-        return maLoai;
+    public boolean isIsActive() {
+        return isActive;
     }
 
-    public void setMaLoai(String maLoai) {
-        this.maLoai = maLoai;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     public Employee getEmployee() {
@@ -101,22 +70,16 @@ public class Account implements Serializable {
         this.employee = employee;
         if (employee != null) {
             this.employeeId = employee.getEmployeeId();
-            this.maLoai = employee.getMaLoai();
         }
-    }
-
-    public boolean isManager() {
-        return "LNV03".equals(maLoai);
     }
 
     @Override
     public String toString() {
         return "Account{" +
                 "username='" + username + '\'' +
-                ", role='" + role + '\'' +
                 ", employeeId='" + employeeId + '\'' +
-                ", maLoai='" + maLoai + '\'' +
-                ", active=" + active +
+                ", role='" + role + '\'' +
+                ", isActive=" + isActive +
                 '}';
     }
 }

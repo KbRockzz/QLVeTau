@@ -7,18 +7,18 @@ public class Customer implements Serializable {
     private String fullName;
     private String phoneNumber;
     private String email;
-    private String identityNumber;
+    private String idNumber;
     private String address;
 
     public Customer() {
     }
 
-    public Customer(String customerId, String fullName, String phoneNumber, String email, String identityNumber, String address) {
+    public Customer(String customerId, String fullName, String phoneNumber, String email, String idNumber, String address) {
         this.customerId = customerId;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.email = email;
-        this.identityNumber = identityNumber;
+        this.idNumber = idNumber;
         this.address = address;
     }
 
@@ -54,12 +54,12 @@ public class Customer implements Serializable {
         this.email = email;
     }
 
-    public String getIdentityNumber() {
-        return identityNumber;
+    public String getIdNumber() {
+        return idNumber;
     }
 
-    public void setIdentityNumber(String identityNumber) {
-        this.identityNumber = identityNumber;
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
     }
 
     public String getAddress() {
@@ -77,7 +77,7 @@ public class Customer implements Serializable {
                 ", fullName='" + fullName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", email='" + email + '\'' +
-                ", identityNumber='" + identityNumber + '\'' +
+                ", idNumber='" + idNumber + '\'' +
                 ", address='" + address + '\'' +
                 '}';
     }

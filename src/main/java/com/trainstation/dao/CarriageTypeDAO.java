@@ -28,7 +28,7 @@ public class CarriageTypeDAO implements GenericDAO<CarriageType> {
             pstmt.setString(1, carriageType.getCarriageTypeId());
             pstmt.setString(2, carriageType.getTypeName());
             pstmt.setInt(3, carriageType.getSeatCount());
-            pstmt.setDouble(4, carriageType.getPriceMultiplier());
+            pstmt.setBigDecimal(4, carriageType.getPriceMultiplier());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -41,7 +41,7 @@ public class CarriageTypeDAO implements GenericDAO<CarriageType> {
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, carriageType.getTypeName());
             pstmt.setInt(2, carriageType.getSeatCount());
-            pstmt.setDouble(3, carriageType.getPriceMultiplier());
+            pstmt.setBigDecimal(3, carriageType.getPriceMultiplier());
             pstmt.setString(4, carriageType.getCarriageTypeId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -95,7 +95,7 @@ public class CarriageTypeDAO implements GenericDAO<CarriageType> {
         carriageType.setCarriageTypeId(rs.getString("CarriageTypeID"));
         carriageType.setTypeName(rs.getString("TypeName"));
         carriageType.setSeatCount(rs.getInt("SeatCount"));
-        carriageType.setPriceMultiplier(rs.getDouble("PriceMultiplier"));
+        carriageType.setPriceMultiplier(rs.getBigDecimal("PriceMultiplier"));
         return carriageType;
     }
 }

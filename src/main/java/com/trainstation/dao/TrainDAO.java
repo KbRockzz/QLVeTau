@@ -33,7 +33,7 @@ public class TrainDAO implements GenericDAO<Train> {
             pstmt.setTimestamp(6, train.getArrivalTime() != null ? Timestamp.valueOf(train.getArrivalTime()) : null);
             pstmt.setInt(7, train.getTotalSeats());
             pstmt.setInt(8, train.getAvailableSeats());
-            pstmt.setDouble(9, train.getTicketPrice());
+            pstmt.setBigDecimal(9, train.getTicketPrice());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -51,7 +51,7 @@ public class TrainDAO implements GenericDAO<Train> {
             pstmt.setTimestamp(5, train.getArrivalTime() != null ? Timestamp.valueOf(train.getArrivalTime()) : null);
             pstmt.setInt(6, train.getTotalSeats());
             pstmt.setInt(7, train.getAvailableSeats());
-            pstmt.setDouble(8, train.getTicketPrice());
+            pstmt.setBigDecimal(8, train.getTicketPrice());
             pstmt.setString(9, train.getTrainId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -132,7 +132,7 @@ public class TrainDAO implements GenericDAO<Train> {
         }
         train.setTotalSeats(rs.getInt("TotalSeats"));
         train.setAvailableSeats(rs.getInt("AvailableSeats"));
-        train.setTicketPrice(rs.getDouble("TicketPrice"));
+        train.setTicketPrice(rs.getBigDecimal("TicketPrice"));
         return train;
     }
 }
