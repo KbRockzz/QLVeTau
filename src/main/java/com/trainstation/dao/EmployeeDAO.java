@@ -23,7 +23,7 @@ public class EmployeeDAO implements GenericDAO<Employee> {
 
     @Override
     public void add(Employee employee) {
-        String sql = "INSERT INTO Employee (EmployeeID, FullName, PhoneNumber, Email, Position, Salary, HireDate, MaLoai) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO NhanVien (EmployeeID, FullName, PhoneNumber, Email, Position, Salary, HireDate, MaLoai) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, employee.getEmployeeId());
             pstmt.setString(2, employee.getFullName());
@@ -41,7 +41,7 @@ public class EmployeeDAO implements GenericDAO<Employee> {
 
     @Override
     public void update(Employee employee) {
-        String sql = "UPDATE Employee SET FullName = ?, PhoneNumber = ?, Email = ?, Position = ?, Salary = ?, HireDate = ?, MaLoai = ? WHERE EmployeeID = ?";
+        String sql = "UPDATE NhanVien SET FullName = ?, PhoneNumber = ?, Email = ?, Position = ?, Salary = ?, HireDate = ?, MaLoai = ? WHERE EmployeeID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, employee.getFullName());
             pstmt.setString(2, employee.getPhoneNumber());
@@ -59,7 +59,7 @@ public class EmployeeDAO implements GenericDAO<Employee> {
 
     @Override
     public void delete(String id) {
-        String sql = "DELETE FROM Employee WHERE EmployeeID = ?";
+        String sql = "DELETE FROM NhanVien WHERE EmployeeID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             pstmt.executeUpdate();
@@ -70,7 +70,7 @@ public class EmployeeDAO implements GenericDAO<Employee> {
 
     @Override
     public Employee findById(String id) {
-        String sql = "SELECT * FROM Employee WHERE EmployeeID = ?";
+        String sql = "SELECT * FROM NhanVien WHERE EmployeeID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             ResultSet rs = pstmt.executeQuery();
@@ -86,7 +86,7 @@ public class EmployeeDAO implements GenericDAO<Employee> {
     @Override
     public List<Employee> findAll() {
         List<Employee> employees = new ArrayList<>();
-        String sql = "SELECT * FROM Employee";
+        String sql = "SELECT * FROM NhanVien";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -100,7 +100,7 @@ public class EmployeeDAO implements GenericDAO<Employee> {
 
     public List<Employee> findByPosition(String position) {
         List<Employee> employees = new ArrayList<>();
-        String sql = "SELECT * FROM Employee WHERE Position = ?";
+        String sql = "SELECT * FROM NhanVien WHERE Position = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, position);
             ResultSet rs = pstmt.executeQuery();

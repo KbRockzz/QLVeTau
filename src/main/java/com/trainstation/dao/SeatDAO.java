@@ -24,7 +24,7 @@ public class SeatDAO implements GenericDAO<Seat> {
 
     @Override
     public void add(Seat seat) {
-        String sql = "INSERT INTO Seat (SeatID, CarriageID, SeatNumber, Status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Ghe (SeatID, CarriageID, SeatNumber, Status) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, seat.getSeatId());
             pstmt.setString(2, seat.getCarriageId());
@@ -38,7 +38,7 @@ public class SeatDAO implements GenericDAO<Seat> {
 
     @Override
     public void update(Seat seat) {
-        String sql = "UPDATE Seat SET CarriageID = ?, SeatNumber = ?, Status = ? WHERE SeatID = ?";
+        String sql = "UPDATE Ghe SET CarriageID = ?, SeatNumber = ?, Status = ? WHERE SeatID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, seat.getCarriageId());
             pstmt.setString(2, seat.getSeatNumber());
@@ -52,7 +52,7 @@ public class SeatDAO implements GenericDAO<Seat> {
 
     @Override
     public void delete(String id) {
-        String sql = "DELETE FROM Seat WHERE SeatID = ?";
+        String sql = "DELETE FROM Ghe WHERE SeatID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             pstmt.executeUpdate();
@@ -63,7 +63,7 @@ public class SeatDAO implements GenericDAO<Seat> {
 
     @Override
     public Seat findById(String id) {
-        String sql = "SELECT * FROM Seat WHERE SeatID = ?";
+        String sql = "SELECT * FROM Ghe WHERE SeatID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             ResultSet rs = pstmt.executeQuery();
@@ -79,7 +79,7 @@ public class SeatDAO implements GenericDAO<Seat> {
     @Override
     public List<Seat> findAll() {
         List<Seat> seats = new ArrayList<>();
-        String sql = "SELECT * FROM Seat";
+        String sql = "SELECT * FROM Ghe";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -93,7 +93,7 @@ public class SeatDAO implements GenericDAO<Seat> {
 
     public List<Seat> findByCarriageId(String carriageId) {
         List<Seat> seats = new ArrayList<>();
-        String sql = "SELECT * FROM Seat WHERE CarriageID = ? ORDER BY SeatNumber";
+        String sql = "SELECT * FROM Ghe WHERE CarriageID = ? ORDER BY SeatNumber";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, carriageId);
             ResultSet rs = pstmt.executeQuery();
@@ -108,7 +108,7 @@ public class SeatDAO implements GenericDAO<Seat> {
 
     public List<Seat> findAvailableByCarriageId(String carriageId) {
         List<Seat> seats = new ArrayList<>();
-        String sql = "SELECT * FROM Seat WHERE CarriageID = ? AND Status = 'AVAILABLE' ORDER BY SeatNumber";
+        String sql = "SELECT * FROM Ghe WHERE CarriageID = ? AND Status = 'AVAILABLE' ORDER BY SeatNumber";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, carriageId);
             ResultSet rs = pstmt.executeQuery();

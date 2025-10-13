@@ -23,7 +23,7 @@ public class CarriageDAO implements GenericDAO<Carriage> {
 
     @Override
     public void add(Carriage carriage) {
-        String sql = "INSERT INTO Carriage (CarriageID, TrainID, CarriageTypeID, CarriageName, CarriageNumber) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ToaTau (CarriageID, TrainID, CarriageTypeID, CarriageName, CarriageNumber) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, carriage.getCarriageId());
             pstmt.setString(2, carriage.getTrainId());
@@ -38,7 +38,7 @@ public class CarriageDAO implements GenericDAO<Carriage> {
 
     @Override
     public void update(Carriage carriage) {
-        String sql = "UPDATE Carriage SET TrainID = ?, CarriageTypeID = ?, CarriageName = ?, CarriageNumber = ? WHERE CarriageID = ?";
+        String sql = "UPDATE ToaTau SET TrainID = ?, CarriageTypeID = ?, CarriageName = ?, CarriageNumber = ? WHERE CarriageID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, carriage.getTrainId());
             pstmt.setString(2, carriage.getCarriageTypeId());
@@ -53,7 +53,7 @@ public class CarriageDAO implements GenericDAO<Carriage> {
 
     @Override
     public void delete(String id) {
-        String sql = "DELETE FROM Carriage WHERE CarriageID = ?";
+        String sql = "DELETE FROM ToaTau WHERE CarriageID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             pstmt.executeUpdate();
@@ -64,7 +64,7 @@ public class CarriageDAO implements GenericDAO<Carriage> {
 
     @Override
     public Carriage findById(String id) {
-        String sql = "SELECT * FROM Carriage WHERE CarriageID = ?";
+        String sql = "SELECT * FROM ToaTau WHERE CarriageID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             ResultSet rs = pstmt.executeQuery();
@@ -80,7 +80,7 @@ public class CarriageDAO implements GenericDAO<Carriage> {
     @Override
     public List<Carriage> findAll() {
         List<Carriage> carriages = new ArrayList<>();
-        String sql = "SELECT * FROM Carriage";
+        String sql = "SELECT * FROM ToaTau";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -94,7 +94,7 @@ public class CarriageDAO implements GenericDAO<Carriage> {
 
     public List<Carriage> findByTrainId(String trainId) {
         List<Carriage> carriages = new ArrayList<>();
-        String sql = "SELECT * FROM Carriage WHERE TrainID = ? ORDER BY CarriageNumber";
+        String sql = "SELECT * FROM ToaTau WHERE TrainID = ? ORDER BY CarriageNumber";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, trainId);
             ResultSet rs = pstmt.executeQuery();

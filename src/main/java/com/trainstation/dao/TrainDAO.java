@@ -23,7 +23,7 @@ public class TrainDAO implements GenericDAO<Train> {
 
     @Override
     public void add(Train train) {
-        String sql = "INSERT INTO Train (TrainID, TrainName, DepartureStation, ArrivalStation, DepartureTime, ArrivalTime, TotalSeats, AvailableSeats, TicketPrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Tau (TrainID, TrainName, DepartureStation, ArrivalStation, DepartureTime, ArrivalTime, TotalSeats, AvailableSeats, TicketPrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, train.getTrainId());
             pstmt.setString(2, train.getTrainName());
@@ -42,7 +42,7 @@ public class TrainDAO implements GenericDAO<Train> {
 
     @Override
     public void update(Train train) {
-        String sql = "UPDATE Train SET TrainName = ?, DepartureStation = ?, ArrivalStation = ?, DepartureTime = ?, ArrivalTime = ?, TotalSeats = ?, AvailableSeats = ?, TicketPrice = ? WHERE TrainID = ?";
+        String sql = "UPDATE Tau SET TrainName = ?, DepartureStation = ?, ArrivalStation = ?, DepartureTime = ?, ArrivalTime = ?, TotalSeats = ?, AvailableSeats = ?, TicketPrice = ? WHERE TrainID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, train.getTrainName());
             pstmt.setString(2, train.getDepartureStation());
@@ -61,7 +61,7 @@ public class TrainDAO implements GenericDAO<Train> {
 
     @Override
     public void delete(String id) {
-        String sql = "DELETE FROM Train WHERE TrainID = ?";
+        String sql = "DELETE FROM Tau WHERE TrainID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             pstmt.executeUpdate();
@@ -72,7 +72,7 @@ public class TrainDAO implements GenericDAO<Train> {
 
     @Override
     public Train findById(String id) {
-        String sql = "SELECT * FROM Train WHERE TrainID = ?";
+        String sql = "SELECT * FROM Tau WHERE TrainID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             ResultSet rs = pstmt.executeQuery();
@@ -88,7 +88,7 @@ public class TrainDAO implements GenericDAO<Train> {
     @Override
     public List<Train> findAll() {
         List<Train> trains = new ArrayList<>();
-        String sql = "SELECT * FROM Train";
+        String sql = "SELECT * FROM Tau";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -102,7 +102,7 @@ public class TrainDAO implements GenericDAO<Train> {
 
     public List<Train> findByRoute(String departureStation, String arrivalStation) {
         List<Train> trains = new ArrayList<>();
-        String sql = "SELECT * FROM Train WHERE DepartureStation = ? AND ArrivalStation = ?";
+        String sql = "SELECT * FROM Tau WHERE DepartureStation = ? AND ArrivalStation = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, departureStation);
             pstmt.setString(2, arrivalStation);

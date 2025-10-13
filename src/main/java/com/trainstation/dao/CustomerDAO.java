@@ -23,7 +23,7 @@ public class CustomerDAO implements GenericDAO<Customer> {
 
     @Override
     public void add(Customer customer) {
-        String sql = "INSERT INTO Customer (CustomerID, FullName, PhoneNumber, Email, IDNumber, Address) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO KhachHang (CustomerID, FullName, PhoneNumber, Email, IDNumber, Address) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, customer.getCustomerId());
             pstmt.setString(2, customer.getFullName());
@@ -39,7 +39,7 @@ public class CustomerDAO implements GenericDAO<Customer> {
 
     @Override
     public void update(Customer customer) {
-        String sql = "UPDATE Customer SET FullName = ?, PhoneNumber = ?, Email = ?, IDNumber = ?, Address = ? WHERE CustomerID = ?";
+        String sql = "UPDATE KhachHang SET FullName = ?, PhoneNumber = ?, Email = ?, IDNumber = ?, Address = ? WHERE CustomerID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, customer.getFullName());
             pstmt.setString(2, customer.getPhoneNumber());
@@ -55,7 +55,7 @@ public class CustomerDAO implements GenericDAO<Customer> {
 
     @Override
     public void delete(String id) {
-        String sql = "DELETE FROM Customer WHERE CustomerID = ?";
+        String sql = "DELETE FROM KhachHang WHERE CustomerID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             pstmt.executeUpdate();
@@ -66,7 +66,7 @@ public class CustomerDAO implements GenericDAO<Customer> {
 
     @Override
     public Customer findById(String id) {
-        String sql = "SELECT * FROM Customer WHERE CustomerID = ?";
+        String sql = "SELECT * FROM KhachHang WHERE CustomerID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);
             ResultSet rs = pstmt.executeQuery();
@@ -82,7 +82,7 @@ public class CustomerDAO implements GenericDAO<Customer> {
     @Override
     public List<Customer> findAll() {
         List<Customer> customers = new ArrayList<>();
-        String sql = "SELECT * FROM Customer";
+        String sql = "SELECT * FROM KhachHang";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -95,7 +95,7 @@ public class CustomerDAO implements GenericDAO<Customer> {
     }
 
     public Customer findByPhoneNumber(String phoneNumber) {
-        String sql = "SELECT * FROM Customer WHERE PhoneNumber = ?";
+        String sql = "SELECT * FROM KhachHang WHERE PhoneNumber = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, phoneNumber);
             ResultSet rs = pstmt.executeQuery();
