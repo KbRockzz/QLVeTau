@@ -166,14 +166,14 @@ public class ChangeTicketPanel extends JPanel {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         
         for (Ticket ticket : tickets) {
-            if (ticket.getStatus() == Ticket.TicketStatus.BOOKED) {
+            if ("BOOKED".equals(ticket.getStatus())) {
                 tableModel.addRow(new Object[]{
                     ticket.getTicketId(),
                     ticket.getTrainId(),
                     ticket.getCustomerId(),
                     ticket.getBookingDate().format(formatter),
                     ticket.getSeatNumber(),
-                    String.format("%.0f", ticket.getPrice()),
+                    ticket.getPrice().toString(),
                     "Đã đặt"
                 });
             }
@@ -234,7 +234,7 @@ public class ChangeTicketPanel extends JPanel {
             JButton seatBtn = new JButton(seat.getSeatNumber());
             seatBtn.setPreferredSize(new Dimension(70, 70));
             
-            if (seat.getStatus() == Seat.SeatStatus.AVAILABLE) {
+            if ("AVAILABLE".equals(seat.getStatus())) {
                 seatBtn.setBackground(new Color(46, 204, 113));
                 seatBtn.setEnabled(true);
                 seatBtn.addActionListener(e -> selectSeat(seat));
@@ -288,7 +288,7 @@ public class ChangeTicketPanel extends JPanel {
                 if (oldTicket != null && oldTicket.getSeatId() != null) {
                     Seat oldSeat = seatDAO.findById(oldTicket.getSeatId());
                     if (oldSeat != null) {
-                        oldSeat.setStatus(Seat.SeatStatus.AVAILABLE);
+                        oldSeat.setStatus("AVAILABLE");
                         seatDAO.update(oldSeat);
                     }
                 }
@@ -305,7 +305,7 @@ public class ChangeTicketPanel extends JPanel {
                 // Update new seat status
                 Seat newSeat = seatDAO.findById(selectedNewSeatId);
                 if (newSeat != null) {
-                    newSeat.setStatus(Seat.SeatStatus.BOOKED);
+                    newSeat.setStatus("BOOKED");
                     seatDAO.update(newSeat);
                 }
                 

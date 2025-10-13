@@ -73,6 +73,13 @@ public class Account implements Serializable {
         }
     }
 
+    public boolean isManager() {
+        if (employee != null) {
+            return "LNV03".equals(employee.getMaLoai());
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "Account{" +

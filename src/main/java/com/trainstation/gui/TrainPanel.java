@@ -5,6 +5,7 @@ import com.trainstation.model.Train;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -148,7 +149,7 @@ public class TrainPanel extends JPanel {
                 train.getArrivalTime().format(formatter),
                 train.getTotalSeats(),
                 train.getAvailableSeats(),
-                String.format("%.0f", train.getTicketPrice())
+                train.getTicketPrice().toString()
             });
         }
     }
@@ -178,6 +179,7 @@ public class TrainPanel extends JPanel {
 
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            int totalSeats = Integer.parseInt(seatsField.getText().trim());
             Train train = new Train(
                 id,
                 nameField.getText().trim(),
@@ -185,8 +187,9 @@ public class TrainPanel extends JPanel {
                 arrivalField.getText().trim(),
                 LocalDateTime.parse(departureDateField.getText().trim(), formatter),
                 LocalDateTime.parse(arrivalDateField.getText().trim(), formatter),
-                Integer.parseInt(seatsField.getText().trim()),
-                Double.parseDouble(priceField.getText().trim())
+                totalSeats,
+                totalSeats,
+                new BigDecimal(priceField.getText().trim())
             );
 
             trainDAO.add(train);
@@ -216,7 +219,7 @@ public class TrainPanel extends JPanel {
             train.setDepartureTime(LocalDateTime.parse(departureDateField.getText().trim(), formatter));
             train.setArrivalTime(LocalDateTime.parse(arrivalDateField.getText().trim(), formatter));
             train.setTotalSeats(Integer.parseInt(seatsField.getText().trim()));
-            train.setTicketPrice(Double.parseDouble(priceField.getText().trim()));
+            train.setTicketPrice(new BigDecimal(priceField.getText().trim()));
 
             trainDAO.update(train);
             loadTrains();

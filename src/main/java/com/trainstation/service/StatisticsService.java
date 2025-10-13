@@ -2,7 +2,7 @@ package com.trainstation.service;
 
 import com.trainstation.dao.TicketDAO;
 import com.trainstation.model.Ticket;
-import com.trainstation.model.Ticket.TicketStatus;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,23 +22,24 @@ public class StatisticsService {
         return instance;
     }
 
-    public double getTotalRevenue() {
-        List<Ticket> tickets = ticketDAO.findByStatus(TicketStatus.BOOKED);
+    public BigDecimal getTotalRevenue() {
+        List<Ticket> tickets = ticketDAO.findByStatus("BOOKED");
         return tickets.stream()
-                .mapToDouble(Ticket::getPrice)
-                .sum();
+                .map(Ticket::getPrice)
+                .filter(price -> price != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public int getTotalTicketsSold() {
-        return ticketDAO.findByStatus(TicketStatus.BOOKED).size();
+        return ticketDAO.findByStatus("BOOKED").size();
     }
 
     public int getTotalTicketsRefunded() {
-        return ticketDAO.findByStatus(TicketStatus.REFUNDED).size();
+        return ticketDAO.findByStatus("REFUNDED").size();
     }
 
     public int getTotalTicketsCancelled() {
-        return ticketDAO.findByStatus(TicketStatus.CANCELLED).size();
+        return ticketDAO.findByStatus("CANCELLED").size();
     }
 
     public Map<String, Integer> getTicketsByTrain() {
@@ -46,7 +47,7 @@ public class StatisticsService {
         List<Ticket> allTickets = ticketDAO.findAll();
         
         for (Ticket ticket : allTickets) {
-            if (ticket.getStatus() == TicketStatus.BOOKED) {
+            if ("BOOKED".equals(ticket.getStatus())) {
                 String trainId = ticket.getTrainId();
                 trainTickets.put(trainId, trainTickets.getOrDefault(trainId, 0) + 1);
             }
