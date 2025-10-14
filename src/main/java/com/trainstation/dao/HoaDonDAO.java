@@ -129,4 +129,35 @@ public class HoaDonDAO implements GenericDAO<HoaDon> {
             return false;
         }
     }
+
+    /**
+     * Tìm hóa đơn theo mã khách hàng
+     */
+    public List<HoaDon> findByKhachHang(String maKH) {
+        List<HoaDon> list = new ArrayList<>();
+        String sql = "SELECT maHoaDon, maNV, maKH, ngayLap, phuongThucThanhToan, trangThai FROM HoaDon WHERE maKH = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setString(1, maKH);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    LocalDateTime ngayLap = null;
+                    Timestamp ts = rs.getTimestamp("ngayLap");
+                    if (ts != null) ngayLap = ts.toLocalDateTime();
+                    
+                    HoaDon hd = new HoaDon(
+                        rs.getString("maHoaDon"),
+                        rs.getString("maNV"),
+                        rs.getString("maKH"),
+                        ngayLap,
+                        rs.getString("phuongThucThanhToan"),
+                        rs.getString("trangThai")
+                    );
+                    list.add(hd);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

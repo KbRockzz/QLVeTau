@@ -1,13 +1,26 @@
 package com.trainstation.service;
 
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 import com.trainstation.dao.VeDAO;
 import com.trainstation.dao.GheDAO;
 import com.trainstation.dao.ChuyenTauDAO;
 import com.trainstation.model.Ve;
 import com.trainstation.model.Ghe;
 import com.trainstation.model.ChuyenTau;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -254,5 +267,125 @@ public class VeService {
             ve.setTrangThai("Đã đặt");
             return veDAO.update(ve);
         }
+    }
+
+    /**
+     * In vé ra file PDF (Boarding Pass style)
+     */
+    public String inVePDF(Ve ve) throws FileNotFoundException {
+        if (ve == null) {
+            throw new IllegalArgumentException("Vé không hợp lệ");
+        }
+
+        // Create tickets directory if not exists
+        File ticketsDir = new File("tickets");
+        if (!ticketsDir.exists()) {
+            ticketsDir.mkdirs();
+        }
+
+        String fileName = "tickets/Ve_" + ve.getMaVe() + ".pdf";
+        PdfWriter writer = new PdfWriter(fileName);
+        PdfDocument pdf = new PdfDocument(writer);
+        Document document = new Document(pdf);
+
+        try {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+            NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
+
+            // Title - Boarding Pass
+            Paragraph title = new Paragraph("BOARDING PASS")
+                    .setFontSize(20)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(title);
+
+            Paragraph subtitle = new Paragraph("VE TAU HOA")
+                    .setFontSize(16)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(subtitle);
+
+            document.add(new Paragraph("\n"));
+
+            // Ticket ID / Barcode placeholder
+            Paragraph ticketId = new Paragraph("Ma ve: " + ve.getMaVe())
+                    .setFontSize(14)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(ticketId);
+
+            document.add(new Paragraph("\n"));
+
+            // Main information table
+            Table mainTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}));
+            mainTable.setWidth(UnitValue.createPercentValue(100));
+
+            // Station information
+            mainTable.addCell(new Cell().add(new Paragraph("GA DI").setBold()).setBorder(null));
+            mainTable.addCell(new Cell().add(new Paragraph("GA DEN").setBold()).setBorder(null));
+            mainTable.addCell(new Cell().add(new Paragraph(ve.getGaDi() != null ? ve.getGaDi() : "N/A")
+                    .setFontSize(16).setBold()).setBorder(null));
+            mainTable.addCell(new Cell().add(new Paragraph(ve.getGaDen() != null ? ve.getGaDen() : "N/A")
+                    .setFontSize(16).setBold()).setBorder(null));
+
+            document.add(mainTable);
+            document.add(new Paragraph("\n"));
+
+            // Details table
+            Table detailsTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}));
+            detailsTable.setWidth(UnitValue.createPercentValue(100));
+
+            // Train number
+            detailsTable.addCell(new Cell().add(new Paragraph("TAU:").setBold()).setBorder(null));
+            detailsTable.addCell(new Cell().add(new Paragraph(ve.getMaChuyen() != null ? ve.getMaChuyen() : "N/A"))
+                    .setBorder(null));
+
+            // Date
+            detailsTable.addCell(new Cell().add(new Paragraph("NGAY:").setBold()).setBorder(null));
+            detailsTable.addCell(new Cell().add(new Paragraph(
+                    ve.getGioDi() != null ? ve.getGioDi().format(dateFormatter) : "N/A"))
+                    .setBorder(null));
+
+            // Time
+            detailsTable.addCell(new Cell().add(new Paragraph("GIO DI:").setBold()).setBorder(null));
+            detailsTable.addCell(new Cell().add(new Paragraph(
+                    ve.getGioDi() != null ? ve.getGioDi().format(timeFormatter) : "N/A"))
+                    .setBorder(null));
+
+            // Carriage
+            detailsTable.addCell(new Cell().add(new Paragraph("TOA:").setBold()).setBorder(null));
+            detailsTable.addCell(new Cell().add(new Paragraph(ve.getSoToa() != null ? ve.getSoToa() : "N/A"))
+                    .setBorder(null));
+
+            // Seat
+            detailsTable.addCell(new Cell().add(new Paragraph("GHE:").setBold()).setBorder(null));
+            detailsTable.addCell(new Cell().add(new Paragraph(ve.getMaSoGhe() != null ? ve.getMaSoGhe() : "N/A"))
+                    .setBorder(null));
+
+            // Seat type
+            detailsTable.addCell(new Cell().add(new Paragraph("LOAI CHO:").setBold()).setBorder(null));
+            detailsTable.addCell(new Cell().add(new Paragraph(ve.getLoaiCho() != null ? ve.getLoaiCho() : "N/A"))
+                    .setBorder(null));
+
+            // Ticket type
+            detailsTable.addCell(new Cell().add(new Paragraph("LOAI VE:").setBold()).setBorder(null));
+            detailsTable.addCell(new Cell().add(new Paragraph(ve.getLoaiVe() != null ? ve.getLoaiVe() : "N/A"))
+                    .setBorder(null));
+
+            document.add(detailsTable);
+            document.add(new Paragraph("\n"));
+
+            // Footer
+            Paragraph footer = new Paragraph("Cam on quy khach da su dung dich vu!")
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setItalic();
+            document.add(footer);
+
+        } finally {
+            document.close();
+        }
+
+        return fileName;
     }
 }
