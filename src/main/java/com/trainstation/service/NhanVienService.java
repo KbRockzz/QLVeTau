@@ -56,4 +56,26 @@ public class NhanVienService {
     public boolean xoaNhanVien(String maNV) {
         return nhanVienDAO.delete(maNV);
     }
+
+    /**
+     * Tạo mã nhân viên tự động
+     */
+    public String taoMaNhanVien() {
+        List<NhanVien> danhSach = nhanVienDAO.getAll();
+        int maxId = 0;
+        for (NhanVien nv : danhSach) {
+            String maNV = nv.getMaNV();
+            if (maNV != null && maNV.startsWith("NV")) {
+                try {
+                    int id = Integer.parseInt(maNV.substring(2));
+                    if (id > maxId) {
+                        maxId = id;
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore invalid IDs
+                }
+            }
+        }
+        return String.format("NV%03d", maxId + 1);
+    }
 }

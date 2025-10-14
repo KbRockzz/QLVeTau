@@ -169,4 +169,47 @@ public class VeDAO implements GenericDAO<Ve> {
             return false;
         }
     }
+
+    /**
+     * Lấy danh sách vé theo mã khách hàng
+     */
+    public List<Ve> getByKhachHang(String maKH) {
+        List<Ve> list = new ArrayList<>();
+        String sql = "SELECT v.maVe, v.maChuyen, v.maLoaiVe, v.maSoGhe, v.ngayIn, v.trangThai, v.gaDi, v.gaDen, v.gioDi, v.soToa, v.loaiCho, v.loaiVe, v.maBangGia " +
+                     "FROM Ve v " +
+                     "INNER JOIN HoaDon hd ON v.maVe = hd.maVe " +
+                     "WHERE hd.maKhachHang = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setString(1, maKH);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    LocalDateTime ngayIn = null, gioDi = null;
+                    Timestamp ts1 = rs.getTimestamp("ngayIn");
+                    if (ts1 != null) ngayIn = ts1.toLocalDateTime();
+                    Timestamp ts2 = rs.getTimestamp("gioDi");
+                    if (ts2 != null) gioDi = ts2.toLocalDateTime();
+                    
+                    Ve v = new Ve(
+                        rs.getString("maVe"),
+                        rs.getString("maChuyen"),
+                        rs.getString("maLoaiVe"),
+                        rs.getString("maSoGhe"),
+                        ngayIn,
+                        rs.getString("trangThai"),
+                        rs.getString("gaDi"),
+                        rs.getString("gaDen"),
+                        gioDi,
+                        rs.getString("soToa"),
+                        rs.getString("loaiCho"),
+                        rs.getString("loaiVe"),
+                        rs.getString("maBangGia")
+                    );
+                    list.add(v);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

@@ -62,12 +62,20 @@ public class TaiKhoan implements Serializable {
 
     /**
      * Kiểm tra xem tài khoản có phải quản lý không
-     * Chỉ nhân viên loại LNV03 mới là quản lý
+     * Nhân viên loại LNV02 (Quản lý) và LNV03 (Admin) có quyền quản lý
      */
     public boolean isManager() {
-        // Cần kiểm tra loại nhân viên từ NhanVien
-        // Tạm thời trả về false, cần được triển khai đầy đủ
-        return false;
+        if (maNV == null) {
+            return false;
+        }
+        try {
+            com.trainstation.dao.NhanVienDAO nhanVienDAO = com.trainstation.dao.NhanVienDAO.getInstance();
+            String loaiNV = nhanVienDAO.getLoaiNV(maNV);
+            return "LNV02".equals(loaiNV) || "LNV03".equals(loaiNV);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override

@@ -197,4 +197,62 @@ public class VeService {
     public boolean xoaVe(String maVe) {
         return veDAO.delete(maVe);
     }
+
+    /**
+     * Lấy danh sách vé theo khách hàng
+     */
+    public List<Ve> layVeTheoKhachHang(String maKH) {
+        return veDAO.getByKhachHang(maKH);
+    }
+
+    /**
+     * Gửi yêu cầu hoàn vé (chuyển trạng thái thành 'Chờ duyệt')
+     */
+    public boolean guiYeuCauHoanVe(String maVe) {
+        Ve ve = veDAO.findById(maVe);
+        if (ve == null) {
+            throw new IllegalArgumentException("Không tìm thấy vé");
+        }
+
+        if (!"Đã thanh toán".equals(ve.getTrangThai()) && !"Đã đặt".equals(ve.getTrangThai())) {
+            throw new IllegalStateException("Chỉ có thể hoàn vé đã đặt hoặc đã thanh toán");
+        }
+
+        ve.setTrangThai("Chờ duyệt");
+        return veDAO.update(ve);
+    }
+
+    /**
+     * Duyệt yêu cầu hoàn vé
+     */
+    public boolean duyetHoanVe(String maVe, boolean chấpNhan) {
+        Ve ve = veDAO.findById(maVe);
+        if (ve == null) {
+            throw new IllegalArgumentException("Không tìm thấy vé");
+        }
+
+        if (!"Chờ duyệt".equals(ve.getTrangThai())) {
+            throw new IllegalStateException("Vé không trong trạng thái chờ duyệt");
+        }
+
+        if (chấpNhan) {
+            // Chấp nhận hoàn vé
+            ve.setTrangThai("Đã hoàn");
+            boolean result = veDAO.update(ve);
+
+            // Cập nhật trạng thái ghế
+            if (result && ve.getMaSoGhe() != null) {
+                Ghe ghe = gheDAO.findById(ve.getMaSoGhe());
+                if (ghe != null) {
+                    ghe.setTrangThai("Trống");
+                    gheDAO.update(ghe);
+                }
+            }
+            return result;
+        } else {
+            // Từ chối hoàn vé
+            ve.setTrangThai("Đã đặt");
+            return veDAO.update(ve);
+        }
+    }
 }

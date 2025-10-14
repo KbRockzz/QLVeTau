@@ -131,4 +131,22 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
             return false;
         }
     }
+
+    /**
+     * Lấy mã loại nhân viên từ mã nhân viên
+     */
+    public String getLoaiNV(String maNV) {
+        String sql = "SELECT maLoaiNV FROM NhanVien WHERE maNV = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setString(1, maNV);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("maLoaiNV");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

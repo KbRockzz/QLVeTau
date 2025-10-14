@@ -104,4 +104,29 @@ public class GheDAO implements GenericDAO<Ghe> {
             return false;
         }
     }
+
+    /**
+     * Lấy danh sách ghế theo mã toa
+     */
+    public List<Ghe> getByToa(String maToa) {
+        List<Ghe> list = new ArrayList<>();
+        String sql = "SELECT maGhe, maToa, loaiGhe, trangThai FROM Ghe WHERE maToa = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setString(1, maToa);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Ghe g = new Ghe(
+                        rs.getString("maGhe"),
+                        rs.getString("maToa"),
+                        rs.getString("loaiGhe"),
+                        rs.getString("trangThai")
+                    );
+                    list.add(g);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
