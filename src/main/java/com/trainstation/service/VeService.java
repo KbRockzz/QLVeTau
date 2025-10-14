@@ -2,6 +2,10 @@ package com.trainstation.service;
 
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
@@ -11,11 +15,14 @@ import com.itextpdf.layout.properties.UnitValue;
 import com.trainstation.dao.VeDAO;
 import com.trainstation.dao.GheDAO;
 import com.trainstation.dao.ChuyenTauDAO;
+import com.trainstation.dao.BangGiaDAO;
 import com.trainstation.model.Ve;
 import com.trainstation.model.Ghe;
 import com.trainstation.model.ChuyenTau;
+import com.trainstation.model.BangGia;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,10 +39,13 @@ public class VeService {
     private final GheDAO gheDAO;
     private final ChuyenTauDAO chuyenTauDAO;
 
+    private final BangGiaDAO bangGiaDAO;
+
     private VeService() {
         this.veDAO = VeDAO.getInstance();
         this.gheDAO = GheDAO.getInstance();
         this.chuyenTauDAO = ChuyenTauDAO.getInstance();
+        this.bangGiaDAO = BangGiaDAO.getInstance();
     }
 
     public static synchronized VeService getInstance() {
@@ -270,9 +280,9 @@ public class VeService {
     }
 
     /**
-     * In vé ra file PDF (Boarding Pass style)
+     * In vé ra file PDF (Boarding Pass style) với font tiếng Việt
      */
-    public String inVePDF(Ve ve) throws FileNotFoundException {
+    public String inVePDF(Ve ve) throws FileNotFoundException, IOException {
         if (ve == null) {
             throw new IllegalArgumentException("Vé không hợp lệ");
         }
@@ -286,101 +296,146 @@ public class VeService {
         String fileName = "tickets/Ve_" + ve.getMaVe() + ".pdf";
         PdfWriter writer = new PdfWriter(fileName);
         PdfDocument pdf = new PdfDocument(writer);
-        Document document = new Document(pdf);
+        
+        // Set page size to A5
+        Document document = new Document(pdf, PageSize.A5);
 
         try {
+            // Load Arial Unicode MS font for Vietnamese support
+            PdfFont font = PdfFontFactory.createFont("fonts/Tinos-Regular.ttf", PdfEncodings.IDENTITY_H,
+                    PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
+            document.setFont(font);
+            
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
             NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
 
-            // Title - Boarding Pass
-            Paragraph title = new Paragraph("BOARDING PASS")
-                    .setFontSize(20)
+            // Header - Company name
+            Paragraph header = new Paragraph("CÔNG TY CỔ PHẦN VẬN TẢI ĐƯỜNG SẮT SÀI GÒN")
+                    .setFont(font)
+                    .setFontSize(14)
                     .setBold()
                     .setTextAlignment(TextAlignment.CENTER);
-            document.add(title);
+            document.add(header);
 
-            Paragraph subtitle = new Paragraph("VE TAU HOA")
-                    .setFontSize(16)
-                    .setBold()
+            // Subtitle - Boarding Pass
+            Paragraph subHeader = new Paragraph("THẺ LÊN TÀU HỎA / BOARDING PASS")
+                    .setFont(font)
+                    .setFontSize(12)
+                    .setItalic()
                     .setTextAlignment(TextAlignment.CENTER);
-            document.add(subtitle);
+            document.add(subHeader);
 
             document.add(new Paragraph("\n"));
 
-            // Ticket ID / Barcode placeholder
-            Paragraph ticketId = new Paragraph("Ma ve: " + ve.getMaVe())
-                    .setFontSize(14)
+            // QR Code section - Ticket ID
+            Paragraph qrTitle = new Paragraph("MÃ QUÉT")
+                    .setFont(font)
+                    .setFontSize(13)
                     .setBold()
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(qrTitle);
+
+            Paragraph ticketId = new Paragraph("Mã vé: " + ve.getMaVe())
+                    .setFont(font)
                     .setTextAlignment(TextAlignment.CENTER);
             document.add(ticketId);
 
             document.add(new Paragraph("\n"));
 
-            // Main information table
-            Table mainTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}));
-            mainTable.setWidth(UnitValue.createPercentValue(100));
-
-            // Station information
-            mainTable.addCell(new Cell().add(new Paragraph("GA DI").setBold()).setBorder(null));
-            mainTable.addCell(new Cell().add(new Paragraph("GA DEN").setBold()).setBorder(null));
-            mainTable.addCell(new Cell().add(new Paragraph(ve.getGaDi() != null ? ve.getGaDi() : "N/A")
-                    .setFontSize(16).setBold()).setBorder(null));
-            mainTable.addCell(new Cell().add(new Paragraph(ve.getGaDen() != null ? ve.getGaDen() : "N/A")
-                    .setFontSize(16).setBold()).setBorder(null));
-
-            document.add(mainTable);
+            // Station table (Ga đi / Ga đến) - 2 columns with borders
+            Table gaTable = new Table(UnitValue.createPercentArray(new float[]{1, 1})).useAllAvailableWidth();
+            
+            // Header row
+            gaTable.addCell(new Cell()
+                    .add(new Paragraph("Ga đi").setFont(font).setBold())
+                    .setTextAlignment(TextAlignment.CENTER));
+            gaTable.addCell(new Cell()
+                    .add(new Paragraph("Ga đến").setFont(font).setBold())
+                    .setTextAlignment(TextAlignment.CENTER));
+            
+            // Station names row
+            gaTable.addCell(new Cell()
+                    .add(new Paragraph(ve.getGaDi() != null ? ve.getGaDi() : "N/A").setFont(font))
+                    .setTextAlignment(TextAlignment.CENTER));
+            gaTable.addCell(new Cell()
+                    .add(new Paragraph(ve.getGaDen() != null ? ve.getGaDen() : "N/A").setFont(font))
+                    .setTextAlignment(TextAlignment.CENTER));
+            
+            document.add(gaTable);
             document.add(new Paragraph("\n"));
 
-            // Details table
-            Table detailsTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}));
-            detailsTable.setWidth(UnitValue.createPercentValue(100));
+            // Details table - 2 columns (label and value)
+            Table infoTable = new Table(UnitValue.createPercentArray(new float[]{2, 3})).useAllAvailableWidth();
 
             // Train number
-            detailsTable.addCell(new Cell().add(new Paragraph("TAU:").setBold()).setBorder(null));
-            detailsTable.addCell(new Cell().add(new Paragraph(ve.getMaChuyen() != null ? ve.getMaChuyen() : "N/A"))
-                    .setBorder(null));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph("Tàu/Train:").setFont(font).setBold()));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph(ve.getMaChuyen() != null ? ve.getMaChuyen() : "N/A").setFont(font)));
 
             // Date
-            detailsTable.addCell(new Cell().add(new Paragraph("NGAY:").setBold()).setBorder(null));
-            detailsTable.addCell(new Cell().add(new Paragraph(
-                    ve.getGioDi() != null ? ve.getGioDi().format(dateFormatter) : "N/A"))
-                    .setBorder(null));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph("Ngày đi/Date:").setFont(font).setBold()));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph(ve.getGioDi() != null ? ve.getGioDi().format(dateFormatter) : "N/A").setFont(font)));
 
             // Time
-            detailsTable.addCell(new Cell().add(new Paragraph("GIO DI:").setBold()).setBorder(null));
-            detailsTable.addCell(new Cell().add(new Paragraph(
-                    ve.getGioDi() != null ? ve.getGioDi().format(timeFormatter) : "N/A"))
-                    .setBorder(null));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph("Giờ đi/Time:").setFont(font).setBold()));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph(ve.getGioDi() != null ? ve.getGioDi().format(timeFormatter) : "N/A").setFont(font)));
 
             // Carriage
-            detailsTable.addCell(new Cell().add(new Paragraph("TOA:").setBold()).setBorder(null));
-            detailsTable.addCell(new Cell().add(new Paragraph(ve.getSoToa() != null ? ve.getSoToa() : "N/A"))
-                    .setBorder(null));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph("Toa/Coach:").setFont(font).setBold()));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph(ve.getSoToa() != null ? ve.getSoToa() : "N/A").setFont(font)));
 
             // Seat
-            detailsTable.addCell(new Cell().add(new Paragraph("GHE:").setBold()).setBorder(null));
-            detailsTable.addCell(new Cell().add(new Paragraph(ve.getMaSoGhe() != null ? ve.getMaSoGhe() : "N/A"))
-                    .setBorder(null));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph("Chỗ/Seat:").setFont(font).setBold()));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph(ve.getMaSoGhe() != null ? ve.getMaSoGhe() : "N/A").setFont(font)));
 
             // Seat type
-            detailsTable.addCell(new Cell().add(new Paragraph("LOAI CHO:").setBold()).setBorder(null));
-            detailsTable.addCell(new Cell().add(new Paragraph(ve.getLoaiCho() != null ? ve.getLoaiCho() : "N/A"))
-                    .setBorder(null));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph("Loại chỗ/Class:").setFont(font).setBold()));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph(ve.getLoaiCho() != null ? ve.getLoaiCho() : "N/A").setFont(font)));
 
             // Ticket type
-            detailsTable.addCell(new Cell().add(new Paragraph("LOAI VE:").setBold()).setBorder(null));
-            detailsTable.addCell(new Cell().add(new Paragraph(ve.getLoaiVe() != null ? ve.getLoaiVe() : "N/A"))
-                    .setBorder(null));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph("Loại vé/Type:").setFont(font).setBold()));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph(ve.getLoaiVe() != null ? ve.getLoaiVe() : "N/A").setFont(font)));
 
-            document.add(detailsTable);
-            document.add(new Paragraph("\n"));
+            // Price - try to fetch from BangGia
+            String priceStr = "N/A";
+            try {
+                if (ve.getMaBangGia() != null && bangGiaDAO != null) {
+                    BangGia bangGia = bangGiaDAO.findById(ve.getMaBangGia());
+                    if (bangGia != null) {
+                        priceStr = String.format("%,.0f VNĐ", bangGia.getGiaCoBan());
+                    }
+                }
+            } catch (Exception e) {
+                // If database is not available, use N/A
+                priceStr = "N/A";
+            }
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph("Giá/Price:").setFont(font).setBold()));
+            infoTable.addCell(new Cell()
+                    .add(new Paragraph(priceStr).setFont(font)));
 
-            // Footer
-            Paragraph footer = new Paragraph("Cam on quy khach da su dung dich vu!")
-                    .setTextAlignment(TextAlignment.CENTER)
-                    .setItalic();
-            document.add(footer);
+            document.add(infoTable);
+
+            // Footer - Thank you message
+            document.add(new Paragraph("\nCảm ơn quý khách đã sử dụng dịch vụ!")
+                    .setFont(font)
+                    .setItalic()
+                    .setFontSize(10)
+                    .setTextAlignment(TextAlignment.CENTER));
 
         } finally {
             document.close();
