@@ -108,4 +108,30 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
             return false;
         }
     }
+
+    /**
+     * Lấy danh sách toa tàu theo mã tàu
+     */
+    public List<ToaTau> getByTau(String maTau) {
+        List<ToaTau> list = new ArrayList<>();
+        String sql = "SELECT maToa, tenToa, loaiToa, maTau, sucChua FROM ToaTau WHERE maTau = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setString(1, maTau);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    ToaTau t = new ToaTau(
+                        rs.getString("maToa"),
+                        rs.getString("tenToa"),
+                        rs.getString("loaiToa"),
+                        rs.getString("maTau"),
+                        rs.getInt("sucChua")
+                    );
+                    list.add(t);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
