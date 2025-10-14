@@ -2,6 +2,9 @@ package com.trainstation.service;
 
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
@@ -98,7 +101,7 @@ public class HoaDonService {
     /**
      * Xuất hóa đơn ra file PDF
      */
-    public String xuatHoaDonPDF(String maHoaDon) throws FileNotFoundException {
+    public String xuatHoaDonPDF(String maHoaDon) throws Exception {
         HoaDon hoaDon = hoaDonDAO.findById(maHoaDon);
         if (hoaDon == null) {
             throw new IllegalArgumentException("Không tìm thấy hóa đơn");
@@ -121,74 +124,118 @@ public class HoaDonService {
         Document document = new Document(pdf);
 
         try {
-            // Tiêu đề
-            Paragraph title = new Paragraph("CONG TY CO PHAN VAN TAI DUONG SAT SAI GON")
-                    .setFontSize(16)
+            // Load Tinos font for Vietnamese support
+            PdfFont font = PdfFontFactory.createFont("fonts/Tinos-Regular.ttf", PdfEncodings.IDENTITY_H, 
+                    PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
+            document.setFont(font);
+
+            // Tiêu đề công ty
+            Paragraph companyTitle = new Paragraph("CÔNG TY CỔ PHẦN VẬN TẢI ĐƯỜNG SẮT SÀI GÒN")
+                    .setFont(font)
+                    .setFontSize(14)
                     .setBold()
                     .setTextAlignment(TextAlignment.CENTER);
-            document.add(title);
+            document.add(companyTitle);
 
-            document.add(new Paragraph("\n"));
+            // Tiêu đề hóa đơn
+            Paragraph invoiceTitle = new Paragraph("HÓA ĐƠN BÁN VÉ TÀU HỎA")
+                    .setFont(font)
+                    .setFontSize(14)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(invoiceTitle);
+
+            document.add(new Paragraph("\n").setFont(font));
 
             // Thông tin hóa đơn
-            document.add(new Paragraph("Ma hoa don: " + hoaDon.getMaHoaDon()));
-            document.add(new Paragraph("Khach hang: " + 
-                    (khachHang != null ? khachHang.getTenKhachHang() : "N/A")));
+            document.add(new Paragraph("Mã hóa đơn: " + hoaDon.getMaHoaDon())
+                    .setFont(font)
+                    .setFontSize(11));
+            document.add(new Paragraph("Khách hàng: " + 
+                    (khachHang != null ? khachHang.getTenKhachHang() : "N/A"))
+                    .setFont(font)
+                    .setFontSize(11));
             
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-            document.add(new Paragraph("Ngay lap: " + 
-                    (hoaDon.getNgayLap() != null ? hoaDon.getNgayLap().format(formatter) : "N/A")));
-            document.add(new Paragraph("Phuong thuc thanh toan: " + 
-                    (hoaDon.getPhuongThucThanhToan() != null ? hoaDon.getPhuongThucThanhToan() : "N/A")));
+            document.add(new Paragraph("Ngày lập: " + 
+                    (hoaDon.getNgayLap() != null ? hoaDon.getNgayLap().format(formatter) : "N/A"))
+                    .setFont(font)
+                    .setFontSize(11));
+            document.add(new Paragraph("Phương thức thanh toán: " + 
+                    (hoaDon.getPhuongThucThanhToan() != null ? hoaDon.getPhuongThucThanhToan() : "N/A"))
+                    .setFont(font)
+                    .setFontSize(11));
 
-            document.add(new Paragraph("\n"));
+            document.add(new Paragraph("\n").setFont(font));
 
             // Bảng vé
             Table table = new Table(UnitValue.createPercentArray(new float[]{1, 2, 2, 2, 2, 2}));
             table.setWidth(UnitValue.createPercentValue(100));
 
-            // Header
-            table.addHeaderCell(new Cell().add(new Paragraph("STT").setBold()));
-            table.addHeaderCell(new Cell().add(new Paragraph("Ma ve").setBold()));
-            table.addHeaderCell(new Cell().add(new Paragraph("Ga di").setBold()));
-            table.addHeaderCell(new Cell().add(new Paragraph("Ga den").setBold()));
-            table.addHeaderCell(new Cell().add(new Paragraph("Ngay di").setBold()));
-            table.addHeaderCell(new Cell().add(new Paragraph("Gia ve").setBold()));
+            // Header - in đậm và căn giữa
+            table.addHeaderCell(new Cell().add(new Paragraph("STT").setFont(font).setBold())
+                    .setTextAlignment(TextAlignment.CENTER));
+            table.addHeaderCell(new Cell().add(new Paragraph("Mã vé").setFont(font).setBold())
+                    .setTextAlignment(TextAlignment.CENTER));
+            table.addHeaderCell(new Cell().add(new Paragraph("Ga đi").setFont(font).setBold()));
+            table.addHeaderCell(new Cell().add(new Paragraph("Ga đến").setFont(font).setBold()));
+            table.addHeaderCell(new Cell().add(new Paragraph("Ngày đi").setFont(font).setBold()));
+            table.addHeaderCell(new Cell().add(new Paragraph("Giá vé").setFont(font).setBold()));
 
             // Data rows
             int stt = 1;
             float tongTien = 0;
             NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             
             for (ChiTietHoaDon ct : chiTietList) {
                 Ve ve = veDAO.findById(ct.getMaVe());
-                table.addCell(String.valueOf(stt++));
-                table.addCell(ct.getMaVe());
-                table.addCell(ve != null ? ve.getGaDi() : "N/A");
-                table.addCell(ve != null ? ve.getGaDen() : "N/A");
-                table.addCell(ve != null && ve.getGioDi() != null ? ve.getGioDi().format(formatter) : "N/A");
-                table.addCell(currencyFormat.format(ct.getGiaDaKM()) + " VND");
+                
+                // STT - căn giữa
+                table.addCell(new Cell().add(new Paragraph(String.valueOf(stt++)).setFont(font))
+                        .setTextAlignment(TextAlignment.CENTER));
+                
+                // Mã vé - căn giữa
+                table.addCell(new Cell().add(new Paragraph(ct.getMaVe()).setFont(font))
+                        .setTextAlignment(TextAlignment.CENTER));
+                
+                // Ga đi
+                table.addCell(new Cell().add(new Paragraph(ve != null ? ve.getGaDi() : "N/A").setFont(font)));
+                
+                // Ga đến
+                table.addCell(new Cell().add(new Paragraph(ve != null ? ve.getGaDen() : "N/A").setFont(font)));
+                
+                // Ngày đi
+                table.addCell(new Cell().add(new Paragraph(
+                        ve != null && ve.getGioDi() != null ? ve.getGioDi().format(dateFormatter) : "N/A")
+                        .setFont(font)));
+                
+                // Giá vé - format với dấu phẩy
+                table.addCell(new Cell().add(new Paragraph(currencyFormat.format(ct.getGiaDaKM()) + " VNĐ")
+                        .setFont(font)));
+                
                 tongTien += ct.getGiaDaKM();
             }
 
             document.add(table);
 
-            document.add(new Paragraph("\n"));
+            document.add(new Paragraph("\n").setFont(font));
 
-            // Tổng tiền
-            Paragraph totalParagraph = new Paragraph("Tong tien: " + currencyFormat.format(tongTien) + " VND")
-                    .setFontSize(14)
+            // Tổng tiền - căn phải
+            Paragraph totalParagraph = new Paragraph("Tổng tiền: " + currencyFormat.format(tongTien) + " VNĐ")
+                    .setFont(font)
+                    .setFontSize(11)
                     .setBold()
                     .setTextAlignment(TextAlignment.RIGHT);
             document.add(totalParagraph);
 
-            document.add(new Paragraph("\n"));
-
-            // Footer
-            Paragraph footer = new Paragraph("Trang thai: Hoan tat - Cam on quy khach da su dung dich vu.")
-                    .setTextAlignment(TextAlignment.CENTER)
-                    .setItalic();
-            document.add(footer);
+            // Trạng thái - căn phải
+            String trangThai = hoaDon.getTrangThai() != null ? hoaDon.getTrangThai() : "Hoàn tất";
+            Paragraph statusParagraph = new Paragraph("Trạng thái: " + trangThai + " - Cảm ơn quý khách đã sử dụng dịch vụ!")
+                    .setFont(font)
+                    .setFontSize(11)
+                    .setTextAlignment(TextAlignment.RIGHT);
+            document.add(statusParagraph);
 
         } finally {
             document.close();
