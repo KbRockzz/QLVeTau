@@ -1,0 +1,103 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           ĐẶT VÉ TÀU                                         ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  Khách hàng: [Nguyễn Văn A (0123456789)  ▼] [+ Thêm khách hàng mới]       ║
+║  Loại vé: [Thường  ▼]                                                       ║
+╠══════════════════════╦══════════════════════════════════════════════════════╣
+║ Chọn chuyến tàu:     ║                                                      ║
+║ [SE1 - Hà Nội → TPHCM ▼]                                                    ║
+║                      ║            SƠ ĐỒ GHẾ (Bố trí toa tàu)              ║
+║ ┌──────────────────┐ ║                                                      ║
+║ │ DANH SÁCH TOA    │ ║   [A1]  [A2]  ║║  [B1]  [B2]                        ║
+║ ├────┬──────┬──────┤ ║                                                      ║
+║ │ T1 │ VIP  │  20  │ ║   [A3]  [A4]  ║║  [B3]  [B4]                        ║
+║ │ T2 │Thường│  40  │ ║                                                      ║
+║ │ T3 │Giường│  24  │ ║   [A5]  [A6]  ║║  [B5]  [B6]                        ║
+║ └────┴──────┴──────┘ ║                                                      ║
+║                      ║   [A7]  [A8]  ║║  [B7]  [B8]                        ║
+║                      ║                                                      ║
+║                      ║   [A9]  [A10] ║║  [B9]  [B10]                       ║
+║                      ║                                                      ║
+╠══════════════════════╩══════════════════════════════════════════════════════╣
+║  Legend:  ■ Trống (Green)      ■ Đã đặt (Red)                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+SEAT BUTTON DETAILS:
+┌─────────────────┐
+│      A1         │  ← Green background (#228B22)
+│                 │  ← White text, Bold 12pt Arial
+│  [Available]    │  ← Black border 2px
+└─────────────────┘
+Tooltip: "Ghế A1 - Trống"
+
+┌─────────────────┐
+│      B5         │  ← Red background
+│                 │  ← White text, Bold 12pt Arial  
+│   [Booked]      │  ← Black border 2px, Disabled
+└─────────────────┘
+Tooltip: "Ghế B5 - Đã đặt"
+
+
+AISLE REPRESENTATION:
+┌────┐
+│ ║║ │  ← Gray background (#C8C8C8)
+│    │  ← 30px width
+│    │  ← Represents train corridor
+└────┘
+
+
+ADD CUSTOMER DIALOG:
+╔════════════════════════════════════════════╗
+║       Thêm khách hàng mới                 ║
+╠════════════════════════════════════════════╣
+║  Mã khách hàng:   [____________]          ║
+║  Họ tên:          [____________]  *       ║
+║  Số điện thoại:   [____________]  *       ║
+║  CCCD:            [____________]          ║
+║  Địa chỉ:         [____________]          ║
+║                                            ║
+║        [Thêm]        [Hủy]                ║
+╚════════════════════════════════════════════╝
+
+
+BOOKING CONFIRMATION DIALOG:
+╔════════════════════════════════════════════╗
+║          Xác nhận đặt vé                  ║
+╠════════════════════════════════════════════╣
+║  Khách hàng: Nguyễn Văn A                 ║
+║  Chuyến tàu: Hà Nội → TP HCM              ║
+║  Toa: T1                                   ║
+║  Ghế: A1                                   ║
+║  Loại vé: Thường                          ║
+║                                            ║
+║  Bạn có chắc chắn muốn đặt vé này?        ║
+║                                            ║
+║        [Yes]        [No]                  ║
+╚════════════════════════════════════════════╝
+
+
+BOOKING SUCCESS MESSAGE:
+╔════════════════════════════════════════════╗
+║            Thành công                     ║
+╠════════════════════════════════════════════╣
+║  Đặt vé thành công!                       ║
+║                                            ║
+║  Mã vé: VE1234567890123                   ║
+║  Khách hàng: Nguyễn Văn A                 ║
+║  Loại vé: Thường                          ║
+║  Ghế: A1                                   ║
+║                                            ║
+║               [OK]                         ║
+╚════════════════════════════════════════════╝
+
+
+KEY IMPROVEMENTS:
+1. ✅ Realistic 2-2 seat layout with aisle
+2. ✅ Customer selection from existing database
+3. ✅ Quick add new customer functionality  
+4. ✅ Ticket type selection
+5. ✅ Enhanced visual feedback (colors, borders, tooltips)
+6. ✅ Confirmation dialog with complete booking info
+7. ✅ Better success messages
+8. ✅ Validation before booking
