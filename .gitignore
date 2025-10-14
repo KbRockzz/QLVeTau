@@ -36,3 +36,7 @@ Thumbs.db
 *.zip
 *.tar.gz
 *.rar
+
+# Generated PDF files
+invoices/
+tickets/

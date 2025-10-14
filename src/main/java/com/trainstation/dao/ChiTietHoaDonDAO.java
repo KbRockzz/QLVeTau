@@ -120,4 +120,31 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
             return false;
         }
     }
+
+    /**
+     * Lấy danh sách chi tiết hóa đơn theo mã hóa đơn
+     */
+    public List<ChiTietHoaDon> findByHoaDon(String maHoaDon) {
+        List<ChiTietHoaDon> list = new ArrayList<>();
+        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon WHERE maHoaDon = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setString(1, maHoaDon);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    ChiTietHoaDon cthd = new ChiTietHoaDon(
+                        rs.getString("maHoaDon"),
+                        rs.getString("maVe"),
+                        rs.getString("maLoaiVe"),
+                        rs.getFloat("giaGoc"),
+                        rs.getFloat("giaDaKM"),
+                        rs.getString("moTa")
+                    );
+                    list.add(cthd);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

@@ -474,13 +474,61 @@ public class PnlDatVe extends JPanel {
             gheDuocChon.setTrangThai("Đã đặt");
             gheDAO.update(gheDuocChon);
             
+            // Auto-create or find open invoice for customer
+            HoaDonDAO hoaDonDAO = HoaDonDAO.getInstance();
+            ChiTietHoaDonDAO chiTietHoaDonDAO = ChiTietHoaDonDAO.getInstance();
+            BangGiaDAO bangGiaDAO = BangGiaDAO.getInstance();
+            
+            // Find open invoice for customer
+            HoaDon hoaDonMo = null;
+            List<HoaDon> danhSachHoaDon = hoaDonDAO.findByKhachHang(khachHang.getMaKhachHang());
+            for (HoaDon hd : danhSachHoaDon) {
+                if ("Chờ xác nhận".equals(hd.getTrangThai())) {
+                    hoaDonMo = hd;
+                    break;
+                }
+            }
+            
+            // If no open invoice, create new one
+            if (hoaDonMo == null) {
+                String maHoaDon = "HD" + System.currentTimeMillis();
+                hoaDonMo = new HoaDon();
+                hoaDonMo.setMaHoaDon(maHoaDon);
+                hoaDonMo.setMaNV(taiKhoanHienTai != null ? taiKhoanHienTai.getMaNV() : "NV001");
+                hoaDonMo.setMaKH(khachHang.getMaKhachHang());
+                hoaDonMo.setNgayLap(null); // Will be set when confirmed
+                hoaDonMo.setPhuongThucThanhToan(null); // Will be set when confirmed
+                hoaDonMo.setTrangThai("Chờ xác nhận");
+                hoaDonDAO.insert(hoaDonMo);
+            }
+            
+            // Get price from BangGia or use default
+            float giaVe = 100000; // Default price
+            List<BangGia> bangGiaList = bangGiaDAO.getAll();
+            if (!bangGiaList.isEmpty()) {
+                giaVe = bangGiaList.get(0).getGiaCoBan();
+            }
+            
+            // Add ticket to invoice details
+            ChiTietHoaDon chiTiet = new ChiTietHoaDon();
+            chiTiet.setMaHoaDon(hoaDonMo.getMaHoaDon());
+            chiTiet.setMaVe(maVe);
+            chiTiet.setMaLoaiVe(loaiVe.getMaLoaiVe());
+            chiTiet.setGiaGoc(giaVe);
+            chiTiet.setGiaDaKM(giaVe); // No discount for now
+            chiTiet.setMoTa("Ve " + chuyenDuocChon.getGaDi() + " - " + chuyenDuocChon.getGaDen());
+            chiTietHoaDonDAO.insert(chiTiet);
+            
             String message = String.format(
                 "Đặt vé thành công!\n\n" +
                 "Mã vé: %s\n" +
+                "Mã hóa đơn: %s\n" +
                 "Khách hàng: %s\n" +
                 "Loại vé: %s\n" +
-                "Ghế: %s",
+                "Ghế: %s\n\n" +
+                "Vé đã được thêm vào hóa đơn.",
                 maVe,
+                hoaDonMo.getMaHoaDon(),
                 khachHang.getTenKhachHang(),
                 loaiVe.getTenLoai(),
                 gheDuocChon.getMaGhe()

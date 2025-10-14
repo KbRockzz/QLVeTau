@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,6 +19,9 @@ public class PnlDoiVe extends JPanel {
     private ChuyenTauDAO chuyenTauDAO;
     private ToaTauDAO toaTauDAO;
     private GheDAO gheDAO;
+    private HoaDonDAO hoaDonDAO;
+    private ChiTietHoaDonDAO chiTietHoaDonDAO;
+    private VeDAO veDAO;
     
     private JTextField txtMaKH;
     private JButton btnTimKiem;
@@ -31,6 +35,9 @@ public class PnlDoiVe extends JPanel {
         this.chuyenTauDAO = ChuyenTauDAO.getInstance();
         this.toaTauDAO = ToaTauDAO.getInstance();
         this.gheDAO = GheDAO.getInstance();
+        this.hoaDonDAO = HoaDonDAO.getInstance();
+        this.chiTietHoaDonDAO = ChiTietHoaDonDAO.getInstance();
+        this.veDAO = VeDAO.getInstance();
         initComponents();
     }
 
@@ -87,21 +94,34 @@ public class PnlDoiVe extends JPanel {
         }
         
         modelBangVe.setRowCount(0);
-        List<Ve> danhSach = veService.layVeTheoKhachHang(maKH);
+        
+        // Lấy tất cả vé của khách hàng thông qua HoaDon → ChiTietHoaDon → Ve
+        List<HoaDon> danhSachHoaDon = hoaDonDAO.findByKhachHang(maKH);
+        List<Ve> danhSachVe = new ArrayList<>();
+        
+        for (HoaDon hoaDon : danhSachHoaDon) {
+            List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.findByHoaDon(hoaDon.getMaHoaDon());
+            for (ChiTietHoaDon chiTiet : chiTietList) {
+                Ve ve = veDAO.findById(chiTiet.getMaVe());
+                if (ve != null) {
+                    danhSachVe.add(ve);
+                }
+            }
+        }
+        
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         
-        for (Ve ve : danhSach) {
-            if ("Đã thanh toán".equals(ve.getTrangThai()) || "Đã đặt".equals(ve.getTrangThai())) {
-                modelBangVe.addRow(new Object[]{
-                    ve.getMaVe(),
-                    ve.getMaChuyen(),
-                    ve.getGaDi(),
-                    ve.getGaDen(),
-                    ve.getGioDi() != null ? ve.getGioDi().format(formatter) : "",
-                    ve.getMaSoGhe(),
-                    ve.getTrangThai()
-                });
-            }
+        for (Ve ve : danhSachVe) {
+            // Hiển thị tất cả vé, kể cả đã hoàn tất
+            modelBangVe.addRow(new Object[]{
+                ve.getMaVe(),
+                ve.getMaChuyen(),
+                ve.getGaDi(),
+                ve.getGaDen(),
+                ve.getGioDi() != null ? ve.getGioDi().format(formatter) : "",
+                ve.getMaSoGhe(),
+                ve.getTrangThai()
+            });
         }
     }
 
