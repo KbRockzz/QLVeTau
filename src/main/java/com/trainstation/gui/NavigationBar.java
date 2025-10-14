@@ -46,6 +46,10 @@ public class NavigationBar extends JPanel {
         JMenuItem changeTicketItem = new JMenuItem("Đổi vé");
         changeTicketItem.addActionListener(e -> navigateTo("changeticket"));
         ticketMenu.add(changeTicketItem);
+
+        JMenuItem invoicesManage = new JMenuItem("Hóa đơn");
+        invoicesManage.addActionListener(e -> navigateTo("ticketbooking"));
+        ticketMenu.add(invoicesManage);
         
         ticketMenuBtn.addActionListener(e -> 
             ticketMenu.show(ticketMenuBtn, 0, ticketMenuBtn.getHeight()));
