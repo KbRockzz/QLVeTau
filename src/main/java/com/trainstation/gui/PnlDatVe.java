@@ -20,8 +20,11 @@ public class PnlDatVe extends JPanel {
     private ToaTauDAO toaTauDAO;
     private GheDAO gheDAO;
     private KhachHangDAO khachHangDAO;
+    private LoaiVeDAO loaiVeDAO;
     
     private JComboBox<String> cmbChuyenTau;
+    private JComboBox<String> cboKhachHang;
+    private JComboBox<String> cboLoaiVe;
     private JTable bangToaTau;
     private DefaultTableModel modelBangToa;
     private JPanel pnlSoDoGhe;
@@ -36,6 +39,7 @@ public class PnlDatVe extends JPanel {
         this.toaTauDAO = ToaTauDAO.getInstance();
         this.gheDAO = GheDAO.getInstance();
         this.khachHangDAO = KhachHangDAO.getInstance();
+        this.loaiVeDAO = LoaiVeDAO.getInstance();
         initComponents();
     }
 
@@ -43,10 +47,36 @@ public class PnlDatVe extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
+        // Top panel with title and selection controls
+        JPanel pnlTop = new JPanel(new BorderLayout(5, 5));
+        
         // Title
         JLabel lblTieuDe = new JLabel("ĐẶT VÉ TÀU", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
-        add(lblTieuDe, BorderLayout.NORTH);
+        pnlTop.add(lblTieuDe, BorderLayout.NORTH);
+        
+        // Customer and ticket type selection panel
+        JPanel pnlChonKhachHangVaLoaiVe = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        
+        // Customer selection
+        pnlChonKhachHangVaLoaiVe.add(new JLabel("Khách hàng:"));
+        cboKhachHang = new JComboBox<>();
+        cboKhachHang.setPreferredSize(new Dimension(200, 25));
+        pnlChonKhachHangVaLoaiVe.add(cboKhachHang);
+        
+        JButton btnThemKhachHang = new JButton("+ Thêm khách hàng mới");
+        btnThemKhachHang.addActionListener(e -> hienThiFormThemKhachHang());
+        pnlChonKhachHangVaLoaiVe.add(btnThemKhachHang);
+        
+        // Ticket type selection
+        pnlChonKhachHangVaLoaiVe.add(Box.createHorizontalStrut(20));
+        pnlChonKhachHangVaLoaiVe.add(new JLabel("Loại vé:"));
+        cboLoaiVe = new JComboBox<>();
+        cboLoaiVe.setPreferredSize(new Dimension(150, 25));
+        pnlChonKhachHangVaLoaiVe.add(cboLoaiVe);
+        
+        pnlTop.add(pnlChonKhachHangVaLoaiVe, BorderLayout.SOUTH);
+        add(pnlTop, BorderLayout.NORTH);
 
         // Main content panel
         JPanel pnlNoiDung = new JPanel(new BorderLayout(10, 10));
@@ -84,10 +114,10 @@ public class PnlDatVe extends JPanel {
         
         pnlNoiDung.add(pnlTrai, BorderLayout.WEST);
         
-        // Right panel - Seat map
-        pnlSoDoGhe = new JPanel(new GridLayout(0, 5, 5, 5));
+        // Right panel - Seat map with train layout
+        pnlSoDoGhe = new JPanel();
         JScrollPane scrollGhe = new JScrollPane(pnlSoDoGhe);
-        scrollGhe.setBorder(BorderFactory.createTitledBorder("Sơ đồ ghế"));
+        scrollGhe.setBorder(BorderFactory.createTitledBorder("Sơ đồ ghế (Bố trí toa tàu)"));
         pnlNoiDung.add(scrollGhe, BorderLayout.CENTER);
         
         add(pnlNoiDung, BorderLayout.CENTER);
@@ -103,8 +133,10 @@ public class PnlDatVe extends JPanel {
         pnlChuThich.add(lblDaDat);
         add(pnlChuThich, BorderLayout.SOUTH);
         
-        // Load train data
+        // Load data
         taiDanhSachChuyenTau();
+        taiDanhSachKhachHang();
+        taiDanhSachLoaiVe();
     }
 
     private void taiDanhSachChuyenTau() {
@@ -117,6 +149,23 @@ public class PnlDatVe extends JPanel {
                 item += " (" + ct.getGioDi().format(formatter) + ")";
             }
             cmbChuyenTau.addItem(item);
+        }
+    }
+    
+    private void taiDanhSachKhachHang() {
+        cboKhachHang.removeAllItems();
+        List<KhachHang> danhSach = khachHangDAO.getAll();
+        for (KhachHang kh : danhSach) {
+            String item = kh.getTenKhachHang() + " (" + kh.getSoDienThoai() + ")";
+            cboKhachHang.addItem(item);
+        }
+    }
+    
+    private void taiDanhSachLoaiVe() {
+        cboLoaiVe.removeAllItems();
+        List<LoaiVe> danhSach = loaiVeDAO.getAll();
+        for (LoaiVe lv : danhSach) {
+            cboLoaiVe.addItem(lv.getTenLoai());
         }
     }
 
@@ -163,43 +212,160 @@ public class PnlDatVe extends JPanel {
         pnlSoDoGhe.removeAll();
         List<Ghe> danhSachGhe = gheDAO.getByToa(maToa);
         
-        for (Ghe ghe : danhSachGhe) {
-            JButton btnGhe = new JButton(ghe.getMaGhe());
-            btnGhe.setPreferredSize(new Dimension(80, 40));
+        if (danhSachGhe.isEmpty()) {
+            pnlSoDoGhe.setLayout(new FlowLayout());
+            pnlSoDoGhe.add(new JLabel("Không có ghế nào trong toa này"));
+        } else {
+            // Calculate number of rows (4 seats per row)
+            int soGhe = danhSachGhe.size();
+            int soHang = (int) Math.ceil(soGhe / 4.0);
             
-            // Set color based on status
-            if ("Trống".equals(ghe.getTrangThai())) {
-                btnGhe.setBackground(new Color(34, 139, 34)); // Green
-                btnGhe.setForeground(Color.WHITE);
-                btnGhe.setEnabled(true);
-                btnGhe.addActionListener(e -> chonGhe(ghe));
-            } else {
-                btnGhe.setBackground(Color.RED);
-                btnGhe.setForeground(Color.WHITE);
-                btnGhe.setEnabled(false);
+            // Setup layout: 5 columns (2 left seats + aisle + 2 right seats)
+            pnlSoDoGhe.setLayout(new GridLayout(soHang, 5, 5, 5));
+            
+            for (int i = 0; i < soHang; i++) {
+                // Left side - 2 seats
+                for (int j = 0; j < 2; j++) {
+                    int index = i * 4 + j;
+                    if (index < soGhe) {
+                        pnlSoDoGhe.add(taoNutGhe(danhSachGhe.get(index)));
+                    } else {
+                        pnlSoDoGhe.add(new JLabel(""));
+                    }
+                }
+                
+                // Aisle (middle corridor)
+                JPanel pnlLoiDi = new JPanel();
+                pnlLoiDi.setBackground(new Color(200, 200, 200));
+                pnlLoiDi.setPreferredSize(new Dimension(30, 40));
+                pnlSoDoGhe.add(pnlLoiDi);
+                
+                // Right side - 2 seats
+                for (int j = 2; j < 4; j++) {
+                    int index = i * 4 + j;
+                    if (index < soGhe) {
+                        pnlSoDoGhe.add(taoNutGhe(danhSachGhe.get(index)));
+                    } else {
+                        pnlSoDoGhe.add(new JLabel(""));
+                    }
+                }
             }
-            
-            pnlSoDoGhe.add(btnGhe);
         }
         
         pnlSoDoGhe.revalidate();
         pnlSoDoGhe.repaint();
     }
+    
+    private JButton taoNutGhe(Ghe ghe) {
+        JButton btnGhe = new JButton(ghe.getMaGhe());
+        btnGhe.setPreferredSize(new Dimension(80, 40));
+        btnGhe.setFont(new Font("Arial", Font.BOLD, 12));
+        btnGhe.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        
+        // Set color and tooltip based on status
+        if ("Trống".equals(ghe.getTrangThai())) {
+            btnGhe.setBackground(new Color(34, 139, 34)); // Green
+            btnGhe.setForeground(Color.WHITE);
+            btnGhe.setEnabled(true);
+            btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Trống");
+            btnGhe.addActionListener(e -> chonGhe(ghe));
+        } else {
+            btnGhe.setBackground(Color.RED);
+            btnGhe.setForeground(Color.WHITE);
+            btnGhe.setEnabled(false);
+            btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đã đặt");
+        }
+        
+        return btnGhe;
+    }
 
     private void chonGhe(Ghe ghe) {
         gheDuocChon = ghe;
         
-        // Show customer info dialog
-        hienThiFormKhachHang();
+        // Validate selections
+        if (cboKhachHang.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (cboLoaiVe.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn loại vé!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Show confirmation dialog
+        xacNhanDatVe();
     }
-
-    private void hienThiFormKhachHang() {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Thông tin khách hàng", true);
+    
+    private void xacNhanDatVe() {
+        String khachHangStr = (String) cboKhachHang.getSelectedItem();
+        String loaiVeStr = (String) cboLoaiVe.getSelectedItem();
+        
+        // Extract customer phone from selection (format: "Name (phone)")
+        String sdt = khachHangStr.substring(khachHangStr.lastIndexOf("(") + 1, khachHangStr.lastIndexOf(")"));
+        
+        // Find customer by phone
+        KhachHang khachHang = null;
+        List<KhachHang> danhSachKH = khachHangDAO.getAll();
+        for (KhachHang kh : danhSachKH) {
+            if (sdt.equals(kh.getSoDienThoai())) {
+                khachHang = kh;
+                break;
+            }
+        }
+        
+        if (khachHang == null) {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy thông tin khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Find ticket type
+        LoaiVe loaiVe = null;
+        List<LoaiVe> danhSachLoaiVe = loaiVeDAO.getAll();
+        for (LoaiVe lv : danhSachLoaiVe) {
+            if (loaiVeStr.equals(lv.getTenLoai())) {
+                loaiVe = lv;
+                break;
+            }
+        }
+        
+        if (loaiVe == null) {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy thông tin loại vé!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Confirm booking
+        String message = String.format(
+            "Xác nhận đặt vé:\n\n" +
+            "Khách hàng: %s\n" +
+            "Chuyến tàu: %s → %s\n" +
+            "Toa: %s\n" +
+            "Ghế: %s\n" +
+            "Loại vé: %s\n\n" +
+            "Bạn có chắc chắn muốn đặt vé này?",
+            khachHang.getTenKhachHang(),
+            chuyenDuocChon.getGaDi(), chuyenDuocChon.getGaDen(),
+            toaDuocChon.getTenToa(),
+            gheDuocChon.getMaGhe(),
+            loaiVe.getTenLoai()
+        );
+        
+        int choice = JOptionPane.showConfirmDialog(this, message, "Xác nhận đặt vé", 
+                                                   JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        
+        if (choice == JOptionPane.YES_OPTION) {
+            datVe(khachHang, loaiVe);
+        }
+    }
+    
+    private void hienThiFormThemKhachHang() {
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Thêm khách hàng mới", true);
         dialog.setLayout(new BorderLayout(10, 10));
-        dialog.setSize(400, 300);
+        dialog.setSize(450, 300);
         dialog.setLocationRelativeTo(this);
         
         JPanel pnlForm = new JPanel(new GridBagLayout());
+        pnlForm.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -207,7 +373,8 @@ public class PnlDatVe extends JPanel {
         JTextField txtMaKH = new JTextField(20);
         JTextField txtTenKH = new JTextField(20);
         JTextField txtSDT = new JTextField(20);
-        JTextField txtEmail = new JTextField(20);
+        JTextField txtCCCD = new JTextField(20);
+        JTextField txtDiaChi = new JTextField(20);
         
         gbc.gridx = 0; gbc.gridy = 0;
         pnlForm.add(new JLabel("Mã khách hàng:"), gbc);
@@ -215,7 +382,7 @@ public class PnlDatVe extends JPanel {
         pnlForm.add(txtMaKH, gbc);
         
         gbc.gridx = 0; gbc.gridy = 1;
-        pnlForm.add(new JLabel("Tên khách hàng:"), gbc);
+        pnlForm.add(new JLabel("Họ tên:"), gbc);
         gbc.gridx = 1;
         pnlForm.add(txtTenKH, gbc);
         
@@ -225,44 +392,60 @@ public class PnlDatVe extends JPanel {
         pnlForm.add(txtSDT, gbc);
         
         gbc.gridx = 0; gbc.gridy = 3;
-        pnlForm.add(new JLabel("Email:"), gbc);
+        pnlForm.add(new JLabel("CCCD:"), gbc);
         gbc.gridx = 1;
-        pnlForm.add(txtEmail, gbc);
+        pnlForm.add(txtCCCD, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 4;
+        pnlForm.add(new JLabel("Địa chỉ:"), gbc);
+        gbc.gridx = 1;
+        pnlForm.add(txtDiaChi, gbc);
         
         dialog.add(pnlForm, BorderLayout.CENTER);
         
         JPanel pnlButton = new JPanel(new FlowLayout());
-        JButton btnXacNhan = new JButton("Xác nhận đặt vé");
-        btnXacNhan.addActionListener(e -> {
-            if (txtMaKH.getText().trim().isEmpty() || txtTenKH.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Vui lòng nhập đầy đủ thông tin!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        JButton btnThem = new JButton("Thêm");
+        btnThem.addActionListener(e -> {
+            String maKH = txtMaKH.getText().trim();
+            String tenKH = txtTenKH.getText().trim();
+            String sdt = txtSDT.getText().trim();
+            
+            if (maKH.isEmpty() || tenKH.isEmpty() || sdt.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Vui lòng nhập đầy đủ thông tin bắt buộc (Mã KH, Họ tên, SĐT)!", 
+                                             "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
-            // Create or update customer
-            KhachHang kh = khachHangDAO.findById(txtMaKH.getText().trim());
-            if (kh == null) {
-                kh = new KhachHang(txtMaKH.getText().trim(), txtTenKH.getText().trim(), 
-                                   txtEmail.getText().trim(), txtSDT.getText().trim());
-                khachHangDAO.insert(kh);
+            // Check if customer already exists
+            if (khachHangDAO.findById(maKH) != null) {
+                JOptionPane.showMessageDialog(dialog, "Mã khách hàng đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
             }
             
-            // Create ticket
-            datVe(kh);
-            dialog.dispose();
+            // Create new customer (using email field to store CCCD and address)
+            String email = txtCCCD.getText().trim() + "|" + txtDiaChi.getText().trim();
+            KhachHang kh = new KhachHang(maKH, tenKH, email, sdt);
+            
+            if (khachHangDAO.insert(kh)) {
+                JOptionPane.showMessageDialog(dialog, "Thêm khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                taiDanhSachKhachHang();
+                dialog.dispose();
+            } else {
+                JOptionPane.showMessageDialog(dialog, "Lỗi khi thêm khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
         });
         
         JButton btnHuy = new JButton("Hủy");
         btnHuy.addActionListener(e -> dialog.dispose());
         
-        pnlButton.add(btnXacNhan);
+        pnlButton.add(btnThem);
         pnlButton.add(btnHuy);
         dialog.add(pnlButton, BorderLayout.SOUTH);
         
         dialog.setVisible(true);
     }
 
-    private void datVe(KhachHang khachHang) {
+    private void datVe(KhachHang khachHang, LoaiVe loaiVe) {
         try {
             // Generate ticket ID
             String maVe = "VE" + System.currentTimeMillis();
@@ -271,6 +454,7 @@ public class PnlDatVe extends JPanel {
             Ve ve = new Ve();
             ve.setMaVe(maVe);
             ve.setMaChuyen(chuyenDuocChon.getMaChuyen());
+            ve.setMaLoaiVe(loaiVe.getMaLoaiVe());
             ve.setMaSoGhe(gheDuocChon.getMaGhe());
             ve.setNgayIn(LocalDateTime.now());
             ve.setTrangThai("Đã đặt");
@@ -279,6 +463,7 @@ public class PnlDatVe extends JPanel {
             ve.setGioDi(chuyenDuocChon.getGioDi());
             ve.setSoToa(toaDuocChon.getMaToa());
             ve.setLoaiCho(toaDuocChon.getLoaiToa());
+            ve.setLoaiVe(loaiVe.getTenLoai());
             
             // Insert ticket
             veService.taoVe(ve);
@@ -287,7 +472,19 @@ public class PnlDatVe extends JPanel {
             gheDuocChon.setTrangThai("Đã đặt");
             gheDAO.update(gheDuocChon);
             
-            JOptionPane.showMessageDialog(this, "Đặt vé thành công!\nMã vé: " + maVe, "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            String message = String.format(
+                "Đặt vé thành công!\n\n" +
+                "Mã vé: %s\n" +
+                "Khách hàng: %s\n" +
+                "Loại vé: %s\n" +
+                "Ghế: %s",
+                maVe,
+                khachHang.getTenKhachHang(),
+                loaiVe.getTenLoai(),
+                gheDuocChon.getMaGhe()
+            );
+            
+            JOptionPane.showMessageDialog(this, message, "Thành công", JOptionPane.INFORMATION_MESSAGE);
             
             // Refresh seat map
             hienThiSoDoGhe(toaDuocChon.getMaToa());
