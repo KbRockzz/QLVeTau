@@ -302,7 +302,7 @@ public class VeService {
 
         try {
             // Load Arial Unicode MS font for Vietnamese support
-            PdfFont font = PdfFontFactory.createFont("fonts/arialuni.ttf", PdfEncodings.IDENTITY_H, 
+            PdfFont font = PdfFontFactory.createFont("fonts/Tinos-Regular.ttf", PdfEncodings.IDENTITY_H,
                     PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
             document.setFont(font);
             
