@@ -263,15 +263,17 @@ public class PnlDatVe extends JPanel {
         btnGhe.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         
         // Set color and tooltip based on status
-        if ("Trống".equals(ghe.getTrangThai())) {
+        if ("Rảnh".equals(ghe.getTrangThai())) {
             btnGhe.setBackground(new Color(34, 139, 34)); // Green
-            btnGhe.setForeground(Color.WHITE);
+//            btnGhe.setForeground(Color.WHITE);
+            btnGhe.setForeground(Color.BLACK);
             btnGhe.setEnabled(true);
             btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Trống");
             btnGhe.addActionListener(e -> chonGhe(ghe));
         } else {
             btnGhe.setBackground(Color.RED);
-            btnGhe.setForeground(Color.WHITE);
+//            btnGhe.setForeground(Color.WHITE);
+            btnGhe.setForeground(Color.BLACK);
             btnGhe.setEnabled(false);
             btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đã đặt");
         }

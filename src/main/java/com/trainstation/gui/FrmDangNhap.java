@@ -71,17 +71,7 @@ public class FrmDangNhap extends JFrame {
         btnDangNhap.addActionListener(e -> xuLyDangNhap());
         mainPanel.add(btnDangNhap, gbc);
 
-        // Info panel
-        JPanel pnlThongTin = new JPanel();
-        pnlThongTin.setBorder(BorderFactory.createTitledBorder("Thông tin đăng nhập mặc định"));
-        pnlThongTin.setLayout(new BoxLayout(pnlThongTin, BoxLayout.Y_AXIS));
-        JLabel lblThongTin1 = new JLabel("Tài khoản: admin");
-        JLabel lblThongTin2 = new JLabel("Mật khẩu: admin123");
-        pnlThongTin.add(lblThongTin1);
-        pnlThongTin.add(lblThongTin2);
-
         add(mainPanel, BorderLayout.CENTER);
-        add(pnlThongTin, BorderLayout.SOUTH);
 
         // Enter key to login
         txtMatKhau.addActionListener(e -> xuLyDangNhap());

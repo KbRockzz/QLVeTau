@@ -11,9 +11,9 @@ public class ConnectSql {
     // SQL Server connection parameters
     private static final String SERVER = "localhost";
     private static final String PORT = "1433";
-    private static final String DATABASE = "QLVeTau";
+    private static final String DATABASE = "QLTauHoa";
     private static final String USERNAME = "sa";
-    private static final String PASSWORD = "your_password";
+    private static final String PASSWORD = "sapassword";
     
     // Connection string for SQL Server
     private static final String CONNECTION_URL = 
