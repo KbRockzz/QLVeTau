@@ -98,7 +98,7 @@ public class NavigationBar extends JPanel {
         // Right panel with employee name
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightPanel.setOpaque(false);
-        JLabel userLabel = new JLabel("👤 " + getEmployeeName());
+        JLabel userLabel = new JLabel(getEmployeeName());
         userLabel.setForeground(Color.WHITE);
         userLabel.setFont(new Font("Arial", Font.BOLD, 14));
         rightPanel.add(userLabel);
