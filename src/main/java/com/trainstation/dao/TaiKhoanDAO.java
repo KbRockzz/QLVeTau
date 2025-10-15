@@ -29,11 +29,11 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 TaiKhoan t = new TaiKhoan(
-                        rs.getString("maTK"),
-                        rs.getString("maNV"),
-                        rs.getString("tenTaiKhoan"),
-                        rs.getString("matKhau"),
-                        rs.getString("trangThai")
+                    rs.getString("maTK"),
+                    rs.getString("maNV"),
+                    rs.getString("tenTaiKhoan"),
+                    rs.getString("matKhau"),
+                    rs.getString("trangThai")
                 );
                 list.add(t);
             }
@@ -51,11 +51,11 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return new TaiKhoan(
-                            rs.getString("maTK"),
-                            rs.getString("maNV"),
-                            rs.getString("tenTaiKhoan"),
-                            rs.getString("matKhau"),
-                            rs.getString("trangThai")
+                        rs.getString("maTK"),
+                        rs.getString("maNV"),
+                        rs.getString("tenTaiKhoan"),
+                        rs.getString("matKhau"),
+                        rs.getString("trangThai")
                     );
                 }
             }
@@ -99,10 +99,9 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "UPDATE TaiKhoan SET trangThai = ? WHERE maTK = ?";
+        String sql = "DELETE FROM TaiKhoan WHERE maTK = ?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setString(1, " "); // Set the status to "hidden"
-            pst.setString(2, id);
+            pst.setString(1, id);
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

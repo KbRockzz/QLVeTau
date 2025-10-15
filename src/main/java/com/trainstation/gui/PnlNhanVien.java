@@ -136,14 +136,16 @@ public class PnlNhanVien extends JPanel {
         modelBang.setRowCount(0);
         List<NhanVien> danhSach = nhanVienService.layTatCaNhanVien();
         for (NhanVien nv : danhSach) {
-            modelBang.addRow(new Object[]{
-                nv.getMaNV(),
-                nv.getTenNV(),
-                nv.getSoDienThoai(),
-                nv.getDiaChi(),
-                nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "",
-                nv.getMaLoaiNV()
-            });
+            if (nv.getTrangThai().equals("active")) {
+                modelBang.addRow(new Object[]{
+                        nv.getMaNV(),
+                        nv.getTenNV(),
+                        nv.getSoDienThoai(),
+                        nv.getDiaChi(),
+                        nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "",
+                        nv.getMaLoaiNV()
+                });
+            }
         }
     }
 
@@ -194,7 +196,7 @@ public class PnlNhanVien extends JPanel {
             if (!txtNgaySinh.getText().trim().isEmpty()) {
                 ngaySinh = LocalDate.parse(txtNgaySinh.getText().trim());
             }
-            
+
             NhanVien nv = new NhanVien(
                 maNV,
                 txtTenNV.getText().trim(),

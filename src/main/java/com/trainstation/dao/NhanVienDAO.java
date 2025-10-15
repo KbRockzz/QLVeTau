@@ -25,7 +25,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
     @Override
     public List<NhanVien> getAll() {
         List<NhanVien> list = new ArrayList<>();
-        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV FROM NhanVien";
+        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien";
         try (PreparedStatement pst = connection.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
@@ -40,10 +40,12 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
                     rs.getString("soDienThoai"),
                     rs.getString("diaChi"),
                     ngaySinh,
-                    rs.getString("maLoaiNV")
+                    rs.getString("maLoaiNV"),
+                    rs.getString("trangThai")
                 );
                 list.add(nv);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -52,7 +54,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public NhanVien findById(String id) {
-        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV FROM NhanVien WHERE maNV = ?";
+        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien WHERE maNV = ?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setString(1, id);
             try (ResultSet rs = pst.executeQuery()) {
@@ -101,7 +103,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public boolean update(NhanVien nv) {
-        String sql = "UPDATE NhanVien SET tenNV = ?, soDienThoai = ?, diaChi = ?, ngaySinh = ?, maLoaiNV = ? WHERE maNV = ?";
+        String sql = "UPDATE NhanVien SET tenNV = ?, soDienThoai = ?, diaChi = ?, ngaySinh = ?, maLoaiNV = ?, trangThai = ? WHERE maNV = ?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setString(1, nv.getTenNV());
             pst.setString(2, nv.getSoDienThoai());
@@ -113,6 +115,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
             }
             pst.setString(5, nv.getMaLoaiNV());
             pst.setString(6, nv.getMaNV());
+            pst.setString(6, nv.getTrangThai());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -122,9 +125,10 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM NhanVien WHERE maNV = ?";
+        String sql = "UPDATE NhanVien SET trangThai = ? WHERE maNV = ?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setString(1, id);
+            pst.setString(1, "hidden"); // Set the status to "hidden"
+            pst.setString(2, id);
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
