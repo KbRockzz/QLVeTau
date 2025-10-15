@@ -83,7 +83,7 @@ public class PnlKhachHang extends JPanel {
 
         pnlButton.add(btnThem);
         pnlButton.add(btnCapNhat);
-        pnlButton.add(btnXoa);
+//        pnlButton.add(btnXoa);
         pnlButton.add(btnLamMoi);
 
         JPanel pnlDuoi = new JPanel(new BorderLayout());

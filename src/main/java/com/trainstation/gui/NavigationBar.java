@@ -32,7 +32,7 @@ public class NavigationBar extends JPanel {
         leftPanel.add(homeBtn);
         
         // Ticket management dropdown
-        JButton ticketMenuBtn = createNavButton("Quản lý vé ▾", null);
+        JButton ticketMenuBtn = createNavButton("Vé", null);
         JPopupMenu ticketMenu = new JPopupMenu();
         
         JMenuItem bookTicketItem = new JMenuItem("Đặt vé");
@@ -66,7 +66,7 @@ public class NavigationBar extends JPanel {
         
         // Employee dropdown (if manager)
         if (currentAccount.isManager()) {
-            JButton employeeMenuBtn = createNavButton("Nhân viên ▾", null);
+            JButton employeeMenuBtn = createNavButton("Nhân viên", null);
             JPopupMenu employeeMenu = new JPopupMenu();
             
             JMenuItem manageEmployeeItem = new JMenuItem("Quản lý nhân viên");
