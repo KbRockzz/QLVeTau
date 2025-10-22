@@ -6,9 +6,12 @@ import com.trainstation.dao.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import com.toedter.calendar.JDateChooser;
 
 /**
  * Panel đặt vé
@@ -22,8 +25,21 @@ public class PnlDatVe extends JPanel {
     private KhachHangDAO khachHangDAO;
     private LoaiVeDAO loaiVeDAO;
     
-    private JComboBox<String> cmbChuyenTau;
-    private JComboBox<String> cboKhachHang;
+    // Customer search components
+    private JTextField txtSoDienThoai;
+    private JButton btnTimKhachHang;
+    private JLabel lblThongTinKhachHang;
+    private KhachHang khachHangDuocChon;
+    
+    // Train search components
+    private JComboBox<String> cmbGaDi;
+    private JComboBox<String> cmbGaDen;
+    private JDateChooser dateNgayDi;
+    private JSpinner spnGioDi;
+    private JButton btnTimChuyenTau;
+    private JTable tblChuyenTau;
+    private DefaultTableModel modelBangChuyenTau;
+    
     private JComboBox<String> cboLoaiVe;
     private JTable bangToaTau;
     private DefaultTableModel modelBangToa;
@@ -47,7 +63,7 @@ public class PnlDatVe extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Top panel with title and selection controls
+        // Top panel with title and customer search
         JPanel pnlTop = new JPanel(new BorderLayout(5, 5));
         
         // Title
@@ -55,46 +71,95 @@ public class PnlDatVe extends JPanel {
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
         pnlTop.add(lblTieuDe, BorderLayout.NORTH);
         
-        // Customer and ticket type selection panel
-        JPanel pnlChonKhachHangVaLoaiVe = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        // Customer search panel
+        JPanel pnlTimKhachHang = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        pnlTimKhachHang.setBorder(BorderFactory.createTitledBorder("Thông tin khách hàng"));
         
-        // Customer selection
-        pnlChonKhachHangVaLoaiVe.add(new JLabel("Khách hàng:"));
-        cboKhachHang = new JComboBox<>();
-        cboKhachHang.setPreferredSize(new Dimension(200, 25));
-        pnlChonKhachHangVaLoaiVe.add(cboKhachHang);
+        pnlTimKhachHang.add(new JLabel("Số điện thoại:"));
+        txtSoDienThoai = new JTextField(15);
+        pnlTimKhachHang.add(txtSoDienThoai);
         
-        JButton btnThemKhachHang = new JButton("+ Thêm khách hàng mới");
-        btnThemKhachHang.addActionListener(e -> hienThiFormThemKhachHang());
-        pnlChonKhachHangVaLoaiVe.add(btnThemKhachHang);
+        btnTimKhachHang = new JButton("Tìm khách hàng");
+        btnTimKhachHang.addActionListener(e -> timKhachHang());
+        pnlTimKhachHang.add(btnTimKhachHang);
+        
+        lblThongTinKhachHang = new JLabel("(Chưa chọn khách hàng)");
+        lblThongTinKhachHang.setForeground(Color.BLUE);
+        pnlTimKhachHang.add(lblThongTinKhachHang);
         
         // Ticket type selection
-        pnlChonKhachHangVaLoaiVe.add(Box.createHorizontalStrut(20));
-        pnlChonKhachHangVaLoaiVe.add(new JLabel("Loại vé:"));
+        pnlTimKhachHang.add(Box.createHorizontalStrut(20));
+        pnlTimKhachHang.add(new JLabel("Loại vé:"));
         cboLoaiVe = new JComboBox<>();
         cboLoaiVe.setPreferredSize(new Dimension(150, 25));
-        pnlChonKhachHangVaLoaiVe.add(cboLoaiVe);
+        pnlTimKhachHang.add(cboLoaiVe);
         
-        pnlTop.add(pnlChonKhachHangVaLoaiVe, BorderLayout.SOUTH);
+        pnlTop.add(pnlTimKhachHang, BorderLayout.CENTER);
+        
+        // Train search panel
+        JPanel pnlTimChuyenTau = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        pnlTimChuyenTau.setBorder(BorderFactory.createTitledBorder("Tìm chuyến tàu"));
+        
+        pnlTimChuyenTau.add(new JLabel("Ga đi:"));
+        cmbGaDi = new JComboBox<>();
+        cmbGaDi.setPreferredSize(new Dimension(120, 25));
+        pnlTimChuyenTau.add(cmbGaDi);
+        
+        pnlTimChuyenTau.add(new JLabel("Ga đến:"));
+        cmbGaDen = new JComboBox<>();
+        cmbGaDen.setPreferredSize(new Dimension(120, 25));
+        pnlTimChuyenTau.add(cmbGaDen);
+        
+        pnlTimChuyenTau.add(new JLabel("Ngày đi:"));
+        dateNgayDi = new JDateChooser();
+        dateNgayDi.setPreferredSize(new Dimension(120, 25));
+        dateNgayDi.setDateFormatString("dd/MM/yyyy");
+        pnlTimChuyenTau.add(dateNgayDi);
+        
+        pnlTimChuyenTau.add(new JLabel("Giờ đi (từ):"));
+        SpinnerDateModel timeModel = new SpinnerDateModel();
+        spnGioDi = new JSpinner(timeModel);
+        JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(spnGioDi, "HH:mm");
+        spnGioDi.setEditor(timeEditor);
+        spnGioDi.setPreferredSize(new Dimension(80, 25));
+        pnlTimChuyenTau.add(spnGioDi);
+        
+        btnTimChuyenTau = new JButton("Tìm chuyến tàu");
+        btnTimChuyenTau.addActionListener(e -> timChuyenTau());
+        pnlTimChuyenTau.add(btnTimChuyenTau);
+        
+        pnlTop.add(pnlTimChuyenTau, BorderLayout.SOUTH);
         add(pnlTop, BorderLayout.NORTH);
 
         // Main content panel
         JPanel pnlNoiDung = new JPanel(new BorderLayout(10, 10));
         
-        // Left panel - Train and Carriage selection
+        // Top section - Train results table
+        String[] tenCotChuyenTau = {"Mã chuyến", "Tên tàu", "Ga đi", "Ga đến", "Ngày đi", "Giờ đi", "Giờ đến"};
+        modelBangChuyenTau = new DefaultTableModel(tenCotChuyenTau, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tblChuyenTau = new JTable(modelBangChuyenTau);
+        tblChuyenTau.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                chonChuyenTauTuBang();
+            }
+        });
+        JScrollPane scrollChuyenTau = new JScrollPane(tblChuyenTau);
+        scrollChuyenTau.setBorder(BorderFactory.createTitledBorder("Danh sách chuyến tàu"));
+        scrollChuyenTau.setPreferredSize(new Dimension(0, 150));
+        pnlNoiDung.add(scrollChuyenTau, BorderLayout.NORTH);
+        
+        // Bottom section - Carriage and seat selection
+        JPanel pnlDuoi = new JPanel(new BorderLayout(10, 10));
+        
+        // Left panel - Carriage table
         JPanel pnlTrai = new JPanel(new BorderLayout(5, 5));
         pnlTrai.setPreferredSize(new Dimension(400, 0));
         
-        // Train selection
-        JPanel pnlChonChuyen = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        pnlChonChuyen.add(new JLabel("Chọn chuyến tàu:"));
-        cmbChuyenTau = new JComboBox<>();
-        cmbChuyenTau.setPreferredSize(new Dimension(250, 25));
-        cmbChuyenTau.addActionListener(e -> chonChuyenTau());
-        pnlChonChuyen.add(cmbChuyenTau);
-        pnlTrai.add(pnlChonChuyen, BorderLayout.NORTH);
-        
-        // Carriage table
         String[] tenCot = {"Mã toa", "Tên toa", "Loại toa", "Sức chứa"};
         modelBangToa = new DefaultTableModel(tenCot, 0) {
             @Override
@@ -112,13 +177,15 @@ public class PnlDatVe extends JPanel {
         scrollToa.setBorder(BorderFactory.createTitledBorder("Danh sách toa tàu"));
         pnlTrai.add(scrollToa, BorderLayout.CENTER);
         
-        pnlNoiDung.add(pnlTrai, BorderLayout.WEST);
+        pnlDuoi.add(pnlTrai, BorderLayout.WEST);
         
-        // Right panel - Seat map with train layout
+        // Right panel - Seat map
         pnlSoDoGhe = new JPanel();
         JScrollPane scrollGhe = new JScrollPane(pnlSoDoGhe);
         scrollGhe.setBorder(BorderFactory.createTitledBorder("Sơ đồ ghế (Bố trí toa tàu)"));
-        pnlNoiDung.add(scrollGhe, BorderLayout.CENTER);
+        pnlDuoi.add(scrollGhe, BorderLayout.CENTER);
+        
+        pnlNoiDung.add(pnlDuoi, BorderLayout.CENTER);
         
         add(pnlNoiDung, BorderLayout.CENTER);
         
@@ -134,30 +201,19 @@ public class PnlDatVe extends JPanel {
         add(pnlChuThich, BorderLayout.SOUTH);
         
         // Load data
-        taiDanhSachChuyenTau();
-        taiDanhSachKhachHang();
+        taiDanhSachGa();
         taiDanhSachLoaiVe();
     }
 
-    private void taiDanhSachChuyenTau() {
-        cmbChuyenTau.removeAllItems();
-        List<ChuyenTau> danhSach = chuyenTauDAO.getAll();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        for (ChuyenTau ct : danhSach) {
-            String item = ct.getMaChuyen() + " - " + ct.getGaDi() + " → " + ct.getGaDen();
-            if (ct.getGioDi() != null) {
-                item += " (" + ct.getGioDi().format(formatter) + ")";
-            }
-            cmbChuyenTau.addItem(item);
-        }
-    }
-    
-    private void taiDanhSachKhachHang() {
-        cboKhachHang.removeAllItems();
-        List<KhachHang> danhSach = khachHangDAO.getAll();
-        for (KhachHang kh : danhSach) {
-            String item = kh.getTenKhachHang() + " (" + kh.getSoDienThoai() + ")";
-            cboKhachHang.addItem(item);
+    private void taiDanhSachGa() {
+        cmbGaDi.removeAllItems();
+        cmbGaDen.removeAllItems();
+        cmbGaDi.addItem(""); // Empty option
+        cmbGaDen.addItem(""); // Empty option
+        List<String> danhSachGa = chuyenTauDAO.getDistinctStations();
+        for (String ga : danhSachGa) {
+            cmbGaDi.addItem(ga);
+            cmbGaDen.addItem(ga);
         }
     }
     
@@ -168,12 +224,85 @@ public class PnlDatVe extends JPanel {
             cboLoaiVe.addItem(lv.getTenLoai());
         }
     }
-
-    private void chonChuyenTau() {
-        String selected = (String) cmbChuyenTau.getSelectedItem();
-        if (selected == null) return;
+    
+    private void timKhachHang() {
+        String sdt = txtSoDienThoai.getText().trim();
+        if (sdt.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập số điện thoại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         
-        String maChuyen = selected.split(" - ")[0];
+        khachHangDuocChon = khachHangDAO.timTheoSoDienThoai(sdt);
+        
+        if (khachHangDuocChon != null) {
+            lblThongTinKhachHang.setText("Khách hàng: " + khachHangDuocChon.getTenKhachHang() + " (Mã: " + khachHangDuocChon.getMaKhachHang() + ")");
+            lblThongTinKhachHang.setForeground(new Color(0, 128, 0));
+        } else {
+            int choice = JOptionPane.showConfirmDialog(this,
+                "Khách hàng chưa tồn tại. Bạn có muốn tạo khách hàng mới không?",
+                "Khách hàng không tồn tại",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+            
+            if (choice == JOptionPane.YES_OPTION) {
+                hienThiFormThemKhachHang(sdt);
+            }
+        }
+    }
+    
+    private void timChuyenTau() {
+        String gaDi = (String) cmbGaDi.getSelectedItem();
+        String gaDen = (String) cmbGaDen.getSelectedItem();
+        
+        LocalDate ngayDi = null;
+        if (dateNgayDi.getDate() != null) {
+            ngayDi = dateNgayDi.getDate().toInstant()
+                .atZone(java.time.ZoneId.systemDefault())
+                .toLocalDate();
+        }
+        
+        LocalTime gioDi = null;
+        if (spnGioDi.getValue() != null) {
+            java.util.Date date = (java.util.Date) spnGioDi.getValue();
+            gioDi = date.toInstant()
+                .atZone(java.time.ZoneId.systemDefault())
+                .toLocalTime();
+        }
+        
+        // Search trains
+        List<ChuyenTau> ketQua = chuyenTauDAO.timKiemChuyenTau(gaDi, gaDen, ngayDi, gioDi);
+        
+        // Display results
+        modelBangChuyenTau.setRowCount(0);
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        
+        for (ChuyenTau ct : ketQua) {
+            String ngayDiStr = ct.getGioDi() != null ? ct.getGioDi().format(dateFormatter) : "";
+            String gioDiStr = ct.getGioDi() != null ? ct.getGioDi().format(timeFormatter) : "";
+            String gioDenStr = ct.getGioDen() != null ? ct.getGioDen().format(timeFormatter) : "";
+            
+            modelBangChuyenTau.addRow(new Object[]{
+                ct.getMaChuyen(),
+                ct.getMaTau(),
+                ct.getGaDi(),
+                ct.getGaDen(),
+                ngayDiStr,
+                gioDiStr,
+                gioDenStr
+            });
+        }
+        
+        if (ketQua.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy chuyến tàu phù hợp!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    
+    private void chonChuyenTauTuBang() {
+        int row = tblChuyenTau.getSelectedRow();
+        if (row < 0) return;
+        
+        String maChuyen = (String) modelBangChuyenTau.getValueAt(row, 0);
         chuyenDuocChon = chuyenTauDAO.findById(maChuyen);
         
         if (chuyenDuocChon == null) return;
@@ -285,8 +414,8 @@ public class PnlDatVe extends JPanel {
         gheDuocChon = ghe;
         
         // Validate selections
-        if (cboKhachHang.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        if (khachHangDuocChon == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng tìm và chọn khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
@@ -300,26 +429,7 @@ public class PnlDatVe extends JPanel {
     }
     
     private void xacNhanDatVe() {
-        String khachHangStr = (String) cboKhachHang.getSelectedItem();
         String loaiVeStr = (String) cboLoaiVe.getSelectedItem();
-        
-        // Extract customer phone from selection (format: "Name (phone)")
-        String sdt = khachHangStr.substring(khachHangStr.lastIndexOf("(") + 1, khachHangStr.lastIndexOf(")"));
-        
-        // Find customer by phone
-        KhachHang khachHang = null;
-        List<KhachHang> danhSachKH = khachHangDAO.getAll();
-        for (KhachHang kh : danhSachKH) {
-            if (sdt.equals(kh.getSoDienThoai())) {
-                khachHang = kh;
-                break;
-            }
-        }
-        
-        if (khachHang == null) {
-            JOptionPane.showMessageDialog(this, "Không tìm thấy thông tin khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
         
         // Find ticket type
         LoaiVe loaiVe = null;
@@ -345,7 +455,7 @@ public class PnlDatVe extends JPanel {
             "Ghế: %s\n" +
             "Loại vé: %s\n\n" +
             "Bạn có chắc chắn muốn đặt vé này?",
-            khachHang.getTenKhachHang(),
+            khachHangDuocChon.getTenKhachHang(),
             chuyenDuocChon.getGaDi(), chuyenDuocChon.getGaDen(),
             toaDuocChon.getTenToa(),
             gheDuocChon.getMaGhe(),
@@ -356,11 +466,11 @@ public class PnlDatVe extends JPanel {
                                                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         
         if (choice == JOptionPane.YES_OPTION) {
-            datVe(khachHang, loaiVe);
+            datVe(khachHangDuocChon, loaiVe);
         }
     }
     
-    private void hienThiFormThemKhachHang() {
+    private void hienThiFormThemKhachHang(String soDienThoai) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Thêm khách hàng mới", true);
         dialog.setLayout(new BorderLayout(10, 10));
         dialog.setSize(450, 300);
@@ -375,6 +485,7 @@ public class PnlDatVe extends JPanel {
         JTextField txtMaKH = new JTextField(20);
         JTextField txtTenKH = new JTextField(20);
         JTextField txtSDT = new JTextField(20);
+        txtSDT.setText(soDienThoai); // Pre-fill with searched phone
         JTextField txtCCCD = new JTextField(20);
         JTextField txtDiaChi = new JTextField(20);
         
@@ -430,7 +541,9 @@ public class PnlDatVe extends JPanel {
             
             if (khachHangDAO.insert(kh)) {
                 JOptionPane.showMessageDialog(dialog, "Thêm khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-                taiDanhSachKhachHang();
+                khachHangDuocChon = kh;
+                lblThongTinKhachHang.setText("Khách hàng: " + kh.getTenKhachHang() + " (Mã: " + kh.getMaKhachHang() + ")");
+                lblThongTinKhachHang.setForeground(new Color(0, 128, 0));
                 dialog.dispose();
             } else {
                 JOptionPane.showMessageDialog(dialog, "Lỗi khi thêm khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -529,7 +642,7 @@ public class PnlDatVe extends JPanel {
                 "Vé đã được thêm vào hóa đơn.",
                 maVe,
                 hoaDonMo.getMaHoaDon(),
-                khachHang.getTenKhachHang(),
+                khachHangDuocChon.getTenKhachHang(),
                 loaiVe.getTenLoai(),
                 gheDuocChon.getMaGhe()
             );

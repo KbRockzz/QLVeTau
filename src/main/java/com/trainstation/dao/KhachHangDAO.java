@@ -104,4 +104,29 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
             return false;
         }
     }
+    
+    /**
+     * Find customer by phone number
+     * @param soDienThoai Phone number to search
+     * @return KhachHang object if found, null otherwise
+     */
+    public KhachHang timTheoSoDienThoai(String soDienThoai) {
+        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE soDienThoai = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setString(1, soDienThoai);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return new KhachHang(
+                        rs.getString("maKhachHang"),
+                        rs.getString("tenKhachHang"),
+                        rs.getString("email"),
+                        rs.getString("soDienThoai")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

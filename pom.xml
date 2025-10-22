@@ -46,6 +46,13 @@
             <version>7.2.5</version>
         </dependency>
         
+        <!-- JCalendar for date picker -->
+        <dependency>
+            <groupId>com.toedter</groupId>
+            <artifactId>jcalendar</artifactId>
+            <version>1.4</version>
+        </dependency>
+        
         <!-- Testing -->
         <dependency>
             <groupId>junit</groupId>

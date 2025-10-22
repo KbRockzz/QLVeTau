@@ -3,9 +3,13 @@ package com.trainstation.dao;
 import com.trainstation.model.ChuyenTau;
 import com.trainstation.MySQL.ConnectSql;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
     private static ChuyenTauDAO instance;
@@ -152,5 +156,92 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
             e.printStackTrace();
             return false;
         }
+    }
+    
+    /**
+     * Search for train trips by departure station, arrival station, date and time
+     * @param gaDi Departure station
+     * @param gaDen Arrival station
+     * @param ngayDi Departure date (can be null)
+     * @param gioDi Departure time (can be null)
+     * @return List of matching train trips
+     */
+    public List<ChuyenTau> timKiemChuyenTau(String gaDi, String gaDen, LocalDate ngayDi, LocalTime gioDi) {
+        List<ChuyenTau> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang FROM ChuyenTau WHERE 1=1");
+        
+        if (gaDi != null && !gaDi.trim().isEmpty()) {
+            sql.append(" AND gaDi = ?");
+        }
+        if (gaDen != null && !gaDen.trim().isEmpty()) {
+            sql.append(" AND gaDen = ?");
+        }
+        if (ngayDi != null) {
+            sql.append(" AND CAST(gioDi AS DATE) = ?");
+        }
+        if (gioDi != null) {
+            sql.append(" AND CAST(gioDi AS TIME) >= ?");
+        }
+        
+        try (PreparedStatement pst = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            
+            if (gaDi != null && !gaDi.trim().isEmpty()) {
+                pst.setString(paramIndex++, gaDi);
+            }
+            if (gaDen != null && !gaDen.trim().isEmpty()) {
+                pst.setString(paramIndex++, gaDen);
+            }
+            if (ngayDi != null) {
+                pst.setDate(paramIndex++, Date.valueOf(ngayDi));
+            }
+            if (gioDi != null) {
+                pst.setTime(paramIndex++, Time.valueOf(gioDi));
+            }
+            
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    LocalDateTime gioDiDT = null, gioDenDT = null;
+                    Timestamp ts1 = rs.getTimestamp("gioDi");
+                    if (ts1 != null) gioDiDT = ts1.toLocalDateTime();
+                    Timestamp ts2 = rs.getTimestamp("gioDen");
+                    if (ts2 != null) gioDenDT = ts2.toLocalDateTime();
+                    
+                    ChuyenTau ct = new ChuyenTau(
+                        rs.getString("maChuyen"),
+                        rs.getString("maTau"),
+                        rs.getString("maNV"),
+                        rs.getString("gaDi"),
+                        rs.getString("gaDen"),
+                        gioDiDT,
+                        gioDenDT,
+                        rs.getInt("soKm"),
+                        rs.getString("maChang")
+                    );
+                    list.add(ct);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
+    /**
+     * Get list of distinct stations (both departure and arrival)
+     * @return List of unique station names
+     */
+    public List<String> getDistinctStations() {
+        Set<String> stations = new HashSet<>();
+        String sql = "SELECT DISTINCT gaDi FROM ChuyenTau UNION SELECT DISTINCT gaDen FROM ChuyenTau ORDER BY 1";
+        try (PreparedStatement pst = connection.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                stations.add(rs.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>(stations);
     }
 }
