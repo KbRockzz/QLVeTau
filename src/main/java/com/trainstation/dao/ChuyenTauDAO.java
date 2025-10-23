@@ -180,7 +180,8 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
             sql.append(" AND CAST(gioDi AS DATE) = ?");
         }
         if (gioDi != null) {
-            sql.append(" AND CAST(gioDi AS TIME) >= ?");
+            // Compare using DATETIME instead of TIME to avoid type mismatch
+            sql.append(" AND gioDi >= ?");
         }
         
         try (PreparedStatement pst = connection.prepareStatement(sql.toString())) {
@@ -196,7 +197,9 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
                 pst.setDate(paramIndex++, Date.valueOf(ngayDi));
             }
             if (gioDi != null) {
-                pst.setTime(paramIndex++, Time.valueOf(gioDi));
+                // Combine date and time into a DATETIME for proper comparison
+                LocalDateTime searchDateTime = LocalDateTime.of(ngayDi != null ? ngayDi : LocalDate.now(), gioDi);
+                pst.setTimestamp(paramIndex++, Timestamp.valueOf(searchDateTime));
             }
             
             try (ResultSet rs = pst.executeQuery()) {
