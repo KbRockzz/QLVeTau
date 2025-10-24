@@ -251,8 +251,16 @@ public class PnlDatVe extends JPanel {
     }
     
     private void timChuyenTau() {
+        // Get search criteria, treating empty strings as null (no filter)
         String gaDi = (String) cmbGaDi.getSelectedItem();
+        if (gaDi != null && gaDi.trim().isEmpty()) {
+            gaDi = null;
+        }
+        
         String gaDen = (String) cmbGaDen.getSelectedItem();
+        if (gaDen != null && gaDen.trim().isEmpty()) {
+            gaDen = null;
+        }
         
         LocalDate ngayDi = null;
         if (dateNgayDi.getDate() != null) {
@@ -269,7 +277,7 @@ public class PnlDatVe extends JPanel {
                 .toLocalTime();
         }
         
-        // Search trains
+        // Search trains with flexible criteria
         List<ChuyenTau> ketQua = chuyenTauDAO.timKiemChuyenTau(gaDi, gaDen, ngayDi, gioDi);
         
         // Display results
@@ -572,7 +580,7 @@ public class PnlDatVe extends JPanel {
             ve.setMaLoaiVe(loaiVe.getMaLoaiVe());
             ve.setMaSoGhe(gheDuocChon.getMaGhe());
             ve.setNgayIn(LocalDateTime.now());
-            ve.setTrangThai("Đã đặt");
+            ve.setTrangThai("Đã thanh toán");
             ve.setGaDi(chuyenDuocChon.getGaDi());
             ve.setGaDen(chuyenDuocChon.getGaDen());
             ve.setGioDi(chuyenDuocChon.getGioDi());
