@@ -65,7 +65,7 @@ public class PnlTau extends JPanel {
         gbc.gridx = 2; gbc.weightx = 0;
         pnlInput.add(new JLabel("Trạng thái:"), gbc);
         gbc.gridx = 3; gbc.weightx = 1;
-        cboTrangThai = new JComboBox<>(new String[]{"Hoạt động", "Bảo trì", "Dừng hoạt động"});
+        cboTrangThai = new JComboBox<>(new String[]{"Hoạt động", "Bảo trì", "Tạm dừng", "Dừng hoạt động"});
         pnlInput.add(cboTrangThai, gbc);
 
         // Table
