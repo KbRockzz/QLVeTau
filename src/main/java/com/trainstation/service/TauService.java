@@ -70,4 +70,18 @@ public class TauService {
     public boolean xoaTau(String maTau) {
         return tauDAO.delete(maTau);
     }
+
+    /**
+     * Dừng hoạt động tàu (soft delete)
+     */
+    public boolean dungHoatDongTau(String maTau) {
+        return tauDAO.dungHoatDongTau(maTau);
+    }
+
+    /**
+     * Lấy danh sách tàu đang hoạt động
+     */
+    public List<Tau> layTauHoatDong() {
+        return tauDAO.layTauHoatDong();
+    }
 }

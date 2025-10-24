@@ -104,4 +104,41 @@ public class TauDAO implements GenericDAO<Tau> {
             return false;
         }
     }
+
+    /**
+     * Dừng hoạt động tàu (soft delete) - cập nhật trạng thái thành "Dừng hoạt động"
+     */
+    public boolean dungHoatDongTau(String maTau) {
+        String sql = "UPDATE Tau SET trangThai = N'Dừng hoạt động' WHERE maTau = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setString(1, maTau);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Lấy danh sách tàu đang hoạt động (không bao gồm tàu dừng hoạt động)
+     */
+    public List<Tau> layTauHoatDong() {
+        List<Tau> list = new ArrayList<>();
+        String sql = "SELECT maTau, soToa, tenTau, trangThai FROM Tau WHERE trangThai != N'Dừng hoạt động'";
+        try (PreparedStatement pst = connection.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                Tau t = new Tau(
+                    rs.getString("maTau"),
+                    rs.getInt("soToa"),
+                    rs.getString("tenTau"),
+                    rs.getString("trangThai")
+                );
+                list.add(t);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
