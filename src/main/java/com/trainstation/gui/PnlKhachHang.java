@@ -15,7 +15,8 @@ public class PnlKhachHang extends JPanel {
     private JTable bangKhachHang;
     private DefaultTableModel modelBang;
     private JTextField txtMaKH, txtTenKH, txtEmail, txtSDT;
-    private JButton btnThem, btnCapNhat, btnXoa, btnLamMoi;
+    private JTextField txtTimKiem;
+    private JButton btnThem, btnCapNhat, btnXoa, btnLamMoi, btnTimKiem;
 
     public PnlKhachHang() {
         this.khachHangService = KhachHangService.getInstance();
@@ -30,7 +31,21 @@ public class PnlKhachHang extends JPanel {
         // Title
         JLabel lblTieuDe = new JLabel("QUẢN LÝ KHÁCH HÀNG", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
-        add(lblTieuDe, BorderLayout.NORTH);
+        
+        // Search panel
+        JPanel pnlTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        pnlTimKiem.add(new JLabel("Tìm theo SĐT:"));
+        txtTimKiem = new JTextField(20);
+        pnlTimKiem.add(txtTimKiem);
+        btnTimKiem = new JButton("Tìm kiếm");
+        btnTimKiem.addActionListener(e -> timKiemTheoSoDienThoai());
+        pnlTimKiem.add(btnTimKiem);
+        
+        JPanel pnlTren = new JPanel(new BorderLayout());
+        pnlTren.add(lblTieuDe, BorderLayout.NORTH);
+        pnlTren.add(pnlTimKiem, BorderLayout.SOUTH);
+        
+        add(pnlTren, BorderLayout.NORTH);
 
         // Table
         String[] tenCot = {"Mã KH", "Tên khách hàng", "Email", "Số điện thoại"};
@@ -183,5 +198,33 @@ public class PnlKhachHang extends JPanel {
         txtTenKH.setText("");
         txtEmail.setText("");
         txtSDT.setText("");
+    }
+
+    private void timKiemTheoSoDienThoai() {
+        String sdt = txtTimKiem.getText().trim();
+        if (sdt.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập số điện thoại cần tìm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        KhachHang kh = khachHangService.timKhachHangTheoSoDienThoai(sdt);
+        if (kh != null) {
+            // Clear table and show only the found customer
+            modelBang.setRowCount(0);
+            modelBang.addRow(new Object[]{
+                kh.getMaKhachHang(),
+                kh.getTenKhachHang(),
+                kh.getEmail(),
+                kh.getSoDienThoai()
+            });
+            
+            // Populate form fields
+            txtMaKH.setText(kh.getMaKhachHang());
+            txtTenKH.setText(kh.getTenKhachHang());
+            txtEmail.setText(kh.getEmail());
+            txtSDT.setText(kh.getSoDienThoai());
+        } else {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy khách hàng với số điện thoại: " + sdt, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 }

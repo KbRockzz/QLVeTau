@@ -56,4 +56,11 @@ public class KhachHangService {
     public boolean xoaKhachHang(String maKH) {
         return khachHangDAO.delete(maKH);
     }
+
+    /**
+     * Tìm khách hàng theo số điện thoại
+     */
+    public KhachHang timKhachHangTheoSoDienThoai(String soDienThoai) {
+        return khachHangDAO.timTheoSoDienThoai(soDienThoai);
+    }
 }
