@@ -3,9 +3,11 @@ package com.trainstation.service;
 import com.trainstation.dao.VeDAO;
 import com.trainstation.dao.HoaDonDAO;
 import com.trainstation.dao.ChiTietHoaDonDAO;
+import com.trainstation.dao.ThongKeDAO;
 import com.trainstation.model.Ve;
 import com.trainstation.model.HoaDon;
 import com.trainstation.model.ChiTietHoaDon;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -20,11 +22,13 @@ public class ThongKeService {
     private final VeDAO veDAO;
     private final HoaDonDAO hoaDonDAO;
     private final ChiTietHoaDonDAO chiTietHoaDonDAO;
+    private final ThongKeDAO thongKeDAO;
 
     private ThongKeService() {
         this.veDAO = VeDAO.getInstance();
         this.hoaDonDAO = HoaDonDAO.getInstance();
         this.chiTietHoaDonDAO = ChiTietHoaDonDAO.getInstance();
+        this.thongKeDAO = ThongKeDAO.getInstance();
     }
 
     public static synchronized ThongKeService getInstance() {
@@ -164,5 +168,26 @@ public class ThongKeService {
         thongKe.put("veTheoTrangThai", thongKeVeTheoTrangThai());
         thongKe.put("veTheoChuyen", demVeTheoChuyen());
         return thongKe;
+    }
+
+    /**
+     * Thống kê doanh thu theo khoảng thời gian
+     */
+    public Map<String, Double> thongKeDoanhThu(LocalDate tuNgay, LocalDate denNgay) {
+        return thongKeDAO.thongKeDoanhThu(tuNgay, denNgay);
+    }
+
+    /**
+     * Thống kê vé hoàn/đổi theo khoảng thời gian
+     */
+    public List<Map<String, Object>> thongKeVeDoiHoan(LocalDate tuNgay, LocalDate denNgay) {
+        return thongKeDAO.thongKeVeDoiHoan(tuNgay, denNgay);
+    }
+
+    /**
+     * Thống kê độ phủ ghế theo khoảng thời gian
+     */
+    public List<Map<String, Object>> thongKeDoPhuGhe(LocalDate tuNgay, LocalDate denNgay) {
+        return thongKeDAO.thongKeDoPhuGhe(tuNgay, denNgay);
     }
 }
