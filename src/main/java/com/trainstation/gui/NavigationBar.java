@@ -47,7 +47,7 @@ public class NavigationBar extends JPanel {
         changeTicketItem.addActionListener(e -> navigateTo("changeticket"));
         ticketMenu.add(changeTicketItem);
 
-        JMenuItem invoicesManage = new JMenuItem("Hóa đơn");
+        JMenuItem invoicesManage = new JMenuItem("Xuất hóa đơn");
         invoicesManage.addActionListener(e -> navigateTo("ticketbooking"));
         ticketMenu.add(invoicesManage);
         
@@ -61,7 +61,7 @@ public class NavigationBar extends JPanel {
         leftPanel.add(customerBtn);
         
         // Train button
-        JButton trainBtn = createNavButton("Chuyến tàu", "train");
+        JButton trainBtn = createNavButton("Tàu", "train");
         leftPanel.add(trainBtn);
         
         // Employee dropdown (if manager)

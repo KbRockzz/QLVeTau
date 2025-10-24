@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * Panel quản lý vé và hóa đơn
+ * Xuất hóa đơn
  */
 public class PnlQuanLyVe extends JPanel {
     private TaiKhoan taiKhoanHienTai;
@@ -45,7 +45,7 @@ public class PnlQuanLyVe extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Title
-        JLabel lblTieuDe = new JLabel("QUẢN LÝ VÉ VÀ HÓA ĐƠN", SwingConstants.CENTER);
+        JLabel lblTieuDe = new JLabel("XUẤT HÓA ĐƠN", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
         add(lblTieuDe, BorderLayout.NORTH);
 
