@@ -274,7 +274,7 @@ public class VeService {
             return result;
         } else {
             // Từ chối hoàn vé
-            ve.setTrangThai("Đã đặt");
+            ve.setTrangThai("Đã thanh toán");
             return veDAO.update(ve);
         }
     }

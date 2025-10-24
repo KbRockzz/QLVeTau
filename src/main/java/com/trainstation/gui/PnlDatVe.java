@@ -580,7 +580,7 @@ public class PnlDatVe extends JPanel {
             ve.setMaLoaiVe(loaiVe.getMaLoaiVe());
             ve.setMaSoGhe(gheDuocChon.getMaGhe());
             ve.setNgayIn(LocalDateTime.now());
-            ve.setTrangThai("Đã đặt");
+            ve.setTrangThai("Đã thanh toán");
             ve.setGaDi(chuyenDuocChon.getGaDi());
             ve.setGaDen(chuyenDuocChon.getGaDen());
             ve.setGioDi(chuyenDuocChon.getGioDi());

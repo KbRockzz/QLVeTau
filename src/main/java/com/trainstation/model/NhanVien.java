@@ -10,7 +10,7 @@ public class NhanVien implements Serializable {
     private String diaChi;
     private LocalDate ngaySinh;
     private String maLoaiNV;
-    private String trangThai;
+    private String trangThai = "active";
     public NhanVien() {
     }
 

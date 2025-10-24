@@ -82,7 +82,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public boolean insert(NhanVien nv) {
-        String sql = "INSERT INTO NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setString(1, nv.getMaNV());
             pst.setString(2, nv.getTenNV());
@@ -94,6 +94,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
                 pst.setNull(5, Types.DATE);
             }
             pst.setString(6, nv.getMaLoaiNV());
+            pst.setString(7, nv.getTrangThai());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -114,7 +115,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
                 pst.setNull(4, Types.DATE);
             }
             pst.setString(5, nv.getMaLoaiNV());
-            pst.setString(6, nv.getMaNV());
+            pst.setString(7, nv.getMaNV());
             pst.setString(6, nv.getTrangThai());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
