@@ -213,9 +213,13 @@ public class PnlDatVe extends JPanel {
         lblTrong.setForeground(new Color(34, 139, 34));
         JLabel lblDaDat = new JLabel("■ Đã đặt");
         lblDaDat.setForeground(Color.RED);
+        JLabel lblDaGiu = new JLabel("■ Đang giữ (chưa thanh toán)");
+        lblDaGiu.setForeground(Color.BLUE);
         pnlChuThich.add(lblTrong);
         pnlChuThich.add(Box.createHorizontalStrut(20));
         pnlChuThich.add(lblDaDat);
+        pnlChuThich.add(Box.createHorizontalStrut(20));
+        pnlChuThich.add(lblDaGiu);
         add(pnlChuThich, BorderLayout.SOUTH);
 
         // Load data
