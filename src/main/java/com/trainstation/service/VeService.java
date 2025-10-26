@@ -12,6 +12,7 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
+import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.dao.VeDAO;
 import com.trainstation.dao.GheDAO;
 import com.trainstation.dao.ChuyenTauDAO;
@@ -23,6 +24,9 @@ import com.trainstation.model.BangGia;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,6 +44,8 @@ public class VeService {
     private final ChuyenTauDAO chuyenTauDAO;
 
     private final BangGiaDAO bangGiaDAO;
+
+
 
     private VeService() {
         this.veDAO = VeDAO.getInstance();
@@ -296,7 +302,7 @@ public class VeService {
         String fileName = "tickets/Ve_" + ve.getMaVe() + ".pdf";
         PdfWriter writer = new PdfWriter(fileName);
         PdfDocument pdf = new PdfDocument(writer);
-        
+
         // Set page size to A5
         Document document = new Document(pdf, PageSize.A5);
 
@@ -305,7 +311,7 @@ public class VeService {
             PdfFont font = PdfFontFactory.createFont("fonts/Tinos-Regular.ttf", PdfEncodings.IDENTITY_H,
                     PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
             document.setFont(font);
-            
+
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
             NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
@@ -345,7 +351,7 @@ public class VeService {
 
             // Station table (Ga đi / Ga đến) - 2 columns with borders
             Table gaTable = new Table(UnitValue.createPercentArray(new float[]{1, 1})).useAllAvailableWidth();
-            
+
             // Header row
             gaTable.addCell(new Cell()
                     .add(new Paragraph("Ga đi").setFont(font).setBold())
@@ -353,7 +359,7 @@ public class VeService {
             gaTable.addCell(new Cell()
                     .add(new Paragraph("Ga đến").setFont(font).setBold())
                     .setTextAlignment(TextAlignment.CENTER));
-            
+
             // Station names row
             gaTable.addCell(new Cell()
                     .add(new Paragraph(ve.getGaDi() != null ? ve.getGaDi() : "N/A").setFont(font))
@@ -361,7 +367,7 @@ public class VeService {
             gaTable.addCell(new Cell()
                     .add(new Paragraph(ve.getGaDen() != null ? ve.getGaDen() : "N/A").setFont(font))
                     .setTextAlignment(TextAlignment.CENTER));
-            
+
             document.add(gaTable);
             document.add(new Paragraph("\n"));
 
@@ -456,6 +462,62 @@ public class VeService {
         if (veList == null || veList.isEmpty()) return;
         for (Ve v : veList) {
             attachChiTietHoaDonToVe(v);
+        }
+    }
+    public boolean releaseSeatsWhenChuyenArrived(String maChuyen, boolean freePaidSeats) throws SQLException {
+        String updateGheSql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
+        String updateVeSql = "UPDATE Ve SET trangThai = ? WHERE maVe = ?";
+
+        Connection conn = null;
+        boolean prevAutoCommit = true;
+        try {
+            conn = ConnectSql.getInstance().getConnection();
+            prevAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+
+            // Lấy tất cả vé của chuyến trong cùng connection
+            List<Ve> danhSachVe = veDAO.getByChuyen(conn, maChuyen);
+
+            try (PreparedStatement pstGhe = conn.prepareStatement(updateGheSql);
+                 PreparedStatement pstVe = conn.prepareStatement(updateVeSql)) {
+
+                for (Ve v : danhSachVe) {
+                    String maVe = v.getMaVe();
+                    String maGhe = v.getMaSoGhe();
+                    String trangThaiVe = v.getTrangThai() != null ? v.getTrangThai().trim() : "";
+
+                    // Quy tắc: nếu vé đã thanh toán và freePaidSeats == false -> không giải phóng ghế
+                    if (!freePaidSeats && "Đã thanh toán".equalsIgnoreCase(trangThaiVe)) {
+                        continue;
+                    }
+
+                    // 1) Cập nhật trạng thái ghế (bạn có thể đổi "Trống" sang giá trị hợp chuẩn)
+                    pstGhe.setString(1, "Trống");
+                    pstGhe.setString(2, maGhe);
+                    pstGhe.executeUpdate();
+
+                    // 2) (Tùy chọn) cập nhật trạng thái vé là "Đã kết thúc" (hoặc "Đã sử dụng")
+                    // Nếu bạn không muốn thay trạng thái vé, bỏ khối dưới.
+                    pstVe.setString(1, "Đã kết thúc"); // hoặc "Đã sử dụng"
+                    pstVe.setString(2, maVe);
+                    pstVe.executeUpdate();
+                }
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException ex) {
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ignore) {}
+            }
+            throw ex;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(prevAutoCommit);
+                    conn.close();
+                } catch (SQLException ignore) {}
+            }
         }
     }
 }

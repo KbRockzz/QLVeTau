@@ -141,4 +141,15 @@ public class TauDAO implements GenericDAO<Tau> {
         }
         return list;
     }
+
+    public void capNhatTrangThai(Connection conn, String maTau, String sanSang) {
+        String sql = "UPDATE Tau SET trangThai = ? WHERE maTau = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, sanSang);
+            pst.setString(2, maTau);
+            pst.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

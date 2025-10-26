@@ -3,6 +3,7 @@ package com.trainstation.dao;
 import com.trainstation.model.Ve;
 import com.trainstation.MySQL.ConnectSql;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -236,4 +237,95 @@ public class VeDAO implements GenericDAO<Ve> {
         }
         return list;
     }
+    public List<Ve> getByChuyen(Connection conn, String maChuyen) throws SQLException {
+        List<Ve> list = new ArrayList<>();
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia FROM Ve WHERE maChuyen = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maChuyen);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    LocalDateTime ngayIn = null, gioDi = null;
+                    Timestamp ts1 = rs.getTimestamp("ngayIn");
+                    if (ts1 != null) ngayIn = ts1.toLocalDateTime();
+                    Timestamp ts2 = rs.getTimestamp("gioDi");
+                    if (ts2 != null) gioDi = ts2.toLocalDateTime();
+
+                    Ve v = new Ve(
+                            rs.getString("maVe"),
+                            rs.getString("maChuyen"),
+                            rs.getString("maLoaiVe"),
+                            rs.getString("maSoGhe"),
+                            ngayIn,
+                            rs.getString("trangThai"),
+                            rs.getString("gaDi"),
+                            rs.getString("gaDen"),
+                            gioDi,
+                            rs.getString("soToa"),
+                            rs.getString("loaiCho"),
+                            rs.getString("loaiVe"),
+                            rs.getString("maBangGia")
+                    );
+                    list.add(v);
+                }
+            }
+        }
+        return list;
+    }
+    public List<Ve> getByChuyenAndDate(Connection conn, String maChuyen, LocalDate date) throws SQLException {
+        List<Ve> list = new ArrayList<>();
+        String sql = "SELECT maVe, maChuyen, maSoGhe, trangThai, gioDi, ... FROM Ve WHERE maChuyen = ? AND DATE(gioDi) = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maChuyen);
+            pst.setDate(2, Date.valueOf(date));
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Ve v = new Ve();
+                    v.setMaVe(rs.getString("maVe"));
+                    v.setMaChuyen(rs.getString("maChuyen"));
+                    v.setMaSoGhe(rs.getString("maSoGhe"));
+                    v.setTrangThai(rs.getString("trangThai"));
+                    Timestamp ts = rs.getTimestamp("gioDi");
+                    if (ts != null) v.setGioDi(ts.toLocalDateTime());
+                    // set các field khác nếu cần
+                    list.add(v);
+                }
+            }
+        }
+        return list;
+    }
+
+    public int countByChuyenAndDate(Connection conn, String maChuyen, LocalDate date) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Ve WHERE maChuyen = ? AND gioDi >= ? AND gioDi < ?";
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maChuyen);
+            pst.setTimestamp(2, Timestamp.valueOf(start));
+            pst.setTimestamp(3, Timestamp.valueOf(end));
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    public int countByChuyenAndDate(String maChuyen, LocalDate date) {
+        try (Connection conn = ConnectSql.getInstance().getConnection()) {
+            return countByChuyenAndDate(conn, maChuyen, date);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    public List<Ve> getByChuyenAndDate(String maChuyen, java.time.LocalDate date) {
+        try (java.sql.Connection conn = com.trainstation.MySQL.ConnectSql.getInstance().getConnection()) {
+            return getByChuyenAndDate(conn, maChuyen, date);
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+            return new java.util.ArrayList<>();
+        }
+    }
+
 }
