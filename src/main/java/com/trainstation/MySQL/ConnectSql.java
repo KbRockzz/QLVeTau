@@ -70,15 +70,6 @@ public class ConnectSql {
      * Close database connection
      */
     public void closeConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-                System.out.println("Đã đóng kết nối SQL Server!");
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi đóng kết nối!");
-            e.printStackTrace();
-        }
     }
     
     /**

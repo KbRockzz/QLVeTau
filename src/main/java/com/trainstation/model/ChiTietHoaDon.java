@@ -1,6 +1,8 @@
 package com.trainstation.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class ChiTietHoaDon implements Serializable {
     private String maHoaDon;
@@ -68,6 +70,21 @@ public class ChiTietHoaDon implements Serializable {
 
     public void setMoTa(String moTa) {
         this.moTa = moTa;
+    }
+
+    public void tinhVaGanGiaDaKM(float heSo) {
+        this.giaDaKM = lamTronGia(this.giaGoc * heSo);
+    }
+
+    public void tinhVaGanGiaDaKM(float giaCoBan, float heSo) {
+        this.giaGoc = lamTronGia(giaCoBan); // lưu gia co ban (rounded)
+        this.giaDaKM = lamTronGia(giaCoBan * heSo); // gia sau he so (rounded)
+    }
+
+
+    private float lamTronGia(double value) {
+        BigDecimal bd = BigDecimal.valueOf(value).setScale(0, RoundingMode.HALF_UP);
+        return bd.floatValue();
     }
 
     @Override

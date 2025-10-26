@@ -248,7 +248,7 @@ public class VeService {
     /**
      * Duyệt yêu cầu hoàn vé
      */
-    public boolean duyetHoanVe(String maVe, boolean chấpNhan) {
+    public boolean duyetHoanVe(String maVe, boolean chapNhan) {
         Ve ve = veDAO.findById(maVe);
         if (ve == null) {
             throw new IllegalArgumentException("Không tìm thấy vé");
@@ -258,7 +258,7 @@ public class VeService {
             throw new IllegalStateException("Vé không trong trạng thái chờ duyệt");
         }
 
-        if (chấpNhan) {
+        if (chapNhan) {
             // Chấp nhận hoàn vé
             ve.setTrangThai("Đã hoàn");
             boolean result = veDAO.update(ve);
@@ -413,12 +413,8 @@ public class VeService {
             // Price - try to fetch from BangGia
             String priceStr = "N/A";
             try {
-                if (ve.getMaBangGia() != null && bangGiaDAO != null) {
-                    BangGia bangGia = bangGiaDAO.findById(ve.getMaBangGia());
-                    if (bangGia != null) {
-                        priceStr = String.format("%,.0f VNĐ", bangGia.getGiaCoBan());
-                    }
-                }
+                float priceToShow = ve.getDisplayPrice();
+                priceStr = String.format("%,.0f VNĐ", priceToShow);
             } catch (Exception e) {
                 // If database is not available, use N/A
                 priceStr = "N/A";
@@ -442,5 +438,24 @@ public class VeService {
         }
 
         return fileName;
+    }
+    // thêm phương thức vào VeService hiện có (hoặc tạo mới)
+    public void attachChiTietHoaDonToVe(Ve ve) {
+        if (ve == null) return;
+        try {
+            com.trainstation.dao.ChiTietHoaDonDAO cthdDAO = com.trainstation.dao.ChiTietHoaDonDAO.getInstance();
+            com.trainstation.model.ChiTietHoaDon cthd = cthdDAO.findById(ve.getMaVe()); // cần DAO hỗ trợ tìm theo maVe
+            ve.setChiTietHoaDon(cthd);
+        } catch (Exception e) {
+            // log, nhưng không ném để UI vẫn hoạt động (sẽ fallback sang computePrice)
+        }
+    }
+
+    // tiện ích để attach cho list vé
+    public void attachChiTietHoaDonToList(List<Ve> veList) {
+        if (veList == null || veList.isEmpty()) return;
+        for (Ve v : veList) {
+            attachChiTietHoaDonToVe(v);
+        }
     }
 }

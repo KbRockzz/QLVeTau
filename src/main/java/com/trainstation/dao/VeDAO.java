@@ -34,7 +34,7 @@ public class VeDAO implements GenericDAO<Ve> {
                 if (ts1 != null) ngayIn = ts1.toLocalDateTime();
                 Timestamp ts2 = rs.getTimestamp("gioDi");
                 if (ts2 != null) gioDi = ts2.toLocalDateTime();
-                
+
                 Ve v = new Ve(
                     rs.getString("maVe"),
                     rs.getString("maChuyen"),
@@ -70,7 +70,7 @@ public class VeDAO implements GenericDAO<Ve> {
                     if (ts1 != null) ngayIn = ts1.toLocalDateTime();
                     Timestamp ts2 = rs.getTimestamp("gioDi");
                     if (ts2 != null) gioDi = ts2.toLocalDateTime();
-                    
+
                     return new Ve(
                         rs.getString("maVe"),
                         rs.getString("maChuyen"),
@@ -125,7 +125,26 @@ public class VeDAO implements GenericDAO<Ve> {
             return false;
         }
     }
-
+    public boolean insert(Ve ve, Connection conn) throws SQLException {
+        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, ve.getMaVe());
+            pst.setString(2, ve.getMaChuyen());
+            pst.setString(3, ve.getMaLoaiVe());
+            pst.setString(4, ve.getMaSoGhe());
+            if (ve.getNgayIn() != null) pst.setTimestamp(5, Timestamp.valueOf(ve.getNgayIn()));
+            else pst.setNull(5, Types.TIMESTAMP);
+            pst.setString(6, ve.getTrangThai());
+            pst.setString(7, ve.getGaDi());
+            pst.setString(8, ve.getGaDen());
+            if (ve.getGioDi() != null) pst.setTimestamp(9, Timestamp.valueOf(ve.getGioDi()));
+            else pst.setNull(9, Types.TIMESTAMP);
+            pst.setString(10, ve.getSoToa());
+            pst.setString(11, ve.getLoaiCho());
+            pst.setString(12, ve.getLoaiVe());
+            return pst.executeUpdate() > 0;
+        }
+    }
     @Override
     public boolean update(Ve v) {
         String sql = "UPDATE Ve SET maChuyen = ?, maLoaiVe = ?, maSoGhe = ?, ngayIn = ?, trangThai = ?, gaDi = ?, gaDen = ?, gioDi = ?, soToa = ?, loaiCho = ?, loaiVe = ?, maBangGia = ? WHERE maVe = ?";
@@ -188,7 +207,7 @@ public class VeDAO implements GenericDAO<Ve> {
                     if (ts1 != null) ngayIn = ts1.toLocalDateTime();
                     Timestamp ts2 = rs.getTimestamp("gioDi");
                     if (ts2 != null) gioDi = ts2.toLocalDateTime();
-                    
+
                     Ve v = new Ve(
                         rs.getString("maVe"),
                         rs.getString("maChuyen"),
