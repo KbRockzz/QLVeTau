@@ -13,10 +13,9 @@ import java.util.Map;
  */
 public class ThongKeDAO {
     private static ThongKeDAO instance;
-    private Connection connection;
 
     private ThongKeDAO() {
-        connection = ConnectSql.getInstance().getConnection();
+        // Không giữ Connection làm trường
     }
 
     public static synchronized ThongKeDAO getInstance() {
@@ -26,26 +25,21 @@ public class ThongKeDAO {
         return instance;
     }
 
-    /**
-     * Thống kê doanh thu theo khoảng thời gian
-     * @param tuNgay Từ ngày
-     * @param denNgay Đến ngày
-     * @return Map với key là ngày (String) và value là doanh thu (Double)
-     */
     public Map<String, Double> thongKeDoanhThu(LocalDate tuNgay, LocalDate denNgay) {
         Map<String, Double> result = new HashMap<>();
         String sql = "SELECT CAST(hd.ngayLap AS DATE) as ngay, SUM(ct.giaDaKM) as tongDoanhThu " +
-                    "FROM HoaDon hd " +
-                    "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
-                    "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
-                    "AND hd.trangThai = N'Hoàn tất' " +
-                    "GROUP BY CAST(hd.ngayLap AS DATE) " +
-                    "ORDER BY CAST(hd.ngayLap AS DATE)";
-        
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                "FROM HoaDon hd " +
+                "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
+                "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
+                "AND hd.trangThai = N'Hoàn tất' " +
+                "GROUP BY CAST(hd.ngayLap AS DATE) " +
+                "ORDER BY CAST(hd.ngayLap AS DATE)";
+
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setDate(1, Date.valueOf(tuNgay));
             pst.setDate(2, Date.valueOf(denNgay));
-            
+
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Date ngay = rs.getDate("ngay");
@@ -56,35 +50,30 @@ public class ThongKeDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
         return result;
     }
 
-    /**
-     * Thống kê vé hoàn/đổi theo khoảng thời gian
-     * @param tuNgay Từ ngày
-     * @param denNgay Đến ngày
-     * @return List of Map containing ticket refund/exchange information
-     */
     public List<Map<String, Object>> thongKeVeDoiHoan(LocalDate tuNgay, LocalDate denNgay) {
         List<Map<String, Object>> result = new ArrayList<>();
         String sql = "SELECT v.maVe, ct.maHoaDon, v.ngayIn, " +
-                    "CASE " +
-                    "  WHEN v.trangThai = N'Đã hoàn' THEN N'Hoàn vé' " +
-                    "  WHEN v.trangThai = N'Đã đổi' THEN N'Đổi vé' " +
-                    "  ELSE v.trangThai " +
-                    "END as hinhThuc, " +
-                    "v.trangThai " +
-                    "FROM Ve v " +
-                    "JOIN ChiTietHoaDon ct ON v.maVe = ct.maVe " +
-                    "WHERE CAST(v.ngayIn AS DATE) BETWEEN ? AND ? " +
-                    "AND (v.trangThai = N'Đã hoàn' OR v.trangThai = N'Đã đổi') " +
-                    "ORDER BY v.ngayIn DESC";
-        
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                "CASE " +
+                "  WHEN v.trangThai = N'Đã hoàn' THEN N'Hoàn vé' " +
+                "  WHEN v.trangThai = N'Đã đổi' THEN N'Đổi vé' " +
+                "  ELSE v.trangThai " +
+                "END as hinhThuc, " +
+                "v.trangThai " +
+                "FROM Ve v " +
+                "JOIN ChiTietHoaDon ct ON v.maVe = ct.maVe " +
+                "WHERE CAST(v.ngayIn AS DATE) BETWEEN ? AND ? " +
+                "AND (v.trangThai = N'Đã hoàn' OR v.trangThai = N'Đã đổi') " +
+                "ORDER BY v.ngayIn DESC";
+
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setDate(1, Date.valueOf(tuNgay));
             pst.setDate(2, Date.valueOf(denNgay));
-            
+
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> row = new HashMap<>();
@@ -99,40 +88,34 @@ public class ThongKeDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
         return result;
     }
 
-    /**
-     * Thống kê độ phủ ghế theo khoảng thời gian
-     * @param tuNgay Từ ngày
-     * @param denNgay Đến ngày
-     * @return Map containing seat coverage statistics per day
-     */
     public List<Map<String, Object>> thongKeDoPhuGhe(LocalDate tuNgay, LocalDate denNgay) {
         List<Map<String, Object>> result = new ArrayList<>();
-        
-        // Get total number of seats
+
         int tongSoGhe = getTongSoGhe();
-        
+
         String sql = "SELECT CAST(v.ngayIn AS DATE) as ngay, COUNT(v.maVe) as soVeBan " +
-                    "FROM Ve v " +
-                    "WHERE CAST(v.ngayIn AS DATE) BETWEEN ? AND ? " +
-                    "AND v.trangThai = N'Đã thanh toán' " +
-                    "GROUP BY CAST(v.ngayIn AS DATE) " +
-                    "ORDER BY CAST(v.ngayIn AS DATE)";
-        
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                "FROM Ve v " +
+                "WHERE CAST(v.ngayIn AS DATE) BETWEEN ? AND ? " +
+                "AND v.trangThai = N'Đã thanh toán' " +
+                "GROUP BY CAST(v.ngayIn AS DATE) " +
+                "ORDER BY CAST(v.ngayIn AS DATE)";
+
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setDate(1, Date.valueOf(tuNgay));
             pst.setDate(2, Date.valueOf(denNgay));
-            
+
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> row = new HashMap<>();
                     Date ngay = rs.getDate("ngay");
                     int soVeBan = rs.getInt("soVeBan");
                     double tyLePhu = tongSoGhe > 0 ? (soVeBan * 100.0 / tongSoGhe) : 0;
-                    
+
                     row.put("ngay", ngay.toString());
                     row.put("soVeBan", soVeBan);
                     row.put("tongSoGhe", tongSoGhe);
@@ -143,17 +126,14 @@ public class ThongKeDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
         return result;
     }
 
-    /**
-     * Get total number of seats in the system
-     * @return Total number of seats
-     */
     private int getTongSoGhe() {
         String sql = "SELECT COUNT(*) as total FROM Ghe";
-        try (PreparedStatement pst = connection.prepareStatement(sql);
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt("total");

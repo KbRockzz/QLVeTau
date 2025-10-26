@@ -8,10 +8,9 @@ import java.util.List;
 
 public class ToaTauDAO implements GenericDAO<ToaTau> {
     private static ToaTauDAO instance;
-    private Connection connection;
 
     private ToaTauDAO() {
-        connection = ConnectSql.getInstance().getConnection();
+        // Không giữ Connection làm trường
     }
 
     public static synchronized ToaTauDAO getInstance() {
@@ -25,15 +24,16 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
     public List<ToaTau> getAll() {
         List<ToaTau> list = new ArrayList<>();
         String sql = "SELECT maToa, tenToa, loaiToa, maTau, sucChua FROM ToaTau";
-        try (PreparedStatement pst = connection.prepareStatement(sql);
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 ToaTau t = new ToaTau(
-                    rs.getString("maToa"),
-                    rs.getString("tenToa"),
-                    rs.getString("loaiToa"),
-                    rs.getString("maTau"),
-                    rs.getInt("sucChua")
+                        rs.getString("maToa"),
+                        rs.getString("tenToa"),
+                        rs.getString("loaiToa"),
+                        rs.getString("maTau"),
+                        rs.getInt("sucChua")
                 );
                 list.add(t);
             }
@@ -46,16 +46,17 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
     @Override
     public ToaTau findById(String id) {
         String sql = "SELECT maToa, tenToa, loaiToa, maTau, sucChua FROM ToaTau WHERE maToa = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return new ToaTau(
-                        rs.getString("maToa"),
-                        rs.getString("tenToa"),
-                        rs.getString("loaiToa"),
-                        rs.getString("maTau"),
-                        rs.getInt("sucChua")
+                            rs.getString("maToa"),
+                            rs.getString("tenToa"),
+                            rs.getString("loaiToa"),
+                            rs.getString("maTau"),
+                            rs.getInt("sucChua")
                     );
                 }
             }
@@ -68,7 +69,8 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
     @Override
     public boolean insert(ToaTau t) {
         String sql = "INSERT INTO ToaTau (maToa, tenToa, loaiToa, maTau, sucChua) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, t.getMaToa());
             pst.setString(2, t.getTenToa());
             pst.setString(3, t.getLoaiToa());
@@ -84,7 +86,8 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
     @Override
     public boolean update(ToaTau t) {
         String sql = "UPDATE ToaTau SET tenToa = ?, loaiToa = ?, maTau = ?, sucChua = ? WHERE maToa = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, t.getTenToa());
             pst.setString(2, t.getLoaiToa());
             pst.setString(3, t.getMaTau());
@@ -100,7 +103,8 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
     @Override
     public boolean delete(String id) {
         String sql = "DELETE FROM ToaTau WHERE maToa = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -109,22 +113,20 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
         }
     }
 
-    /**
-     * Lấy danh sách toa tàu theo mã tàu
-     */
     public List<ToaTau> getByTau(String maTau) {
         List<ToaTau> list = new ArrayList<>();
         String sql = "SELECT maToa, tenToa, loaiToa, maTau, sucChua FROM ToaTau WHERE maTau = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maTau);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     ToaTau t = new ToaTau(
-                        rs.getString("maToa"),
-                        rs.getString("tenToa"),
-                        rs.getString("loaiToa"),
-                        rs.getString("maTau"),
-                        rs.getInt("sucChua")
+                            rs.getString("maToa"),
+                            rs.getString("tenToa"),
+                            rs.getString("loaiToa"),
+                            rs.getString("maTau"),
+                            rs.getInt("sucChua")
                     );
                     list.add(t);
                 }
