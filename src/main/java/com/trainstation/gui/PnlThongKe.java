@@ -273,13 +273,13 @@ public class PnlThongKe extends JPanel {
         
         // Update button styles
         btnDoanhThu.setBackground(panelName.equals("doanhThu") ? new Color(70, 130, 180) : null);
-        btnDoanhThu.setForeground(panelName.equals("doanhThu") ? Color.WHITE : Color.BLACK);
+        btnDoanhThu.setForeground(panelName.equals("doanhThu") ? Color.GRAY : Color.BLACK);
         
         btnVeDoiHoan.setBackground(panelName.equals("veDoiHoan") ? new Color(70, 130, 180) : null);
-        btnVeDoiHoan.setForeground(panelName.equals("veDoiHoan") ? Color.WHITE : Color.BLACK);
+        btnVeDoiHoan.setForeground(panelName.equals("veDoiHoan") ? Color.GRAY : Color.BLACK);
         
         btnDoPhuGhe.setBackground(panelName.equals("doPhuGhe") ? new Color(70, 130, 180) : null);
-        btnDoPhuGhe.setForeground(panelName.equals("doPhuGhe") ? Color.WHITE : Color.BLACK);
+        btnDoPhuGhe.setForeground(panelName.equals("doPhuGhe") ? Color.GRAY : Color.BLACK);
     }
 
     /**

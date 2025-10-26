@@ -2,6 +2,8 @@ package com.trainstation.gui;
 
 import com.trainstation.service.TaiKhoanService;
 import com.trainstation.model.TaiKhoan;
+import com.trainstation.util.UIUtils;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -23,19 +25,24 @@ public class FrmDangNhap extends JFrame {
         setTitle("QLVeTau - Đăng nhập");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        setSize(400, 250);
+
+        // Make login dialog larger so scaled UI looks comfortable
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        int w = Math.max(600, (int)(screen.width * 0.45));
+        int h = Math.max(380, (int)(screen.height * 0.45));
+        setSize(w, h);
         setLocationRelativeTo(null);
 
         // Main panel
         JPanel mainPanel = new JPanel(new GridBagLayout());
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Title
-        JLabel lblTieuDe = new JLabel("HỆ THỐNG QUẢN LÝ VÉ TÀU");
-        lblTieuDe.setFont(new Font("Arial", Font.BOLD, 18));
+        JLabel lblTieuDe = new JLabel("HỆ THỐNG QUẢN LÝ VÉ TÀU", SwingConstants.CENTER);
+        lblTieuDe.setFont(new Font("Arial", Font.BOLD, 20));
         lblTieuDe.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -94,6 +101,11 @@ public class FrmDangNhap extends JFrame {
             dispose();
             SwingUtilities.invokeLater(() -> {
                 FrmChinh frmChinh = new FrmChinh(taiKhoan);
+
+                // Apply per-component scaling (option B) with factor 1.2
+                UIUtils.scaleComponentTree(frmChinh, 1.2f);
+
+                // Show main frame
                 frmChinh.setVisible(true);
             });
         } else {
