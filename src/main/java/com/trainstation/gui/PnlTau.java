@@ -6,11 +6,17 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Panel quản lý tàu
  */
 public class PnlTau extends JPanel {
+    // Regex patterns for validation
+    private static final Pattern PATTERN_MA_TAU = Pattern.compile("^T\\d{3}$");
+    private static final Pattern PATTERN_TEN_TAU = Pattern.compile("^[a-zA-Z0-9\\s\\-]{1,100}$");
+    private static final Pattern PATTERN_SO_TOA = Pattern.compile("^([1-9]|[1-9][0-9])$");
+    
     private TauService tauService;
     private JTable bangTau;
     private DefaultTableModel modelBang;
@@ -166,23 +172,12 @@ public class PnlTau extends JPanel {
                 return;
             }
 
-            int soToa;
-            try {
-                soToa = Integer.parseInt(soToaStr);
-                if (soToa <= 0) {
-                    JOptionPane.showMessageDialog(this, 
-                        "Số toa phải là số dương!", 
-                        "Lỗi", 
-                        JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, 
-                    "Số toa phải là số nguyên!", 
-                    "Lỗi", 
-                    JOptionPane.ERROR_MESSAGE);
+            // Validate using regex
+            if (!kiemTraHopLe(maTau, tenTau, soToaStr, false)) {
                 return;
             }
+
+            int soToa = Integer.parseInt(soToaStr);
 
             // Check if train already exists
             if (tauService.timTauTheoMa(maTau) != null) {
@@ -243,23 +238,12 @@ public class PnlTau extends JPanel {
                 return;
             }
 
-            int soToa;
-            try {
-                soToa = Integer.parseInt(soToaStr);
-                if (soToa <= 0) {
-                    JOptionPane.showMessageDialog(this, 
-                        "Số toa phải là số dương!", 
-                        "Lỗi", 
-                        JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, 
-                    "Số toa phải là số nguyên!", 
-                    "Lỗi", 
-                    JOptionPane.ERROR_MESSAGE);
+            // Validate using regex
+            if (!kiemTraHopLe(maTau, tenTau, soToaStr, true)) {
                 return;
             }
+
+            int soToa = Integer.parseInt(soToaStr);
 
             // Tạo đối tượng tàu với thông tin cập nhật
             Tau tau = new Tau(maTau, soToa, tenTau, trangThai);
@@ -284,6 +268,41 @@ public class PnlTau extends JPanel {
                 "Lỗi", 
                 JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * Validates input fields using regex patterns
+     * @return true if all inputs are valid, false otherwise
+     */
+    private boolean kiemTraHopLe(String maTau, String tenTau, String soToaStr, boolean isUpdate) {
+        // Validate Mã tàu
+        if (!PATTERN_MA_TAU.matcher(maTau).matches()) {
+            JOptionPane.showMessageDialog(this,
+                "Mã tàu không hợp lệ (VD: T001)",
+                "Lỗi",
+                JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        // Validate Tên tàu
+        if (!PATTERN_TEN_TAU.matcher(tenTau).matches()) {
+            JOptionPane.showMessageDialog(this,
+                "Tên tàu chỉ được chứa chữ, số, khoảng trắng, dấu gạch nối và tối đa 100 ký tự.",
+                "Lỗi",
+                JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        // Validate Số toa
+        if (!PATTERN_SO_TOA.matcher(soToaStr).matches()) {
+            JOptionPane.showMessageDialog(this,
+                "Số toa phải là số từ 1 đến 99.",
+                "Lỗi",
+                JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        return true;
     }
 
     private void xoaTau() {
