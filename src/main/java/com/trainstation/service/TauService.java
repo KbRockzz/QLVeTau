@@ -2,6 +2,7 @@ package com.trainstation.service;
 
 import com.trainstation.dao.TauDAO;
 import com.trainstation.dao.ToaTauDAO;
+import com.trainstation.model.NhanVien;
 import com.trainstation.model.Tau;
 import com.trainstation.model.ToaTau;
 import java.util.List;
@@ -25,6 +26,28 @@ public class TauService {
             instance = new TauService();
         }
         return instance;
+    }
+
+    /**
+     * Tạo mã nhân viên tự động
+     */
+    public String taoMaTau() {
+        List<Tau> danhSach = tauDAO.getAll();
+        int maxId = 0;
+        for (Tau tau : danhSach) {
+            String maTau = tau.getMaTau();
+            if (maTau != null && maTau.startsWith("T")) {
+                try {
+                    int id = Integer.parseInt(maTau.substring(1));
+                    if (id > maxId) {
+                        maxId = id;
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore invalid IDs
+                }
+            }
+        }
+        return String.format("T%03d", maxId + 1);
     }
 
     /**

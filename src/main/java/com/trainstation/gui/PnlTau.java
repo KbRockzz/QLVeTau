@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 public class PnlTau extends JPanel {
     // Regex patterns for validation
     private static final Pattern PATTERN_MA_TAU = Pattern.compile("^T\\d{3}$");
-    private static final Pattern PATTERN_TEN_TAU = Pattern.compile("^[a-zA-Z0-9\\s\\-\\u00C0-\\u1EF9]{1,100}$");
+    private static final Pattern PATTERN_TEN_TAU = Pattern.compile("^[\\p{L}0-9\\s\\-]{1,100}$");
     private static final Pattern PATTERN_SO_TOA = Pattern.compile("^([1-9]|[1-9][0-9])$");
     
     private TauService tauService;
@@ -148,7 +148,7 @@ public class PnlTau extends JPanel {
     }
 
     private void xoaForm() {
-        txtMaTau.setText("");
+        txtMaTau.setText(TauService.getInstance().taoMaTau());
         txtTenTau.setText("");
         txtSoToa.setText("");
         cboTrangThai.setSelectedIndex(0);

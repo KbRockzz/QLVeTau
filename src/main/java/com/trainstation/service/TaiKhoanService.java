@@ -38,6 +38,9 @@ public class TaiKhoanService {
         return null;
     }
 
+    /**
+     * Tạo mã tài khoản tự động
+     */
     public String taoMaTaiKhoan() {
         List<TaiKhoan> danhSach = taiKhoanDAO.getAll();
         int maxId = 0;
