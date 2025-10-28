@@ -1,6 +1,7 @@
 package com.trainstation.service;
 
 import com.trainstation.dao.TaiKhoanDAO;
+import com.trainstation.model.NhanVien;
 import com.trainstation.model.TaiKhoan;
 import java.util.List;
 
@@ -35,6 +36,25 @@ public class TaiKhoanService {
             }
         }
         return null;
+    }
+
+    public String taoMaTaiKhoan() {
+        List<TaiKhoan> danhSach = taiKhoanDAO.getAll();
+        int maxId = 0;
+        for (TaiKhoan tk : danhSach) {
+            String maTK = tk.getMaTK();
+            if (maTK != null && maTK.startsWith("TK")) {
+                try {
+                    int id = Integer.parseInt(maTK.substring(2));
+                    if (id > maxId) {
+                        maxId = id;
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore invalid IDs
+                }
+            }
+        }
+        return String.format("TK%02d", maxId + 1);
     }
 
     /**
