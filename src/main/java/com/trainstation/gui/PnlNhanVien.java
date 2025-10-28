@@ -7,7 +7,9 @@ import com.trainstation.model.LoaiNV;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.text.Normalizer;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 /**
@@ -104,23 +106,23 @@ public class PnlNhanVien extends JPanel {
 
         // Buttons
         JPanel pnlButton = new JPanel(new FlowLayout());
-        
+
         btnMoi = new JButton("Mới");
         btnMoi.addActionListener(e -> lamMoiForm());
         pnlButton.add(btnMoi);
-        
+
         btnThem = new JButton("Thêm");
         btnThem.addActionListener(e -> themNhanVien());
         pnlButton.add(btnThem);
-        
+
         btnCapNhat = new JButton("Cập nhật");
         btnCapNhat.addActionListener(e -> capNhatNhanVien());
         pnlButton.add(btnCapNhat);
-        
+
         btnXoa = new JButton("Xóa");
         btnXoa.addActionListener(e -> xoaNhanVien());
         pnlButton.add(btnXoa);
-        
+
         btnLamMoi = new JButton("Làm mới");
         btnLamMoi.addActionListener(e -> taiDuLieuNhanVien());
         pnlButton.add(btnLamMoi);
@@ -152,13 +154,13 @@ public class PnlNhanVien extends JPanel {
     private void hienThiThongTinNhanVien() {
         int row = bangNhanVien.getSelectedRow();
         if (row < 0) return;
-        
+
         txtMaNV.setText((String) modelBang.getValueAt(row, 0));
         txtTenNV.setText((String) modelBang.getValueAt(row, 1));
         txtSDT.setText((String) modelBang.getValueAt(row, 2));
         txtDiaChi.setText((String) modelBang.getValueAt(row, 3));
         txtNgaySinh.setText((String) modelBang.getValueAt(row, 4));
-        
+
         String maLoaiNV = (String) modelBang.getValueAt(row, 5);
         for (int i = 0; i < cmbLoaiNV.getItemCount(); i++) {
             if (cmbLoaiNV.getItemAt(i).startsWith(maLoaiNV)) {
@@ -182,30 +184,30 @@ public class PnlNhanVien extends JPanel {
 
     private void themNhanVien() {
         if (!kiemTraDuLieu()) return;
-        
+
         try {
             String maNV = txtMaNV.getText().trim();
             if (maNV.isEmpty()) {
                 maNV = nhanVienService.taoMaNhanVien();
             }
-            
+
             String loaiNVStr = (String) cmbLoaiNV.getSelectedItem();
             String maLoaiNV = loaiNVStr.split(" - ")[0];
-            
+
             LocalDate ngaySinh = null;
             if (!txtNgaySinh.getText().trim().isEmpty()) {
                 ngaySinh = LocalDate.parse(txtNgaySinh.getText().trim());
             }
 
             NhanVien nv = new NhanVien(
-                maNV,
-                txtTenNV.getText().trim(),
-                txtSDT.getText().trim(),
-                txtDiaChi.getText().trim(),
-                ngaySinh,
-                maLoaiNV
+                    maNV,
+                    txtTenNV.getText().trim(),
+                    txtSDT.getText().trim(),
+                    txtDiaChi.getText().trim(),
+                    ngaySinh,
+                    maLoaiNV
             );
-            
+
             if (nhanVienService.themNhanVien(nv)) {
                 JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 taiDuLieuNhanVien();
@@ -223,27 +225,27 @@ public class PnlNhanVien extends JPanel {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên cần cập nhật!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
         if (!kiemTraDuLieu()) return;
-        
+
         try {
             String loaiNVStr = (String) cmbLoaiNV.getSelectedItem();
             String maLoaiNV = loaiNVStr.split(" - ")[0];
-            
+
             LocalDate ngaySinh = null;
             if (!txtNgaySinh.getText().trim().isEmpty()) {
                 ngaySinh = LocalDate.parse(txtNgaySinh.getText().trim());
             }
-            
+
             NhanVien nv = new NhanVien(
-                txtMaNV.getText().trim(),
-                txtTenNV.getText().trim(),
-                txtSDT.getText().trim(),
-                txtDiaChi.getText().trim(),
-                ngaySinh,
-                maLoaiNV
+                    txtMaNV.getText().trim(),
+                    txtTenNV.getText().trim(),
+                    txtSDT.getText().trim(),
+                    txtDiaChi.getText().trim(),
+                    ngaySinh,
+                    maLoaiNV
             );
-            
+
             if (nhanVienService.capNhatNhanVien(nv)) {
                 JOptionPane.showMessageDialog(this, "Cập nhật nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 taiDuLieuNhanVien();
@@ -260,12 +262,12 @@ public class PnlNhanVien extends JPanel {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên cần xóa!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
-        int confirm = JOptionPane.showConfirmDialog(this, 
-            "Bạn có chắc chắn muốn xóa nhân viên này?", 
-            "Xác nhận", 
-            JOptionPane.YES_NO_OPTION);
-        
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có chắc chắn muốn xóa nhân viên này?",
+                "Xác nhận",
+                JOptionPane.YES_NO_OPTION);
+
         if (confirm == JOptionPane.YES_OPTION) {
             if (nhanVienService.xoaNhanVien(txtMaNV.getText().trim())) {
                 JOptionPane.showMessageDialog(this, "Xóa nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
@@ -277,11 +279,93 @@ public class PnlNhanVien extends JPanel {
         }
     }
 
+    /**
+     * Kiểm tra dữ liệu form trước khi thêm/cập nhật
+     * - Tên: ít nhất 2 từ, mỗi từ viết hoa chữ đầu, tổng 2-50 ký tự
+     * - SĐT: dạng 0xxxxxxxxx hoặc +84xxxxxxxxx (10 chữ số dạng 0... hoặc +84 +9 chữ số)
+     * - Ngày sinh: nếu nhập phải đúng định dạng yyyy-MM-dd và >= 16 tuổi
+     * - Địa chỉ: không để trống
+     */
     private boolean kiemTraDuLieu() {
-        if (txtTenNV.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập tên nhân viên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        // Tên
+        String ten = txtTenNV.getText().trim().replaceAll("\\s+", " ");
+        if (ten.isEmpty()) {
+            showError("Vui lòng nhập tên nhân viên!");
             return false;
         }
+
+        // regex: ít nhất 2 từ, mỗi từ bắt đầu hoa; tổng độ dài 2-50
+        String nameRegex = "^\\p{Lu}\\p{Ll}*(\\s\\p{Lu}\\p{Ll}*)*$";
+        if (!ten.matches(nameRegex)) {
+            showError("Tên KH phải viết hoa chữ đầu mỗi từ và có ít nhất 2 từ (2–50 ký tự).");
+            return false;
+        }
+
+        // SĐT
+        String sdt = txtSDT.getText().trim();
+        if (!sdt.isEmpty()) {
+            String phoneRegex = "^(0[3|5|7|8|9])[0-9]{8}$";
+            if (!sdt.matches(phoneRegex)) {
+                showError("SĐT không hợp lệ. Ví dụ: 0912345678");
+                return false;
+            }
+        }
+
+        // Ngày sinh
+        String ns = txtNgaySinh.getText().trim();
+        if (!ns.isEmpty()) {
+            try {
+                LocalDate ngaySinh = LocalDate.parse(ns);
+                LocalDate minDob = LocalDate.now().minusYears(16);
+                if (ngaySinh.isAfter(minDob)) {
+                    showError("Nhân viên phải ít nhất 16 tuổi.");
+                    return false;
+                }
+                if (ngaySinh.isAfter(LocalDate.now())) {
+                    showError("Ngày sinh không được lớn hơn ngày hiện tại.");
+                    return false;
+                }
+            } catch (DateTimeParseException ex) {
+                showError("Ngày sinh không đúng định dạng yyyy-MM-dd.");
+                return false;
+            }
+        }
+
+        // Địa chỉ
+        if (txtDiaChi.getText().trim().isEmpty()) {
+            showError("Vui lòng nhập địa chỉ!");
+            return false;
+        }
+        String diaChi = txtDiaChi.getText().trim();
+        String diaChiPattern = "^[\\p{L}0-9\\s,\\.-/]{5,100}$";
+        if (!diaChi.matches(diaChiPattern)) {
+            JOptionPane.showMessageDialog(this, "Địa chỉ chỉ được chứa chữ, số và dấu ( , . - / ), từ 5-100 ký tự!");
+            return false;
+        }
+
+
+        // Mã NV
+        String ma = txtMaNV.getText().trim();
+        if (!ma.isEmpty()) {
+            if (!ma.matches("^[A-Z]{2}[0-9]{2,}$")) {
+                showError("Mã NV không hợp lệ. Mã đúng dạng: 2 chữ hoa theo sau là số, ví dụ PL01");
+                return false;
+            }
+        }
+
+        // Loại NV
+        if (cmbLoaiNV.getSelectedItem() == null) {
+            showError("Vui lòng chọn loại nhân viên!");
+            return false;
+        }
+
+        // Nếu mọi thứ ok, cập nhật trường tên
+        txtTenNV.setText(ten);
+        txtSDT.setText(sdt);
         return true;
+    }
+
+    private void showError(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Lỗi", JOptionPane.ERROR_MESSAGE);
     }
 }
