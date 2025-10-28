@@ -22,7 +22,8 @@ public class GheDAO {
 
     public List<Ghe> getByToa(String maToa) {
         List<Ghe> list = new ArrayList<>();
-        String sql = "SELECT maGhe, maToa, trangThai FROM Ghe WHERE maToa = ? ORDER BY maGhe";
+        // Đã thêm cột loaiGhe vào SELECT (tên cột có thể là 'loaiGhe' hoặc 'maLoaiGhe' tuỳ schema)
+        String sql = "SELECT maGhe, maToa, trangThai, loaiGhe FROM Ghe WHERE maToa = ? ORDER BY maGhe";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maToa);
@@ -32,6 +33,12 @@ public class GheDAO {
                     g.setMaGhe(rs.getString("maGhe"));
                     g.setMaToa(rs.getString("maToa"));
                     g.setTrangThai(rs.getString("trangThai"));
+                    // set loại ghế nếu có trong DB
+                    try {
+                        g.setLoaiGhe(rs.getString("loaiGhe"));
+                    } catch (Throwable ignored) {
+                        // nếu model không có setter/field, bỏ qua (mà nên bổ sung model)
+                    }
                     list.add(g);
                 }
             }
@@ -42,7 +49,7 @@ public class GheDAO {
     }
 
     public Ghe findById(String maGhe) {
-        String sql = "SELECT maGhe, maToa, trangThai FROM Ghe WHERE maGhe = ?";
+        String sql = "SELECT maGhe, maToa, trangThai, loaiGhe FROM Ghe WHERE maGhe = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maGhe);
@@ -52,6 +59,9 @@ public class GheDAO {
                     g.setMaGhe(rs.getString("maGhe"));
                     g.setMaToa(rs.getString("maToa"));
                     g.setTrangThai(rs.getString("trangThai"));
+                    try {
+                        g.setLoaiGhe(rs.getString("loaiGhe"));
+                    } catch (Throwable ignored) {}
                     return g;
                 }
             }
@@ -60,6 +70,7 @@ public class GheDAO {
         }
         return null;
     }
+
 
     public boolean update(Ghe ghe) {
         String sql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";

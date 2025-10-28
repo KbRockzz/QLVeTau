@@ -156,7 +156,6 @@ public class ChuyenTauService {
             List<Ve> danhSachVe = veDAO.getByChuyenAndDate(conn, maChuyen, date);
             if (danhSachVe == null) danhSachVe = java.util.Collections.emptyList();
 
-            // Prepare batch statements for seat and ticket updates
             String updateGheSql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
             String updateVeSql = "UPDATE Ve SET trangThai = ? WHERE maVe = ?";
             try (PreparedStatement pstGhe = conn.prepareStatement(updateGheSql);

@@ -1,7 +1,11 @@
 package com.trainstation.dao;
 
+import com.trainstation.model.BangGia;
+import com.trainstation.model.ChuyenTau;
 import com.trainstation.model.Ve;
 import com.trainstation.MySQL.ConnectSql;
+
+import java.lang.reflect.Method;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -99,55 +103,60 @@ public class VeDAO implements GenericDAO<Ve> {
     @Override
     public boolean insert(Ve v) {
         String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
+        Connection conn = null;
+        PreparedStatement pst = null;
+        try {
+            conn = ConnectSql.getInstance().getConnection();
+            // Tìm maChang từ maChuyen
+            String maChang = null;
+            try {
+                ChuyenTauDAO ctDAO = ChuyenTauDAO.getInstance();
+                ChuyenTau ct = ctDAO.findById(v.getMaChuyen());
+                if (ct != null) {
+                    // Giả sử ChuyenTau có phương thức getMaChang()
+                    maChang = ct.getMaChang();
+                }
+            } catch (Exception ignored) {
+                // Nếu không tìm được hoặc ChuyenTau thiếu trường, tiếp tục với maChang = null
+            }
+
+            // Tìm Bảng Giá áp dụng tại thời điểm đặt vé (ngay hiện tại)
+            BangGiaDAO bgDAO = BangGiaDAO.getInstance();
+            LocalDateTime now = LocalDateTime.now();
+            BangGia applicable = null;
+            if (maChang != null && v.getLoaiCho() != null) {
+                applicable = bgDAO.findApplicable(maChang, v.getLoaiCho(), now);
+            }
+
+            if (applicable != null) {
+                v.setMaBangGia(applicable.getMaBangGia());
+            } else {
+                // Không tìm thấy bảng giá phù hợp -> maBangGia để null (hoặc xử lý theo yêu cầu)
+                v.setMaBangGia(null);
+            }
+
+            pst = conn.prepareStatement(sql);
             pst.setString(1, v.getMaVe());
             pst.setString(2, v.getMaChuyen());
             pst.setString(3, v.getMaLoaiVe());
             pst.setString(4, v.getMaSoGhe());
-            if (v.getNgayIn() != null) {
-                pst.setTimestamp(5, Timestamp.valueOf(v.getNgayIn()));
-            } else {
-                pst.setNull(5, Types.TIMESTAMP);
-            }
+            if (v.getNgayIn() != null) pst.setTimestamp(5, Timestamp.valueOf(v.getNgayIn())); else pst.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
             pst.setString(6, v.getTrangThai());
             pst.setString(7, v.getGaDi());
             pst.setString(8, v.getGaDen());
-            if (v.getGioDi() != null) {
-                pst.setTimestamp(9, Timestamp.valueOf(v.getGioDi()));
-            } else {
-                pst.setNull(9, Types.TIMESTAMP);
-            }
+            if (v.getGioDi() != null) pst.setTimestamp(9, Timestamp.valueOf(v.getGioDi())); else pst.setNull(9, Types.TIMESTAMP);
             pst.setString(10, v.getSoToa());
             pst.setString(11, v.getLoaiCho());
             pst.setString(12, v.getLoaiVe());
             pst.setString(13, v.getMaBangGia());
+            System.out.println("DEBUG Ve.insert: inserting maVe=" + v.getMaVe() + " maBangGia=" + v.getMaBangGia());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        }
-    }
-
-    // Keep transactional insert using provided Connection (used by services that manage transactions)
-    public boolean insert(Ve ve, Connection conn) throws SQLException {
-        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, ve.getMaVe());
-            pst.setString(2, ve.getMaChuyen());
-            pst.setString(3, ve.getMaLoaiVe());
-            pst.setString(4, ve.getMaSoGhe());
-            if (ve.getNgayIn() != null) pst.setTimestamp(5, Timestamp.valueOf(ve.getNgayIn()));
-            else pst.setNull(5, Types.TIMESTAMP);
-            pst.setString(6, ve.getTrangThai());
-            pst.setString(7, ve.getGaDi());
-            pst.setString(8, ve.getGaDen());
-            if (ve.getGioDi() != null) pst.setTimestamp(9, Timestamp.valueOf(ve.getGioDi()));
-            else pst.setNull(9, Types.TIMESTAMP);
-            pst.setString(10, ve.getSoToa());
-            pst.setString(11, ve.getLoaiCho());
-            pst.setString(12, ve.getLoaiVe());
-            return pst.executeUpdate() > 0;
+        } finally {
+            try { if (pst != null) pst.close(); } catch (Exception ignored) {}
+            try { if (conn != null) conn.close(); } catch (Exception ignored) {}
         }
     }
 

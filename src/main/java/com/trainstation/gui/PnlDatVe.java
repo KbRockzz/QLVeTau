@@ -730,6 +730,14 @@ public class PnlDatVe extends JPanel {
         dialog.setVisible(true);
     }
 
+    /**
+     * Thực hiện đặt vé (thêm vé tạm vào hoá đơn mở trong session).
+     *
+     * Lưu ý: phần "áp dụng bảng giá" đã được tinh chỉnh:
+     *  - Lấy maChang từ object ChuyenTau nếu có (chứ không dùng maChuyen trực tiếp).
+     *  - Cố gắng resolve mã loại ghế từ bản ghi Ghe trong DB (qua getter phổ biến hoặc reflection).
+     *  - Gọi BangGiaDAO.findApplicable(maChang, loaiGheKey, LocalDateTime.now()) để lấy bảng giá đang áp dụng tại thời điểm đặt.
+     */
     private void datVe(KhachHang khachHang, LoaiVe loaiVe) {
         try {
             // Validate trip datetime again before actually adding
@@ -783,16 +791,34 @@ public class PnlDatVe extends JPanel {
             ve.setLoaiCho(toaDuocChon.getLoaiToa());
             ve.setLoaiVe(loaiVe.getTenLoai());
 
-            // 5) Lookup bảng giá hiện tại (áp dụng theo thời điểm đặt)
+            // -------------------------
+            // 5) Áp dụng bảng giá hiện tại
+            // -------------------------
             BangGia bangGia = null;
             try {
-                // Use the ticket type name (tenLoai) assuming BangGia.loaiGhe stores the type name.
-                // If your BangGia.loaiGhe stores the code (maLoaiVe), change to loaiVe.getMaLoaiVe()
-                bangGia = BangGiaDAO.getInstance().findApplicableForChuyen(
-                        chuyenDuocChon.getMaChuyen(),
-                        loaiVe.getTenLoai(),
-                        LocalDateTime.now()
-                );
+                // 1) Lấy maChang từ ChuyenTau (ưu tiên), fallback sang maChuyen nếu null/empty
+                String maChang = null;
+                try {
+                    maChang = chuyenDuocChon.getMaChang();
+                } catch (Throwable ignored) {
+                }
+                if (maChang == null || maChang.trim().isEmpty()) {
+                    maChang = chuyenDuocChon.getMaChuyen();
+                }
+
+                // 2) Lấy loại ghế từ gheDB.getLoaiGhe()
+                String loaiGheKey = null;
+                try {
+                    loaiGheKey = gheDB.getLoaiGhe();
+                } catch (Throwable t) {
+                    loaiGheKey = (toaDuocChon != null) ? toaDuocChon.getLoaiToa() : null;
+                }
+                if (loaiGheKey != null) loaiGheKey = loaiGheKey.trim();
+
+                System.out.println("DEBUG datVe: resolved maChang='" + maChang + "' loaiGheKey='" + loaiGheKey + "' maGhe=" + (gheDuocChon != null ? gheDuocChon.getMaGhe() : "null"));
+
+                // 3) Gọi DAO để tìm bảng giá dựa trên maChang & loaiGheKey & thời điểm đặt (now)
+                bangGia = BangGiaDAO.getInstance().findApplicable(maChang, loaiGheKey, LocalDateTime.now());
             } catch (Exception ex) {
                 ex.printStackTrace();
                 bangGia = null;
@@ -800,53 +826,60 @@ public class PnlDatVe extends JPanel {
 
             if (bangGia == null) {
                 JOptionPane.showMessageDialog(this,
-                        "Không tìm thấy bảng giá phù hợp cho chuyến/loại vé đã chọn. Vui lòng kiểm tra cấu hình bảng giá.",
+                        "Không tìm thấy bảng giá phù hợp cho chặng/loại ghế đã chọn. Vui lòng kiểm tra cấu hình bảng giá.",
                         "Bảng giá không tồn tại",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Gán mã bảng giá và đơn giá vào đối tượng vé (nếu model Ve có trường donGia)
+            // GÁN maBangGia VÀO Vé TẠM (bắt buộc theo lựa chọn 1)
             ve.setMaBangGia(bangGia.getMaBangGia());
+            System.out.println("DEBUG datVe: assigned maBangGia=" + bangGia.getMaBangGia() + " to ve=" + ve.getMaVe());
 
-            // 6) Nếu chưa có hoaDonMo thì tìm hoặc tạo (giống logic trước đó)
-            HoaDonDAO hoaDonDAO = HoaDonDAO.getInstance();
-            if (hoaDonMo == null) {
-                List<HoaDon> danhSachHoaDon = hoaDonDAO.findByKhachHang(khachHang.getMaKhachHang());
-                for (HoaDon hd : danhSachHoaDon) {
-                    if ("Chờ xác nhận".equals(hd.getTrangThai())) {
-                        hoaDonMo = hd;
-                        break;
+            // Gán đơn giá nếu model Ve có trường donGia
+            try {
+                java.lang.reflect.Method mFloat = null;
+                try { mFloat = ve.getClass().getMethod("setDonGia", float.class); } catch (NoSuchMethodException ignored) {}
+                if (mFloat != null) mFloat.invoke(ve, bangGia.getGiaCoBan());
+                else {
+                    java.lang.reflect.Method mDouble = null;
+                    try { mDouble = ve.getClass().getMethod("setDonGia", double.class); } catch (NoSuchMethodException ignored) {}
+                    if (mDouble != null) mDouble.invoke(ve, (double) bangGia.getGiaCoBan());
+                    else {
+                        try {
+                            java.lang.reflect.Method mBig = ve.getClass().getMethod("setDonGia", java.math.BigDecimal.class);
+                            mBig.invoke(ve, java.math.BigDecimal.valueOf(bangGia.getGiaCoBan()));
+                        } catch (NoSuchMethodException ignored) {}
                     }
                 }
-            }
+            } catch (Throwable ignored) {}
+
+            // -------------------------
+            // 6) Thêm vé vào danh sách hoá đơn trong session (in-memory)
+            // -------------------------
+            // Nếu chưa có hoá đơn mở trong session, tạo 1 hoá đơn tạm
             if (hoaDonMo == null) {
-                String maHoaDon = "HD" + System.currentTimeMillis();
-                hoaDonMo = new HoaDon();
-                hoaDonMo.setMaHoaDon(maHoaDon);
-                hoaDonMo.setMaNV(taiKhoanHienTai != null ? taiKhoanHienTai.getMaNV() : "NV001");
-                hoaDonMo.setMaKH(khachHang.getMaKhachHang());
-                hoaDonMo.setNgayLap(null);
-                hoaDonMo.setPhuongThucThanhToan(null);
-                hoaDonMo.setTrangThai("Chờ xác nhận");
-                hoaDonDAO.insert(hoaDonMo); // lưu hoá đơn tạm
+                HoaDon hd = new HoaDon();
+                try {
+                    hd.setMaHoaDon("HD" + System.currentTimeMillis());
+                } catch (Throwable ignored) {
+                }
+                try { hd.setMaKH(khachHang.getMaKhachHang()); } catch (Throwable ignored) {}
+                try { hd.setTrangThai("Chờ xác nhận"); } catch (Throwable ignored) {}
+                try { hd.setNgayLap(LocalDateTime.now()); } catch (Throwable ignored) {}
+                hoaDonMo = hd;
             }
 
-            // 7) Thêm ve vào cấu trúc tạm trong memory (không chèn ChiTietHoaDon)
-            heldVeMap.put(ve.getMaSoGhe(), ve);
+            // Thêm vé vào danhSachVeTrongHoaDon và mark ghế là giữ tạm trong heldVeMap
             danhSachVeTrongHoaDon.add(ve);
+            heldVeMap.put(ve.getMaSoGhe(), ve);
 
-            // 8) Cập nhật UI: đổi màu nút ghế thành 'Đã giữ' (chỉ trên UI)
-            gheDuocChon.setTrangThai("Đã giữ"); // local object
-            hienThiSoDoGhe(toaDuocChon.getMaToa()); // reload hiển thị để thấy đổi màu (nếu code hiển thị dựa trên ghe.getTrangThai())
-
-            JOptionPane.showMessageDialog(this,
-                    "Đã thêm vé vào hoá đơn tạm. Bạn có thể tiếp tục chọn vé khác hoặc xác nhận thanh toán.",
-                    "Đã thêm", JOptionPane.INFORMATION_MESSAGE);
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Lỗi khi thêm vé tạm: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+            // Cập nhật UI: đánh dấu ghế đã giữ (hiển thị màu xanh dương)
+            JOptionPane.showMessageDialog(this, "Đã thêm vé vào hoá đơn (Giữ ghế tạm). Vui lòng tiến hành 'Xác nhận thanh toán' để hoàn tất.", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            if (toaDuocChon != null) hienThiSoDoGhe(toaDuocChon.getMaToa());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi đặt vé: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
     }
 

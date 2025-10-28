@@ -24,6 +24,7 @@ import com.trainstation.model.BangGia;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -64,11 +65,8 @@ public class VeService {
     /**
      * Tạo vé mới
      */
-    public Ve taoVe(Ve ve) {
-        if (veDAO.insert(ve)) {
-            return ve;
-        }
-        throw new RuntimeException("Không thể tạo vé");
+    public boolean taoVe(Ve ve) {
+        return veDAO.insert(ve);
     }
 
     /**
@@ -445,79 +443,5 @@ public class VeService {
 
         return fileName;
     }
-    // thêm phương thức vào VeService hiện có (hoặc tạo mới)
-    public void attachChiTietHoaDonToVe(Ve ve) {
-        if (ve == null) return;
-        try {
-            com.trainstation.dao.ChiTietHoaDonDAO cthdDAO = com.trainstation.dao.ChiTietHoaDonDAO.getInstance();
-            com.trainstation.model.ChiTietHoaDon cthd = cthdDAO.findById(ve.getMaVe()); // cần DAO hỗ trợ tìm theo maVe
-            ve.setChiTietHoaDon(cthd);
-        } catch (Exception e) {
-            // log, nhưng không ném để UI vẫn hoạt động (sẽ fallback sang computePrice)
-        }
-    }
 
-    // tiện ích để attach cho list vé
-    public void attachChiTietHoaDonToList(List<Ve> veList) {
-        if (veList == null || veList.isEmpty()) return;
-        for (Ve v : veList) {
-            attachChiTietHoaDonToVe(v);
-        }
-    }
-    public boolean releaseSeatsWhenChuyenArrived(String maChuyen, boolean freePaidSeats) throws SQLException {
-        String updateGheSql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
-        String updateVeSql = "UPDATE Ve SET trangThai = ? WHERE maVe = ?";
-
-        Connection conn = null;
-        boolean prevAutoCommit = true;
-        try {
-            conn = ConnectSql.getInstance().getConnection();
-            prevAutoCommit = conn.getAutoCommit();
-            conn.setAutoCommit(false);
-
-            // Lấy tất cả vé của chuyến trong cùng connection
-            List<Ve> danhSachVe = veDAO.getByChuyen(conn, maChuyen);
-
-            try (PreparedStatement pstGhe = conn.prepareStatement(updateGheSql);
-                 PreparedStatement pstVe = conn.prepareStatement(updateVeSql)) {
-
-                for (Ve v : danhSachVe) {
-                    String maVe = v.getMaVe();
-                    String maGhe = v.getMaSoGhe();
-                    String trangThaiVe = v.getTrangThai() != null ? v.getTrangThai().trim() : "";
-
-                    // Quy tắc: nếu vé đã thanh toán và freePaidSeats == false -> không giải phóng ghế
-                    if (!freePaidSeats && "Đã thanh toán".equalsIgnoreCase(trangThaiVe)) {
-                        continue;
-                    }
-
-                    // 1) Cập nhật trạng thái ghế (bạn có thể đổi "Trống" sang giá trị hợp chuẩn)
-                    pstGhe.setString(1, "Trống");
-                    pstGhe.setString(2, maGhe);
-                    pstGhe.executeUpdate();
-
-                    // 2) (Tùy chọn) cập nhật trạng thái vé là "Đã kết thúc" (hoặc "Đã sử dụng")
-                    // Nếu bạn không muốn thay trạng thái vé, bỏ khối dưới.
-                    pstVe.setString(1, "Đã kết thúc"); // hoặc "Đã sử dụng"
-                    pstVe.setString(2, maVe);
-                    pstVe.executeUpdate();
-                }
-            }
-
-            conn.commit();
-            return true;
-        } catch (SQLException ex) {
-            if (conn != null) {
-                try { conn.rollback(); } catch (SQLException ignore) {}
-            }
-            throw ex;
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(prevAutoCommit);
-                    conn.close();
-                } catch (SQLException ignore) {}
-            }
-        }
-    }
 }
