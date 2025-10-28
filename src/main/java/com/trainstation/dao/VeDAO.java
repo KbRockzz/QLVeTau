@@ -273,10 +273,20 @@ public class VeDAO implements GenericDAO<Ve> {
     }
     public List<Ve> getByChuyenAndDate(Connection conn, String maChuyen, LocalDate date) throws SQLException {
         List<Ve> list = new ArrayList<>();
-        String sql = "SELECT maVe, maChuyen, maSoGhe, trangThai, gioDi, ... FROM Ve WHERE maChuyen = ? AND DATE(gioDi) = ?";
+        if (conn == null) throw new SQLException("Connection is null");
+        if (maChuyen == null || maChuyen.trim().isEmpty() || date == null) return list;
+
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+
+        String sql = "SELECT maVe, maChuyen, maSoGhe, trangThai, gioDi FROM Ve " +
+                "WHERE maChuyen = ? AND gioDi >= ? AND gioDi < ? ORDER BY gioDi";
+
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maChuyen);
-            pst.setDate(2, Date.valueOf(date));
+            pst.setTimestamp(2, Timestamp.valueOf(start));
+            pst.setTimestamp(3, Timestamp.valueOf(end));
+
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Ve v = new Ve();
@@ -286,11 +296,12 @@ public class VeDAO implements GenericDAO<Ve> {
                     v.setTrangThai(rs.getString("trangThai"));
                     Timestamp ts = rs.getTimestamp("gioDi");
                     if (ts != null) v.setGioDi(ts.toLocalDateTime());
-                    // set các field khác nếu cần
+                    // set thêm các field khác nếu cần (maKH, maLoaiVe, maBangGia, donGia, ngayIn, ...)
                     list.add(v);
                 }
             }
         }
+
         return list;
     }
 

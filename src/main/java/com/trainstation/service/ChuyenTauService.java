@@ -79,10 +79,6 @@ public class ChuyenTauService {
     /**
      * Khởi hành chuyến vào ngày cụ thể: cập nhật trạng thái tàu = "Đang chạy".
      * Không cập nhật ChuyenTau toàn cục (theo yêu cầu).
-     *
-     * @param maChuyen chuyến mẫu
-     * @param date     ngày chạy (LocalDate)
-     * @param user     người thực hiện (cho log)
      */
     public void startChuyenOnDate(String maChuyen, LocalDate date, String user) throws SQLException {
         Connection conn = null;
@@ -96,19 +92,19 @@ public class ChuyenTauService {
             if (ct == null) throw new SQLException("Không tìm thấy chuyến: " + maChuyen);
             String maTau = ct.getMaTau();
 
-            // Kiểm tra trạng thái tàu
-            Tau tau = tauDAO.findById(maTau);
-            if (tau != null) {
-                String cur = tau.getTrangThai() == null ? "" : tau.getTrangThai().trim();
-                // policy: chỉ cho start nếu tàu đang "Sẵn sàng" hoặc rảnh
-                if (!cur.isEmpty() && !cur.equalsIgnoreCase("Sẵn sàng") && !cur.equalsIgnoreCase("Rảnh")) {
+            // Kiểm tra trạng thái chuyến tàu
+            ChuyenTau Ctau = chuyenTauDAO.findById(maTau);
+            if (Ctau != null) {
+                String cur = Ctau.getTrangThai() == null ? "" : Ctau.getTrangThai().trim();
+                // chỉ cho start nếu ctàu đang "Sẵn sàng"
+                if (!cur.isEmpty() || !cur.equalsIgnoreCase("Sẵn sàng")){
                     throw new SQLException("Tàu " + maTau + " hiện không sẵn sàng: " + cur);
                 }
             }
 
-            // update tau status
-            tauDAO.capNhatTrangThai(conn, maTau, "Đang chạy");
-
+            // update chuyen tau status
+//            tauDAO.capNhatTrangThai(conn, maTau, "Đang chạy");
+            chuyenTauDAO.capNhatTrangThai(conn, maChuyen, "Đang chạy");
             // commit và log action (we don't change ChuyenTau.trangThai)
             conn.commit();
             writeActionLog(String.format("START|%s|%s|%s|OK", maChuyen, date.toString(), user));
@@ -121,18 +117,12 @@ public class ChuyenTauService {
                 try { conn.setAutoCommit(prevAuto); conn.close(); } catch (SQLException ignore) {}
             }
         }
+
     }
 
     /**
      * Đến nơi: giải phóng ghế cho các vé của chuyến vào ngày date, cập nhật trạng thái vé (tùy policy),
      * và cập nhật trạng thái tàu -> "Sẵn sàng".
-     *
-     * @param maChuyen     mã chuyến template
-     * @param date         ngày của lần chạy
-     * @param freePaidSeats nếu true giải phóng cả ghế của vé đã thanh toán
-     * @param user         người thực hiện (cho log)
-     * @return số ghế được thay đổi
-     * @throws SQLException khi lỗi DB
      */
     public int arriveChuyenOnDate(String maChuyen, LocalDate date, boolean freePaidSeats, String user) throws SQLException {
         Connection conn = null;
@@ -143,30 +133,47 @@ public class ChuyenTauService {
             prevAuto = conn.getAutoCommit();
             conn.setAutoCommit(false);
 
+            // Load chuyến
             ChuyenTau ct = chuyenTauDAO.findById(maChuyen);
             if (ct == null) throw new SQLException("Không tìm thấy chuyến: " + maChuyen);
-            String maTau = ct.getMaTau();
 
-            // Lấy danh sách vé của chuyến vào ngày date - VeDAO cần có getByChuyenAndDate(conn,...)
+            // Optional: verify the chuyến's gioDi matches the provided date (if your model stores per-instance date/time)
+            if (ct.getGioDi() != null) {
+                if (!ct.getGioDi().toLocalDate().equals(date)) {
+                    // If you want to enforce strict match, uncomment the next line:
+                    // throw new SQLException("Chuyến " + maChuyen + " không chạy vào ngày: " + date);
+                    // Otherwise continue — we still filter tickets by date below.
+                }
+            }
+
+            // Check current chuyến status: should be "Đang chạy" before arriving
+            String curStatus = ct.getTrangThai() == null ? "" : ct.getTrangThai().trim();
+            if (!"Đang chạy".equalsIgnoreCase(curStatus)) {
+                throw new SQLException("Chuyến " + maChuyen + " hiện không ở trạng thái 'Đang chạy' (hiện: " + curStatus + ")");
+            }
+
+            // Get tickets for this chuyến on the given date (VeDAO must have getByChuyenAndDate(conn, maChuyen, date))
             List<Ve> danhSachVe = veDAO.getByChuyenAndDate(conn, maChuyen, date);
+            if (danhSachVe == null) danhSachVe = java.util.Collections.emptyList();
 
-            // Cập nhật ghế & vé
+            // Prepare batch statements for seat and ticket updates
             String updateGheSql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
             String updateVeSql = "UPDATE Ve SET trangThai = ? WHERE maVe = ?";
             try (PreparedStatement pstGhe = conn.prepareStatement(updateGheSql);
                  PreparedStatement pstVe = conn.prepareStatement(updateVeSql)) {
 
                 for (Ve v : danhSachVe) {
+                    if (v == null) continue;
                     String trangThaiVe = v.getTrangThai() == null ? "" : v.getTrangThai().trim();
 
-                    if (!freePaidSeats && trangThaiVe.equalsIgnoreCase("Đã thanh toán")) {
-                        // skip paid tickets if policy says so
+                    // If policy says don't free already paid seats, skip those tickets
+                    if (!freePaidSeats && "Đã thanh toán".equalsIgnoreCase(trangThaiVe)) {
                         continue;
                     }
 
                     String maGhe = v.getMaSoGhe();
                     if (maGhe != null && !maGhe.trim().isEmpty()) {
-                        pstGhe.setString(1, "Trống");
+                        pstGhe.setString(1, "Rảnh");
                         pstGhe.setString(2, maGhe);
                         pstGhe.addBatch();
                     }
@@ -178,12 +185,19 @@ public class ChuyenTauService {
                     updatedSeats++;
                 }
 
-                pstGhe.executeBatch();
-                pstVe.executeBatch();
+                // Execute batches (if any)
+                try {
+                    int[] resGhe = pstGhe.executeBatch();
+                    int[] resVe = pstVe.executeBatch();
+                    // Note: res arrays may contain Statement.SUCCESS_NO_INFO / execute counts.
+                } catch (BatchUpdateException bue) {
+                    // If a batch fails, rethrow as SQLException to trigger rollback and logging
+                    throw new SQLException("Lỗi khi cập nhật ghế/vé (batch): " + bue.getMessage(), bue);
+                }
             }
 
-            // cập nhật trạng thái tàu về "Sẵn sàng"
-            tauDAO.capNhatTrangThai(conn, maTau, "Sẵn sàng");
+            // Update chuyến status to Hoàn tất
+            chuyenTauDAO.capNhatTrangThai(conn, maChuyen, "Hoàn tất");
 
             conn.commit();
             writeActionLog(String.format("ARRIVE|%s|%s|%s|freePaid=%s|updatedSeats=%d|OK",
@@ -205,38 +219,17 @@ public class ChuyenTauService {
      * Hủy chuyến vào ngày date (tùy policy: có thể thông báo/ gỡ vé / hoàn tiền).
      * Ở đây chỉ cập nhật trạng thái tàu về Sẵn sàng và ghi log; không thay đổi dữ liệu vé tự động.
      */
-    public void cancelChuyenOnDate(String maChuyen, LocalDate date, String user) throws SQLException {
-        Connection conn = null;
-        boolean prevAuto = true;
-        try {
-            conn = ConnectSql.getInstance().getConnection();
-            prevAuto = conn.getAutoCommit();
-            conn.setAutoCommit(false);
-
-            ChuyenTau ct = chuyenTauDAO.findById(maChuyen);
-            if (ct == null) throw new SQLException("Không tìm thấy chuyến: " + maChuyen);
-            String maTau = ct.getMaTau();
-
-            // policy: set train to "Sẵn sàng"
-            tauDAO.capNhatTrangThai(conn, maTau, "Sẵn sàng");
-
-            conn.commit();
-            writeActionLog(String.format("CANCEL|%s|%s|%s|OK", maChuyen, date.toString(), user));
-        } catch (SQLException ex) {
-            if (conn != null) try { conn.rollback(); } catch (SQLException ignore) {}
-            writeActionLog(String.format("CANCEL|%s|%s|%s|ERROR:%s", maChuyen, date.toString(), user, ex.getMessage()));
-            throw ex;
-        } finally {
-            if (conn != null) {
-                try { conn.setAutoCommit(prevAuto); conn.close(); } catch (SQLException ignore) {}
-            }
-        }
-    }
 
     private synchronized void writeActionLog(String line) {
         try (PrintWriter out = new PrintWriter(new FileWriter(actionLogFile, true))) {
             out.println(java.time.ZonedDateTime.now(ZoneId.systemDefault()) + "|" + line);
         } catch (Exception ignored) {
         }
+    }
+
+    public String getChuyenTauStatus(String maTau) {
+        ChuyenTau CT = chuyenTauDAO.findById(maTau);
+        if (CT == null) return "Không tìm thấy chuyến tàu";
+        return CT.getTrangThai();
     }
 }

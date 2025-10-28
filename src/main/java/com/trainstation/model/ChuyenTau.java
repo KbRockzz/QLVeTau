@@ -13,11 +13,12 @@ public class ChuyenTau implements Serializable {
     private LocalDateTime gioDen;
     private int soKm;
     private String maChang;
+    private String trangThai; // Thêm trường trạng thái
 
     public ChuyenTau() {
     }
 
-    public ChuyenTau(String maChuyen, String maTau, String maNV, String gaDi, String gaDen, LocalDateTime gioDi, LocalDateTime gioDen, int soKm, String maChang) {
+    public ChuyenTau(String maChuyen, String maTau, String maNV, String gaDi, String gaDen, LocalDateTime gioDi, LocalDateTime gioDen, int soKm, String maChang,String trangThai) {
         this.maChuyen = maChuyen;
         this.maTau = maTau;
         this.maNV = maNV;
@@ -27,6 +28,7 @@ public class ChuyenTau implements Serializable {
         this.gioDen = gioDen;
         this.soKm = soKm;
         this.maChang = maChang;
+        this.trangThai = trangThai;
     }
 
     public String getMaChuyen() {
@@ -114,5 +116,13 @@ public class ChuyenTau implements Serializable {
                 ", soKm=" + soKm +
                 ", maChang='" + maChang + '\'' +
                 '}';
+    }
+
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
     }
 }

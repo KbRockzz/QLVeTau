@@ -20,7 +20,7 @@ import java.util.List;
 public class PnlChuyenTau extends JPanel {
     private final JTable table;
     private final DefaultTableModel model;
-    private final JButton btnRefresh, btnStart, btnArrived, btnCancel;
+    private final JButton btnRefresh, btnStart, btnArrived;
     private final JSpinner dateSpinner;
     private final ChuyenTauService chuyenTauService;
     private final VeDAO veDAO;
@@ -47,18 +47,15 @@ public class PnlChuyenTau extends JPanel {
         btnStart.addActionListener(e -> startSelected());
         btnArrived = new JButton("Đến nơi");
         btnArrived.addActionListener(e -> arrivedSelected());
-        btnCancel = new JButton("Hủy chuyến");
-        btnCancel.addActionListener(e -> cancelSelected());
 
         top.add(btnRefresh);
         top.add(btnStart);
         top.add(btnArrived);
-        top.add(btnCancel);
 
         add(top, BorderLayout.NORTH);
 
         // Added column "Ngày giờ chạy" before "Số vé (ngày)"
-        String[] cols = {"Mã chuyến", "Mã tàu", "Ga đi", "Ga đến", "Giờ mẫu", "Ngày giờ chạy", "Số vé (ngày)", "Trạng thái tàu"};
+        String[] cols = {"Mã chuyến", "Mã tàu", "Ga đi", "Ga đến", "Ngày giờ chạy", "Số vé (ngày)", "Trạng thái tàu"};
         model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int row, int col) { return false; }
         };
@@ -68,14 +65,13 @@ public class PnlChuyenTau extends JPanel {
         sp.setBorder(BorderFactory.createTitledBorder("Danh sách chuyến"));
         add(sp, BorderLayout.CENTER);
 
-        // bottom: show selected chuyến detail simple
         JPanel bottom = new JPanel(new BorderLayout());
         bottom.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         JLabel lblNote = new JLabel("Chọn 1 chuyến rồi thao tác. Các thay đổi sẽ áp dụng cho ngày đã chọn.");
         bottom.add(lblNote, BorderLayout.WEST);
         add(bottom, BorderLayout.SOUTH);
 
-        // If UIUtils exists, adjust
+
         try { UIUtils.adjustTableForScale(table, 1.2f); } catch (Throwable ignored) {}
 
         loadData();
@@ -102,12 +98,8 @@ public class PnlChuyenTau extends JPanel {
                 if (list == null) return null;
                 for (ChuyenTau c : list) {
                     try {
-                        // Determine whether this chuyến should be shown for the selected date,
-                        // and compute a "runTime" to display (if available).
                         LocalDateTime runTime = null;
                         boolean include = false;
-
-                        // If the template has a concrete gioDi (date+time), check its date
                         if (c.getGioDi() != null) {
                             runTime = c.getGioDi();
                             if (runTime.toLocalDate().equals(date)) {
@@ -116,11 +108,9 @@ public class PnlChuyenTau extends JPanel {
                                 include = false;
                             }
                         } else {
-                            // Template: check if there are any tickets for this chuyến on that date
                             List<Ve> ves = veDAO.getByChuyenAndDate(c.getMaChuyen(), date);
                             if (ves != null && !ves.isEmpty()) {
                                 include = true;
-                                // try to get runtime from first ticket that has gioDi
                                 for (Ve v : ves) {
                                     if (v.getGioDi() != null) {
                                         runTime = v.getGioDi();
@@ -132,21 +122,19 @@ public class PnlChuyenTau extends JPanel {
                             }
                         }
 
-                        if (!include) continue; // skip this template/chuyến if not running on selected date
+                        if (!include) continue;
 
-                        // count tickets for the day (uses chuyenTauService which delegates to VeDAO)
                         int count = chuyenTauService.countTicketsForChuyenOnDate(c.getMaChuyen(), date);
 
                         String runTimeStr = runTime != null ? runTime.format(DT_FMT) : "";
                         String tauStatus = "";
-                        // optional: fill tauStatus via TauDAO if available (left empty if not)
+                        tauStatus = chuyenTauService.getChuyenTauStatus(c.getMaChuyen());
                         publish(new Object[]{
                                 c.getMaChuyen(),
                                 c.getMaTau(),
                                 c.getGaDi(),
                                 c.getGaDen(),
-                                c.getGioDi() != null ? c.getGioDi().format(DT_FMT) : "",
-                                runTimeStr,
+                                c.getGioDi(),
                                 count,
                                 tauStatus
                         });
@@ -158,7 +146,7 @@ public class PnlChuyenTau extends JPanel {
             }
 
             @Override
-            protected void process(java.util.List<Object[]> chunks) {
+            protected void process(List<Object[]> chunks) {
                 for (Object[] row : chunks) model.addRow(row);
             }
 
@@ -254,39 +242,6 @@ public class PnlChuyenTau extends JPanel {
             @Override
             protected void done() {
                 btnArrived.setEnabled(true);
-                loadData();
-            }
-        };
-        w.execute();
-    }
-
-    private void cancelSelected() {
-        String ma = getSelectedMaChuyen();
-        if (ma == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến để hủy.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        LocalDate date = getSelectedDate();
-        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn hủy chuyến " + ma + " ngày " + date + "?", "Xác nhận", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
-
-        btnCancel.setEnabled(false);
-        SwingWorker<Void, Void> w = new SwingWorker<>() {
-            @Override
-            protected Void doInBackground() {
-                try {
-                    chuyenTauService.cancelChuyenOnDate(ma, date, "UI");
-                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã hủy chuyến.", "Kết quả", JOptionPane.INFORMATION_MESSAGE));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(PnlChuyenTau.this, "Lỗi khi hủy: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE));
-                }
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                btnCancel.setEnabled(true);
                 loadData();
             }
         };

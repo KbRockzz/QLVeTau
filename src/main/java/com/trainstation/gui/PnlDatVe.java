@@ -9,11 +9,14 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Calendar;
+import java.util.Date;
 
 import com.toedter.calendar.JDateChooser;
 
@@ -28,6 +31,13 @@ public class PnlDatVe extends JPanel {
     private GheDAO gheDAO;
     private KhachHangDAO khachHangDAO;
     private LoaiVeDAO loaiVeDAO;
+
+    // Booking rules (configurable)
+    // If ALLOW_SAME_DAY = true then same-day booking is allowed subject to MIN_ADVANCE_MINUTES
+    // If ALLOW_SAME_DAY = false then booking date must be strictly after today.
+    private static final boolean ALLOW_SAME_DAY = true;
+    private static final int MIN_ADVANCE_MINUTES = 60; // minimum minutes from now to travel time
+    private static final int MAX_DAYS_AHEAD = 90; // maximum days ahead allowed to book
 
     // Customer search components
     private JTextField txtSoDienThoai;
@@ -132,6 +142,27 @@ public class PnlDatVe extends JPanel {
         dateNgayDi = new JDateChooser();
         dateNgayDi.setPreferredSize(new Dimension(120, 25));
         dateNgayDi.setDateFormatString("dd/MM/yyyy");
+        // Set min/max selectable dates based on booking rules
+        applyDateConstraintsToDateChooser();
+        // Validate manual entry
+        dateNgayDi.getDateEditor().addPropertyChangeListener("date", evt -> {
+            Date selected = dateNgayDi.getDate();
+            if (selected == null) return;
+            LocalDate sel = selected.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate min = computeEarliestAllowedDate();
+            LocalDate max = LocalDate.now().plusDays(MAX_DAYS_AHEAD);
+            if (sel.isBefore(min) || sel.isAfter(max)) {
+                JOptionPane.showMessageDialog(this,
+                        String.format("Vui lòng chọn ngày trong khoảng từ %s đến %s",
+                                min.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                                max.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))),
+                        "Ngày không hợp lệ",
+                        JOptionPane.WARNING_MESSAGE);
+                // reset to min
+                dateNgayDi.setDate(java.util.Date.from(min.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            }
+        });
+
         pnlTimChuyenTau.add(dateNgayDi);
 
         pnlTimChuyenTau.add(new JLabel("Giờ đi (từ):"));
@@ -227,6 +258,38 @@ public class PnlDatVe extends JPanel {
         taiDanhSachLoaiVe();
     }
 
+    /**
+     * Compute the earliest allowed booking date (date portion) depending on ALLOW_SAME_DAY and MIN_ADVANCE_MINUTES.
+     */
+    private LocalDate computeEarliestAllowedDate() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime earliest = now.plusMinutes(MIN_ADVANCE_MINUTES);
+        LocalDate earliestDate = earliest.toLocalDate();
+        if (!ALLOW_SAME_DAY) {
+            // require strictly after today -> earliestDate is tomorrow
+            return LocalDate.now().plusDays(1);
+        } else {
+            return earliestDate;
+        }
+    }
+
+    /**
+     * Apply min/max selectable date to the JDateChooser control according to booking rules.
+     */
+    private void applyDateConstraintsToDateChooser() {
+        LocalDate minDate = computeEarliestAllowedDate();
+        LocalDate maxDate = LocalDate.now().plusDays(MAX_DAYS_AHEAD);
+
+        Date min = java.util.Date.from(minDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date max = java.util.Date.from(maxDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        dateNgayDi.setMinSelectableDate(min);
+        dateNgayDi.setMaxSelectableDate(max);
+
+        // Set default selected date to minDate (if not null)
+        dateNgayDi.setDate(min);
+    }
+
     private void taiDanhSachGa() {
         cmbGaDi.removeAllItems();
         cmbGaDen.removeAllItems();
@@ -309,6 +372,15 @@ public class PnlDatVe extends JPanel {
             gioDi = date.toInstant()
                     .atZone(java.time.ZoneId.systemDefault())
                     .toLocalTime();
+        }
+
+        // Validate search date/time quickly for UX
+        if (ngayDi != null && gioDi != null) {
+            LocalDateTime selectedDT = LocalDateTime.of(ngayDi, gioDi);
+            if (!isBookingAllowedForDateTime(selectedDT)) {
+                // message already shown in isBookingAllowedForDateTime
+                return;
+            }
         }
 
         // Search trains with flexible criteria
@@ -434,23 +506,21 @@ public class PnlDatVe extends JPanel {
         btnGhe.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
         // Set color and tooltip based on status
-        if ("Rảnh".equals(ghe.getTrangThai())) {
+        if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai())) {
             btnGhe.setBackground(new Color(34, 139, 34)); // Green
-//            btnGhe.setForeground(Color.WHITE);
             btnGhe.setForeground(Color.BLACK);
             btnGhe.setEnabled(true);
             btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Trống");
             btnGhe.addActionListener(e -> chonGhe(ghe));
         } else {
             btnGhe.setBackground(Color.RED);
-//            btnGhe.setForeground(Color.WHITE);
             btnGhe.setForeground(Color.BLACK);
             btnGhe.setEnabled(false);
             btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đã đặt");
         }
         if (heldVeMap.containsKey(ghe.getMaGhe())) {
-            // hiển thị as 'Đã giữ' (orange)
-            btnGhe.setBackground(Color.BLUE); // blue for held
+            // hiển thị as 'Đã giữ' (blue)
+            btnGhe.setBackground(Color.BLUE);
             btnGhe.setEnabled(false);
             btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đang giữ (chưa thanh toán)");
             return btnGhe;
@@ -494,6 +564,17 @@ public class PnlDatVe extends JPanel {
             return;
         }
 
+        // Before confirming, validate that the trip datetime is allowed for booking
+        if (chuyenDuocChon == null || chuyenDuocChon.getGioDi() == null) {
+            JOptionPane.showMessageDialog(this, "Chưa chọn chuyến hoặc chuyến không có thời gian.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        LocalDateTime tripDateTime = chuyenDuocChon.getGioDi();
+        if (!isBookingAllowedForDateTime(tripDateTime)) {
+            // isBookingAllowedForDateTime shows message to user when invalid
+            return;
+        }
+
         // Confirm booking
         String message = String.format(
                 "Xác nhận đặt vé:\n\n" +
@@ -516,6 +597,47 @@ public class PnlDatVe extends JPanel {
         if (choice == JOptionPane.YES_OPTION) {
             datVe(khachHangDuocChon, loaiVe);
         }
+    }
+    private boolean isBookingAllowedForDateTime(LocalDateTime tripDateTime) {
+        if (tripDateTime == null) {
+            JOptionPane.showMessageDialog(this, "Thời gian chuyến không hợp lệ.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // If same-day booking is not allowed, require trip date strictly after today
+        if (!ALLOW_SAME_DAY) {
+            if (!tripDateTime.toLocalDate().isAfter(now.toLocalDate())) {
+                JOptionPane.showMessageDialog(this,
+                        "Chỉ được đặt vé cho các chuyến vào ngày sau ngày hôm nay.",
+                        "Không hợp lệ",
+                        JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+        } else {
+            // If same-day booking allowed, enforce a minimum advance time in minutes
+            LocalDateTime earliest = now.plusMinutes(MIN_ADVANCE_MINUTES);
+            if (tripDateTime.isBefore(earliest)) {
+                JOptionPane.showMessageDialog(this,
+                        String.format("Không thể đặt vé cho chuyến trước %d phút so với thời điểm hiện tại.", MIN_ADVANCE_MINUTES),
+                        "Không hợp lệ",
+                        JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+        }
+
+        // Enforce maximum days ahead window
+        LocalDateTime latest = now.plusDays(MAX_DAYS_AHEAD).with(LocalTime.MAX);
+        if (tripDateTime.isAfter(latest)) {
+            JOptionPane.showMessageDialog(this,
+                    String.format("Hiện chỉ cho phép đặt vé trong %d ngày tới.", MAX_DAYS_AHEAD),
+                    "Không hợp lệ",
+                    JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+        return true;
     }
 
     private void hienThiFormThemKhachHang(String soDienThoai) {
@@ -610,10 +732,43 @@ public class PnlDatVe extends JPanel {
 
     private void datVe(KhachHang khachHang, LoaiVe loaiVe) {
         try {
-            // 1) Tạo mã vé tạm (maVe tạm dùng timestamp)
+            // Validate trip datetime again before actually adding
+            if (chuyenDuocChon == null || chuyenDuocChon.getGioDi() == null) {
+                JOptionPane.showMessageDialog(this, "Chưa chọn chuyến hoặc chuyến không có thời gian.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            LocalDateTime tripDateTime = chuyenDuocChon.getGioDi();
+            if (!isBookingAllowedForDateTime(tripDateTime)) return;
+
+            // 1) Kiểm tra xem ghế đã được giữ trong session này chưa (trước khi tạo đối tượng vé)
+            if (gheDuocChon == null) {
+                JOptionPane.showMessageDialog(this, "Chưa chọn ghế.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (heldVeMap.containsKey(gheDuocChon.getMaGhe())) {
+                JOptionPane.showMessageDialog(this, "Ghế này đã được giữ trong hoá đơn hiện tại.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            // 2) Kiểm tra trạng thái ghế trên DB
+            Ghe gheDB = gheDAO.findById(gheDuocChon.getMaGhe());
+            if (gheDB == null) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy ghế trên hệ thống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            String trangThaiDB = gheDB.getTrangThai();
+            if (trangThaiDB != null && !"Rảnh".equalsIgnoreCase(trangThaiDB) && !"RANH".equalsIgnoreCase(trangThaiDB)) {
+                // Ghế đã bị đặt/giữ bởi người khác
+                JOptionPane.showMessageDialog(this, "Ghế này đã không còn trống (" + trangThaiDB + "). Vui lòng chọn ghế khác.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                // refresh seat map để hiển thị trạng thái thực tế
+                hienThiSoDoGhe(toaDuocChon.getMaToa());
+                return;
+            }
+
+            // 3) Tạo mã vé tạm (maVe tạm dùng timestamp)
             String maVe = "VE" + System.currentTimeMillis();
 
-            // 2) Tạo đối tượng Ve nhưng KHÔNG gọi veService.taoVe() ở đây
+            // 4) Tạo đối tượng Ve (tạm) và gán thuộc tính
             Ve ve = new Ve();
             ve.setMaVe(maVe);
             ve.setMaChuyen(chuyenDuocChon.getMaChuyen());
@@ -628,27 +783,33 @@ public class PnlDatVe extends JPanel {
             ve.setLoaiCho(toaDuocChon.getLoaiToa());
             ve.setLoaiVe(loaiVe.getTenLoai());
 
-            // 3) Kiểm tra xem ghế đã được giữ trong session này chưa
-            if (heldVeMap.containsKey(ve.getMaSoGhe())) {
-                JOptionPane.showMessageDialog(this, "Ghế này đã được giữ trong hoá đơn hiện tại.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                return;
+            // 5) Lookup bảng giá hiện tại (áp dụng theo thời điểm đặt)
+            BangGia bangGia = null;
+            try {
+                // Use the ticket type name (tenLoai) assuming BangGia.loaiGhe stores the type name.
+                // If your BangGia.loaiGhe stores the code (maLoaiVe), change to loaiVe.getMaLoaiVe()
+                bangGia = BangGiaDAO.getInstance().findApplicableForChuyen(
+                        chuyenDuocChon.getMaChuyen(),
+                        loaiVe.getTenLoai(),
+                        LocalDateTime.now()
+                );
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                bangGia = null;
             }
-            Ghe gheDB = gheDAO.findById(ve.getMaSoGhe());
-            if (gheDB == null) {
-                JOptionPane.showMessageDialog(this, "Không tìm thấy ghế trên hệ thống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            String trangThaiDB = gheDB.getTrangThai();
-            if (trangThaiDB != null && !"Rảnh".equalsIgnoreCase(trangThaiDB) && !"RANH".equalsIgnoreCase(trangThaiDB)) {
-                // Ghế đã bị đặt/giữ bởi người khác
-                JOptionPane.showMessageDialog(this, "Ghế này đã không còn trống (" + trangThaiDB + "). Vui lòng chọn ghế khác.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                // refresh seat map để hiển thị trạng thái thực tế
-                hienThiSoDoGhe(toaDuocChon.getMaToa());
+
+            if (bangGia == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Không tìm thấy bảng giá phù hợp cho chuyến/loại vé đã chọn. Vui lòng kiểm tra cấu hình bảng giá.",
+                        "Bảng giá không tồn tại",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
+            // Gán mã bảng giá và đơn giá vào đối tượng vé (nếu model Ve có trường donGia)
+            ve.setMaBangGia(bangGia.getMaBangGia());
 
-            // 4) Nếu chưa có hoaDonMo thì tìm hoặc tạo (giống logic trước đó)
+            // 6) Nếu chưa có hoaDonMo thì tìm hoặc tạo (giống logic trước đó)
             HoaDonDAO hoaDonDAO = HoaDonDAO.getInstance();
             if (hoaDonMo == null) {
                 List<HoaDon> danhSachHoaDon = hoaDonDAO.findByKhachHang(khachHang.getMaKhachHang());
@@ -671,13 +832,11 @@ public class PnlDatVe extends JPanel {
                 hoaDonDAO.insert(hoaDonMo); // lưu hoá đơn tạm
             }
 
-            // 5) Thêm ve vào cấu trúc tạm trong memory (không chèn ChiTietHoaDon)
+            // 7) Thêm ve vào cấu trúc tạm trong memory (không chèn ChiTietHoaDon)
             heldVeMap.put(ve.getMaSoGhe(), ve);
             danhSachVeTrongHoaDon.add(ve);
 
-            // 6) Cập nhật UI: đổi màu nút ghế thành 'Đã giữ' (chỉ trên UI)
-            // Bạn cần tìm nút tương ứng và đổi màu. Giả sử bạn giữ mapping giữa MaGhe -> JButton (không có sẵn),
-            // tạm cách đơn giản: cập nhật gheDuocChon object và gọi repaint layout:
+            // 8) Cập nhật UI: đổi màu nút ghế thành 'Đã giữ' (chỉ trên UI)
             gheDuocChon.setTrangThai("Đã giữ"); // local object
             hienThiSoDoGhe(toaDuocChon.getMaToa()); // reload hiển thị để thấy đổi màu (nếu code hiển thị dựa trên ghe.getTrangThai())
 

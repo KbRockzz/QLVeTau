@@ -28,7 +28,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
     @Override
     public List<ChuyenTau> getAll() {
         List<ChuyenTau> list = new ArrayList<>();
-        String sql = "SELECT maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang FROM ChuyenTau";
+        String sql = "SELECT maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -48,8 +48,8 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
                         gioDi,
                         gioDen,
                         rs.getInt("soKm"),
-                        rs.getString("maChang")
-                );
+                        rs.getString("maChang"),
+                        rs.getString("trangThai"));
                 list.add(ct);
             }
         } catch (SQLException e) {
@@ -60,7 +60,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     @Override
     public ChuyenTau findById(String id) {
-        String sql = "SELECT maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang FROM ChuyenTau WHERE maChuyen = ?";
+        String sql = "SELECT maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE maChuyen = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -81,7 +81,8 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
                             gioDi,
                             gioDen,
                             rs.getInt("soKm"),
-                            rs.getString("maChang")
+                            rs.getString("maChang"),
+                            rs.getString("trangThai")
                     );
                 }
             }
@@ -164,7 +165,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     public List<ChuyenTau> timKiemChuyenTau(String gaDi, String gaDen, LocalDate ngayDi, LocalTime gioDi) {
         List<ChuyenTau> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang FROM ChuyenTau WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE 1=1");
 
         if (gaDi != null && !gaDi.trim().isEmpty()) {
             sql.append(" AND gaDi = ?");
@@ -214,7 +215,8 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
                             gioDiDT,
                             gioDenDT,
                             rs.getInt("soKm"),
-                            rs.getString("maChang")
+                            rs.getString("maChang"),
+                            rs.getString("trangThai")
                     );
                     list.add(ct);
                 }
@@ -240,4 +242,14 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
         return new ArrayList<>(stations);
     }
 
+    public void capNhatTrangThai(Connection conn, String maChuyen, String tThai) {
+        String sql = "UPDATE ChuyenTau SET trangThai = ? WHERE maChuyen = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, tThai);
+            pst.setString(2, maChuyen);
+            pst.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
