@@ -278,13 +278,7 @@ public class PnlNhanVien extends JPanel {
         }
     }
 
-    /**
-     * Kiểm tra dữ liệu form trước khi thêm/cập nhật
-     * - Tên: ít nhất 2 từ, mỗi từ viết hoa chữ đầu, tổng 2-50 ký tự
-     * - SĐT: dạng 0xxxxxxxxx hoặc +84xxxxxxxxx (10 chữ số dạng 0... hoặc +84 +9 chữ số)
-     * - Ngày sinh: nếu nhập phải đúng định dạng yyyy-MM-dd và >= 16 tuổi
-     * - Địa chỉ: không để trống
-     */
+   
     private boolean kiemTraDuLieu() {
         // Tên
         String ten = txtTenNV.getText().trim().replaceAll("\\s+", " ");
@@ -358,7 +352,7 @@ public class PnlNhanVien extends JPanel {
             return false;
         }
 
-        // Nếu mọi thứ ok, cập nhật trường tên
+       
         txtTenNV.setText(ten);
         txtSDT.setText(sdt);
         return true;
