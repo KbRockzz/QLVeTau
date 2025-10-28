@@ -2,6 +2,8 @@ package com.trainstation.gui;
 
 import com.trainstation.service.KhachHangService;
 import com.trainstation.model.KhachHang;
+import com.trainstation.service.TauService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -111,8 +113,18 @@ public class PnlKhachHang extends JPanel {
                 txtTenKH.setText(modelBang.getValueAt(row, 1).toString());
                 txtEmail.setText(modelBang.getValueAt(row, 2).toString());
                 txtSDT.setText(modelBang.getValueAt(row, 3).toString());
+                txtMaKH.setEditable(false);
             }
         });
+    }
+
+    private void xoaForm() {
+        txtMaKH.setText(KhachHangService.getInstance().taoMaKhachHang());
+        txtTenKH.setText("");
+        txtEmail.setText("");
+        txtSDT.setText("");
+        txtTenKH.setEditable(true);
+        bangKhachHang.clearSelection();
     }
 
     private void taiDuLieuKhachHang() {
@@ -126,6 +138,7 @@ public class PnlKhachHang extends JPanel {
                     kh.getSoDienThoai()
             });
         }
+        xoaForm();
     }
 
     private boolean validateKhachHang() {

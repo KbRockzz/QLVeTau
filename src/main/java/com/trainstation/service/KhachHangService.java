@@ -2,6 +2,8 @@ package com.trainstation.service;
 
 import com.trainstation.dao.KhachHangDAO;
 import com.trainstation.model.KhachHang;
+import com.trainstation.model.NhanVien;
+
 import java.util.List;
 
 /**
@@ -62,5 +64,27 @@ public class KhachHangService {
      */
     public KhachHang timKhachHangTheoSoDienThoai(String soDienThoai) {
         return khachHangDAO.timTheoSoDienThoai(soDienThoai);
+    }
+
+    /**
+     * Tạo mã khách hàng tự động
+     */
+    public String taoMaKhachHang() {
+        List<KhachHang> danhSach = khachHangDAO.getAll();
+        int maxId = 0;
+        for (KhachHang kh : danhSach) {
+            String maKH = kh.getMaKhachHang();
+            if (maKH != null && maKH.startsWith("KH")) {
+                try {
+                    int id = Integer.parseInt(maKH.substring(2));
+                    if (id > maxId) {
+                        maxId = id;
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore invalid IDs
+                }
+            }
+        }
+        return String.format("KH%02d", maxId + 1);
     }
 }
