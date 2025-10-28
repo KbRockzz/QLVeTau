@@ -297,7 +297,7 @@ public class PnlNhanVien extends JPanel {
         // regex: ít nhất 2 từ, mỗi từ bắt đầu hoa; tổng độ dài 2-50
         String nameRegex = "^\\p{Lu}\\p{Ll}*(\\s\\p{Lu}\\p{Ll}*)*$";
         if (!ten.matches(nameRegex)) {
-            showError("Tên KH phải viết hoa chữ đầu mỗi từ và có ít nhất 2 từ (2–50 ký tự).");
+            showError("Tên NV phải viết hoa chữ đầu mỗi từ và có ít nhất 2 từ (2–50 ký tự).");
             return false;
         }
 

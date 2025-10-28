@@ -140,7 +140,7 @@ public class PnlKhachHang extends JPanel {
         }
 
         if (!tenKH.matches("^\\p{Lu}\\p{Ll}*(\\s\\p{Lu}\\p{Ll}*)*$")) {
-            JOptionPane.showMessageDialog(this, "Tên KH chỉ chứa chữ cái và khoảng trắng (2–50 ký tự)!");
+            JOptionPane.showMessageDialog(this, "Tên KH phải viết hoa chữ đầu mỗi từ và có ít nhất 2 từ (2–50 ký tự).");
             return false;
         }
 
