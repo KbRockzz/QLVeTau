@@ -154,7 +154,7 @@ public class PnlKhachHang extends JPanel {
             return false;
         }
 
-        // Nếu qua hết thì cập nhật lại tên đã chuẩn hóa
+       
         txtTenKH.setText(tenKH);
         return true;
     }
