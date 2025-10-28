@@ -23,6 +23,7 @@ public class FrmChinh extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1200, 700);
         setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // Auto-maximize window
         setLayout(new BorderLayout());
 
         // Navigation bar at the top
