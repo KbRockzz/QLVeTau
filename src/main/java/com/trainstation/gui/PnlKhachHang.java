@@ -30,11 +30,11 @@ public class PnlKhachHang extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Title
+        // Tiêu đề
         JLabel lblTieuDe = new JLabel("QUẢN LÝ KHÁCH HÀNG", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
 
-        // Search panel
+        // panel tìm kiếm
         JPanel pnlTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pnlTimKiem.add(new JLabel("Tìm theo SĐT:"));
         txtTimKiem = new JTextField(20);
@@ -55,7 +55,7 @@ public class PnlKhachHang extends JPanel {
         JScrollPane scrollPane = new JScrollPane(bangKhachHang);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Form panel
+        // panel form
         JPanel pnlForm = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -85,7 +85,7 @@ public class PnlKhachHang extends JPanel {
         txtSDT = new JTextField(20);
         pnlForm.add(txtSDT, gbc);
 
-        // Buttons
+        // Các nút
         JPanel pnlButton = new JPanel(new FlowLayout());
         btnThem = new JButton("Thêm");
         btnCapNhat = new JButton("Cập nhật");
@@ -105,7 +105,7 @@ public class PnlKhachHang extends JPanel {
         pnlDuoi.add(pnlButton, BorderLayout.SOUTH);
         add(pnlDuoi, BorderLayout.SOUTH);
 
-        // Table selection listener
+        // Chọn bảng để hiện thông tin trên mấy cái txt
         bangKhachHang.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && bangKhachHang.getSelectedRow() != -1) {
                 int row = bangKhachHang.getSelectedRow();

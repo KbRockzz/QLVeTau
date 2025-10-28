@@ -35,12 +35,12 @@ public class PnlHoanVe extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Title
+        // Tiêu đề
         JLabel lblTieuDe = new JLabel("HOÀN VÉ TÀU", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
         add(lblTieuDe, BorderLayout.NORTH);
 
-        // Ticket table
+        // Bảng danh sách vé
         String[] tenCot = {"Mã vé", "Chuyến", "Ga đi", "Ga đến", "Giờ đi", "Ghế", "Trạng thái"};
         modelBangVe = new DefaultTableModel(tenCot, 0) {
             @Override
@@ -53,7 +53,7 @@ public class PnlHoanVe extends JPanel {
         scrollVe.setBorder(BorderFactory.createTitledBorder("Danh sách vé"));
         add(scrollVe, BorderLayout.CENTER);
 
-        // Button panel
+        // panel nút
         JPanel pnlButton = new JPanel(new FlowLayout());
         
         btnGuiYeuCau = new JButton("Gửi yêu cầu hoàn vé");
@@ -79,7 +79,6 @@ public class PnlHoanVe extends JPanel {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         
         for (Ve ve : danhSach) {
-            // Show tickets that can be refunded or are pending approval
             String trangThai = ve.getTrangThai();
             if ("Đã đặt".equals(trangThai) || "Đã thanh toán".equals(trangThai) || 
                 "Chờ duyệt".equals(trangThai)) {
@@ -154,9 +153,9 @@ public class PnlHoanVe extends JPanel {
         
         if (choice == 0 || choice == 1) {
             try {
-                boolean chấpNhan = (choice == 0);
-                veService.duyetHoanVe(maVe, chấpNhan);
-                String message = chấpNhan ? "Đã chấp nhận hoàn vé!" : "Đã từ chối hoàn vé!";
+                boolean chapNhan = (choice == 0);
+                veService.duyetHoanVe(maVe, chapNhan);
+                String message = chapNhan ? "Đã chấp nhận hoàn vé!" : "Đã từ chối hoàn vé!";
                 JOptionPane.showMessageDialog(this, message, "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 taiDanhSachVe();
             } catch (Exception e) {

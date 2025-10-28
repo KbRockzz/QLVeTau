@@ -28,6 +28,20 @@ public class TauService {
         return instance;
     }
 
+    public List<Tau> layTatCaTau() {
+        return tauDAO.getAll();
+    }
+
+    public Tau timTauTheoMa(String maTau) {
+        return tauDAO.findById(maTau);
+    }
+
+    public List<ToaTau> layDanhSachToaTau(String maTau) {
+        return toaTauDAO.getAll().stream()
+                .filter(toa -> toa.getMaTau() != null && toa.getMaTau().equals(maTau))
+                .collect(Collectors.toList());
+    }
+
     /**
      * Tạo mã nhân viên tự động
      */
@@ -50,60 +64,22 @@ public class TauService {
         return String.format("T%03d", maxId + 1);
     }
 
-    /**
-     * Lấy tất cả tàu
-     */
-    public List<Tau> layTatCaTau() {
-        return tauDAO.getAll();
-    }
-
-    /**
-     * Tìm tàu theo mã
-     */
-    public Tau timTauTheoMa(String maTau) {
-        return tauDAO.findById(maTau);
-    }
-
-    /**
-     * Lấy danh sách toa tàu theo mã tàu
-     */
-    public List<ToaTau> layDanhSachToaTau(String maTau) {
-        return toaTauDAO.getAll().stream()
-                .filter(toa -> toa.getMaTau() != null && toa.getMaTau().equals(maTau))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Thêm tàu mới
-     */
     public boolean themTau(Tau tau) {
         return tauDAO.insert(tau);
     }
 
-    /**
-     * Cập nhật thông tin tàu
-     */
     public boolean capNhatTau(Tau tau) {
         return tauDAO.update(tau);
     }
 
-    /**
-     * Xóa tàu
-     */
     public boolean xoaTau(String maTau) {
         return tauDAO.delete(maTau);
     }
 
-    /**
-     * Dừng hoạt động tàu (soft delete)
-     */
     public boolean dungHoatDongTau(String maTau) {
         return tauDAO.dungHoatDongTau(maTau);
     }
 
-    /**
-     * Lấy danh sách tàu đang hoạt động
-     */
     public List<Tau> layTauHoatDong() {
         return tauDAO.layTauHoatDong();
     }

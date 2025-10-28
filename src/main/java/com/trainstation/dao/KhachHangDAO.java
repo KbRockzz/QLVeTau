@@ -104,12 +104,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
             return false;
         }
     }
-    
-    /**
-     * Find customer by phone number
-     * @param soDienThoai Phone number to search
-     * @return KhachHang object if found, null otherwise
-     */
+
     public KhachHang timTheoSoDienThoai(String soDienThoai) {
         String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE soDienThoai = ?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {

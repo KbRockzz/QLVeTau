@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  * Panel quản lý tàu
  */
 public class PnlTau extends JPanel {
-    // Regex patterns for validation
+    // Regex
     private static final Pattern PATTERN_MA_TAU = Pattern.compile("^T\\d{3}$");
     private static final Pattern PATTERN_TEN_TAU = Pattern.compile("^[\\p{L}0-9\\s\\-]{1,100}$");
     private static final Pattern PATTERN_SO_TOA = Pattern.compile("^([1-9]|[1-9][0-9])$");
@@ -34,40 +34,36 @@ public class PnlTau extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Title
+        // Tiêu đề
         JLabel lblTieuDe = new JLabel("QUẢN LÝ TÀU", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
         add(lblTieuDe, BorderLayout.NORTH);
 
-        // Input panel
+        // pannel nhập
         JPanel pnlInput = new JPanel(new GridBagLayout());
         pnlInput.setBorder(BorderFactory.createTitledBorder("Thông tin tàu"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Mã tàu
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
         pnlInput.add(new JLabel("Mã tàu:"), gbc);
         gbc.gridx = 1; gbc.weightx = 1;
         txtMaTau = new JTextField(20);
         pnlInput.add(txtMaTau, gbc);
 
-        // Tên tàu
         gbc.gridx = 2; gbc.weightx = 0;
         pnlInput.add(new JLabel("Tên tàu:"), gbc);
         gbc.gridx = 3; gbc.weightx = 1;
         txtTenTau = new JTextField(20);
         pnlInput.add(txtTenTau, gbc);
 
-        // Số toa
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
         pnlInput.add(new JLabel("Số toa:"), gbc);
         gbc.gridx = 1; gbc.weightx = 1;
         txtSoToa = new JTextField(20);
         pnlInput.add(txtSoToa, gbc);
 
-        // Trạng thái
         gbc.gridx = 2; gbc.weightx = 0;
         pnlInput.add(new JLabel("Trạng thái:"), gbc);
         gbc.gridx = 3; gbc.weightx = 1;
@@ -91,13 +87,12 @@ public class PnlTau extends JPanel {
         });
         JScrollPane scrollPane = new JScrollPane(bangTau);
 
-        // Combined panel for input and table
         JPanel pnlCenter = new JPanel(new BorderLayout(10, 10));
         pnlCenter.add(pnlInput, BorderLayout.NORTH);
         pnlCenter.add(scrollPane, BorderLayout.CENTER);
         add(pnlCenter, BorderLayout.CENTER);
 
-        // Buttons
+        // Các nút
         JPanel pnlButton = new JPanel(new FlowLayout());
         
         btnThemTau = new JButton("Thêm");
@@ -124,7 +119,7 @@ public class PnlTau extends JPanel {
 
     private void taiDuLieuTau() {
         modelBang.setRowCount(0);
-        // Chỉ hiển thị các tàu đang hoạt động (không bao gồm tàu dừng hoạt động)
+        // Không hiện thị các tàu dừng hoạt động
         List<Tau> danhSach = tauService.layTauHoatDong();
         for (Tau tau : danhSach) {
             modelBang.addRow(new Object[]{
@@ -143,7 +138,7 @@ public class PnlTau extends JPanel {
             txtTenTau.setText(modelBang.getValueAt(selectedRow, 1).toString());
             txtSoToa.setText(modelBang.getValueAt(selectedRow, 2).toString());
             cboTrangThai.setSelectedItem(modelBang.getValueAt(selectedRow, 3).toString());
-            txtMaTau.setEditable(false); // Không cho sửa mã tàu
+            txtMaTau.setEditable(false);
         }
     }
 
@@ -158,7 +153,7 @@ public class PnlTau extends JPanel {
 
     private void themTau() {
         try {
-            // Validate input
+            // Kiểm tra thông tin nhập vào
             String maTau = txtMaTau.getText().trim();
             String tenTau = txtTenTau.getText().trim();
             String soToaStr = txtSoToa.getText().trim();
@@ -172,14 +167,14 @@ public class PnlTau extends JPanel {
                 return;
             }
 
-            // Validate using regex
+            // Kiểm tra bằng regex
             if (!kiemTraHopLe(maTau, tenTau, soToaStr, false)) {
                 return;
             }
 
             int soToa = Integer.parseInt(soToaStr);
 
-            // Check if train already exists
+            // Kiểm tra đã tồn tại chưa
             if (tauService.timTauTheoMa(maTau) != null) {
                 JOptionPane.showMessageDialog(this, 
                     "Mã tàu đã tồn tại!", 
@@ -188,8 +183,8 @@ public class PnlTau extends JPanel {
                 return;
             }
 
-            // Tạo đối tượng tàu mới với trạng thái mặc định là "Hoạt động"
-            Tau tau = new Tau(maTau, soToa, tenTau, "Hoạt động");
+            // Tạo đối tượng tàu mới
+            Tau tau = new Tau(maTau, soToa, tenTau, trangThai);
             
             if (tauService.themTau(tau)) {
                 JOptionPane.showMessageDialog(this, 
@@ -224,7 +219,7 @@ public class PnlTau extends JPanel {
                 return;
             }
 
-            // Validate input
+            // Kiểm tra thông tin sửa
             String maTau = txtMaTau.getText().trim();
             String tenTau = txtTenTau.getText().trim();
             String soToaStr = txtSoToa.getText().trim();
@@ -238,7 +233,7 @@ public class PnlTau extends JPanel {
                 return;
             }
 
-            // Validate using regex
+            // Kiểm tra bằng regex
             if (!kiemTraHopLe(maTau, tenTau, soToaStr, true)) {
                 return;
             }
@@ -270,12 +265,8 @@ public class PnlTau extends JPanel {
         }
     }
 
-    /**
-     * Validates input fields using regex patterns
-     * @return true if all inputs are valid, false otherwise
-     */
     private boolean kiemTraHopLe(String maTau, String tenTau, String soToaStr, boolean isUpdate) {
-        // Validate Mã tàu
+        // Kiểm tra Mã tàu
         if (!PATTERN_MA_TAU.matcher(maTau).matches()) {
             JOptionPane.showMessageDialog(this,
                 "Mã tàu không hợp lệ (VD: T001)",
@@ -284,7 +275,7 @@ public class PnlTau extends JPanel {
             return false;
         }
 
-        // Validate Tên tàu
+        // Kiểm tra Tên tàu
         if (!PATTERN_TEN_TAU.matcher(tenTau).matches()) {
             JOptionPane.showMessageDialog(this,
                 "Tên tàu chỉ được chứa chữ, số, khoảng trắng, dấu gạch nối và tối đa 100 ký tự.",
@@ -293,7 +284,7 @@ public class PnlTau extends JPanel {
             return false;
         }
 
-        // Validate Số toa
+        // Kiểm tra Số toa
         if (!PATTERN_SO_TOA.matcher(soToaStr).matches()) {
             JOptionPane.showMessageDialog(this,
                 "Số toa phải là số từ 1 đến 99.",
