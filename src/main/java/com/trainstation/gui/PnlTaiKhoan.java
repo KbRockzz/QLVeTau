@@ -19,7 +19,7 @@ public class PnlTaiKhoan extends JPanel {
     private JTextField txtMaTK, txtMaNV, txtTenTK;
     private JPasswordField txtMatKhau;
     private JComboBox<String> cmbTrangThai;
-    private JButton btnThem, btnCapNhat, btnXoa, btnLamMoi, btnMoi, btnDoiMatKhau;
+    private JButton btnThem, btnCapNhat, btnXoa, btnLamMoi, btnXoaRong, btnDoiMatKhau;
 
     public PnlTaiKhoan() {
         this.taiKhoanService = TaiKhoanService.getInstance();
@@ -67,7 +67,7 @@ public class PnlTaiKhoan extends JPanel {
         gbc.gridx = 1; cmbTrangThai = new JComboBox<>(new String[]{"Hoạt động", "Khóa"}); pnlForm.add(cmbTrangThai, gbc);
 
         JPanel pnlButton = new JPanel(new FlowLayout());
-        btnMoi = new JButton("Mới"); btnMoi.addActionListener(e -> lamMoiForm()); pnlButton.add(btnMoi);
+        btnXoaRong = new JButton("Xóa rỗng"); btnXoaRong.addActionListener(e -> xoaRongForm()); pnlButton.add(btnXoaRong);
         btnThem = new JButton("Thêm"); btnThem.addActionListener(e -> themTaiKhoan()); pnlButton.add(btnThem);
         btnCapNhat = new JButton("Cập nhật"); btnCapNhat.addActionListener(e -> capNhatTaiKhoan()); pnlButton.add(btnCapNhat);
         btnDoiMatKhau = new JButton("Đổi mật khẩu"); btnDoiMatKhau.addActionListener(e -> doiMatKhau()); pnlButton.add(btnDoiMatKhau);
@@ -129,8 +129,8 @@ public class PnlTaiKhoan extends JPanel {
         cmbTrangThai.setSelectedItem(modelBang.getValueAt(r, 3));
     }
 
-    private void lamMoiForm() {
-        txtMaTK.setText("TK" + System.currentTimeMillis());
+    private void xoaRongForm() {
+        txtMaTK.setText(taiKhoanService.taoMaTaiKhoan());
         txtMaNV.setText("");
         txtTenTK.setText("");
         txtMatKhau.setText("");
@@ -141,7 +141,7 @@ public class PnlTaiKhoan extends JPanel {
     private void themTaiKhoan() {
         if (!kiemTraDuLieu()) return;
         String maTK = txtMaTK.getText().trim();
-        if (maTK.isEmpty()) maTK = "TK" + System.currentTimeMillis();
+        if (maTK.isEmpty()) maTK = taiKhoanService.taoMaTaiKhoan();
         TaiKhoan tk = new TaiKhoan(
                 maTK,
                 txtMaNV.getText().trim(),
@@ -151,7 +151,7 @@ public class PnlTaiKhoan extends JPanel {
         );
         if (taiKhoanService.themTaiKhoan(tk)) {
             JOptionPane.showMessageDialog(this, "✔ Thêm thành công!");
-            taiDuLieuTaiKhoan(); lamMoiForm();
+            taiDuLieuTaiKhoan(); xoaRongForm();
         } else JOptionPane.showMessageDialog(this, "❌ Thêm thất bại!");
     }
 
@@ -204,7 +204,7 @@ public class PnlTaiKhoan extends JPanel {
         if (c == JOptionPane.YES_OPTION) {
             if (taiKhoanService.xoaTaiKhoan(txtMaTK.getText().trim())) {
                 JOptionPane.showMessageDialog(this, "✔ Xóa thành công!");
-                taiDuLieuTaiKhoan(); lamMoiForm();
+                taiDuLieuTaiKhoan(); xoaRongForm();
             } else JOptionPane.showMessageDialog(this, "❌ Xóa thất bại!");
         }
     }

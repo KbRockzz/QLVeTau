@@ -7,7 +7,6 @@ import com.trainstation.model.LoaiNV;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -22,7 +21,7 @@ public class PnlNhanVien extends JPanel {
     private DefaultTableModel modelBang;
     private JTextField txtMaNV, txtTenNV, txtSDT, txtDiaChi, txtNgaySinh;
     private JComboBox<String> cmbLoaiNV;
-    private JButton btnThem, btnCapNhat, btnXoa, btnLamMoi, btnMoi;
+    private JButton btnThem, btnCapNhat, btnXoa, btnLamMoi, btnXoaRong;
 
     public PnlNhanVien() {
         this.nhanVienService = NhanVienService.getInstance();
@@ -107,9 +106,9 @@ public class PnlNhanVien extends JPanel {
         // Buttons
         JPanel pnlButton = new JPanel(new FlowLayout());
 
-        btnMoi = new JButton("Mới");
-        btnMoi.addActionListener(e -> lamMoiForm());
-        pnlButton.add(btnMoi);
+        btnXoaRong = new JButton("Xóa rỗng");
+        btnXoaRong.addActionListener(e -> xoaRongForm());
+        pnlButton.add(btnXoaRong);
 
         btnThem = new JButton("Thêm");
         btnThem.addActionListener(e -> themNhanVien());
@@ -170,7 +169,7 @@ public class PnlNhanVien extends JPanel {
         }
     }
 
-    private void lamMoiForm() {
+    private void xoaRongForm() {
         txtMaNV.setText(nhanVienService.taoMaNhanVien());
         txtTenNV.setText("");
         txtSDT.setText("");
@@ -211,7 +210,7 @@ public class PnlNhanVien extends JPanel {
             if (nhanVienService.themNhanVien(nv)) {
                 JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 taiDuLieuNhanVien();
-                lamMoiForm();
+                xoaRongForm();
             } else {
                 JOptionPane.showMessageDialog(this, "Thêm nhân viên thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
@@ -272,7 +271,7 @@ public class PnlNhanVien extends JPanel {
             if (nhanVienService.xoaNhanVien(txtMaNV.getText().trim())) {
                 JOptionPane.showMessageDialog(this, "Xóa nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 taiDuLieuNhanVien();
-                lamMoiForm();
+                xoaRongForm();
             } else {
                 JOptionPane.showMessageDialog(this, "Xóa nhân viên thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }

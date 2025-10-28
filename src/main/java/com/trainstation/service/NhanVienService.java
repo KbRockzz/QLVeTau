@@ -76,6 +76,6 @@ public class NhanVienService {
                 }
             }
         }
-        return String.format("NV%03d", maxId + 1);
+        return String.format("NV%02d", maxId + 1);
     }
 }
