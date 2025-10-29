@@ -8,10 +8,9 @@ import java.util.List;
 
 public class LoaiGheDAO implements GenericDAO<LoaiGhe> {
     private static LoaiGheDAO instance;
-    private Connection connection;
 
     private LoaiGheDAO() {
-        connection = ConnectSql.getInstance().getConnection();
+        // Không giữ Connection làm trường
     }
 
     public static synchronized LoaiGheDAO getInstance() {
@@ -25,13 +24,14 @@ public class LoaiGheDAO implements GenericDAO<LoaiGhe> {
     public List<LoaiGhe> getAll() {
         List<LoaiGhe> list = new ArrayList<>();
         String sql = "SELECT maLoai, tenLoai, moTa FROM LoaiGhe";
-        try (PreparedStatement pst = connection.prepareStatement(sql);
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 LoaiGhe lg = new LoaiGhe(
-                    rs.getString("maLoai"),
-                    rs.getString("tenLoai"),
-                    rs.getString("moTa")
+                        rs.getString("maLoai"),
+                        rs.getString("tenLoai"),
+                        rs.getString("moTa")
                 );
                 list.add(lg);
             }
@@ -44,14 +44,15 @@ public class LoaiGheDAO implements GenericDAO<LoaiGhe> {
     @Override
     public LoaiGhe findById(String id) {
         String sql = "SELECT maLoai, tenLoai, moTa FROM LoaiGhe WHERE maLoai = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return new LoaiGhe(
-                        rs.getString("maLoai"),
-                        rs.getString("tenLoai"),
-                        rs.getString("moTa")
+                            rs.getString("maLoai"),
+                            rs.getString("tenLoai"),
+                            rs.getString("moTa")
                     );
                 }
             }
@@ -64,7 +65,8 @@ public class LoaiGheDAO implements GenericDAO<LoaiGhe> {
     @Override
     public boolean insert(LoaiGhe lg) {
         String sql = "INSERT INTO LoaiGhe (maLoai, tenLoai, moTa) VALUES (?, ?, ?)";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, lg.getMaLoai());
             pst.setString(2, lg.getTenLoai());
             pst.setString(3, lg.getMoTa());
@@ -78,7 +80,8 @@ public class LoaiGheDAO implements GenericDAO<LoaiGhe> {
     @Override
     public boolean update(LoaiGhe lg) {
         String sql = "UPDATE LoaiGhe SET tenLoai = ?, moTa = ? WHERE maLoai = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, lg.getTenLoai());
             pst.setString(2, lg.getMoTa());
             pst.setString(3, lg.getMaLoai());
@@ -92,7 +95,8 @@ public class LoaiGheDAO implements GenericDAO<LoaiGhe> {
     @Override
     public boolean delete(String id) {
         String sql = "DELETE FROM LoaiGhe WHERE maLoai = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {

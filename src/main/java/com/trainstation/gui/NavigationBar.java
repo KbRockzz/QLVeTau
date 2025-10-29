@@ -63,7 +63,10 @@ public class NavigationBar extends JPanel {
         // Train button
         JButton trainBtn = createNavButton("Tàu", "train");
         leftPanel.add(trainBtn);
-        
+        // Train schedule button
+        JButton chuyenBtn = createNavButton("Chuyến", "traintimetable");
+        leftPanel.add(chuyenBtn);
+
         // Employee dropdown (if manager)
         if (currentAccount.isManager()) {
             JButton employeeMenuBtn = createNavButton("Nhân viên", null);

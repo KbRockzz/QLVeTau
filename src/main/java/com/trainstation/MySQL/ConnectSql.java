@@ -4,40 +4,40 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * ConnectSql: cung cấp Connection mới mỗi lần gọi getConnection().
+ * Tránh giữ 1 Connection singleton chia sẻ giữa nhiều DAO để không bị lỗi "The connection is closed".
+ *
+ * Lưu ý:
+ * - Caller phải đóng Connection sau khi dùng (ví dụ bằng try-with-resources).
+ * - Khi cần tối ưu hiệu năng, chuyển sang DataSource/connection pool (HikariCP).
+ */
 public class ConnectSql {
     private static ConnectSql instance;
-    private Connection connection;
-    
+
     // SQL Server connection parameters
     private static final String SERVER = "localhost";
     private static final String PORT = "1433";
     private static final String DATABASE = "QLTauHoa";
     private static final String USERNAME = "sa";
     private static final String PASSWORD = "sapassword";
-    
+
     // Connection string for SQL Server
-    private static final String CONNECTION_URL = 
-        "jdbc:sqlserver://" + SERVER + ":" + PORT + 
-        ";databaseName=" + DATABASE + 
-        ";encrypt=true;trustServerCertificate=true";
-    
+    private static final String CONNECTION_URL =
+            "jdbc:sqlserver://" + SERVER + ":" + PORT +
+                    ";databaseName=" + DATABASE +
+                    ";encrypt=true;trustServerCertificate=true";
+
     private ConnectSql() {
         try {
-            // Load SQL Server JDBC driver
+            // Load SQL Server JDBC driver once
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            
-            // Establish connection
-            connection = DriverManager.getConnection(CONNECTION_URL, USERNAME, PASSWORD);
-            System.out.println("Kết nối SQL Server thành công!");
         } catch (ClassNotFoundException e) {
             System.err.println("Không tìm thấy SQL Server JDBC Driver!");
             e.printStackTrace();
-        } catch (SQLException e) {
-            System.err.println("Lỗi kết nối SQL Server!");
-            e.printStackTrace();
         }
     }
-    
+
     /**
      * Get singleton instance of ConnectSql
      * @return ConnectSql instance
@@ -48,47 +48,32 @@ public class ConnectSql {
         }
         return instance;
     }
-    
+
     /**
-     * Get database connection
-     * @return Connection object
+     * Get a new database connection.
+     * IMPORTANT: caller phải đóng Connection sau khi dùng (try-with-resources).
+     * @return a new Connection
+     * @throws RuntimeException if cannot get connection
      */
     public Connection getConnection() {
         try {
-            // Check if connection is closed or invalid
-            if (connection == null || connection.isClosed()) {
-                connection = DriverManager.getConnection(CONNECTION_URL, USERNAME, PASSWORD);
-            }
+            // Always return a fresh connection (or from pool in future)
+            return DriverManager.getConnection(CONNECTION_URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
             System.err.println("Lỗi khi lấy kết nối!");
             e.printStackTrace();
-        }
-        return connection;
-    }
-    
-    /**
-     * Close database connection
-     */
-    public void closeConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-                System.out.println("Đã đóng kết nối SQL Server!");
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi đóng kết nối!");
-            e.printStackTrace();
+            throw new RuntimeException("Không thể tạo kết nối tới DB", e);
         }
     }
-    
+
     /**
-     * Test connection
-     * @return true if connection is valid, false otherwise
+     * Helper test connection: thử mở và đóng ngay để kiểm tra cấu hình.
+     * @return true nếu có thể kết nối
      */
     public boolean testConnection() {
-        try {
-            return connection != null && !connection.isClosed() && connection.isValid(5);
-        } catch (SQLException e) {
+        try (Connection conn = getConnection()) {
+            return conn != null && conn.isValid(5);
+        } catch (Exception e) {
             return false;
         }
     }

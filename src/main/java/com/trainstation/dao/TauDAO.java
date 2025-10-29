@@ -8,10 +8,9 @@ import java.util.List;
 
 public class TauDAO implements GenericDAO<Tau> {
     private static TauDAO instance;
-    private Connection connection;
 
     private TauDAO() {
-        connection = ConnectSql.getInstance().getConnection();
+        // Không giữ Connection làm trường
     }
 
     public static synchronized TauDAO getInstance() {
@@ -25,14 +24,15 @@ public class TauDAO implements GenericDAO<Tau> {
     public List<Tau> getAll() {
         List<Tau> list = new ArrayList<>();
         String sql = "SELECT maTau, soToa, tenTau, trangThai FROM Tau";
-        try (PreparedStatement pst = connection.prepareStatement(sql);
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 Tau t = new Tau(
-                    rs.getString("maTau"),
-                    rs.getInt("soToa"),
-                    rs.getString("tenTau"),
-                    rs.getString("trangThai")
+                        rs.getString("maTau"),
+                        rs.getInt("soToa"),
+                        rs.getString("tenTau"),
+                        rs.getString("trangThai")
                 );
                 list.add(t);
             }
@@ -45,15 +45,16 @@ public class TauDAO implements GenericDAO<Tau> {
     @Override
     public Tau findById(String id) {
         String sql = "SELECT maTau, soToa, tenTau, trangThai FROM Tau WHERE maTau = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return new Tau(
-                        rs.getString("maTau"),
-                        rs.getInt("soToa"),
-                        rs.getString("tenTau"),
-                        rs.getString("trangThai")
+                            rs.getString("maTau"),
+                            rs.getInt("soToa"),
+                            rs.getString("tenTau"),
+                            rs.getString("trangThai")
                     );
                 }
             }
@@ -66,7 +67,8 @@ public class TauDAO implements GenericDAO<Tau> {
     @Override
     public boolean insert(Tau t) {
         String sql = "INSERT INTO Tau (maTau, soToa, tenTau, trangThai) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, t.getMaTau());
             pst.setInt(2, t.getSoToa());
             pst.setString(3, t.getTenTau());
@@ -81,7 +83,8 @@ public class TauDAO implements GenericDAO<Tau> {
     @Override
     public boolean update(Tau t) {
         String sql = "UPDATE Tau SET soToa = ?, tenTau = ?, trangThai = ? WHERE maTau = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, t.getSoToa());
             pst.setString(2, t.getTenTau());
             pst.setString(3, t.getTrangThai());
@@ -96,7 +99,8 @@ public class TauDAO implements GenericDAO<Tau> {
     @Override
     public boolean delete(String id) {
         String sql = "DELETE FROM Tau WHERE maTau = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -105,12 +109,10 @@ public class TauDAO implements GenericDAO<Tau> {
         }
     }
 
-    /**
-     * Dừng hoạt động tàu (soft delete) - cập nhật trạng thái thành "Dừng hoạt động"
-     */
     public boolean dungHoatDongTau(String maTau) {
         String sql = "UPDATE Tau SET trangThai = N'Dừng hoạt động' WHERE maTau = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maTau);
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -119,20 +121,18 @@ public class TauDAO implements GenericDAO<Tau> {
         }
     }
 
-    /**
-     * Lấy danh sách tàu đang hoạt động (không bao gồm tàu dừng hoạt động)
-     */
     public List<Tau> layTauHoatDong() {
         List<Tau> list = new ArrayList<>();
         String sql = "SELECT maTau, soToa, tenTau, trangThai FROM Tau WHERE trangThai != N'Dừng hoạt động'";
-        try (PreparedStatement pst = connection.prepareStatement(sql);
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 Tau t = new Tau(
-                    rs.getString("maTau"),
-                    rs.getInt("soToa"),
-                    rs.getString("tenTau"),
-                    rs.getString("trangThai")
+                        rs.getString("maTau"),
+                        rs.getInt("soToa"),
+                        rs.getString("tenTau"),
+                        rs.getString("trangThai")
                 );
                 list.add(t);
             }
@@ -140,5 +140,16 @@ public class TauDAO implements GenericDAO<Tau> {
             e.printStackTrace();
         }
         return list;
+    }
+
+    public void capNhatTrangThai(Connection conn, String maTau, String sanSang) {
+        String sql = "UPDATE Tau SET trangThai = ? WHERE maTau = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, sanSang);
+            pst.setString(2, maTau);
+            pst.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

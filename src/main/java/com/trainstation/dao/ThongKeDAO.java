@@ -10,10 +10,9 @@ import java.util.Map;
 
 public class ThongKeDAO {
     private static ThongKeDAO instance;
-    private Connection connection;
 
     private ThongKeDAO() {
-        connection = ConnectSql.getInstance().getConnection();
+        // Không giữ Connection làm trường
     }
 
     public static synchronized ThongKeDAO getInstance() {
@@ -50,6 +49,7 @@ public class ThongKeDAO {
 
         return result;
     }
+  
     public List<Map<String, Object>> thongKeVeDoiHoan(LocalDate tuNgay, LocalDate denNgay) {
         List<Map<String, Object>> result = new ArrayList<>();
         String sql = "SELECT v.maVe, ct.maHoaDon, v.ngayIn, " +
@@ -126,7 +126,8 @@ public class ThongKeDAO {
 
     private int getTongSoGhe() {
         String sql = "SELECT COUNT(*) as total FROM Ghe";
-        try (PreparedStatement pst = connection.prepareStatement(sql);
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt("total");

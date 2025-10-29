@@ -8,10 +8,9 @@ import java.util.List;
 
 public class KhachHangDAO implements GenericDAO<KhachHang> {
     private static KhachHangDAO instance;
-    private Connection connection;
 
     private KhachHangDAO() {
-        connection = ConnectSql.getInstance().getConnection();
+        // Không giữ Connection làm trường
     }
 
     public static synchronized KhachHangDAO getInstance() {
@@ -25,14 +24,15 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     public List<KhachHang> getAll() {
         List<KhachHang> list = new ArrayList<>();
         String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang";
-        try (PreparedStatement pst = connection.prepareStatement(sql);
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 KhachHang kh = new KhachHang(
-                    rs.getString("maKhachHang"),
-                    rs.getString("tenKhachHang"),
-                    rs.getString("email"),
-                    rs.getString("soDienThoai")
+                        rs.getString("maKhachHang"),
+                        rs.getString("tenKhachHang"),
+                        rs.getString("email"),
+                        rs.getString("soDienThoai")
                 );
                 list.add(kh);
             }
@@ -45,15 +45,16 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     @Override
     public KhachHang findById(String id) {
         String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE maKhachHang = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return new KhachHang(
-                        rs.getString("maKhachHang"),
-                        rs.getString("tenKhachHang"),
-                        rs.getString("email"),
-                        rs.getString("soDienThoai")
+                            rs.getString("maKhachHang"),
+                            rs.getString("tenKhachHang"),
+                            rs.getString("email"),
+                            rs.getString("soDienThoai")
                     );
                 }
             }
@@ -66,7 +67,8 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     @Override
     public boolean insert(KhachHang kh) {
         String sql = "INSERT INTO KhachHang (maKhachHang, tenKhachHang, email, soDienThoai) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, kh.getMaKhachHang());
             pst.setString(2, kh.getTenKhachHang());
             pst.setString(3, kh.getEmail());
@@ -81,7 +83,8 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     @Override
     public boolean update(KhachHang kh) {
         String sql = "UPDATE KhachHang SET tenKhachHang = ?, email = ?, soDienThoai = ? WHERE maKhachHang = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, kh.getTenKhachHang());
             pst.setString(2, kh.getEmail());
             pst.setString(3, kh.getSoDienThoai());
@@ -96,7 +99,8 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     @Override
     public boolean delete(String id) {
         String sql = "DELETE FROM KhachHang WHERE maKhachHang = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -107,15 +111,16 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
 
     public KhachHang timTheoSoDienThoai(String soDienThoai) {
         String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE soDienThoai = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, soDienThoai);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return new KhachHang(
-                        rs.getString("maKhachHang"),
-                        rs.getString("tenKhachHang"),
-                        rs.getString("email"),
-                        rs.getString("soDienThoai")
+                            rs.getString("maKhachHang"),
+                            rs.getString("tenKhachHang"),
+                            rs.getString("email"),
+                            rs.getString("soDienThoai")
                     );
                 }
             }

@@ -1,17 +1,16 @@
 package com.trainstation.dao;
 
-import com.trainstation.model.ChiTietHoaDon;
 import com.trainstation.MySQL.ConnectSql;
+import com.trainstation.model.ChiTietHoaDon;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
     private static ChiTietHoaDonDAO instance;
-    private Connection connection;
 
     private ChiTietHoaDonDAO() {
-        connection = ConnectSql.getInstance().getConnection();
     }
 
     public static synchronized ChiTietHoaDonDAO getInstance() {
@@ -25,18 +24,18 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
     public List<ChiTietHoaDon> getAll() {
         List<ChiTietHoaDon> list = new ArrayList<>();
         String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon";
-        try (PreparedStatement pst = connection.prepareStatement(sql);
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
-                ChiTietHoaDon cthd = new ChiTietHoaDon(
-                    rs.getString("maHoaDon"),
-                    rs.getString("maVe"),
-                    rs.getString("maLoaiVe"),
-                    rs.getFloat("giaGoc"),
-                    rs.getFloat("giaDaKM"),
-                    rs.getString("moTa")
-                );
-                list.add(cthd);
+                ChiTietHoaDon ct = new ChiTietHoaDon();
+                ct.setMaHoaDon(rs.getString("maHoaDon"));
+                ct.setMaVe(rs.getString("maVe"));
+                ct.setMaLoaiVe(rs.getString("maLoaiVe"));
+                ct.setGiaGoc(rs.getFloat("giaGoc"));
+                ct.setGiaDaKM(rs.getFloat("giaDaKM"));
+                ct.setMoTa(rs.getString("moTa"));
+                list.add(ct);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -46,23 +45,21 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
 
     @Override
     public ChiTietHoaDon findById(String id) {
-        String[] ids = id.split(",");
-        if (ids.length != 2) return null;
-        
-        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setString(1, ids[0]);
-            pst.setString(2, ids[1]);
+        // composite PK (maHoaDon, maVe) - this method not applicable; keep simple lookup by maVe
+        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon WHERE maVe = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    return new ChiTietHoaDon(
-                        rs.getString("maHoaDon"),
-                        rs.getString("maVe"),
-                        rs.getString("maLoaiVe"),
-                        rs.getFloat("giaGoc"),
-                        rs.getFloat("giaDaKM"),
-                        rs.getString("moTa")
-                    );
+                    ChiTietHoaDon ct = new ChiTietHoaDon();
+                    ct.setMaHoaDon(rs.getString("maHoaDon"));
+                    ct.setMaVe(rs.getString("maVe"));
+                    ct.setMaLoaiVe(rs.getString("maLoaiVe"));
+                    ct.setGiaGoc(rs.getFloat("giaGoc"));
+                    ct.setGiaDaKM(rs.getFloat("giaDaKM"));
+                    ct.setMoTa(rs.getString("moTa"));
+                    return ct;
                 }
             }
         } catch (SQLException e) {
@@ -72,15 +69,16 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
     }
 
     @Override
-    public boolean insert(ChiTietHoaDon cthd) {
+    public boolean insert(ChiTietHoaDon ct) {
         String sql = "INSERT INTO ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setString(1, cthd.getMaHoaDon());
-            pst.setString(2, cthd.getMaVe());
-            pst.setString(3, cthd.getMaLoaiVe());
-            pst.setFloat(4, cthd.getGiaGoc());
-            pst.setFloat(5, cthd.getGiaDaKM());
-            pst.setString(6, cthd.getMoTa());
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, ct.getMaHoaDon());
+            pst.setString(2, ct.getMaVe());
+            pst.setString(3, ct.getMaLoaiVe());
+            pst.setFloat(4, ct.getGiaGoc());
+            pst.setFloat(5, ct.getGiaDaKM());
+            pst.setString(6, ct.getMoTa());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -88,16 +86,31 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
         }
     }
 
+    // New: insert using existing Connection (for transactional checkout)
+    public boolean insert(ChiTietHoaDon ct, Connection conn) throws SQLException {
+        String sql = "INSERT INTO ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa) VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, ct.getMaHoaDon());
+            pst.setString(2, ct.getMaVe());
+            pst.setString(3, ct.getMaLoaiVe());
+            pst.setFloat(4, ct.getGiaGoc());
+            pst.setFloat(5, ct.getGiaDaKM());
+            pst.setString(6, ct.getMoTa());
+            return pst.executeUpdate() > 0;
+        }
+    }
+
     @Override
-    public boolean update(ChiTietHoaDon cthd) {
+    public boolean update(ChiTietHoaDon ct) {
         String sql = "UPDATE ChiTietHoaDon SET maLoaiVe = ?, giaGoc = ?, giaDaKM = ?, moTa = ? WHERE maHoaDon = ? AND maVe = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setString(1, cthd.getMaLoaiVe());
-            pst.setFloat(2, cthd.getGiaGoc());
-            pst.setFloat(3, cthd.getGiaDaKM());
-            pst.setString(4, cthd.getMoTa());
-            pst.setString(5, cthd.getMaHoaDon());
-            pst.setString(6, cthd.getMaVe());
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, ct.getMaLoaiVe());
+            pst.setFloat(2, ct.getGiaGoc());
+            pst.setFloat(3, ct.getGiaDaKM());
+            pst.setString(4, ct.getMoTa());
+            pst.setString(5, ct.getMaHoaDon());
+            pst.setString(6, ct.getMaVe());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -107,13 +120,10 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
 
     @Override
     public boolean delete(String id) {
-        String[] ids = id.split(",");
-        if (ids.length != 2) return false;
-        
-        String sql = "DELETE FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setString(1, ids[0]);
-            pst.setString(2, ids[1]);
+        String sql = "DELETE FROM ChiTietHoaDon WHERE maVe = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, id);
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -121,25 +131,50 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
         }
     }
 
-    /**
-     * Lấy danh sách chi tiết hóa đơn theo mã hóa đơn
-     */
+    // New: exists check
+    public boolean exists(String maHoaDon, String maVe) {
+        String sql = "SELECT 1 FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maHoaDon);
+            pst.setString(2, maVe);
+            try (ResultSet rs = pst.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // exists using provided connection (transactional)
+    public boolean exists(String maHoaDon, String maVe, Connection conn) throws SQLException {
+        String sql = "SELECT 1 FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maHoaDon);
+            pst.setString(2, maVe);
+            try (ResultSet rs = pst.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     public List<ChiTietHoaDon> findByHoaDon(String maHoaDon) {
         List<ChiTietHoaDon> list = new ArrayList<>();
-        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon WHERE maHoaDon = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon WHERE maHoaDon = ? ORDER BY maVe";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maHoaDon);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    ChiTietHoaDon cthd = new ChiTietHoaDon(
-                        rs.getString("maHoaDon"),
-                        rs.getString("maVe"),
-                        rs.getString("maLoaiVe"),
-                        rs.getFloat("giaGoc"),
-                        rs.getFloat("giaDaKM"),
-                        rs.getString("moTa")
-                    );
-                    list.add(cthd);
+                    ChiTietHoaDon ct = new ChiTietHoaDon();
+                    ct.setMaHoaDon(rs.getString("maHoaDon"));
+                    ct.setMaVe(rs.getString("maVe"));
+                    ct.setMaLoaiVe(rs.getString("maLoaiVe"));
+                    ct.setGiaGoc(rs.getFloat("giaGoc"));
+                    ct.setGiaDaKM(rs.getFloat("giaDaKM"));
+                    ct.setMoTa(rs.getString("moTa"));
+                    list.add(ct);
                 }
             }
         } catch (SQLException e) {

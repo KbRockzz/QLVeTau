@@ -12,6 +12,7 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
+import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.dao.VeDAO;
 import com.trainstation.dao.GheDAO;
 import com.trainstation.dao.ChuyenTauDAO;
@@ -23,6 +24,10 @@ import com.trainstation.model.BangGia;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,6 +45,8 @@ public class VeService {
     private final ChuyenTauDAO chuyenTauDAO;
 
     private final BangGiaDAO bangGiaDAO;
+
+
 
     private VeService() {
         this.veDAO = VeDAO.getInstance();
@@ -281,7 +288,7 @@ public class VeService {
             PdfFont font = PdfFontFactory.createFont("fonts/Tinos-Regular.ttf", PdfEncodings.IDENTITY_H,
                     PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
             document.setFont(font);
-            
+
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
             NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
@@ -335,7 +342,7 @@ public class VeService {
             gaTable.addCell(new Cell()
                     .add(new Paragraph(ve.getGaDen() != null ? ve.getGaDen() : "N/A").setFont(font))
                     .setTextAlignment(TextAlignment.CENTER));
-            
+
             document.add(gaTable);
             document.add(new Paragraph("\n"));
 
@@ -387,12 +394,8 @@ public class VeService {
             // Giá cơ bản
             String priceStr = "N/A";
             try {
-                if (ve.getMaBangGia() != null && bangGiaDAO != null) {
-                    BangGia bangGia = bangGiaDAO.findById(ve.getMaBangGia());
-                    if (bangGia != null) {
-                        priceStr = String.format("%,.0f VNĐ", bangGia.getGiaCoBan());
-                    }
-                }
+                float priceToShow = ve.getDisplayPrice();
+                priceStr = String.format("%,.0f VNĐ", priceToShow);
             } catch (Exception e) {
                 priceStr = "N/A";
             }
@@ -416,4 +419,5 @@ public class VeService {
 
         return fileName;
     }
+
 }
