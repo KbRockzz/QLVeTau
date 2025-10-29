@@ -28,14 +28,12 @@ public class PnlHoanVe extends JPanel {
     private JButton btnGuiYeuCau, btnDuyetYeuCau, btnLamMoi;
     private boolean isManager;
 
-    // Search / filter controls: keep status filter + allow search by mã vé and ngày đi
     private JTextField txtMaVe;
     private JDateChooser dateChooser;
     private JComboBox<String> cbTrangThai;
     private JButton btnTimKiem;
     private JButton btnXoaTimKiem;
 
-    // Approve-all button
     private JButton btnDuyetTatCa;
 
     public PnlHoanVe(TaiKhoan taiKhoan) {
@@ -56,7 +54,7 @@ public class PnlHoanVe extends JPanel {
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 20));
         add(lblTieuDe, BorderLayout.NORTH);
 
-        // Search / filter panel (ma vé + ngày đi + trạng thái)
+        // filter
         JPanel pnlSearch = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
 
         pnlSearch.add(new JLabel("Mã vé:"));
@@ -76,7 +74,7 @@ public class PnlHoanVe extends JPanel {
                 "Chờ duyệt"
         });
         cbTrangThai.setSelectedIndex(0);
-        // when user changes status, immediately refresh results
+
         cbTrangThai.addActionListener(e -> applyFilters());
         pnlSearch.add(cbTrangThai);
 
@@ -85,7 +83,7 @@ public class PnlHoanVe extends JPanel {
         pnlSearch.add(btnTimKiem);
 
         btnXoaTimKiem = new JButton("Xóa tìm");
-        // Clear only the search fields (mã vé + ngày), keep status selection intact
+
         btnXoaTimKiem.addActionListener(e -> {
             clearSearchFields();
             applyFilters();
@@ -94,7 +92,7 @@ public class PnlHoanVe extends JPanel {
 
         add(pnlSearch, BorderLayout.BEFORE_FIRST_LINE);
 
-        // Ticket table
+        // table
         String[] tenCot = {"Mã vé", "Chuyến", "Ga đi", "Ga đến", "Giờ đi", "Ghế", "Trạng thái"};
         modelBangVe = new DefaultTableModel(tenCot, 0) {
             @Override
@@ -123,7 +121,7 @@ public class PnlHoanVe extends JPanel {
         }
 
         btnLamMoi = new JButton("Làm mới");
-        // "Làm mới" will reset everything including status filter
+
         btnLamMoi.addActionListener(e -> {
             clearAllFields();
             applyFilters();
@@ -133,22 +131,12 @@ public class PnlHoanVe extends JPanel {
         add(pnlButton, BorderLayout.SOUTH);
     }
 
-    /**
-     * Initial load - keep old behavior: if no filters, show relevant statuses.
-     */
     private void taiDanhSachVe() {
         // Default behavior: no search values, status = "Tất cả"
         clearAllFields();
         applyFilters();
     }
 
-    /**
-     * Apply filters: search by mã vé (contains, case-insensitive), by ngày đi (exact date),
-     * and by trạng thái (if selected other than "Tất cả").
-     *
-     * If no search criteria provided and status is "Tất cả", show only relevant statuses:
-     * "Đã đặt", "Đã thanh toán", "Chờ duyệt".
-     */
     private void applyFilters() {
         modelBangVe.setRowCount(0);
         List<Ve> danhSach = veService.layTatCaVe();
@@ -170,7 +158,6 @@ public class PnlHoanVe extends JPanel {
         for (Ve ve : danhSach) {
             String trangThai = ve.getTrangThai() != null ? ve.getTrangThai() : "";
 
-            // default behavior when nothing specified
             if (isAllEmpty) {
                 if (!"Đã đặt".equals(trangThai) && !"Đã thanh toán".equals(trangThai) &&
                         !"Chờ duyệt".equals(trangThai)) {
@@ -178,18 +165,15 @@ public class PnlHoanVe extends JPanel {
                 }
             }
 
-            // filter by mã vé (contains, case-insensitive)
             if (!qMaVe.isEmpty()) {
                 String maVe = ve.getMaVe() != null ? ve.getMaVe() : "";
                 if (!maVe.toLowerCase().contains(qMaVe.toLowerCase())) continue;
             }
 
-            // filter by ngày đi (compare date part only)
             if (qNgayDi != null) {
                 if (ve.getGioDi() == null || !ve.getGioDi().toLocalDate().equals(qNgayDi)) continue;
             }
 
-            // filter by trang thai if selected
             if (qTrangThai != null && !qTrangThai.equals(trangThai)) continue;
 
             modelBangVe.addRow(new Object[]{
@@ -204,13 +188,11 @@ public class PnlHoanVe extends JPanel {
         }
     }
 
-    // Clear only search inputs (maVe + date), keep status selection
     private void clearSearchFields() {
         txtMaVe.setText("");
         dateChooser.setDate(null);
     }
 
-    // Clear all fields including status
     private void clearAllFields() {
         txtMaVe.setText("");
         dateChooser.setDate(null);
@@ -286,10 +268,6 @@ public class PnlHoanVe extends JPanel {
         }
     }
 
-    /**
-     * Approve all pending refund requests ("Chờ duyệt").
-     * Only available to managers.
-     */
     private void duyetTatCaYeuCau() {
         List<Ve> allVe = veService.layTatCaVe();
         List<String> pendingMaVe = new ArrayList<>();

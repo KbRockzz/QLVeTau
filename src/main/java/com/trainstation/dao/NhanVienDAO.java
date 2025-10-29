@@ -132,7 +132,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
         String sql = "UPDATE NhanVien SET trangThai = ? WHERE maNV = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, "hidden"); // Set the status to "hidden"
+            pst.setString(1, "hidden"); // Set "hidden"
             pst.setString(2, id);
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {

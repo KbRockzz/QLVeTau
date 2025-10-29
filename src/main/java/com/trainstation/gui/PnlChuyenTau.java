@@ -181,7 +181,7 @@ public class PnlChuyenTau extends JPanel {
             @Override
             protected Void doInBackground() {
                 try {
-                    // user name could be fetched from session; using placeholder "UI"
+                    // Gọi dịch vụ khởi hành
                     chuyenTauService.startChuyenOnDate(ma, date, "UI");
                     SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã cập nhật: Khởi hành.", "Kết quả", JOptionPane.INFORMATION_MESSAGE));
                 } catch (Exception ex) {

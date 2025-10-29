@@ -57,6 +57,7 @@ public class FrmChinh extends JFrame {
             pnlNoiDung.add(taoPanelVoiBo(new PnlNhanVien()), "employee");
             pnlNoiDung.add(taoPanelVoiBo(new PnlTaiKhoan()), "account");
             pnlNoiDung.add(taoPanelVoiBo(new PnlThongKe()), "statistics");
+            pnlNoiDung.add(taoPanelVoiBo(new PnlDuLieuDaXoa()), "deletedemployees");
         }
 
         add(pnlNoiDung, BorderLayout.CENTER);
@@ -94,9 +95,9 @@ public class FrmChinh extends JFrame {
     public void dieuHuongDenTrang(String trang) {
         // Check if manager-only pages are accessed by non-managers
         if (!taiKhoanHienTai.isManager() &&
-                (trang.equals("employee") || trang.equals("account") || trang.equals("statistics"))) {
+                (trang.equals("employee") || trang.equals("account") || trang.equals("statistics")) ) {
             JOptionPane.showMessageDialog(this,
-                    "Bạn không có quyền truy cập trang này!\nChỉ quản lý (LNV03) mới có thể truy cập.",
+                    "Bạn không có quyền truy cập trang này!\nChỉ quản lý mới có thể truy cập.",
                     "Từ chối truy cập",
                     JOptionPane.WARNING_MESSAGE);
             return;

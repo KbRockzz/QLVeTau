@@ -5,23 +5,20 @@ import com.trainstation.util.DataInitializer;
 
 import javax.swing.*;
 
-/**
- * Entry point. Keep LAF system default and create UI on EDT.
- * Per-component scaling will be applied at runtime (FrmDangNhap -> FrmChinh).
- */
+// Main application
 public class MainApplication {
     public static void main(String[] args) {
-        // Set look and feel to system default
+        // Đặt phần giao diện hệ thống
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Initialize sample data
+        // Tải dữ liệu mẫu
         DataInitializer.initializeSampleData();
 
-        // Start the application on the Event Dispatch Thread
+        // Hiển thị form đăng nhập
         SwingUtilities.invokeLater(() -> {
             FrmDangNhap frmDangNhap = new FrmDangNhap();
             frmDangNhap.setVisible(true);

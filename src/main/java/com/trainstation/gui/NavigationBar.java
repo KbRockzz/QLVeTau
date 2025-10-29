@@ -79,7 +79,11 @@ public class NavigationBar extends JPanel {
             JMenuItem statisticsItem = new JMenuItem("Thống kê");
             statisticsItem.addActionListener(e -> navigateTo("statistics"));
             employeeMenu.add(statisticsItem);
-            
+
+            JMenuItem deletedEmployeesItem = new JMenuItem("Dữ liệu đã xóa");
+            deletedEmployeesItem.addActionListener(e -> navigateTo("deletedemployees"));
+            employeeMenu.add(deletedEmployeesItem);
+
             employeeMenuBtn.addActionListener(e -> 
                 employeeMenu.show(employeeMenuBtn, 0, employeeMenuBtn.getHeight()));
             
