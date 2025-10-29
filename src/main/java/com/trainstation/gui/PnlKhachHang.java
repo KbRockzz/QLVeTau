@@ -2,6 +2,8 @@ package com.trainstation.gui;
 
 import com.trainstation.service.KhachHangService;
 import com.trainstation.model.KhachHang;
+import com.trainstation.service.TauService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -28,11 +30,11 @@ public class PnlKhachHang extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Title
+        // Tiêu đề
         JLabel lblTieuDe = new JLabel("QUẢN LÝ KHÁCH HÀNG", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
-        
-        // Search panel
+
+        // panel tìm kiếm
         JPanel pnlTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pnlTimKiem.add(new JLabel("Tìm theo SĐT:"));
         txtTimKiem = new JTextField(20);
@@ -40,11 +42,10 @@ public class PnlKhachHang extends JPanel {
         btnTimKiem = new JButton("Tìm kiếm");
         btnTimKiem.addActionListener(e -> timKiemTheoSoDienThoai());
         pnlTimKiem.add(btnTimKiem);
-        
+
         JPanel pnlTren = new JPanel(new BorderLayout());
         pnlTren.add(lblTieuDe, BorderLayout.NORTH);
         pnlTren.add(pnlTimKiem, BorderLayout.SOUTH);
-        
         add(pnlTren, BorderLayout.NORTH);
 
         // Table
@@ -54,7 +55,7 @@ public class PnlKhachHang extends JPanel {
         JScrollPane scrollPane = new JScrollPane(bangKhachHang);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Form panel
+        // panel form
         JPanel pnlForm = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -84,7 +85,7 @@ public class PnlKhachHang extends JPanel {
         txtSDT = new JTextField(20);
         pnlForm.add(txtSDT, gbc);
 
-        // Buttons
+        // Các nút
         JPanel pnlButton = new JPanel(new FlowLayout());
         btnThem = new JButton("Thêm");
         btnCapNhat = new JButton("Cập nhật");
@@ -93,21 +94,18 @@ public class PnlKhachHang extends JPanel {
 
         btnThem.addActionListener(e -> themKhachHang());
         btnCapNhat.addActionListener(e -> capNhatKhachHang());
-        btnXoa.addActionListener(e -> xoaKhachHang());
         btnLamMoi.addActionListener(e -> taiDuLieuKhachHang());
 
         pnlButton.add(btnThem);
         pnlButton.add(btnCapNhat);
-//        pnlButton.add(btnXoa);
         pnlButton.add(btnLamMoi);
 
         JPanel pnlDuoi = new JPanel(new BorderLayout());
         pnlDuoi.add(pnlForm, BorderLayout.CENTER);
         pnlDuoi.add(pnlButton, BorderLayout.SOUTH);
-
         add(pnlDuoi, BorderLayout.SOUTH);
 
-        // Table selection listener
+        // Chọn bảng để hiện thông tin trên mấy cái txt
         bangKhachHang.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && bangKhachHang.getSelectedRow() != -1) {
                 int row = bangKhachHang.getSelectedRow();
@@ -115,8 +113,18 @@ public class PnlKhachHang extends JPanel {
                 txtTenKH.setText(modelBang.getValueAt(row, 1).toString());
                 txtEmail.setText(modelBang.getValueAt(row, 2).toString());
                 txtSDT.setText(modelBang.getValueAt(row, 3).toString());
+                txtMaKH.setEditable(false);
             }
         });
+    }
+
+    private void xoaForm() {
+        txtMaKH.setText(KhachHangService.getInstance().taoMaKhachHang());
+        txtTenKH.setText("");
+        txtEmail.setText("");
+        txtSDT.setText("");
+        txtTenKH.setEditable(true);
+        bangKhachHang.clearSelection();
     }
 
     private void taiDuLieuKhachHang() {
@@ -124,24 +132,53 @@ public class PnlKhachHang extends JPanel {
         List<KhachHang> danhSach = khachHangService.layTatCaKhachHang();
         for (KhachHang kh : danhSach) {
             modelBang.addRow(new Object[]{
-                kh.getMaKhachHang(),
-                kh.getTenKhachHang(),
-                kh.getEmail(),
-                kh.getSoDienThoai()
+                    kh.getMaKhachHang(),
+                    kh.getTenKhachHang(),
+                    kh.getEmail(),
+                    kh.getSoDienThoai()
             });
         }
+        xoaForm();
+    }
+
+    private boolean validateKhachHang() {
+        String maKH = txtMaKH.getText().trim();
+        String tenKH = txtTenKH.getText().trim().replaceAll("\\s+", " ");
+        String email = txtEmail.getText().trim();
+        String sdt = txtSDT.getText().trim();
+
+        if (!maKH.matches("^[A-Z]{2}[0-9]{2,}$")) {
+            JOptionPane.showMessageDialog(this, "Mã KH chỉ gồm 2 kí tự hoa theo sau là số");
+            return false;
+        }
+
+        if (!tenKH.matches("^\\p{Lu}\\p{Ll}*(\\s\\p{Lu}\\p{Ll}*)*$")) {
+            JOptionPane.showMessageDialog(this, "Tên KH phải viết hoa chữ đầu mỗi từ và có ít nhất 2 từ (2–50 ký tự).");
+            return false;
+        }
+
+        if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")) {
+            JOptionPane.showMessageDialog(this, "Email không hợp lệ! (ví dụ: abc@gmail.com)");
+            return false;
+        }
+
+        if (!sdt.matches("^(0[3|5|7|8|9])[0-9]{8}$")) {
+            JOptionPane.showMessageDialog(this, "Số điện thoại Việt Nam không hợp lệ (10 số, đầu 03-09)!");
+            return false;
+        }
+
+       
+        txtTenKH.setText(tenKH);
+        return true;
     }
 
     private void themKhachHang() {
+        if (!validateKhachHang()) return;
+
         String maKH = txtMaKH.getText().trim();
         String tenKH = txtTenKH.getText().trim();
         String email = txtEmail.getText().trim();
         String sdt = txtSDT.getText().trim();
-
-        if (maKH.isEmpty() || tenKH.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
 
         KhachHang kh = new KhachHang(maKH, tenKH, email, sdt);
         if (khachHangService.themKhachHang(kh)) {
@@ -154,12 +191,9 @@ public class PnlKhachHang extends JPanel {
     }
 
     private void capNhatKhachHang() {
-        String maKH = txtMaKH.getText().trim();
-        if (maKH.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng cần cập nhật!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        if (!validateKhachHang()) return;
 
+        String maKH = txtMaKH.getText().trim();
         String tenKH = txtTenKH.getText().trim();
         String email = txtEmail.getText().trim();
         String sdt = txtSDT.getText().trim();
@@ -171,25 +205,6 @@ public class PnlKhachHang extends JPanel {
             xoaTrang();
         } else {
             JOptionPane.showMessageDialog(this, "Cập nhật khách hàng thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void xoaKhachHang() {
-        String maKH = txtMaKH.getText().trim();
-        if (maKH.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng cần xóa!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa khách hàng này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            if (khachHangService.xoaKhachHang(maKH)) {
-                JOptionPane.showMessageDialog(this, "Xóa khách hàng thành công!");
-                taiDuLieuKhachHang();
-                xoaTrang();
-            } else {
-                JOptionPane.showMessageDialog(this, "Xóa khách hàng thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
         }
     }
 
@@ -209,16 +224,14 @@ public class PnlKhachHang extends JPanel {
 
         KhachHang kh = khachHangService.timKhachHangTheoSoDienThoai(sdt);
         if (kh != null) {
-            // Clear table and show only the found customer
             modelBang.setRowCount(0);
             modelBang.addRow(new Object[]{
-                kh.getMaKhachHang(),
-                kh.getTenKhachHang(),
-                kh.getEmail(),
-                kh.getSoDienThoai()
+                    kh.getMaKhachHang(),
+                    kh.getTenKhachHang(),
+                    kh.getEmail(),
+                    kh.getSoDienThoai()
             });
-            
-            // Populate form fields
+
             txtMaKH.setText(kh.getMaKhachHang());
             txtTenKH.setText(kh.getTenKhachHang());
             txtEmail.setText(kh.getEmail());

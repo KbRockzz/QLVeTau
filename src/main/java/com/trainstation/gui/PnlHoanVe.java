@@ -51,7 +51,7 @@ public class PnlHoanVe extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
-        // Title
+        // Tiêu đề
         JLabel lblTieuDe = new JLabel("HOÀN VÉ TÀU", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 20));
         add(lblTieuDe, BorderLayout.NORTH);
@@ -105,7 +105,7 @@ public class PnlHoanVe extends JPanel {
         scrollVe.setBorder(BorderFactory.createTitledBorder("Danh sách vé"));
         add(scrollVe, BorderLayout.CENTER);
 
-        // Button panel
+        // panel nút
         JPanel pnlButton = new JPanel(new FlowLayout());
 
         btnGuiYeuCau = new JButton("Gửi yêu cầu hoàn vé");

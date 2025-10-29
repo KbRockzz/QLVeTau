@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * DAO class for statistical queries
- */
 public class ThongKeDAO {
     private static ThongKeDAO instance;
 
@@ -35,8 +32,7 @@ public class ThongKeDAO {
                 "GROUP BY CAST(hd.ngayLap AS DATE) " +
                 "ORDER BY CAST(hd.ngayLap AS DATE)";
 
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setDate(1, Date.valueOf(tuNgay));
             pst.setDate(2, Date.valueOf(denNgay));
 
@@ -53,7 +49,7 @@ public class ThongKeDAO {
 
         return result;
     }
-
+  
     public List<Map<String, Object>> thongKeVeDoiHoan(LocalDate tuNgay, LocalDate denNgay) {
         List<Map<String, Object>> result = new ArrayList<>();
         String sql = "SELECT v.maVe, ct.maHoaDon, v.ngayIn, " +
@@ -69,8 +65,7 @@ public class ThongKeDAO {
                 "AND (v.trangThai = N'Đã hoàn' OR v.trangThai = N'Đã đổi') " +
                 "ORDER BY v.ngayIn DESC";
 
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setDate(1, Date.valueOf(tuNgay));
             pst.setDate(2, Date.valueOf(denNgay));
 
@@ -104,8 +99,7 @@ public class ThongKeDAO {
                 "GROUP BY CAST(v.ngayIn AS DATE) " +
                 "ORDER BY CAST(v.ngayIn AS DATE)";
 
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setDate(1, Date.valueOf(tuNgay));
             pst.setDate(2, Date.valueOf(denNgay));
 

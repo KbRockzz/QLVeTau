@@ -61,24 +61,18 @@ public class VeService {
         }
         return instance;
     }
-
-    /**
-     * Tạo vé mới
-     */
-    public boolean taoVe(Ve ve) {
-        return veDAO.insert(ve);
+    
+    public Ve taoVe(Ve ve) {
+        if (veDAO.insert(ve)) {
+            return ve;
+        }
+        throw new RuntimeException("Không thể tạo vé");
     }
-
-    /**
-     * Cập nhật thông tin vé
-     */
+    
     public boolean capNhatVe(Ve ve) {
         return veDAO.update(ve);
     }
-
-    /**
-     * Hủy vé
-     */
+    
     public boolean huyVe(String maVe) {
         Ve ve = veDAO.findById(maVe);
         if (ve == null) {
@@ -103,10 +97,7 @@ public class VeService {
 
         return result;
     }
-
-    /**
-     * Hoàn vé
-     */
+    
     public boolean hoanVe(String maVe) {
         Ve ve = veDAO.findById(maVe);
         if (ve == null) {
@@ -133,7 +124,7 @@ public class VeService {
     }
 
     /**
-     * Đổi vé
+     * Đổi vé (phát triển trong tương lai)
      */
     public boolean doiVe(String maVeCu, Ve veMoi) {
         Ve veCu = veDAO.findById(maVeCu);
@@ -178,17 +169,11 @@ public class VeService {
 
         return veDAO.update(veCu);
     }
-
-    /**
-     * Lấy tất cả vé
-     */
+    
     public List<Ve> layTatCaVe() {
         return veDAO.getAll();
     }
-
-    /**
-     * Tìm vé theo mã
-     */
+    
     public Ve timVeTheoMa(String maVe) {
         return veDAO.findById(maVe);
     }
@@ -217,17 +202,11 @@ public class VeService {
     public int demVeTheoTrangThai(String trangThai) {
         return layVeTheoTrangThai(trangThai).size();
     }
-
-    /**
-     * Xóa vé
-     */
+    
     public boolean xoaVe(String maVe) {
         return veDAO.delete(maVe);
     }
-
-    /**
-     * Lấy danh sách vé theo khách hàng
-     */
+    
     public List<Ve> layVeTheoKhachHang(String maKH) {
         return veDAO.getByKhachHang(maKH);
     }
@@ -284,14 +263,14 @@ public class VeService {
     }
 
     /**
-     * In vé ra file PDF (Boarding Pass style) với font tiếng Việt
+     * In vé ra file PDF với font tiếng Việt
      */
     public String inVePDF(Ve ve) throws FileNotFoundException, IOException {
         if (ve == null) {
             throw new IllegalArgumentException("Vé không hợp lệ");
         }
 
-        // Create tickets directory if not exists
+        // Tạo folder tickets
         File ticketsDir = new File("tickets");
         if (!ticketsDir.exists()) {
             ticketsDir.mkdirs();
@@ -300,12 +279,12 @@ public class VeService {
         String fileName = "tickets/Ve_" + ve.getMaVe() + ".pdf";
         PdfWriter writer = new PdfWriter(fileName);
         PdfDocument pdf = new PdfDocument(writer);
-
-        // Set page size to A5
+        
+        // Chỉnh kích cỡ trang thành A5
         Document document = new Document(pdf, PageSize.A5);
 
         try {
-            // Load Arial Unicode MS font for Vietnamese support
+            // Font Tiếng Việt
             PdfFont font = PdfFontFactory.createFont("fonts/Tinos-Regular.ttf", PdfEncodings.IDENTITY_H,
                     PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
             document.setFont(font);
@@ -314,7 +293,7 @@ public class VeService {
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
             NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
 
-            // Header - Company name
+            // Header
             Paragraph header = new Paragraph("CÔNG TY CỔ PHẦN VẬN TẢI ĐƯỜNG SẮT SÀI GÒN")
                     .setFont(font)
                     .setFontSize(14)
@@ -322,7 +301,7 @@ public class VeService {
                     .setTextAlignment(TextAlignment.CENTER);
             document.add(header);
 
-            // Subtitle - Boarding Pass
+            // Subtitle
             Paragraph subHeader = new Paragraph("THẺ LÊN TÀU HỎA / BOARDING PASS")
                     .setFont(font)
                     .setFontSize(12)
@@ -332,7 +311,7 @@ public class VeService {
 
             document.add(new Paragraph("\n"));
 
-            // QR Code section - Ticket ID
+            // Mã vạch
             Paragraph qrTitle = new Paragraph("MÃ QUÉT")
                     .setFont(font)
                     .setFontSize(13)
@@ -347,10 +326,9 @@ public class VeService {
 
             document.add(new Paragraph("\n"));
 
-            // Station table (Ga đi / Ga đến) - 2 columns with borders
+            // Bảng ga đi ga đến
             Table gaTable = new Table(UnitValue.createPercentArray(new float[]{1, 1})).useAllAvailableWidth();
 
-            // Header row
             gaTable.addCell(new Cell()
                     .add(new Paragraph("Ga đi").setFont(font).setBold())
                     .setTextAlignment(TextAlignment.CENTER));
@@ -358,7 +336,6 @@ public class VeService {
                     .add(new Paragraph("Ga đến").setFont(font).setBold())
                     .setTextAlignment(TextAlignment.CENTER));
 
-            // Station names row
             gaTable.addCell(new Cell()
                     .add(new Paragraph(ve.getGaDi() != null ? ve.getGaDi() : "N/A").setFont(font))
                     .setTextAlignment(TextAlignment.CENTER));
@@ -369,58 +346,57 @@ public class VeService {
             document.add(gaTable);
             document.add(new Paragraph("\n"));
 
-            // Details table - 2 columns (label and value)
+            // Bảng thông tin chi tiết
             Table infoTable = new Table(UnitValue.createPercentArray(new float[]{2, 3})).useAllAvailableWidth();
 
-            // Train number
+            // Mã chuyến tàu
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Tàu/Train:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getMaChuyen() != null ? ve.getMaChuyen() : "N/A").setFont(font)));
 
-            // Date
+            // Ngày đi
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Ngày đi/Date:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getGioDi() != null ? ve.getGioDi().format(dateFormatter) : "N/A").setFont(font)));
 
-            // Time
+            // Giờ đi
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Giờ đi/Time:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getGioDi() != null ? ve.getGioDi().format(timeFormatter) : "N/A").setFont(font)));
 
-            // Carriage
+            // Toa
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Toa/Coach:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getSoToa() != null ? ve.getSoToa() : "N/A").setFont(font)));
 
-            // Seat
+            // Ghế
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Chỗ/Seat:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getMaSoGhe() != null ? ve.getMaSoGhe() : "N/A").setFont(font)));
 
-            // Seat type
+            // Loại ghế
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Loại chỗ/Class:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getLoaiCho() != null ? ve.getLoaiCho() : "N/A").setFont(font)));
 
-            // Ticket type
+            // Loại vé
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Loại vé/Type:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getLoaiVe() != null ? ve.getLoaiVe() : "N/A").setFont(font)));
 
-            // Price - try to fetch from BangGia
+            // Giá cơ bản
             String priceStr = "N/A";
             try {
                 float priceToShow = ve.getDisplayPrice();
                 priceStr = String.format("%,.0f VNĐ", priceToShow);
             } catch (Exception e) {
-                // If database is not available, use N/A
                 priceStr = "N/A";
             }
             infoTable.addCell(new Cell()
@@ -430,7 +406,7 @@ public class VeService {
 
             document.add(infoTable);
 
-            // Footer - Thank you message
+            // Footer
             document.add(new Paragraph("\nCảm ơn quý khách đã sử dụng dịch vụ!")
                     .setFont(font)
                     .setItalic()

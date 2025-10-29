@@ -206,6 +206,10 @@ public class VeDAO implements GenericDAO<Ve> {
         }
     }
 
+    /**
+     * Lấy danh sách vé theo mã khách hàng
+     * Dùng cho đổi vé (phát triển trong tương lai)
+     */
     public List<Ve> getByKhachHang(String maKH) {
         List<Ve> list = new ArrayList<>();
         String sql = "SELECT v.maVe, v.maChuyen, v.maLoaiVe, v.maSoGhe, v.ngayIn, v.trangThai, v.gaDi, v.gaDen, v.gioDi, v.soToa, v.loaiCho, v.loaiVe, v.maBangGia " +
