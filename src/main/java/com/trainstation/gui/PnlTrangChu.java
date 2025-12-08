@@ -22,37 +22,24 @@ public class PnlTrangChu extends JPanel {
     
     private void initComponents() {
         setLayout(new BorderLayout(10, 10));
+        setBackground(new Color(245, 245, 245)); // Material background #F5F5F5
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
-        // Create a panel with train station background
+        // Create a panel with Material gradient background
         JPanel pnlNen = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 
-                // Create gradient background simulating train station
+                // Material Professional Light gradient
                 GradientPaint gradient = new GradientPaint(
-                    0, 0, new Color(52, 73, 94),
-                    0, getHeight(), new Color(149, 165, 166)
+                    0, 0, new Color(25, 118, 210), // #1976D2 - Primary Blue
+                    0, getHeight(), new Color(33, 150, 243) // #2196F3 - Light Blue
                 );
                 g2d.setPaint(gradient);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
-                
-                // Draw train station silhouette
-                g2d.setColor(new Color(44, 62, 80, 150));
-                g2d.fillRect(50, getHeight() - 200, 150, 180);
-                g2d.fillRect(220, getHeight() - 250, 200, 230);
-                g2d.fillRect(440, getHeight() - 220, 180, 200);
-                
-                // Draw train tracks
-                g2d.setColor(new Color(149, 165, 166));
-                g2d.setStroke(new BasicStroke(3));
-                for (int i = 0; i < getWidth(); i += 30) {
-                    g2d.drawLine(i, getHeight() - 50, i + 20, getHeight() - 50);
-                }
-                g2d.drawLine(0, getHeight() - 45, getWidth(), getHeight() - 45);
-                g2d.drawLine(0, getHeight() - 55, getWidth(), getHeight() - 55);
             }
         };
         pnlNen.setLayout(new BoxLayout(pnlNen, BoxLayout.Y_AXIS));
@@ -64,19 +51,19 @@ public class PnlTrangChu extends JPanel {
         pnlChaoMung.setLayout(new BoxLayout(pnlChaoMung, BoxLayout.Y_AXIS));
         
         JLabel lblTieuDe = new JLabel("HỆ THỐNG QUẢN LÝ VÉ TÀU");
-        lblTieuDe.setFont(new Font("Arial", Font.BOLD, 36));
+        lblTieuDe.setFont(new Font("Roboto", Font.BOLD, 36));
         lblTieuDe.setAlignmentX(Component.CENTER_ALIGNMENT);
         lblTieuDe.setForeground(Color.WHITE);
         
         JLabel lblChaoMung = new JLabel("Xin chào, " + layTenNhanVien());
-        lblChaoMung.setFont(new Font("Arial", Font.BOLD, 24));
+        lblChaoMung.setFont(new Font("Roboto", Font.BOLD, 24));
         lblChaoMung.setAlignmentX(Component.CENTER_ALIGNMENT);
         lblChaoMung.setForeground(Color.WHITE);
         
         JLabel lblChucVu = new JLabel("Chức vụ: " + layMoTaChucVu());
-        lblChucVu.setFont(new Font("Arial", Font.PLAIN, 20));
+        lblChucVu.setFont(new Font("Roboto", Font.PLAIN, 20));
         lblChucVu.setAlignmentX(Component.CENTER_ALIGNMENT);
-        lblChucVu.setForeground(new Color(236, 240, 241));
+        lblChucVu.setForeground(new Color(227, 242, 253)); // #E3F2FD - Very Light Blue
         
         pnlChaoMung.add(Box.createVerticalStrut(100));
         pnlChaoMung.add(lblTieuDe);
@@ -92,8 +79,10 @@ public class PnlTrangChu extends JPanel {
         
         // Footer panel
         JPanel pnlChanTrang = new JPanel();
+        pnlChanTrang.setBackground(new Color(245, 245, 245)); // Material background
         JLabel lblChanTrang = new JLabel("© 2024 QLVeTau - Hệ thống quản lý vé tàu");
-        lblChanTrang.setForeground(Color.GRAY);
+        lblChanTrang.setFont(new Font("Roboto", Font.PLAIN, 12));
+        lblChanTrang.setForeground(new Color(117, 117, 117)); // #757575 - Secondary text
         pnlChanTrang.add(lblChanTrang);
         
         add(pnlChanTrang, BorderLayout.SOUTH);
