@@ -173,6 +173,8 @@ public class PnlDoiVe extends JPanel {
             }
         } else if (!soDienThoai.isEmpty()) {
             // Tìm khách hàng theo số điện thoại
+            // TODO: Optimize - Add findByPhoneNumber method to KhachHangDAO
+            // for better performance with large datasets
             List<KhachHang> khachHangs = khachHangDAO.getAll().stream()
                 .filter(kh -> soDienThoai.equals(kh.getSoDienThoai()))
                 .toList();
@@ -185,14 +187,20 @@ public class PnlDoiVe extends JPanel {
             khachHangHienTai = khachHangs.get(0);
             danhSachVe = layVeTheoKhachHang(khachHangHienTai.getMaKhachHang());
         } else if (!cccd.isEmpty()) {
-            // Tìm khách hàng theo CCCD (giả sử có trong email hoặc mở rộng model)
-            // Tạm thời tìm theo email chứa CCCD
+            // TODO: Tìm khách hàng theo CCCD
+            // Hiện tại bảng KhachHang chưa có trường CCCD
+            // Cần mở rộng model KhachHang và thêm cột CCCD vào database
+            // Tạm thời sử dụng mã khách hàng chứa CCCD như workaround
             List<KhachHang> khachHangs = khachHangDAO.getAll().stream()
-                .filter(kh -> kh.getEmail() != null && kh.getEmail().contains(cccd))
+                .filter(kh -> kh.getMaKhachHang() != null && kh.getMaKhachHang().contains(cccd))
                 .toList();
             
             if (khachHangs.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Không tìm thấy khách hàng với CCCD: " + cccd, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, 
+                    "Không tìm thấy khách hàng với CCCD: " + cccd + "\n" +
+                    "Lưu ý: Tính năng tìm theo CCCD đang phát triển.\n" +
+                    "Hiện tại vui lòng sử dụng mã vé hoặc số điện thoại.", 
+                    "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
             
@@ -502,7 +510,13 @@ public class PnlDoiVe extends JPanel {
                 
                 // Exchange ticket using new service
                 String maNV = taiKhoanHienTai != null && taiKhoanHienTai.getMaNV() != null ? 
-                             taiKhoanHienTai.getMaNV() : "SYSTEM";
+                             taiKhoanHienTai.getMaNV() : null;
+                
+                if (maNV == null) {
+                    JOptionPane.showMessageDialog(dialog, "Lỗi: Không xác định được nhân viên thực hiện", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
                 String maKH = khachHangHienTai != null ? khachHangHienTai.getMaKhachHang() : null;
                 String ghiChu = txtGhiChu.getText().trim();
                 

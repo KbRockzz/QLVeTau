@@ -88,13 +88,29 @@ public class DoiVeService {
             float giaVeCu = veCu.getDisplayPrice();
             float giaVeMoi = veMoi.getDisplayPrice();
             
+            if (giaVeCu <= 0 || giaVeMoi <= 0) {
+                // Giá vé không hợp lệ - không thể tính phí
+                thongTin.setGiaVeCu(0);
+                thongTin.setGiaVeMoi(0);
+                thongTin.setChenhLechGia(0);
+                thongTin.setPhiDoiVe(0);
+                thongTin.setMucPhi("Lỗi: Không tính được giá vé");
+                return thongTin;
+            }
+            
             thongTin.setGiaVeCu(giaVeCu);
             thongTin.setGiaVeMoi(giaVeMoi);
             thongTin.setChenhLechGia(giaVeMoi - giaVeCu);
         } catch (Exception e) {
+            // Log lỗi và trả về thông tin không hợp lệ
+            System.err.println("Lỗi khi tính giá vé: " + e.getMessage());
+            e.printStackTrace();
             thongTin.setGiaVeCu(0);
             thongTin.setGiaVeMoi(0);
             thongTin.setChenhLechGia(0);
+            thongTin.setPhiDoiVe(0);
+            thongTin.setMucPhi("Lỗi: " + e.getMessage());
+            return thongTin;
         }
 
         // Tính phí đổi dựa trên thời gian
