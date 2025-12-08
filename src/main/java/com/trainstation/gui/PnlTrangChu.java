@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.model.TaiKhoan;
 import com.trainstation.dao.NhanVienDAO;
 import com.trainstation.model.NhanVien;
@@ -51,17 +52,17 @@ public class PnlTrangChu extends JPanel {
         pnlChaoMung.setLayout(new BoxLayout(pnlChaoMung, BoxLayout.Y_AXIS));
         
         JLabel lblTieuDe = new JLabel("HỆ THỐNG QUẢN LÝ VÉ TÀU");
-        lblTieuDe.setFont(new Font("Roboto", Font.BOLD, 36));
+        lblTieuDe.setFont(MaterialInitializer.createFont(Font.BOLD, 36));
         lblTieuDe.setAlignmentX(Component.CENTER_ALIGNMENT);
         lblTieuDe.setForeground(Color.WHITE);
         
         JLabel lblChaoMung = new JLabel("Xin chào, " + layTenNhanVien());
-        lblChaoMung.setFont(new Font("Roboto", Font.BOLD, 24));
+        lblChaoMung.setFont(MaterialInitializer.createFont(Font.BOLD, 24));
         lblChaoMung.setAlignmentX(Component.CENTER_ALIGNMENT);
         lblChaoMung.setForeground(Color.WHITE);
         
         JLabel lblChucVu = new JLabel("Chức vụ: " + layMoTaChucVu());
-        lblChucVu.setFont(new Font("Roboto", Font.PLAIN, 20));
+        lblChucVu.setFont(MaterialInitializer.createFont(Font.PLAIN, 20));
         lblChucVu.setAlignmentX(Component.CENTER_ALIGNMENT);
         lblChucVu.setForeground(new Color(227, 242, 253)); // #E3F2FD - Very Light Blue
         
@@ -81,7 +82,7 @@ public class PnlTrangChu extends JPanel {
         JPanel pnlChanTrang = new JPanel();
         pnlChanTrang.setBackground(new Color(245, 245, 245)); // Material background
         JLabel lblChanTrang = new JLabel("© 2024 QLVeTau - Hệ thống quản lý vé tàu");
-        lblChanTrang.setFont(new Font("Roboto", Font.PLAIN, 12));
+        lblChanTrang.setFont(MaterialInitializer.createFont(Font.PLAIN, 12));
         lblChanTrang.setForeground(new Color(117, 117, 117)); // #757575 - Secondary text
         pnlChanTrang.add(lblChanTrang);
         

@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.service.TaiKhoanService;
 import com.trainstation.model.TaiKhoan;
 import com.trainstation.util.UIUtils;
@@ -52,7 +53,7 @@ public class FrmDangNhap extends JFrame {
         
         // Title
         JLabel lblTitle = new JLabel("ĐĂNG NHẬP");
-        lblTitle.setFont(new Font("Roboto", Font.BOLD, 24));
+        lblTitle.setFont(MaterialInitializer.createFont(Font.BOLD, 24));
         lblTitle.setForeground(new Color(33, 33, 33)); // #212121 - text color
         lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         cardPanel.add(lblTitle);
@@ -61,7 +62,7 @@ public class FrmDangNhap extends JFrame {
         
         // Username field
         JLabel lblUsername = new JLabel("Tên đăng nhập");
-        lblUsername.setFont(new Font("Roboto", Font.PLAIN, 14));
+        lblUsername.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         lblUsername.setForeground(new Color(33, 33, 33));
         lblUsername.setAlignmentX(Component.LEFT_ALIGNMENT);
         cardPanel.add(lblUsername);
@@ -69,7 +70,7 @@ public class FrmDangNhap extends JFrame {
         cardPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         
         txtTenDangNhap = new JTextField(20);
-        txtTenDangNhap.setFont(new Font("Roboto", Font.PLAIN, 14));
+        txtTenDangNhap.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         txtTenDangNhap.setPreferredSize(new Dimension(280, 36));
         txtTenDangNhap.setMaximumSize(new Dimension(280, 36));
         txtTenDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -79,7 +80,7 @@ public class FrmDangNhap extends JFrame {
         
         // Password field
         JLabel lblPassword = new JLabel("Mật khẩu");
-        lblPassword.setFont(new Font("Roboto", Font.PLAIN, 14));
+        lblPassword.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         lblPassword.setForeground(new Color(33, 33, 33));
         lblPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
         cardPanel.add(lblPassword);
@@ -87,7 +88,7 @@ public class FrmDangNhap extends JFrame {
         cardPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         
         txtMatKhau = new JPasswordField(20);
-        txtMatKhau.setFont(new Font("Roboto", Font.PLAIN, 14));
+        txtMatKhau.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         txtMatKhau.setPreferredSize(new Dimension(280, 36));
         txtMatKhau.setMaximumSize(new Dimension(280, 36));
         txtMatKhau.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -98,7 +99,7 @@ public class FrmDangNhap extends JFrame {
         
         // Login button
         btnDangNhap = new JButton("Đăng Nhập");
-        btnDangNhap.setFont(new Font("Roboto", Font.BOLD, 14));
+        btnDangNhap.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnDangNhap.setPreferredSize(new Dimension(280, 40));
         btnDangNhap.setMaximumSize(new Dimension(280, 40));
         btnDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);

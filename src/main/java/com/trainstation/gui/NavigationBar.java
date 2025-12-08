@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.model.TaiKhoan;
 import javax.swing.*;
 import java.awt.*;
@@ -109,7 +110,7 @@ public class NavigationBar extends JPanel {
         rightPanel.setOpaque(false);
         JLabel userLabel = new JLabel(getEmployeeName());
         userLabel.setForeground(Color.WHITE);
-        userLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
+        userLabel.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         rightPanel.add(userLabel);
         
         add(rightPanel, BorderLayout.EAST);
@@ -124,7 +125,7 @@ public class NavigationBar extends JPanel {
         button.setFocusPainted(false);
         button.setContentAreaFilled(false); // Transparent background
         button.setOpaque(false);
-        button.setFont(new Font("Roboto", Font.PLAIN, 14));
+        button.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setPreferredSize(new Dimension(100, 40));
         

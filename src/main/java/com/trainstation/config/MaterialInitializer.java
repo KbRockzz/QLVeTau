@@ -31,13 +31,8 @@ public class MaterialInitializer {
                 System.err.println("Warning: ProfessionalLight.json theme not found, using default theme");
             }
 
-            // Cấu hình font mặc định - Roboto
-            // Fallback to system font if Roboto is not available
-            Font defaultFont = new Font("Roboto", Font.PLAIN, 14);
-            if (defaultFont.getFamily().equals("Dialog")) {
-                // Roboto not available, use Segoe UI or system default
-                defaultFont = new Font("Segoe UI", Font.PLAIN, 14);
-            }
+            // Cấu hình font mặc định - Roboto with proper fallback
+            Font defaultFont = getDefaultFont();
             UIManager.put("defaultFont", defaultFont);
 
             // Bật anti-aliasing cho text để hiển thị mượt mà hơn
@@ -52,5 +47,46 @@ public class MaterialInitializer {
             System.err.println("Error initializing Material theme: " + ex.getMessage());
             ex.printStackTrace();
         }
+    }
+
+    /**
+     * Tạo font mặc định với fallback logic đúng đắn
+     * Ưu tiên: Roboto -> Segoe UI -> Sans Serif (system default)
+     */
+    private static Font getDefaultFont() {
+        String[] preferredFonts = {"Roboto", "Segoe UI", "SansSerif"};
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String[] availableFonts = ge.getAvailableFontFamilyNames();
+        
+        // Tìm font đầu tiên có sẵn trong danh sách ưu tiên
+        for (String fontName : preferredFonts) {
+            for (String availableFont : availableFonts) {
+                if (availableFont.equals(fontName)) {
+                    return new Font(fontName, Font.PLAIN, 14);
+                }
+            }
+        }
+        
+        // Fallback to default logical font
+        return new Font("SansSerif", Font.PLAIN, 14);
+    }
+
+    /**
+     * Tạo font với style và size cụ thể, sử dụng fallback logic
+     */
+    public static Font createFont(int style, int size) {
+        String[] preferredFonts = {"Roboto", "Segoe UI", "SansSerif"};
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String[] availableFonts = ge.getAvailableFontFamilyNames();
+        
+        for (String fontName : preferredFonts) {
+            for (String availableFont : availableFonts) {
+                if (availableFont.equals(fontName)) {
+                    return new Font(fontName, style, size);
+                }
+            }
+        }
+        
+        return new Font("SansSerif", style, size);
     }
 }
