@@ -20,11 +20,13 @@ public class NavigationBar extends JPanel {
     
     private void initComponents() {
         setLayout(new BorderLayout());
-        setBackground(new Color(52, 73, 94));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // Material Professional Light - Primary Blue
+        setBackground(new Color(25, 118, 210)); // #1976D2
+        setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+        setPreferredSize(new Dimension(0, 56)); // Fixed height for navigation bar
         
         // Left panel with navigation buttons
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         leftPanel.setOpaque(false);
         
         // Home button
@@ -103,11 +105,11 @@ public class NavigationBar extends JPanel {
         add(leftPanel, BorderLayout.WEST);
         
         // Right panel with employee name
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         rightPanel.setOpaque(false);
         JLabel userLabel = new JLabel(getEmployeeName());
         userLabel.setForeground(Color.WHITE);
-        userLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        userLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
         rightPanel.add(userLabel);
         
         add(rightPanel, BorderLayout.EAST);
@@ -115,21 +117,27 @@ public class NavigationBar extends JPanel {
     
     private JButton createNavButton(String text, String action) {
         JButton button = new JButton(text);
+        // Material Professional Light - Text only, flat design
         button.setForeground(Color.WHITE);
-        button.setBackground(new Color(41, 128, 185));
+        button.setBackground(new Color(25, 118, 210)); // Match navbar background
         button.setBorderPainted(false);
         button.setFocusPainted(false);
-        button.setFont(new Font("Arial", Font.BOLD, 12));
+        button.setContentAreaFilled(false); // Transparent background
+        button.setOpaque(false);
+        button.setFont(new Font("Roboto", Font.PLAIN, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(120, 35));
+        button.setPreferredSize(new Dimension(100, 40));
         
-        // Hover effect
+        // Material hover effect - subtle background
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(52, 152, 219));
+                button.setOpaque(true);
+                button.setContentAreaFilled(true);
+                button.setBackground(new Color(13, 71, 161)); // #0D47A1 - darker blue for hover
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(41, 128, 185));
+                button.setOpaque(false);
+                button.setContentAreaFilled(false);
             }
         });
         
