@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.model.*;
 import com.trainstation.service.*;
 import com.trainstation.dao.*;
@@ -57,6 +58,7 @@ public class PnlDoiVe extends JPanel {
         pnlTimKiem.add(txtMaKH);
         btnTimKiem = new JButton("Tìm kiếm");
         btnTimKiem.addActionListener(e -> timKiemVe());
+        MaterialInitializer.styleButton(btnTimKiem);
         pnlTimKiem.add(btnTimKiem);
         
         JPanel pnlTop = new JPanel(new BorderLayout());
@@ -77,10 +79,11 @@ public class PnlDoiVe extends JPanel {
         
         add(pnlTop, BorderLayout.CENTER);
         
-        // Button panel
-        JPanel pnlButton = new JPanel(new FlowLayout());
+        // Button panel - Material styled
+        JPanel pnlButton = MaterialInitializer.createButtonPanel();
         JButton btnDoiVe = new JButton("Đổi vé");
         btnDoiVe.addActionListener(e -> chonVeDeDoiVe());
+        MaterialInitializer.styleButton(btnDoiVe);
         pnlButton.add(btnDoiVe);
         
         add(pnlButton, BorderLayout.SOUTH);

@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.dao.ChiTietHoaDonDAO;
 import com.trainstation.dao.HoaDonDAO;
 import com.trainstation.dao.KhachHangDAO;
@@ -62,15 +63,17 @@ public class PnlQuanLyVe extends JPanel {
         scrollPane.setBorder(BorderFactory.createTitledBorder("Danh sách hóa đơn"));
         add(scrollPane, BorderLayout.CENTER);
 
-        // Button panel
-        JPanel pnlButton = new JPanel(new FlowLayout());
+        // Button panel - Material styled
+        JPanel pnlButton = MaterialInitializer.createButtonPanel();
         
         btnXuatHoaDon = new JButton("Xuất hóa đơn");
         btnXuatHoaDon.addActionListener(e -> xuatHoaDon());
+        MaterialInitializer.styleButton(btnXuatHoaDon);
         pnlButton.add(btnXuatHoaDon);
         
         btnTaiLai = new JButton("Tải lại");
         btnTaiLai.addActionListener(e -> taiDanhSachHoaDon());
+        MaterialInitializer.styleButton(btnTaiLai);
         pnlButton.add(btnTaiLai);
         
         add(pnlButton, BorderLayout.SOUTH);

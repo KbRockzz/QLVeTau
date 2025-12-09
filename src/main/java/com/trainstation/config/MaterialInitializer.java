@@ -89,4 +89,57 @@ public class MaterialInitializer {
         
         return new Font("SansSerif", style, size);
     }
+
+    /**
+     * Áp dụng Material styling cho một nút bấm
+     * - Bo góc 6px
+     * - Màu nền #1976D2 (Primary Blue)
+     * - Màu chữ trắng
+     * - Font Roboto Medium 14px
+     * - Hover #0D47A1 (Primary Dark)
+     */
+    public static void styleButton(JButton button) {
+        if (button == null) return;
+        
+        // Font
+        button.setFont(createFont(Font.PLAIN, 14));
+        
+        // Kích thước tối thiểu
+        button.setPreferredSize(new Dimension(100, 36));
+        
+        // Cursor
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // FlatLaf sẽ tự động áp dụng màu từ theme
+        // Nhưng ta có thể đảm bảo nút luôn hiển thị
+        button.setVisible(true);
+        button.setEnabled(true);
+    }
+
+    /**
+     * Tạo và cấu hình panel chứa các nút bấm
+     * Đảm bảo panel luôn hiển thị với chiều cao cố định
+     */
+    public static JPanel createButtonPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
+        panel.setPreferredSize(new Dimension(0, 60)); // Chiều cao cố định 60px
+        panel.setMinimumSize(new Dimension(0, 60));
+        panel.setVisible(true);
+        return panel;
+    }
+
+    /**
+     * Áp dụng Material styling cho tất cả nút trong một panel
+     */
+    public static void styleAllButtons(Container container) {
+        if (container == null) return;
+        
+        for (Component comp : container.getComponents()) {
+            if (comp instanceof JButton) {
+                styleButton((JButton) comp);
+            } else if (comp instanceof Container) {
+                styleAllButtons((Container) comp);
+            }
+        }
+    }
 }

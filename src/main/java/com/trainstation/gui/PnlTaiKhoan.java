@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.service.TaiKhoanService;
 import com.trainstation.service.NhanVienService;
 import com.trainstation.model.TaiKhoan;
@@ -66,17 +67,41 @@ public class PnlTaiKhoan extends JPanel {
         gbc.gridx = 0; gbc.gridy = 4; pnlForm.add(new JLabel("Trạng thái:"), gbc);
         gbc.gridx = 1; cmbTrangThai = new JComboBox<>(new String[]{"Hoạt động", "Khóa"}); pnlForm.add(cmbTrangThai, gbc);
 
-        JPanel pnlButton = new JPanel(new FlowLayout());
-        btnXoaRong = new JButton("Xóa rỗng"); btnXoaRong.addActionListener(e -> xoaRongForm()); pnlButton.add(btnXoaRong);
-        btnThem = new JButton("Thêm"); btnThem.addActionListener(e -> themTaiKhoan()); pnlButton.add(btnThem);
-        btnCapNhat = new JButton("Cập nhật"); btnCapNhat.addActionListener(e -> capNhatTaiKhoan()); pnlButton.add(btnCapNhat);
-        btnDoiMatKhau = new JButton("Đổi mật khẩu"); btnDoiMatKhau.addActionListener(e -> doiMatKhau()); pnlButton.add(btnDoiMatKhau);
-        btnXoa = new JButton("Xóa"); btnXoa.addActionListener(e -> xoaTaiKhoan()); pnlButton.add(btnXoa);
-        btnLamMoi = new JButton("Làm mới"); btnLamMoi.addActionListener(e -> taiDuLieuTaiKhoan()); pnlButton.add(btnLamMoi);
+        JPanel pnlButton = MaterialInitializer.createButtonPanel();
+        btnXoaRong = new JButton("Xóa rỗng"); 
+        btnXoaRong.addActionListener(e -> xoaRongForm()); 
+        MaterialInitializer.styleButton(btnXoaRong);
+        pnlButton.add(btnXoaRong);
+        
+        btnThem = new JButton("Thêm"); 
+        btnThem.addActionListener(e -> themTaiKhoan()); 
+        MaterialInitializer.styleButton(btnThem);
+        pnlButton.add(btnThem);
+        
+        btnCapNhat = new JButton("Cập nhật"); 
+        btnCapNhat.addActionListener(e -> capNhatTaiKhoan()); 
+        MaterialInitializer.styleButton(btnCapNhat);
+        pnlButton.add(btnCapNhat);
+        
+        btnDoiMatKhau = new JButton("Đổi mật khẩu"); 
+        btnDoiMatKhau.addActionListener(e -> doiMatKhau()); 
+        MaterialInitializer.styleButton(btnDoiMatKhau);
+        pnlButton.add(btnDoiMatKhau);
+        
+        btnXoa = new JButton("Xóa"); 
+        btnXoa.addActionListener(e -> xoaTaiKhoan()); 
+        MaterialInitializer.styleButton(btnXoa);
+        pnlButton.add(btnXoa);
+        
+        btnLamMoi = new JButton("Làm mới"); 
+        btnLamMoi.addActionListener(e -> taiDuLieuTaiKhoan()); 
+        MaterialInitializer.styleButton(btnLamMoi);
+        pnlButton.add(btnLamMoi);
 
         JPanel pnlDuoi = new JPanel(new BorderLayout());
         pnlDuoi.add(pnlForm, BorderLayout.CENTER);
         pnlDuoi.add(pnlButton, BorderLayout.SOUTH);
+        pnlDuoi.setPreferredSize(new Dimension(0, 260)); // Đảm bảo có đủ không gian
         add(pnlDuoi, BorderLayout.SOUTH);
     }
 

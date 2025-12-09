@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.service.ThongKeService;
 import com.toedter.calendar.JDateChooser;
 import javax.swing.*;
@@ -58,18 +59,21 @@ public class PnlThongKe extends JPanel {
 
         btnDoanhThu = new JButton("Thống kê doanh thu");
         btnDoanhThu.setPreferredSize(new Dimension(200, 40));
-        btnDoanhThu.setFont(new Font("Arial", Font.BOLD, 14));
+        btnDoanhThu.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnDoanhThu.addActionListener(e -> showPanel("doanhThu"));
+        MaterialInitializer.styleButton(btnDoanhThu);
 
         btnVeDoiHoan = new JButton("Thống kê vé hoàn/đổi");
         btnVeDoiHoan.setPreferredSize(new Dimension(200, 40));
-        btnVeDoiHoan.setFont(new Font("Arial", Font.BOLD, 14));
+        btnVeDoiHoan.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnVeDoiHoan.addActionListener(e -> showPanel("veDoiHoan"));
+        MaterialInitializer.styleButton(btnVeDoiHoan);
 
         btnDoPhuGhe = new JButton("Thống kê độ phủ ghế");
         btnDoPhuGhe.setPreferredSize(new Dimension(200, 40));
-        btnDoPhuGhe.setFont(new Font("Arial", Font.BOLD, 14));
+        btnDoPhuGhe.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnDoPhuGhe.addActionListener(e -> showPanel("doPhuGhe"));
+        MaterialInitializer.styleButton(btnDoPhuGhe);
 
         pnlNav.add(btnDoanhThu);
         pnlNav.add(btnVeDoiHoan);
@@ -107,6 +111,7 @@ public class PnlThongKe extends JPanel {
 
         btnThongKeDoanhThu = new JButton("Thống kê");
         btnThongKeDoanhThu.addActionListener(e -> loadDoanhThuData());
+        MaterialInitializer.styleButton(btnThongKeDoanhThu);
         pnlFilter.add(btnThongKeDoanhThu);
 
         panel.add(pnlFilter, BorderLayout.NORTH);
@@ -155,6 +160,7 @@ public class PnlThongKe extends JPanel {
 
         btnThongKeVeDoiHoan = new JButton("Thống kê");
         btnThongKeVeDoiHoan.addActionListener(e -> loadVeDoiHoanData());
+        MaterialInitializer.styleButton(btnThongKeVeDoiHoan);
         pnlFilter.add(btnThongKeVeDoiHoan);
 
         panel.add(pnlFilter, BorderLayout.NORTH);
@@ -202,6 +208,7 @@ public class PnlThongKe extends JPanel {
 
         btnThongKeDoPhuGhe = new JButton("Thống kê");
         btnThongKeDoPhuGhe.addActionListener(e -> loadDoPhuGheData());
+        MaterialInitializer.styleButton(btnThongKeDoPhuGhe);
         pnlFilter.add(btnThongKeDoPhuGhe);
 
         panel.add(pnlFilter, BorderLayout.NORTH);

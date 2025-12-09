@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.model.*;
 import com.trainstation.service.*;
 import com.trainstation.dao.*;
@@ -99,6 +100,7 @@ public class PnlDatVe extends JPanel {
 
         btnTimKhachHang = new JButton("Tìm khách hàng");
         btnTimKhachHang.addActionListener(e -> timKhachHang());
+        MaterialInitializer.styleButton(btnTimKhachHang);
         pnlTimKhachHang.add(btnTimKhachHang);
 
         lblThongTinKhachHang = new JLabel("(Chưa chọn khách hàng)");
@@ -116,6 +118,7 @@ public class PnlDatVe extends JPanel {
         btnThanhToan = new JButton("Xác nhận thanh toán");
         btnThanhToan.setToolTipText("Thanh toán cho hóa đơn đang mở (nếu có vé được thêm)");
         btnThanhToan.addActionListener(e -> xacNhanThanhToan());
+        MaterialInitializer.styleButton(btnThanhToan);
         pnlTimKhachHang.add(Box.createHorizontalStrut(10));
         pnlTimKhachHang.add(btnThanhToan);
 
@@ -172,6 +175,7 @@ public class PnlDatVe extends JPanel {
 
         btnTimChuyenTau = new JButton("Tìm chuyến tàu");
         btnTimChuyenTau.addActionListener(e -> timChuyenTau());
+        MaterialInitializer.styleButton(btnTimChuyenTau);
         pnlTimChuyenTau.add(btnTimChuyenTau);
 
         pnlTop.add(pnlTimChuyenTau, BorderLayout.SOUTH);

@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.service.KhachHangService;
 import com.trainstation.model.KhachHang;
 import com.trainstation.service.TauService;
@@ -85,16 +86,21 @@ public class PnlKhachHang extends JPanel {
         txtSDT = new JTextField(20);
         pnlForm.add(txtSDT, gbc);
 
-        // Các nút
-        JPanel pnlButton = new JPanel(new FlowLayout());
+        // Các nút - Material styled
+        JPanel pnlButton = MaterialInitializer.createButtonPanel();
         btnThem = new JButton("Thêm");
         btnCapNhat = new JButton("Cập nhật");
         btnXoa = new JButton("Xóa");
         btnLamMoi = new JButton("Làm mới");
 
         btnThem.addActionListener(e -> themKhachHang());
+        MaterialInitializer.styleButton(btnThem);
+        
         btnCapNhat.addActionListener(e -> capNhatKhachHang());
+        MaterialInitializer.styleButton(btnCapNhat);
+        
         btnLamMoi.addActionListener(e -> taiDuLieuKhachHang());
+        MaterialInitializer.styleButton(btnLamMoi);
 
         pnlButton.add(btnThem);
         pnlButton.add(btnCapNhat);
@@ -103,6 +109,7 @@ public class PnlKhachHang extends JPanel {
         JPanel pnlDuoi = new JPanel(new BorderLayout());
         pnlDuoi.add(pnlForm, BorderLayout.CENTER);
         pnlDuoi.add(pnlButton, BorderLayout.SOUTH);
+        pnlDuoi.setPreferredSize(new Dimension(0, 220)); // Đảm bảo có đủ không gian
         add(pnlDuoi, BorderLayout.SOUTH);
 
         // Chọn bảng để hiện thông tin trên mấy cái txt

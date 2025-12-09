@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.dao.NhanVienDAO;
 import com.trainstation.model.NhanVien;
 
@@ -46,18 +47,21 @@ public class PnlDuLieuDaXoa extends JPanel {
         JScrollPane scrollPane = new JScrollPane(bangNhanVien);
         add(scrollPane, BorderLayout.CENTER);
 
-        JPanel pnlButton = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JPanel pnlButton = MaterialInitializer.createButtonPanel();
 
         btnKhoiPhuc = new JButton("Khôi phục");
         btnKhoiPhuc.addActionListener(e -> khoiPhucNhanVien());
+        MaterialInitializer.styleButton(btnKhoiPhuc);
         pnlButton.add(btnKhoiPhuc);
 
         btnLamMoi = new JButton("Làm mới");
         btnLamMoi.addActionListener(e -> taiDuLieuDaXoa());
+        MaterialInitializer.styleButton(btnLamMoi);
         pnlButton.add(btnLamMoi);
 
         btnXoaRong = new JButton("Bỏ chọn");
         btnXoaRong.addActionListener(e -> bangNhanVien.clearSelection());
+        MaterialInitializer.styleButton(btnXoaRong);
         pnlButton.add(btnXoaRong);
 
         add(pnlButton, BorderLayout.SOUTH);

@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.model.*;
 import com.trainstation.service.*;
 import com.trainstation.dao.NhanVienDAO;
@@ -80,14 +81,15 @@ public class PnlHoanVe extends JPanel {
 
         btnTimKiem = new JButton("Tìm");
         btnTimKiem.addActionListener(e -> applyFilters());
+        MaterialInitializer.styleButton(btnTimKiem);
         pnlSearch.add(btnTimKiem);
 
         btnXoaTimKiem = new JButton("Xóa tìm");
-
         btnXoaTimKiem.addActionListener(e -> {
             clearSearchFields();
             applyFilters();
         });
+        MaterialInitializer.styleButton(btnXoaTimKiem);
         pnlSearch.add(btnXoaTimKiem);
 
         add(pnlSearch, BorderLayout.BEFORE_FIRST_LINE);
@@ -103,29 +105,32 @@ public class PnlHoanVe extends JPanel {
         scrollVe.setBorder(BorderFactory.createTitledBorder("Danh sách vé"));
         add(scrollVe, BorderLayout.CENTER);
 
-        // panel nút
-        JPanel pnlButton = new JPanel(new FlowLayout());
+        // panel nút - Material styled
+        JPanel pnlButton = MaterialInitializer.createButtonPanel();
 
         btnGuiYeuCau = new JButton("Gửi yêu cầu hoàn vé");
         btnGuiYeuCau.addActionListener(e -> guiYeuCauHoanVe());
+        MaterialInitializer.styleButton(btnGuiYeuCau);
         pnlButton.add(btnGuiYeuCau);
 
         if (isManager) {
             btnDuyetYeuCau = new JButton("Duyệt yêu cầu");
             btnDuyetYeuCau.addActionListener(e -> duyetYeuCauHoanVe());
+            MaterialInitializer.styleButton(btnDuyetYeuCau);
             pnlButton.add(btnDuyetYeuCau);
 
             btnDuyetTatCa = new JButton("Duyệt tất cả");
             btnDuyetTatCa.addActionListener(e -> duyetTatCaYeuCau());
+            MaterialInitializer.styleButton(btnDuyetTatCa);
             pnlButton.add(btnDuyetTatCa);
         }
 
         btnLamMoi = new JButton("Làm mới");
-
         btnLamMoi.addActionListener(e -> {
             clearAllFields();
             applyFilters();
         });
+        MaterialInitializer.styleButton(btnLamMoi);
         pnlButton.add(btnLamMoi);
 
         add(pnlButton, BorderLayout.SOUTH);
