@@ -87,6 +87,8 @@ public class PnlTau extends JPanel {
             }
         });
         JScrollPane scrollPane = new JScrollPane(bangTau);
+        // Giảm chiều cao bảng để form phía dưới hiển thị đầy đủ
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 30);
 
         JPanel pnlCenter = new JPanel(new BorderLayout(10, 10));
         pnlCenter.add(pnlInput, BorderLayout.NORTH);

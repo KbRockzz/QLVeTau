@@ -103,6 +103,8 @@ public class PnlHoanVe extends JPanel {
         bangVe = new JTable(modelBangVe);
         JScrollPane scrollVe = new JScrollPane(bangVe);
         scrollVe.setBorder(BorderFactory.createTitledBorder("Danh sách vé"));
+        // Giảm chiều cao bảng để có đủ không gian cho các điều khiển
+        MaterialInitializer.setTableScrollPaneSize(scrollVe, 40);
         add(scrollVe, BorderLayout.CENTER);
 
         // panel nút - Material styled

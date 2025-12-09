@@ -45,7 +45,10 @@ public class PnlTaiKhoan extends JPanel {
         bangTaiKhoan.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) hienThiThongTinTaiKhoan();
         });
-        add(new JScrollPane(bangTaiKhoan), BorderLayout.CENTER);
+        JScrollPane scrollPaneTK = new JScrollPane(bangTaiKhoan);
+        // Giảm chiều cao bảng để form phía dưới hiển thị đầy đủ
+        MaterialInitializer.setTableScrollPaneSize(scrollPaneTK, 35);
+        add(scrollPaneTK, BorderLayout.CENTER);
 
         JPanel pnlForm = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();

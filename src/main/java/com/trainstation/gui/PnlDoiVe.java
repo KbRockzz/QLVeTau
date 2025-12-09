@@ -75,6 +75,8 @@ public class PnlDoiVe extends JPanel {
         bangVe = new JTable(modelBangVe);
         JScrollPane scrollVe = new JScrollPane(bangVe);
         scrollVe.setBorder(BorderFactory.createTitledBorder("Danh sách vé"));
+        // Giảm chiều cao bảng để có đủ không gian
+        MaterialInitializer.setTableScrollPaneSize(scrollVe, 40);
         pnlTop.add(scrollVe, BorderLayout.CENTER);
         
         add(pnlTop, BorderLayout.CENTER);

@@ -54,6 +54,8 @@ public class PnlKhachHang extends JPanel {
         modelBang = new DefaultTableModel(tenCot, 0);
         bangKhachHang = new JTable(modelBang);
         JScrollPane scrollPane = new JScrollPane(bangKhachHang);
+        // Giảm chiều cao bảng để form phía dưới hiển thị đầy đủ
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 35);
         add(scrollPane, BorderLayout.CENTER);
 
         // panel form

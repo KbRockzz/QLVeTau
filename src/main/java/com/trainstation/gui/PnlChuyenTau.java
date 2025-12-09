@@ -76,6 +76,8 @@ public class PnlChuyenTau extends JPanel {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane sp = new JScrollPane(table);
         sp.setBorder(BorderFactory.createTitledBorder("Danh sách chuyến"));
+        // Giảm chiều cao bảng để form phía dưới hiển thị đầy đủ
+        MaterialInitializer.setTableScrollPaneSize(sp, 35);
 
         // Form panel
         JPanel form = new JPanel(new GridBagLayout());

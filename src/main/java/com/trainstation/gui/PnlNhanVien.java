@@ -55,6 +55,8 @@ public class PnlNhanVien extends JPanel {
             }
         });
         JScrollPane scrollPane = new JScrollPane(bangNhanVien);
+        // Giảm chiều cao bảng để form phía dưới hiển thị đầy đủ
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 35);
         add(scrollPane, BorderLayout.CENTER);
 
         // Form panel

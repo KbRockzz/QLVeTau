@@ -200,7 +200,8 @@ public class PnlDatVe extends JPanel {
         });
         JScrollPane scrollChuyenTau = new JScrollPane(tblChuyenTau);
         scrollChuyenTau.setBorder(BorderFactory.createTitledBorder("Danh sách chuyến tàu"));
-        scrollChuyenTau.setPreferredSize(new Dimension(0, 150));
+        // Giảm chiều cao bảng để có đủ không gian cho form phía dưới
+        scrollChuyenTau.setPreferredSize(new Dimension(0, 120));
         pnlNoiDung.add(scrollChuyenTau, BorderLayout.NORTH);
 
         // Bottom section

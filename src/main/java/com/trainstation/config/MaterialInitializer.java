@@ -92,11 +92,11 @@ public class MaterialInitializer {
 
     /**
      * Áp dụng Material styling cho một nút bấm
-     * - Bo góc 6px
-     * - Màu nền #1976D2 (Primary Blue)
+     * - Bo góc 6px (từ FlatLaf theme)
+     * - Màu nền #0A73D7 (xanh header)
      * - Màu chữ trắng
      * - Font Roboto Medium 14px
-     * - Hover #0D47A1 (Primary Dark)
+     * - Hover #0859A6
      */
     public static void styleButton(JButton button) {
         if (button == null) return;
@@ -110,10 +110,33 @@ public class MaterialInitializer {
         // Cursor
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
-        // FlatLaf sẽ tự động áp dụng màu từ theme
-        // Nhưng ta có thể đảm bảo nút luôn hiển thị
+        // Màu nền và chữ theo yêu cầu
+        button.setBackground(new Color(10, 115, 215)); // #0A73D7
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        
+        // Đảm bảo nút luôn hiển thị
         button.setVisible(true);
         button.setEnabled(true);
+        
+        // Thêm hiệu ứng hover
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            private Color originalColor = button.getBackground();
+            
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(8, 89, 166)); // #0859A6 hover
+                }
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (button.isEnabled()) {
+                    button.setBackground(originalColor);
+                }
+            }
+        });
     }
 
     /**
@@ -141,5 +164,21 @@ public class MaterialInitializer {
                 styleAllButtons((Container) comp);
             }
         }
+    }
+    
+    /**
+     * Giảm kích thước bảng để form nhập liệu có đủ không gian hiển thị
+     * Đặt chiều cao khoảng 45% của container height để form phía dưới hiển thị đầy đủ
+     */
+    public static void setTableScrollPaneSize(JScrollPane scrollPane, int heightPercentage) {
+        if (scrollPane == null) return;
+        
+        // Lấy kích thước màn hình để tính toán
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int targetHeight = (int)(screenSize.height * heightPercentage / 100.0);
+        
+        // Đặt kích thước ưu tiên cho scroll pane
+        scrollPane.setPreferredSize(new Dimension(0, targetHeight));
+        scrollPane.setMinimumSize(new Dimension(0, Math.min(200, targetHeight)));
     }
 }

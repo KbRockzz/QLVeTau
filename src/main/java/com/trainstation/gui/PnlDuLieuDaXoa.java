@@ -45,6 +45,8 @@ public class PnlDuLieuDaXoa extends JPanel {
         bangNhanVien.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         JScrollPane scrollPane = new JScrollPane(bangNhanVien);
+        // Giảm chiều cao bảng để có đủ không gian
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 45);
         add(scrollPane, BorderLayout.CENTER);
 
         JPanel pnlButton = MaterialInitializer.createButtonPanel();

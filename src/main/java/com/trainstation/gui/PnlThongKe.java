@@ -129,6 +129,8 @@ public class PnlThongKe extends JPanel {
         tblDoanhThu.getColumnModel().getColumn(1).setPreferredWidth(300);
 
         JScrollPane scrollPane = new JScrollPane(tblDoanhThu);
+        // Giảm chiều cao bảng để có đủ không gian
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 40);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel pnlSummary = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
@@ -176,6 +178,8 @@ public class PnlThongKe extends JPanel {
         tblVeDoiHoan.setRowHeight(25);
 
         JScrollPane scrollPane = new JScrollPane(tblVeDoiHoan);
+        // Giảm chiều cao bảng để có đủ không gian
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 40);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel pnlSummary = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
@@ -224,6 +228,8 @@ public class PnlThongKe extends JPanel {
         tblDoPhuGhe.setRowHeight(25);
 
         JScrollPane scrollPane = new JScrollPane(tblDoPhuGhe);
+        // Giảm chiều cao bảng để có đủ không gian
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 40);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel pnlSummary = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));

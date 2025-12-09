@@ -61,6 +61,8 @@ public class PnlQuanLyVe extends JPanel {
         bangHoaDon = new JTable(modelBangHoaDon);
         JScrollPane scrollPane = new JScrollPane(bangHoaDon);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Danh sách hóa đơn"));
+        // Giảm chiều cao bảng để có đủ không gian
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 45);
         add(scrollPane, BorderLayout.CENTER);
 
         // Button panel - Material styled
