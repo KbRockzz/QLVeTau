@@ -7,8 +7,8 @@ public class ChuyenTau implements Serializable {
     private String maChuyen;
     private String maTau;
     private String maNV;
-    private String gaDi;
-    private String gaDen;
+    private Ga gaDi;
+    private Ga gaDen;
     private LocalDateTime gioDi;
     private LocalDateTime gioDen;
     private int soKm;
@@ -18,12 +18,13 @@ public class ChuyenTau implements Serializable {
     public ChuyenTau() {
     }
 
-    public ChuyenTau(String maChuyen, String maTau, String maNV, String gaDi, String gaDen, LocalDateTime gioDi, LocalDateTime gioDen, int soKm, String maChang,String trangThai) {
+    public ChuyenTau(String maChuyen, String maTau, String maNV, Ga maGaDi, Ga maGaDen,
+                     LocalDateTime gioDi, LocalDateTime gioDen, int soKm, String maChang, String trangThai) {
         this.maChuyen = maChuyen;
         this.maTau = maTau;
         this.maNV = maNV;
-        this.gaDi = gaDi;
-        this.gaDen = gaDen;
+        this.gaDi = maGaDi;
+        this.gaDen = maGaDen;
         this.gioDi = gioDi;
         this.gioDen = gioDen;
         this.soKm = soKm;
@@ -55,21 +56,13 @@ public class ChuyenTau implements Serializable {
         this.maNV = maNV;
     }
 
-    public String getGaDi() {
-        return gaDi;
-    }
+    public Ga getGaDi() {return gaDi;}
 
-    public void setGaDi(String gaDi) {
-        this.gaDi = gaDi;
-    }
+    public void setGaDi(Ga gaDi) {this.gaDi = gaDi;}
 
-    public String getGaDen() {
-        return gaDen;
-    }
+    public Ga getGaDen() {return gaDen;}
 
-    public void setGaDen(String gaDen) {
-        this.gaDen = gaDen;
-    }
+    public void setGaDen(Ga gaDen) {this.gaDen = gaDen;}
 
     public LocalDateTime getGioDi() {
         return gioDi;
@@ -103,21 +96,6 @@ public class ChuyenTau implements Serializable {
         this.maChang = maChang;
     }
 
-    @Override
-    public String toString() {
-        return "ChuyenTau{" +
-                "maChuyen='" + maChuyen + '\'' +
-                ", maTau='" + maTau + '\'' +
-                ", maNV='" + maNV + '\'' +
-                ", gaDi='" + gaDi + '\'' +
-                ", gaDen='" + gaDen + '\'' +
-                ", gioDi=" + gioDi +
-                ", gioDen=" + gioDen +
-                ", soKm=" + soKm +
-                ", maChang='" + maChang + '\'' +
-                '}';
-    }
-
     public String getTrangThai() {
         return trangThai;
     }
@@ -125,4 +103,22 @@ public class ChuyenTau implements Serializable {
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
     }
+
+    @Override
+    public String toString() {
+        return "ChuyenTau{" +
+                "maChuyen='" + maChuyen + '\'' +
+                ", maTau='" + maTau + '\'' +
+                ", maNV='" + maNV + '\'' +
+                ", maGaDi=" + gaDi.getMaGa() +
+                ", maGaDen=" + gaDen.getMaGa() +
+                ", gioDi=" + gioDi +
+                ", gioDen=" + gioDen +
+                ", soKm=" + soKm +
+                ", maChang='" + maChang + '\'' +
+                ", trangThai='" + trangThai + '\'' +
+                '}';
+    }
+
+
 }

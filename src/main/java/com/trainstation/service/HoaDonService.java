@@ -146,8 +146,8 @@ public class HoaDonService {
 
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(stt++)).setFont(font)).setTextAlignment(TextAlignment.CENTER));
                 table.addCell(new Cell().add(new Paragraph(ct.getMaVe()).setFont(font)).setTextAlignment(TextAlignment.CENTER));
-                table.addCell(new Cell().add(new Paragraph(ve != null ? ve.getGaDi() : "N/A").setFont(font)));
-                table.addCell(new Cell().add(new Paragraph(ve != null ? ve.getGaDen() : "N/A").setFont(font)));
+                table.addCell(new Cell().add(new Paragraph(ve != null ? ve.getTenGaDi() : "N/A").setFont(font)));
+                table.addCell(new Cell().add(new Paragraph(ve != null ? ve.getTenGaDen() : "N/A").setFont(font)));
                 table.addCell(new Cell().add(new Paragraph(ve != null && ve.getGioDi() != null ? ve.getGioDi().format(dateFormatter) : "N/A").setFont(font)));
                 table.addCell(new Cell().add(new Paragraph(currencyFormat.format(ct.getGiaDaKM()) + " VNĐ").setFont(font)));
 
@@ -279,8 +279,8 @@ public class HoaDonService {
                         if (ve.getNgayIn() != null) pstInsertVe.setTimestamp(5, Timestamp.valueOf(ve.getNgayIn()));
                         else pstInsertVe.setNull(5, Types.TIMESTAMP);
                         pstInsertVe.setString(6, ve.getTrangThai());
-                        pstInsertVe.setString(7, ve.getGaDi());
-                        pstInsertVe.setString(8, ve.getGaDen());
+                        pstInsertVe.setString(7, ve.getTenGaDi());
+                        pstInsertVe.setString(8, ve.getTenGaDen());
                         if (ve.getGioDi() != null) pstInsertVe.setTimestamp(9, Timestamp.valueOf(ve.getGioDi()));
                         else pstInsertVe.setNull(9, Types.TIMESTAMP);
                         pstInsertVe.setString(10, ve.getSoToa());
@@ -405,7 +405,7 @@ public class HoaDonService {
             if (!veExistsOnConnection(ve.getMaVe(), connection)) {
                 TinhGiaService.KetQuaGia kq = tinhGia.tinhGiaChoVe(ve);
 
-                String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai,tenGaDi, tenGaDen, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement pst = connection.prepareStatement(insertVeSql)) {
                     pst.setString(1, ve.getMaVe());
                     pst.setString(2, ve.getMaChuyen());
@@ -414,8 +414,10 @@ public class HoaDonService {
                     if (ve.getNgayIn() != null) pst.setTimestamp(5, Timestamp.valueOf(ve.getNgayIn()));
                     else pst.setNull(5, Types.TIMESTAMP);
                     pst.setString(6, ve.getTrangThai());
-                    pst.setString(7, ve.getGaDi());
-                    pst.setString(8, ve.getGaDen());
+                    pst.setString(7, ve.getTenGaDi());
+                    pst.setString(8, ve.getTenGaDen());
+                    pst.setString(9, ve.getGaDi().getMaGa());
+                    pst.setString(10, ve.getGaDen().getMaGa());
                     if (ve.getGioDi() != null) pst.setTimestamp(9, Timestamp.valueOf(ve.getGioDi()));
                     else pst.setNull(9, Types.TIMESTAMP);
                     pst.setString(10, ve.getSoToa());

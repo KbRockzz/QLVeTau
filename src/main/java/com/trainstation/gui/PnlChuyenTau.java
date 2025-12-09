@@ -1,6 +1,7 @@
 package com.trainstation.gui;
 
 import com.trainstation.dao.ChuyenTauDAO;
+import com.trainstation.dao.GaDAO;
 import com.trainstation.dao.VeDAO;
 import com.trainstation.model.ChuyenTau;
 import com.trainstation.util.UIUtils;
@@ -44,6 +45,7 @@ public class PnlChuyenTau extends JPanel {
     private ScheduledExecutorService scheduler;
 
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private GaDAO gaDAO;
 
     public PnlChuyenTau() {
         chuyenTauDAO = ChuyenTauDAO.getInstance();
@@ -242,8 +244,8 @@ public class PnlChuyenTau extends JPanel {
                     txtMaChuyen.setText(ct.getMaChuyen());
                     txtMaChuyen.setEnabled(false); // khóa mã khi edit
                     txtMaTau.setText(ct.getMaTau());
-                    txtGaDi.setText(ct.getGaDi());
-                    txtGaDen.setText(ct.getGaDen());
+                    txtGaDi.setText(ct.getGaDi().getTenGa());
+                    txtGaDen.setText(ct.getGaDen().getTenGa());
                     if (ct.getGioDi() != null) {
                         Date d = java.util.Date.from(ct.getGioDi().atZone(ZoneId.systemDefault()).toInstant());
                         spinnerDateTime.setValue(d);
@@ -370,8 +372,8 @@ public class PnlChuyenTau extends JPanel {
         ChuyenTau ct = new ChuyenTau();
         ct.setMaChuyen(txtMaChuyen.getText().trim());
         ct.setMaTau(txtMaTau.getText().trim());
-        ct.setGaDi(txtGaDi.getText().trim());
-        ct.setGaDen(txtGaDen.getText().trim());
+        ct.setGaDi(gaDAO.findById(txtGaDi.getText().trim()));
+        ct.setGaDen(gaDAO.findById(txtGaDen.getText().trim()));
         if (chkTemplate.isSelected()) {
             ct.setGioDi(null);
             ct.setGioDen(null);

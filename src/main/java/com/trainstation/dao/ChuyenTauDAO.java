@@ -2,6 +2,7 @@ package com.trainstation.dao;
 
 import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.model.ChuyenTau;
+import com.trainstation.model.Ga;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static java.util.Locale.filter;
 
 /**
  * Data access object for ChuyenTau.
@@ -27,6 +30,7 @@ import java.util.Set;
  */
 public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
     private static ChuyenTauDAO instance;
+    private GaDAO gaDAO;
 
     private ChuyenTauDAO() {
         // Không giữ Connection làm trường
@@ -42,7 +46,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
     @Override
     public List<ChuyenTau> getAll() {
         List<ChuyenTau> list = new ArrayList<>();
-        String sql = "SELECT maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau";
+        String sql = "SELECT maChuyen, maTau, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -58,8 +62,8 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
                         rs.getString("maChuyen"),
                         rs.getString("maTau"),
                         rs.getString("maNV"),
-                        rs.getString("gaDi"),
-                        rs.getString("gaDen"),
+                        gaDAO.findById(rs.getString("maGaDi")),
+                        gaDAO.findById(rs.getString("maGaDen")),
                         gioDi,
                         gioDen,
                         rs.getInt("soKm"),
@@ -76,48 +80,21 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     @Override
     public ChuyenTau findById(String id) {
-        String sql = "SELECT maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE maChuyen = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    LocalDateTime gioDi = null, gioDen = null;
-                    Timestamp ts1 = rs.getTimestamp("gioDi");
-                    if (ts1 != null) gioDi = ts1.toLocalDateTime();
-                    Timestamp ts2 = rs.getTimestamp("gioDen");
-                    if (ts2 != null) gioDen = ts2.toLocalDateTime();
-
-                    return new ChuyenTau(
-                            rs.getString("maChuyen"),
-                            rs.getString("maTau"),
-                            rs.getString("maNV"),
-                            rs.getString("gaDi"),
-                            rs.getString("gaDen"),
-                            gioDi,
-                            gioDen,
-                            rs.getInt("soKm"),
-                            rs.getString("maChang"),
-                            rs.getString("trangThai")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<ChuyenTau> list = new ArrayList<>();
+        list = getAll();
+        return list.stream().filter(ct -> ct.getMaChuyen().equals(id)).findFirst().orElse(null);
     }
 
     @Override
     public boolean insert(ChuyenTau ct) {
-        String sql = "INSERT INTO ChuyenTau (maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ChuyenTau (maChuyen, maTau, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, ct.getMaChuyen());
             pst.setString(2, ct.getMaTau());
             pst.setString(3, ct.getMaNV());
-            pst.setString(4, ct.getGaDi());
-            pst.setString(5, ct.getGaDen());
+            pst.setString(4, ct.getGaDi().toString());
+            pst.setString(5, ct.getGaDen().toString());
             if (ct.getGioDi() != null) {
                 pst.setTimestamp(6, Timestamp.valueOf(ct.getGioDi()));
             } else {
@@ -138,45 +115,18 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
     }
 
     @Override
-    public boolean update(ChuyenTau ct) {
-        String sql = "UPDATE ChuyenTau SET maTau = ?, maNV = ?, gaDi = ?, gaDen = ?, gioDi = ?, gioDen = ?, soKm = ?, maChang = ? WHERE maChuyen = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, ct.getMaTau());
-            pst.setString(2, ct.getMaNV());
-            pst.setString(3, ct.getGaDi());
-            pst.setString(4, ct.getGaDen());
-            if (ct.getGioDi() != null) {
-                pst.setTimestamp(5, Timestamp.valueOf(ct.getGioDi()));
-            } else {
-                pst.setNull(5, Types.TIMESTAMP);
-            }
-            if (ct.getGioDen() != null) {
-                pst.setTimestamp(6, Timestamp.valueOf(ct.getGioDen()));
-            } else {
-                pst.setNull(6, Types.TIMESTAMP);
-            }
-            pst.setInt(7, ct.getSoKm());
-            pst.setString(8, ct.getMaChang());
-            pst.setString(9, ct.getMaChuyen());
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean update(ChuyenTau entity) {
+        return false;
     }
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM ChuyenTau WHERE maChuyen = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
+        ChuyenTau ct = findById(id);
+        if (ct == null) {
             return false;
         }
+        ct.setTrangThai("Đã hủy");
+        return true;
     }
 
     /**
@@ -184,71 +134,28 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
      */
     public List<ChuyenTau> timKiemChuyenTau(String gaDi, String gaDen, LocalDate ngayDi, LocalTime gioDi) {
         List<ChuyenTau> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE 1=1");
-
-        if (gaDi != null && !gaDi.trim().isEmpty()) {
-            sql.append(" AND gaDi = ?");
-        }
-        if (gaDen != null && !gaDen.trim().isEmpty()) {
-            sql.append(" AND gaDen = ?");
-        }
-        if (ngayDi != null) {
-            sql.append(" AND CAST(gioDi AS DATE) = ?");
-        }
-        if (gioDi != null) {
-            sql.append(" AND gioDi >= ?");
-        }
-
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql.toString())) {
-            int paramIndex = 1;
-
-            if (gaDi != null && !gaDi.trim().isEmpty()) {
-                pst.setString(paramIndex++, gaDi);
+        list = getAll();
+        return list.stream().filter(ct -> {
+            boolean match = true;
+            if (gaDi != null && !gaDi.isEmpty()) {
+                match = match && ct.getGaDi().getTenGa().toLowerCase().contains(gaDi.toLowerCase());
             }
-            if (gaDen != null && !gaDen.trim().isEmpty()) {
-                pst.setString(paramIndex++, gaDen);
+            if (gaDen != null && !gaDen.isEmpty()) {
+                match = match && ct.getGaDen().getTenGa().toLowerCase().contains(gaDen.toLowerCase());
             }
             if (ngayDi != null) {
-                pst.setDate(paramIndex++, Date.valueOf(ngayDi));
+                match = match && ct.getGioDi() != null && ct.getGioDi().toLocalDate().isEqual(ngayDi);
             }
             if (gioDi != null) {
-                LocalDateTime searchDateTime = LocalDateTime.of(ngayDi != null ? ngayDi : LocalDate.now(), gioDi);
-                pst.setTimestamp(paramIndex++, Timestamp.valueOf(searchDateTime));
+                match = match && ct.getGioDi() != null && ct.getGioDi().toLocalTime().equals(gioDi);
             }
-
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    LocalDateTime gioDiDT = null, gioDenDT = null;
-                    Timestamp ts1 = rs.getTimestamp("gioDi");
-                    if (ts1 != null) gioDiDT = ts1.toLocalDateTime();
-                    Timestamp ts2 = rs.getTimestamp("gioDen");
-                    if (ts2 != null) gioDenDT = ts2.toLocalDateTime();
-
-                    ChuyenTau ct = new ChuyenTau(
-                            rs.getString("maChuyen"),
-                            rs.getString("maTau"),
-                            rs.getString("maNV"),
-                            rs.getString("gaDi"),
-                            rs.getString("gaDen"),
-                            gioDiDT,
-                            gioDenDT,
-                            rs.getInt("soKm"),
-                            rs.getString("maChang"),
-                            rs.getString("trangThai")
-                    );
-                    list.add(ct);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
+            return match;
+        }).toList();
     }
 
     public List<String> getDistinctStations() {
         Set<String> stations = new HashSet<>();
-        String sql = "SELECT DISTINCT gaDi FROM ChuyenTau UNION SELECT DISTINCT gaDen FROM ChuyenTau ORDER BY 1";
+        String sql = "SELECT DISTINCT maGaDi FROM ChuyenTau UNION SELECT DISTINCT maGaDen FROM ChuyenTau ORDER BY 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {

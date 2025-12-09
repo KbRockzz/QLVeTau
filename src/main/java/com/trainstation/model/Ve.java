@@ -10,8 +10,10 @@ public class Ve implements Serializable {
     private String maSoGhe;
     private LocalDateTime ngayIn;
     private String trangThai;
-    private String gaDi;
-    private String gaDen;
+    private String tenGaDi;
+    private String tenGaDen;
+    private Ga gaDi;
+    private Ga gaDen;
     private LocalDateTime gioDi;
     private String soToa;
     private String loaiCho;
@@ -21,13 +23,18 @@ public class Ve implements Serializable {
     public Ve() {
     }
 
-    public Ve(String maVe, String maChuyen, String maLoaiVe, String maSoGhe, LocalDateTime ngayIn, String trangThai, String gaDi, String gaDen, LocalDateTime gioDi, String soToa, String loaiCho, String loaiVe, String maBangGia) {
+    public Ve(String maVe, String maChuyen, String maLoaiVe, String maSoGhe,
+               LocalDateTime ngayIn, String trangThai, String tenGaDi, String tenGaDen,
+               Ga gaDi, Ga gaDen, LocalDateTime gioDi, String soToa,
+               String loaiCho, String loaiVe, String maBangGia) {
         this.maVe = maVe;
         this.maChuyen = maChuyen;
         this.maLoaiVe = maLoaiVe;
         this.maSoGhe = maSoGhe;
         this.ngayIn = ngayIn;
         this.trangThai = trangThai;
+        this.tenGaDi = tenGaDi;
+        this.tenGaDen = tenGaDen;
         this.gaDi = gaDi;
         this.gaDen = gaDen;
         this.gioDi = gioDi;
@@ -81,24 +88,24 @@ public class Ve implements Serializable {
         return trangThai;
     }
 
+    public String getTenGaDi() {return tenGaDi;}
+
+    public void setTenGaDi(String tenGaDi) {this.tenGaDi = tenGaDi;}
+
+    public String getTenGaDen() {return tenGaDen;}
+
+    public void setTenGaDen(String tenGaDen) {this.tenGaDen = tenGaDen;}
+
+    public Ga getGaDi() {return gaDi;}
+
+    public void setGaDi(Ga gaDi) { this.gaDi = gaDi;}
+
+    public Ga getGaDen() { return gaDen;}
+
+    public void setGaDen(Ga gaDen) { this.gaDen = gaDen;}
+
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
-    }
-
-    public String getGaDi() {
-        return gaDi;
-    }
-
-    public void setGaDi(String gaDi) {
-        this.gaDi = gaDi;
-    }
-
-    public String getGaDen() {
-        return gaDen;
-    }
-
-    public void setGaDen(String gaDen) {
-        this.gaDen = gaDen;
     }
 
     public LocalDateTime getGioDi() {
@@ -142,6 +149,7 @@ public class Ve implements Serializable {
     }
     // Chỉ là ví dụ phần liên quan, chèn vào class Ve hiện tại
 
+
     private transient com.trainstation.model.ChiTietHoaDon chiTietHoaDon; // transient: không serial hóa / không map DB
 
     public com.trainstation.model.ChiTietHoaDon getChiTietHoaDon() {
@@ -176,8 +184,10 @@ public class Ve implements Serializable {
                 ", maSoGhe='" + maSoGhe + '\'' +
                 ", ngayIn=" + ngayIn +
                 ", trangThai='" + trangThai + '\'' +
-                ", gaDi='" + gaDi + '\'' +
-                ", gaDen='" + gaDen + '\'' +
+                ", tenGaDi='" + tenGaDi + '\'' +
+                ", tenGaDen='" + tenGaDen + '\'' +
+                ", maGaDi=" + gaDi +
+                ", maGaDen=" + gaDen +
                 ", gioDi=" + gioDi +
                 ", soToa='" + soToa + '\'' +
                 ", loaiCho='" + loaiCho + '\'' +

@@ -12,12 +12,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * DAO cho BangGia (cột: maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc)
- *
- * LƯU Ý: findApplicable hiện không chấp nhận ngayKetThuc = NULL là "vô hạn".
- * Chỉ những bản ghi có ngayBatDau <= refDate AND ngayKetThuc >= refDate mới được áp dụng.
- */
 public class BangGiaDAO implements GenericDAO<BangGia> {
     private static BangGiaDAO instance;
 
@@ -31,7 +25,7 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
     @Override
     public List<BangGia> getAll() {
         List<BangGia> list = new ArrayList<>();
-        String sql = "SELECT maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc FROM BangGia";
+        String sql = "SELECT maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc FROM BangGia WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -60,31 +54,38 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
 
     @Override
     public BangGia findById(String id) {
-        String sql = "SELECT maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc FROM BangGia WHERE maBangGia = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    LocalDateTime ngayBatDau = null, ngayKetThuc = null;
-                    Timestamp ts1 = rs.getTimestamp("ngayBatDau");
-                    if (ts1 != null) ngayBatDau = ts1.toLocalDateTime();
-                    Timestamp ts2 = rs.getTimestamp("ngayKetThuc");
-                    if (ts2 != null) ngayKetThuc = ts2.toLocalDateTime();
-
-                    return new BangGia(
-                            rs.getString("maBangGia"),
-                            rs.getString("maChang"),
-                            rs.getString("loaiGhe"),
-                            rs.getFloat("giaCoBan"),
-                            ngayBatDau,
-                            ngayKetThuc
-                    );
-                }
+//        String sql = "SELECT maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc FROM BangGia WHERE maBangGia = ?";
+//        try (Connection conn = ConnectSql.getInstance().getConnection();
+//             PreparedStatement pst = conn.prepareStatement(sql)) {
+//            pst.setString(1, id);
+//            try (ResultSet rs = pst.executeQuery()) {
+//                if (rs.next()) {
+//                    LocalDateTime ngayBatDau = null, ngayKetThuc = null;
+//                    Timestamp ts1 = rs.getTimestamp("ngayBatDau");
+//                    if (ts1 != null) ngayBatDau = ts1.toLocalDateTime();
+//                    Timestamp ts2 = rs.getTimestamp("ngayKetThuc");
+//                    if (ts2 != null) ngayKetThuc = ts2.toLocalDateTime();
+//
+//                    return new BangGia(
+//                            rs.getString("maBangGia"),
+//                            rs.getString("maChang"),
+//                            rs.getString("loaiGhe"),
+//                            rs.getFloat("giaCoBan"),
+//                            ngayBatDau,
+//                            ngayKetThuc
+//                    );
+//                }
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+        List <BangGia> all = getAll();
+        for (BangGia bg : all) {
+            if (bg.getMaBangGia().equals(id)) {
+                return bg;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+
         return null;
     }
 
@@ -126,7 +127,7 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM BangGia WHERE maBangGia = ?";
+        String sql = "UPDATE BangGia SET isActive = 0 WHERE maBangGia = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -138,39 +139,13 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
     }
     public BangGia findApplicable(String maChang, String loaiGhe, LocalDateTime refDate) {
         if (maChang == null || loaiGhe == null || refDate == null) return null;
-        // NOTE: Use SQL Server compatible TOP 1 instead of MySQL LIMIT
-        String sql = "SELECT TOP 1 maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc " +
-                "FROM BangGia " +
-                "WHERE maChang = ? AND loaiGhe = ? AND ngayBatDau <= ? AND ngayKetThuc >= ? " +
-                "ORDER BY ngayBatDau DESC";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            Timestamp ts = Timestamp.valueOf(refDate);
-            pst.setString(1, maChang);
-            pst.setString(2, loaiGhe);
-            pst.setTimestamp(3, ts);
-            pst.setTimestamp(4, ts);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    LocalDateTime ngayBatDau = null, ngayKetThuc = null;
-                    Timestamp t1 = rs.getTimestamp("ngayBatDau");
-                    if (t1 != null) ngayBatDau = t1.toLocalDateTime();
-                    Timestamp t2 = rs.getTimestamp("ngayKetThuc");
-                    if (t2 != null) ngayKetThuc = t2.toLocalDateTime();
+        List<BangGia> banggias = new ArrayList<>();
+        banggias = getAll();
+        return banggias.stream()
+                .filter(bg -> bg.getMaChang().equals(maChang)
+                        && bg.getLoaiGhe().equals(loaiGhe)
+                        && bg.getNgayBatDau() != null && !bg.getNgayBatDau().isAfter(refDate)
+                        && bg.getNgayKetThuc() != null && !bg.getNgayKetThuc().isBefore(refDate)).findFirst().map(bg -> bg).orElse(null);
 
-                    return new BangGia(
-                            rs.getString("maBangGia"),
-                            rs.getString("maChang"),
-                            rs.getString("loaiGhe"),
-                            rs.getFloat("giaCoBan"),
-                            ngayBatDau,
-                            ngayKetThuc
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

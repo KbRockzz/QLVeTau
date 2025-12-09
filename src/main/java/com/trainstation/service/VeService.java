@@ -337,10 +337,10 @@ public class VeService {
                     .setTextAlignment(TextAlignment.CENTER));
 
             gaTable.addCell(new Cell()
-                    .add(new Paragraph(ve.getGaDi() != null ? ve.getGaDi() : "N/A").setFont(font))
+                    .add(new Paragraph(ve.getTenGaDi() != null ? ve.getTenGaDi() : "N/A").setFont(font))
                     .setTextAlignment(TextAlignment.CENTER));
             gaTable.addCell(new Cell()
-                    .add(new Paragraph(ve.getGaDen() != null ? ve.getGaDen() : "N/A").setFont(font))
+                    .add(new Paragraph(ve.getGaDen().getTenGa() != null ? ve.getGaDen().getTenGa() : "N/A").setFont(font))
                     .setTextAlignment(TextAlignment.CENTER));
 
             document.add(gaTable);
