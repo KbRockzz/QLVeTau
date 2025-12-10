@@ -118,27 +118,30 @@ public class NavigationBar extends JPanel {
     
     private JButton createNavButton(String text, String action) {
         JButton button = new JButton(text);
-        // Material Professional Light - Text only, flat design
-        button.setForeground(Color.WHITE);
-        button.setBackground(new Color(25, 118, 210)); // Match navbar background
+        // Material Professional Light - White background, blue text
+        button.setForeground(new Color(10, 115, 215)); // #0A73D7 - blue text
+        button.setBackground(Color.WHITE); // White background
         button.setBorderPainted(false);
         button.setFocusPainted(false);
-        button.setContentAreaFilled(false); // Transparent background
-        button.setOpaque(false);
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
         button.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(100, 40));
         
-        // Material hover effect - subtle background
+        // Increase width to prevent text truncation, adjust based on text length
+        int buttonWidth = Math.max(140, text.length() * 12 + 30);
+        button.setPreferredSize(new Dimension(buttonWidth, 40));
+        button.setMargin(new Insets(5, 15, 5, 15));
+        
+        // Material hover effect - white background normally, blue background on hover
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setOpaque(true);
-                button.setContentAreaFilled(true);
-                button.setBackground(new Color(13, 71, 161)); // #0D47A1 - darker blue for hover
+                button.setBackground(new Color(10, 115, 215)); // #0A73D7 - blue hover
+                button.setForeground(Color.WHITE); // White text on hover
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setOpaque(false);
-                button.setContentAreaFilled(false);
+                button.setBackground(Color.WHITE); // Back to white
+                button.setForeground(new Color(10, 115, 215)); // Back to blue text
             }
         });
         
