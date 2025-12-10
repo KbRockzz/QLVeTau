@@ -64,44 +64,55 @@ public class PnlNhanVien extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 0.5;
 
         // Cột 1
         gbc.gridx = 0; gbc.gridy = 0;
+        gbc.weightx = 0.0; // Label không mở rộng
         pnlForm.add(new JLabel("Mã NV:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 0.5; // TextField mở rộng
         txtMaNV = new JTextField(20);
         txtMaNV.setEditable(false);
         pnlForm.add(txtMaNV, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Tên NV:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 0.5;
         txtTenNV = new JTextField(20);
         pnlForm.add(txtTenNV, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("SĐT:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 0.5;
         txtSDT = new JTextField(20);
         pnlForm.add(txtSDT, gbc);
 
         // Cột 2
         gbc.gridx = 2; gbc.gridy = 0;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Địa chỉ:"), gbc);
         gbc.gridx = 3;
+        gbc.weightx = 0.5;
         txtDiaChi = new JTextField(20);
         pnlForm.add(txtDiaChi, gbc);
 
         gbc.gridx = 2; gbc.gridy = 1;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Ngày sinh (yyyy-mm-dd):"), gbc);
         gbc.gridx = 3;
+        gbc.weightx = 0.5;
         txtNgaySinh = new JTextField(20);
         pnlForm.add(txtNgaySinh, gbc);
 
         gbc.gridx = 2; gbc.gridy = 2;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Loại nhân viên:"), gbc);
         gbc.gridx = 3;
+        gbc.weightx = 0.5;
         cmbLoaiNV = new JComboBox<>();
         List<LoaiNV> danhSachLoaiNV = loaiNVDAO.getAll();
         for (LoaiNV loai : danhSachLoaiNV) {

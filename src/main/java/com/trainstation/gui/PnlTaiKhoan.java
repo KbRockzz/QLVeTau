@@ -54,24 +54,23 @@ public class PnlTaiKhoan extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 0.5;
 
         // Cột 1
-        gbc.gridx = 0; gbc.gridy = 0; pnlForm.add(new JLabel("Mã TK:"), gbc);
-        gbc.gridx = 1; txtMaTK = new JTextField(20); txtMaTK.setEditable(false); pnlForm.add(txtMaTK, gbc);
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.0; pnlForm.add(new JLabel("Mã TK:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.5; txtMaTK = new JTextField(20); txtMaTK.setEditable(false); pnlForm.add(txtMaTK, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1; pnlForm.add(new JLabel("Mã NV:"), gbc);
-        gbc.gridx = 1; txtMaNV = new JTextField(20); pnlForm.add(txtMaNV, gbc);
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.0; pnlForm.add(new JLabel("Mã NV:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.5; txtMaNV = new JTextField(20); pnlForm.add(txtMaNV, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2; pnlForm.add(new JLabel("Tên tài khoản:"), gbc);
-        gbc.gridx = 1; txtTenTK = new JTextField(20); pnlForm.add(txtTenTK, gbc);
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0; pnlForm.add(new JLabel("Tên tài khoản:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.5; txtTenTK = new JTextField(20); pnlForm.add(txtTenTK, gbc);
 
         // Cột 2
-        gbc.gridx = 2; gbc.gridy = 0; pnlForm.add(new JLabel("Mật khẩu:"), gbc);
-        gbc.gridx = 3; txtMatKhau = new JPasswordField(20); pnlForm.add(txtMatKhau, gbc);
+        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0.0; pnlForm.add(new JLabel("Mật khẩu:"), gbc);
+        gbc.gridx = 3; gbc.weightx = 0.5; txtMatKhau = new JPasswordField(20); pnlForm.add(txtMatKhau, gbc);
 
-        gbc.gridx = 2; gbc.gridy = 1; pnlForm.add(new JLabel("Trạng thái:"), gbc);
-        gbc.gridx = 3; cmbTrangThai = new JComboBox<>(new String[]{"Hoạt động", "Khóa"}); pnlForm.add(cmbTrangThai, gbc);
+        gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0.0; pnlForm.add(new JLabel("Trạng thái:"), gbc);
+        gbc.gridx = 3; gbc.weightx = 0.5; cmbTrangThai = new JComboBox<>(new String[]{"Hoạt động", "Khóa"}); pnlForm.add(cmbTrangThai, gbc);
 
         JPanel pnlButton = MaterialInitializer.createButtonPanel();
         btnXoaRong = new JButton("Xóa rỗng"); 
