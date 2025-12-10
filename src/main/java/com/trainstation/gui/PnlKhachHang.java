@@ -64,28 +64,37 @@ public class PnlKhachHang extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0; // Cho phép text fields co giãn đúng cách
 
         gbc.gridx = 0; gbc.gridy = 0;
+        gbc.weightx = 0.0; // Label không co giãn
         pnlForm.add(new JLabel("Mã KH:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 1.0; // TextField co giãn
         txtMaKH = new JTextField(20);
         pnlForm.add(txtMaKH, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Tên KH:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         txtTenKH = new JTextField(20);
         pnlForm.add(txtTenKH, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Email:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         txtEmail = new JTextField(20);
         pnlForm.add(txtEmail, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("SĐT:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         txtSDT = new JTextField(20);
         pnlForm.add(txtSDT, gbc);
 
