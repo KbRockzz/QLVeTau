@@ -65,6 +65,7 @@ public class PnlHoanVe extends JPanel {
         pnlSearch.add(new JLabel("Ngày đi:"));
         dateChooser = new JDateChooser();
         dateChooser.setDateFormatString("dd/MM/yyyy");
+        dateChooser.setPreferredSize(new Dimension(150, 32));
         pnlSearch.add(dateChooser);
 
         pnlSearch.add(new JLabel("Trạng thái:"));

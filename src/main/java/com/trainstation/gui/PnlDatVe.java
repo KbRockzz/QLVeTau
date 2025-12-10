@@ -130,17 +130,17 @@ public class PnlDatVe extends JPanel {
 
         pnlTimChuyenTau.add(new JLabel("Ga đi:"));
         cmbGaDi = new JComboBox<>();
-        cmbGaDi.setPreferredSize(new Dimension(120, 25));
+        cmbGaDi.setPreferredSize(new Dimension(120, 32));
         pnlTimChuyenTau.add(cmbGaDi);
 
         pnlTimChuyenTau.add(new JLabel("Ga đến:"));
         cmbGaDen = new JComboBox<>();
-        cmbGaDen.setPreferredSize(new Dimension(120, 25));
+        cmbGaDen.setPreferredSize(new Dimension(120, 32));
         pnlTimChuyenTau.add(cmbGaDen);
 
         pnlTimChuyenTau.add(new JLabel("Ngày đi:"));
         dateNgayDi = new JDateChooser();
-        dateNgayDi.setPreferredSize(new Dimension(120, 25));
+        dateNgayDi.setPreferredSize(new Dimension(120, 32));
         dateNgayDi.setDateFormatString("dd/MM/yyyy");
         // Set min/max
         applyDateConstraintsToDateChooser();
@@ -170,7 +170,7 @@ public class PnlDatVe extends JPanel {
         spnGioDi = new JSpinner(timeModel);
         JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(spnGioDi, "HH:mm");
         spnGioDi.setEditor(timeEditor);
-        spnGioDi.setPreferredSize(new Dimension(80, 25));
+        spnGioDi.setPreferredSize(new Dimension(80, 32));
         pnlTimChuyenTau.add(spnGioDi);
 
         btnTimChuyenTau = new JButton("Tìm chuyến tàu");
