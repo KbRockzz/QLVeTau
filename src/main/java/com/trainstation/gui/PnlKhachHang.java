@@ -59,55 +59,38 @@ public class PnlKhachHang extends JPanel {
         MaterialInitializer.setTableScrollPaneSize(scrollPane, 35);
         add(scrollPane, BorderLayout.CENTER);
 
-        // panel form
+        // panel form - 2 cột song song giống Quản lý Nhân viên
         JPanel pnlForm = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 0.5;
 
+        // Cột 1
         gbc.gridx = 0; gbc.gridy = 0;
-        gbc.weightx = 0.0; // Label không co giãn
         pnlForm.add(new JLabel("Mã KH:"), gbc);
         gbc.gridx = 1;
-        gbc.weightx = 0.3; // TextField có độ rộng hợp lý
         txtMaKH = new JTextField(20);
         pnlForm.add(txtMaKH, gbc);
-        gbc.gridx = 2;
-        gbc.weightx = 1.0; // Cột thứ 3 hấp thụ không gian thừa
-        pnlForm.add(new JLabel(""), gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
-        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Tên KH:"), gbc);
         gbc.gridx = 1;
-        gbc.weightx = 0.3;
         txtTenKH = new JTextField(20);
         pnlForm.add(txtTenKH, gbc);
-        gbc.gridx = 2;
-        gbc.weightx = 1.0;
-        pnlForm.add(new JLabel(""), gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
-        gbc.weightx = 0.0;
+        // Cột 2
+        gbc.gridx = 2; gbc.gridy = 0;
         pnlForm.add(new JLabel("Email:"), gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 0.3;
+        gbc.gridx = 3;
         txtEmail = new JTextField(20);
         pnlForm.add(txtEmail, gbc);
-        gbc.gridx = 2;
-        gbc.weightx = 1.0;
-        pnlForm.add(new JLabel(""), gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3;
-        gbc.weightx = 0.0;
+        gbc.gridx = 2; gbc.gridy = 1;
         pnlForm.add(new JLabel("SĐT:"), gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 0.3;
+        gbc.gridx = 3;
         txtSDT = new JTextField(20);
         pnlForm.add(txtSDT, gbc);
-        gbc.gridx = 2;
-        gbc.weightx = 1.0;
-        pnlForm.add(new JLabel(""), gbc);
 
         // Các nút - Material styled
         JPanel pnlButton = MaterialInitializer.createButtonPanel();
