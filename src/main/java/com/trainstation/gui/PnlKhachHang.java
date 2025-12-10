@@ -42,6 +42,7 @@ public class PnlKhachHang extends JPanel {
         pnlTimKiem.add(txtTimKiem);
         btnTimKiem = new JButton("Tìm kiếm");
         btnTimKiem.addActionListener(e -> timKiemTheoSoDienThoai());
+        MaterialInitializer.styleButton(btnTimKiem);
         pnlTimKiem.add(btnTimKiem);
 
         JPanel pnlTren = new JPanel(new BorderLayout());

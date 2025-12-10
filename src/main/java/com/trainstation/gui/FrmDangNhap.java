@@ -99,12 +99,13 @@ public class FrmDangNhap extends JFrame {
         
         // Login button
         btnDangNhap = new JButton("Đăng Nhập");
-        btnDangNhap.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
-        btnDangNhap.setPreferredSize(new Dimension(280, 40));
-        btnDangNhap.setMaximumSize(new Dimension(280, 40));
-        btnDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btnDangNhap.setFocusPainted(false);
-        btnDangNhap.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        MaterialInitializer.styleButton(btnDangNhap);
+//        btnDangNhap.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
+//        btnDangNhap.setPreferredSize(new Dimension(280, 40));
+//        btnDangNhap.setMaximumSize(new Dimension(280, 40));
+//        btnDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);
+//        btnDangNhap.setFocusPainted(false);
+//        btnDangNhap.setCursor(new Cursor(Cursor.HAND_CURSOR));
         // FlatLaf will apply Material colors automatically
         btnDangNhap.addActionListener(e -> xuLyDangNhap());
         cardPanel.add(btnDangNhap);

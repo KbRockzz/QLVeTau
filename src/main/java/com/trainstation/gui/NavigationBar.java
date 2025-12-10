@@ -129,7 +129,7 @@ public class NavigationBar extends JPanel {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
         // Increase width to prevent text truncation, adjust based on text length
-        int buttonWidth = Math.max(140, text.length() * 12 + 30);
+        int buttonWidth = Math.max(80, text.length() * 12 + 10);
         button.setPreferredSize(new Dimension(buttonWidth, 40));
         button.setMargin(new Insets(5, 15, 5, 15));
         
