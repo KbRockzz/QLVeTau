@@ -97,6 +97,7 @@ public class MaterialInitializer {
      * - Màu chữ trắng
      * - Font Roboto Medium 14px
      * - Hover #0859A6
+     * - Width động dựa trên text
      */
     public static void styleButton(JButton button) {
         if (button == null) return;
@@ -104,8 +105,11 @@ public class MaterialInitializer {
         // Font
         button.setFont(createFont(Font.PLAIN, 14));
         
-        // Kích thước tối thiểu
-        button.setPreferredSize(new Dimension(100, 36));
+        // Kích thước động dựa trên text, giống Navigation Bar
+        String text = button.getText();
+        int buttonWidth = Math.max(100, text.length() * 10 + 30);
+        button.setPreferredSize(new Dimension(buttonWidth, 36));
+        button.setMargin(new Insets(5, 12, 5, 12));
         
         // Cursor
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));

@@ -59,12 +59,14 @@ public class PnlNhanVien extends JPanel {
         MaterialInitializer.setTableScrollPaneSize(scrollPane, 35);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Form panel
+        // Form panel - 2 cột song song
         JPanel pnlForm = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 0.5;
 
+        // Cột 1
         gbc.gridx = 0; gbc.gridy = 0;
         pnlForm.add(new JLabel("Mã NV:"), gbc);
         gbc.gridx = 1;
@@ -84,21 +86,22 @@ public class PnlNhanVien extends JPanel {
         txtSDT = new JTextField(20);
         pnlForm.add(txtSDT, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3;
+        // Cột 2
+        gbc.gridx = 2; gbc.gridy = 0;
         pnlForm.add(new JLabel("Địa chỉ:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 3;
         txtDiaChi = new JTextField(20);
         pnlForm.add(txtDiaChi, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.gridx = 2; gbc.gridy = 1;
         pnlForm.add(new JLabel("Ngày sinh (yyyy-mm-dd):"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 3;
         txtNgaySinh = new JTextField(20);
         pnlForm.add(txtNgaySinh, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 5;
+        gbc.gridx = 2; gbc.gridy = 2;
         pnlForm.add(new JLabel("Loại nhân viên:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 3;
         cmbLoaiNV = new JComboBox<>();
         List<LoaiNV> danhSachLoaiNV = loaiNVDAO.getAll();
         for (LoaiNV loai : danhSachLoaiNV) {
