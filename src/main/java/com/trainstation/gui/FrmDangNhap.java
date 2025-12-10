@@ -86,7 +86,7 @@ public class FrmDangNhap extends JFrame {
         JLabel lblUsername = new JLabel("Tên đăng nhập");
         lblUsername.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         lblUsername.setForeground(new Color(33, 33, 33));
-        lblUsername.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lblUsername.setAlignmentX(Component.CENTER_ALIGNMENT);
         cardPanel.add(lblUsername);
         
         cardPanel.add(Box.createRigidArea(new Dimension(0, 8)));
@@ -95,7 +95,7 @@ public class FrmDangNhap extends JFrame {
         txtTenDangNhap.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         txtTenDangNhap.setPreferredSize(new Dimension(300, 38));
         txtTenDangNhap.setMaximumSize(new Dimension(300, 38));
-        txtTenDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);
+        txtTenDangNhap.setAlignmentX(Component.CENTER_ALIGNMENT);
         cardPanel.add(txtTenDangNhap);
         
         cardPanel.add(Box.createRigidArea(new Dimension(0, 20)));
@@ -104,7 +104,7 @@ public class FrmDangNhap extends JFrame {
         JLabel lblPassword = new JLabel("Mật khẩu");
         lblPassword.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         lblPassword.setForeground(new Color(33, 33, 33));
-        lblPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lblPassword.setAlignmentX(Component.CENTER_ALIGNMENT);
         cardPanel.add(lblPassword);
         
         cardPanel.add(Box.createRigidArea(new Dimension(0, 8)));
@@ -113,7 +113,7 @@ public class FrmDangNhap extends JFrame {
         txtMatKhau.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         txtMatKhau.setPreferredSize(new Dimension(300, 38));
         txtMatKhau.setMaximumSize(new Dimension(300, 38));
-        txtMatKhau.setAlignmentX(Component.LEFT_ALIGNMENT);
+        txtMatKhau.setAlignmentX(Component.CENTER_ALIGNMENT);
         txtMatKhau.addActionListener(e -> xuLyDangNhap()); // Enter key triggers login
         cardPanel.add(txtMatKhau);
         
@@ -124,7 +124,7 @@ public class FrmDangNhap extends JFrame {
         btnDangNhap.setFont(MaterialInitializer.createFont(Font.BOLD, 15));
         btnDangNhap.setPreferredSize(new Dimension(300, 42));
         btnDangNhap.setMaximumSize(new Dimension(300, 42));
-        btnDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnDangNhap.setAlignmentX(Component.CENTER_ALIGNMENT);
         MaterialInitializer.styleButton(btnDangNhap);
         btnDangNhap.addActionListener(e -> xuLyDangNhap());
         cardPanel.add(btnDangNhap);
