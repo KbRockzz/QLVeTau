@@ -55,7 +55,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
     }
 
     @Override
-    public boolean add(DauMay entity) {
+    public boolean insert(DauMay entity) {
         String sql = "INSERT INTO DauMay (maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai, isActive) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {

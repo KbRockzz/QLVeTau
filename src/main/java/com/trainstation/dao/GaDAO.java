@@ -54,7 +54,7 @@ public class GaDAO implements GenericDAO<Ga> {
     }
 
     @Override
-    public boolean add(Ga entity) {
+    public boolean insert(Ga entity) {
         String sql = "INSERT INTO Ga (maGa, tenGa, moTa, tinhTrang, diaChi, isActive) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
