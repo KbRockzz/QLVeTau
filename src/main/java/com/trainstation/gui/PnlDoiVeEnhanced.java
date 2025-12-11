@@ -204,7 +204,8 @@ public class PnlDoiVeEnhanced extends JPanel {
         }
         
         // Mở dialog đổi vé
-        new DlgDoiVe(this, veHienTai).setVisible(true);
+        Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
+        new DlgDoiVe(parentFrame, veHienTai).setVisible(true);
     }
 
     /**
