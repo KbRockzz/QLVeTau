@@ -109,16 +109,18 @@ public class HoaDonDAO implements GenericDAO<HoaDon> {
     }
     @Override
     public boolean insert(HoaDon hd) {
-        String sql = "INSERT INTO HoaDon (maHoaDon, maNV, maKH, ngayLap, phuongThucThanhToan, trangThai) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO HoaDon (maHoaDon, maNV, maKH, tenKH, soDienThoai, ngayLap, phuongThucThanhToan, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, hd.getMaHoaDon());
             pst.setString(2, hd.getMaNV());
             pst.setString(3, hd.getMaKH());
-            if (hd.getNgayLap() != null) pst.setTimestamp(4, Timestamp.valueOf(hd.getNgayLap()));
-            else pst.setNull(4, Types.TIMESTAMP);
-            pst.setString(5, hd.getPhuongThucThanhToan());
-            pst.setString(6, hd.getTrangThai());
+            pst.setString(4, hd.getTenKH());
+            pst.setString(5, hd.getSoDienThoai());
+            if (hd.getNgayLap() != null) pst.setTimestamp(6, Timestamp.valueOf(hd.getNgayLap()));
+            else pst.setNull(6, Types.TIMESTAMP);
+            pst.setString(7, hd.getPhuongThucThanhToan());
+            pst.setString(8, hd.getTrangThai());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -127,31 +129,35 @@ public class HoaDonDAO implements GenericDAO<HoaDon> {
     }
     // New: insert using provided Connection
     public boolean insert(HoaDon hd, Connection conn) throws SQLException {
-        String sql = "INSERT INTO HoaDon (maHoaDon, maNV, maKH, ngayLap, phuongThucThanhToan, trangThai) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO HoaDon (maHoaDon, maNV, maKH, tenKH, soDienThoai, ngayLap, phuongThucThanhToan, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, hd.getMaHoaDon());
             pst.setString(2, hd.getMaNV());
             pst.setString(3, hd.getMaKH());
-            if (hd.getNgayLap() != null) pst.setTimestamp(4, Timestamp.valueOf(hd.getNgayLap()));
-            else pst.setNull(4, Types.TIMESTAMP);
-            pst.setString(5, hd.getPhuongThucThanhToan());
-            pst.setString(6, hd.getTrangThai());
+            pst.setString(4, hd.getTenKH());
+            pst.setString(5, hd.getSoDienThoai());
+            if (hd.getNgayLap() != null) pst.setTimestamp(6, Timestamp.valueOf(hd.getNgayLap()));
+            else pst.setNull(6, Types.TIMESTAMP);
+            pst.setString(7, hd.getPhuongThucThanhToan());
+            pst.setString(8, hd.getTrangThai());
             return pst.executeUpdate() > 0;
         }
     }
 
     @Override
     public boolean update(HoaDon hd) {
-        String sql = "UPDATE HoaDon SET maNV = ?, maKH = ?, ngayLap = ?, phuongThucThanhToan = ?, trangThai = ? WHERE maHoaDon = ?";
+        String sql = "UPDATE HoaDon SET maNV = ?, maKH = ?, tenKH = ?, soDienThoai = ?, ngayLap = ?, phuongThucThanhToan = ?, trangThai = ? WHERE maHoaDon = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, hd.getMaNV());
             pst.setString(2, hd.getMaKH());
-            if (hd.getNgayLap() != null) pst.setTimestamp(3, Timestamp.valueOf(hd.getNgayLap()));
-            else pst.setNull(3, Types.TIMESTAMP);
-            pst.setString(4, hd.getPhuongThucThanhToan());
-            pst.setString(5, hd.getTrangThai());
-            pst.setString(6, hd.getMaHoaDon());
+            pst.setString(3, hd.getTenKH());
+            pst.setString(4, hd.getSoDienThoai());
+            if (hd.getNgayLap() != null) pst.setTimestamp(5, Timestamp.valueOf(hd.getNgayLap()));
+            else pst.setNull(5, Types.TIMESTAMP);
+            pst.setString(6, hd.getPhuongThucThanhToan());
+            pst.setString(7, hd.getTrangThai());
+            pst.setString(8, hd.getMaHoaDon());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
