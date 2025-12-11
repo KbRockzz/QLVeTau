@@ -1,23 +1,24 @@
 package com.trainstation.service;
 
-import com.trainstation.dao.TauDAO;
+import com.trainstation.dao.DauMayDAO;
 import com.trainstation.dao.ToaTauDAO;
-import com.trainstation.model.NhanVien;
+import com.trainstation.model.DauMay;
 import com.trainstation.model.Tau;
 import com.trainstation.model.ToaTau;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Service xử lý nghiệp vụ liên quan đến Tàu
+ * Service xử lý nghiệp vụ liên quan đến Đầu máy (Locomotive)
+ * Note: Maintains backwards compatibility with Tau for existing GUI code
  */
 public class TauService {
     private static TauService instance;
-    private final TauDAO tauDAO;
+    private final DauMayDAO dauMayDAO;
     private final ToaTauDAO toaTauDAO;
 
     private TauService() {
-        this.tauDAO = TauDAO.getInstance();
+        this.dauMayDAO = DauMayDAO.getInstance();
         this.toaTauDAO = ToaTauDAO.getInstance();
     }
 
@@ -28,31 +29,23 @@ public class TauService {
         return instance;
     }
 
-    public List<Tau> layTatCaTau() {
-        return tauDAO.getAll();
+    // New methods using DauMay directly
+    public List<DauMay> layTatCaDauMay() {
+        return dauMayDAO.getAll();
     }
 
-    public Tau timTauTheoMa(String maTau) {
-        return tauDAO.findById(maTau);
+    public DauMay timDauMayTheoMa(String maDauMay) {
+        return dauMayDAO.findById(maDauMay);
     }
 
-    public List<ToaTau> layDanhSachToaTau(String maDauMay) {
-        // Note: ToaTau no longer has maTau FK, so this needs to be reimplemented
-        // For now, return all ToaTau as they are no longer linked to specific trains
-        return toaTauDAO.getAll();
-    }
-
-    /**
-     * Tạo mã nhân viên tự động
-     */
-    public String taoMaTau() {
-        List<Tau> danhSach = tauDAO.getAll();
+    public String taoMaDauMay() {
+        List<DauMay> danhSach = dauMayDAO.getAll();
         int maxId = 0;
-        for (Tau tau : danhSach) {
-            String maTau = tau.getMaTau();
-            if (maTau != null && maTau.startsWith("T")) {
+        for (DauMay dauMay : danhSach) {
+            String maDauMay = dauMay.getMaDauMay();
+            if (maDauMay != null && maDauMay.startsWith("DM")) {
                 try {
-                    int id = Integer.parseInt(maTau.substring(1));
+                    int id = Integer.parseInt(maDauMay.substring(2));
                     if (id > maxId) {
                         maxId = id;
                     }
@@ -61,26 +54,93 @@ public class TauService {
                 }
             }
         }
-        return String.format("T%03d", maxId + 1);
+        return String.format("DM%03d", maxId + 1);
+    }
+
+    public boolean themDauMay(DauMay dauMay) {
+        return dauMayDAO.insert(dauMay);
+    }
+
+    public boolean capNhatDauMay(DauMay dauMay) {
+        return dauMayDAO.update(dauMay);
+    }
+
+    public boolean xoaDauMay(String maDauMay) {
+        return dauMayDAO.delete(maDauMay);
+    }
+
+    public boolean dungHoatDongDauMay(String maDauMay) {
+        return dauMayDAO.dungHoatDongDauMay(maDauMay);
+    }
+
+    public List<DauMay> layDauMayHoatDong() {
+        return dauMayDAO.layDauMayHoatDong();
+    }
+
+    // Backwards compatibility methods using Tau (adapter pattern)
+    public List<Tau> layTatCaTau() {
+        return dauMayDAO.getAll().stream()
+            .map(this::convertDauMayToTau)
+            .collect(Collectors.toList());
+    }
+
+    public Tau timTauTheoMa(String maTau) {
+        DauMay dauMay = dauMayDAO.findById(maTau);
+        return dauMay != null ? convertDauMayToTau(dauMay) : null;
+    }
+
+    public String taoMaTau() {
+        // Delegate to new method
+        return taoMaDauMay();
     }
 
     public boolean themTau(Tau tau) {
-        return tauDAO.insert(tau);
+        DauMay dauMay = convertTauToDauMay(tau);
+        return dauMayDAO.insert(dauMay);
     }
 
     public boolean capNhatTau(Tau tau) {
-        return tauDAO.update(tau);
+        DauMay dauMay = convertTauToDauMay(tau);
+        return dauMayDAO.update(dauMay);
     }
 
     public boolean xoaTau(String maTau) {
-        return tauDAO.delete(maTau);
+        return dauMayDAO.delete(maTau);
     }
 
     public boolean dungHoatDongTau(String maTau) {
-        return tauDAO.dungHoatDongTau(maTau);
+        return dauMayDAO.dungHoatDongDauMay(maTau);
     }
 
     public List<Tau> layTauHoatDong() {
-        return tauDAO.layTauHoatDong();
+        return dauMayDAO.layDauMayHoatDong().stream()
+            .map(this::convertDauMayToTau)
+            .collect(Collectors.toList());
+    }
+
+    public List<ToaTau> layDanhSachToaTau(String maDauMay) {
+        // ToaTau no longer has maTau FK in new schema
+        // Return all active ToaTau
+        return toaTauDAO.getAll();
+    }
+
+    // Conversion helper methods
+    private Tau convertDauMayToTau(DauMay dauMay) {
+        return new Tau(
+            dauMay.getMaDauMay(),
+            0, // soToa not available in DauMay
+            dauMay.getTenDauMay(),
+            dauMay.getTrangThai()
+        );
+    }
+
+    private DauMay convertTauToDauMay(Tau tau) {
+        DauMay dauMay = new DauMay();
+        dauMay.setMaDauMay(tau.getMaTau());
+        dauMay.setTenDauMay(tau.getTenTau());
+        dauMay.setTrangThai(tau.getTrangThai());
+        dauMay.setActive(true);
+        // loaiDauMay, namSX, lanBaoTriGanNhat are not set (will be null/default)
+        return dauMay;
     }
 }

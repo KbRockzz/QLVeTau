@@ -138,4 +138,52 @@ public class DauMayDAO implements GenericDAO<DauMay> {
                 rs.getBoolean("isActive")
         );
     }
+
+    /**
+     * Dừng hoạt động đầu máy
+     */
+    public boolean dungHoatDongDauMay(String maDauMay) {
+        String sql = "UPDATE DauMay SET trangThai = N'Dừng hoạt động' WHERE maDauMay = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maDauMay);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Lấy danh sách đầu máy đang hoạt động
+     */
+    public List<DauMay> layDauMayHoatDong() {
+        List<DauMay> list = new ArrayList<>();
+        String sql = "SELECT maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai, isActive FROM DauMay WHERE trangThai != N'Dừng hoạt động' AND isActive = 1";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                Timestamp timestamp = rs.getTimestamp("lanBaoTriGanNhat");
+                LocalDateTime lanBaoTri = null;
+                if (timestamp != null) {
+                    lanBaoTri = timestamp.toLocalDateTime();
+                }
+                
+                DauMay dauMay = new DauMay(
+                        rs.getString("maDauMay"),
+                        rs.getString("loaiDauMay"),
+                        rs.getString("tenDauMay"),
+                        rs.getObject("namSX", Integer.class),
+                        lanBaoTri,
+                        rs.getString("trangThai"),
+                        rs.getBoolean("isActive")
+                );
+                list.add(dauMay);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
