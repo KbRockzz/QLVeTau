@@ -17,10 +17,14 @@ import com.trainstation.dao.VeDAO;
 import com.trainstation.dao.GheDAO;
 import com.trainstation.dao.ChuyenTauDAO;
 import com.trainstation.dao.BangGiaDAO;
+import com.trainstation.dao.ChiTietHoaDonDAO;
+import com.trainstation.dao.HoaDonDAO;
 import com.trainstation.model.Ve;
 import com.trainstation.model.Ghe;
 import com.trainstation.model.ChuyenTau;
 import com.trainstation.model.BangGia;
+import com.trainstation.model.ChiTietHoaDon;
+import com.trainstation.model.HoaDon;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -43,8 +47,12 @@ public class VeService {
     private final VeDAO veDAO;
     private final GheDAO gheDAO;
     private final ChuyenTauDAO chuyenTauDAO;
-
     private final BangGiaDAO bangGiaDAO;
+    private final ChiTietHoaDonDAO chiTietHoaDonDAO;
+    private final HoaDonDAO hoaDonDAO;
+    
+    // Thời gian tối thiểu trước khi tàu chạy (phút)
+    private static final int MINIMUM_MINUTES_BEFORE_DEPARTURE = 30;
 
 
 
@@ -53,6 +61,8 @@ public class VeService {
         this.gheDAO = GheDAO.getInstance();
         this.chuyenTauDAO = ChuyenTauDAO.getInstance();
         this.bangGiaDAO = BangGiaDAO.getInstance();
+        this.chiTietHoaDonDAO = ChiTietHoaDonDAO.getInstance();
+        this.hoaDonDAO = HoaDonDAO.getInstance();
     }
 
     public static synchronized VeService getInstance() {
@@ -220,10 +230,70 @@ public class VeService {
             throw new IllegalArgumentException("Không tìm thấy vé");
         }
 
-        if (!"Đã thanh toán".equals(ve.getTrangThai()) && !"Đã đặt".equals(ve.getTrangThai())) {
+        // Điều kiện 2: Kiểm tra vé chưa bị hoàn hoặc đổi trước đó
+        String trangThai = ve.getTrangThai();
+        if ("Đã hoàn".equals(trangThai)) {
+            throw new IllegalStateException("Vé đã được hoàn trước đó. Không thể hoàn lại.");
+        }
+        if ("Đã đổi".equals(trangThai)) {
+            throw new IllegalStateException("Vé đã được đổi trước đó. Không thể hoàn.");
+        }
+        
+        // Kiểm tra trạng thái hợp lệ để hoàn vé
+        if (!"Đã thanh toán".equals(trangThai) && !"Đã đặt".equals(trangThai)) {
             throw new IllegalStateException("Chỉ có thể hoàn vé đã đặt hoặc đã thanh toán");
         }
 
+        // Điều kiện 3: Kiểm tra vé thuộc về hóa đơn hợp lệ
+        ChiTietHoaDon chiTiet = chiTietHoaDonDAO.findById(maVe);
+        if (chiTiet == null) {
+            throw new IllegalStateException("Vé không thuộc về hóa đơn nào. Không thể hoàn.");
+        }
+        
+        String maHoaDon = chiTiet.getMaHoaDon();
+        if (maHoaDon == null || maHoaDon.trim().isEmpty()) {
+            throw new IllegalStateException("Vé không có mã hóa đơn hợp lệ. Không thể hoàn.");
+        }
+        
+        HoaDon hoaDon = hoaDonDAO.findById(maHoaDon);
+        if (hoaDon == null) {
+            throw new IllegalStateException("Không tìm thấy hóa đơn liên kết với vé. Không thể hoàn.");
+        }
+        
+        String trangThaiHoaDon = hoaDon.getTrangThai();
+        if ("Đã hủy".equals(trangThaiHoaDon) || "Vô hiệu".equals(trangThaiHoaDon)) {
+            throw new IllegalStateException("Hóa đơn đã bị hủy hoặc vô hiệu. Không thể hoàn vé.");
+        }
+
+        // Điều kiện 1: Kiểm tra chuyến tàu chưa khởi hành
+        String maChuyen = ve.getMaChuyen();
+        if (maChuyen == null || maChuyen.trim().isEmpty()) {
+            throw new IllegalStateException("Vé không có thông tin chuyến tàu. Không thể hoàn.");
+        }
+        
+        ChuyenTau chuyenTau = chuyenTauDAO.findById(maChuyen);
+        if (chuyenTau == null) {
+            throw new IllegalStateException("Không tìm thấy chuyến tàu liên kết với vé. Không thể hoàn.");
+        }
+        
+        LocalDateTime thoiGianKhoiHanh = chuyenTau.getGioDi();
+        if (thoiGianKhoiHanh == null) {
+            throw new IllegalStateException("Chuyến tàu không có thông tin giờ khởi hành. Không thể hoàn.");
+        }
+        
+        LocalDateTime thoiGianHienTai = LocalDateTime.now();
+        if (thoiGianHienTai.isAfter(thoiGianKhoiHanh) || thoiGianHienTai.isEqual(thoiGianKhoiHanh)) {
+            throw new IllegalStateException("Chuyến tàu đã khởi hành. Không thể hoàn vé.");
+        }
+
+        // Điều kiện 4: Kiểm tra thời gian tối thiểu trước khi tàu chạy
+        LocalDateTime thoiGianToiThieu = thoiGianKhoiHanh.minusMinutes(MINIMUM_MINUTES_BEFORE_DEPARTURE);
+        if (thoiGianHienTai.isAfter(thoiGianToiThieu)) {
+            throw new IllegalStateException("Chỉ còn dưới " + MINIMUM_MINUTES_BEFORE_DEPARTURE + 
+                " phút trước khi tàu chạy. Không thể hoàn vé.");
+        }
+
+        // Tất cả điều kiện đều đạt, chuyển trạng thái sang "Chờ duyệt"
         ve.setTrangThai("Chờ duyệt");
         return veDAO.update(ve);
     }
