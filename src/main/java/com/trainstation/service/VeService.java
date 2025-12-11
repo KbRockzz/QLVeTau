@@ -17,10 +17,18 @@ import com.trainstation.dao.VeDAO;
 import com.trainstation.dao.GheDAO;
 import com.trainstation.dao.ChuyenTauDAO;
 import com.trainstation.dao.BangGiaDAO;
+import com.trainstation.dao.ChiTietHoaDonDAO;
+import com.trainstation.dao.HoaDonDAO;
+import com.trainstation.dao.LichSuDoiVeDAO;
 import com.trainstation.model.Ve;
 import com.trainstation.model.Ghe;
 import com.trainstation.model.ChuyenTau;
 import com.trainstation.model.BangGia;
+import com.trainstation.model.ChiTietHoaDon;
+import com.trainstation.model.HoaDon;
+import com.trainstation.model.LichSuDoiVe;
+import com.trainstation.dto.DoiVeRequest;
+import com.trainstation.dto.DoiVeResult;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -43,16 +51,24 @@ public class VeService {
     private final VeDAO veDAO;
     private final GheDAO gheDAO;
     private final ChuyenTauDAO chuyenTauDAO;
-
     private final BangGiaDAO bangGiaDAO;
+    private final ChiTietHoaDonDAO chiTietHoaDonDAO;
+    private final HoaDonDAO hoaDonDAO;
+    private final LichSuDoiVeDAO lichSuDoiVeDAO;
+    private final TinhGiaService tinhGiaService;
 
-
+    // Cấu hình thời gian tối thiểu trước giờ đi để được đổi vé (giờ)
+    private static final int HOURS_BEFORE_DEPARTURE_TO_EXCHANGE = 2;
 
     private VeService() {
         this.veDAO = VeDAO.getInstance();
         this.gheDAO = GheDAO.getInstance();
         this.chuyenTauDAO = ChuyenTauDAO.getInstance();
         this.bangGiaDAO = BangGiaDAO.getInstance();
+        this.chiTietHoaDonDAO = ChiTietHoaDonDAO.getInstance();
+        this.hoaDonDAO = HoaDonDAO.getInstance();
+        this.lichSuDoiVeDAO = LichSuDoiVeDAO.getInstance();
+        this.tinhGiaService = TinhGiaService.getInstance();
     }
 
     public static synchronized VeService getInstance() {
@@ -418,6 +434,241 @@ public class VeService {
         }
 
         return fileName;
+    }
+
+    /**
+     * Kiểm tra xem vé có được phép đổi không
+     */
+    public DoiVeResult validateDoiVe(String maVe) {
+        Ve ve = veDAO.findById(maVe);
+        if (ve == null) {
+            return new DoiVeResult(false, "Không tìm thấy vé");
+        }
+
+        // Kiểm tra trạng thái vé
+        if (!"Đã thanh toán".equals(ve.getTrangThai()) && !"Đã đặt".equals(ve.getTrangThai())) {
+            return new DoiVeResult(false, "Chỉ có thể đổi vé đã đặt hoặc đã thanh toán. Trạng thái hiện tại: " + ve.getTrangThai());
+        }
+
+        // Kiểm tra thời hạn đổi vé
+        if (ve.getGioDi() != null) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime cutoffTime = ve.getGioDi().minusHours(HOURS_BEFORE_DEPARTURE_TO_EXCHANGE);
+            if (now.isAfter(cutoffTime)) {
+                return new DoiVeResult(false, "Đã quá thời hạn đổi vé. Phải đổi trước " + HOURS_BEFORE_DEPARTURE_TO_EXCHANGE + " giờ so với giờ đi");
+            }
+        }
+
+        return new DoiVeResult(true, "Vé hợp lệ để đổi");
+    }
+
+    /**
+     * Yêu cầu đổi vé - phương thức chính để xử lý đổi vé
+     */
+    public DoiVeResult yeuCauDoiVe(DoiVeRequest request) {
+        if (request == null || request.getMaVeCu() == null || request.getMaGheMoi() == null) {
+            return new DoiVeResult(false, "Thông tin yêu cầu không đầy đủ");
+        }
+
+        // Validate vé cũ
+        DoiVeResult validation = validateDoiVe(request.getMaVeCu());
+        if (!validation.isThanhCong()) {
+            return validation;
+        }
+
+        Ve veCu = veDAO.findById(request.getMaVeCu());
+        if (veCu == null) {
+            return new DoiVeResult(false, "Không tìm thấy vé cũ");
+        }
+
+        // Kiểm tra ghế mới
+        Ghe gheMoi = gheDAO.findById(request.getMaGheMoi());
+        if (gheMoi == null) {
+            return new DoiVeResult(false, "Không tìm thấy ghế mới");
+        }
+
+        if (!"Trống".equals(gheMoi.getTrangThai()) && !"Rảnh".equals(gheMoi.getTrangThai())) {
+            return new DoiVeResult(false, "Ghế đã được đặt");
+        }
+
+        // Kiểm tra chuyến tàu mới
+        ChuyenTau chuyenMoi = null;
+        if (request.getMaChuyenMoi() != null) {
+            chuyenMoi = chuyenTauDAO.findById(request.getMaChuyenMoi());
+            if (chuyenMoi == null) {
+                return new DoiVeResult(false, "Không tìm thấy chuyến tàu mới");
+            }
+        }
+
+        // Thực hiện đổi vé trong transaction
+        return thucHienDoiVe(veCu, request, chuyenMoi, gheMoi);
+    }
+
+    /**
+     * Thực hiện đổi vé (atomic transaction)
+     */
+    private DoiVeResult thucHienDoiVe(Ve veCu, DoiVeRequest request, ChuyenTau chuyenMoi, Ghe gheMoi) {
+        Connection conn = null;
+        boolean originalAutoCommit = true;
+        
+        try {
+            conn = ConnectSql.getInstance().getConnection();
+            originalAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+
+            // 1. Khóa ghế mới để kiểm tra và đảm bảo tính nhất quán
+            Ghe gheMoiLocked = gheDAO.findByIdForUpdate(request.getMaGheMoi(), conn);
+            if (gheMoiLocked == null || (!"Trống".equals(gheMoiLocked.getTrangThai()) && !"Rảnh".equals(gheMoiLocked.getTrangThai()))) {
+                conn.rollback();
+                return new DoiVeResult(false, "Ghế mới đã được đặt bởi người khác");
+            }
+
+            // 2. Lưu thông tin vé cũ để audit
+            String chiTietCu = String.format("Chuyến: %s, Ghế: %s, Ga: %s -> %s, Giờ: %s", 
+                veCu.getMaChuyen(), veCu.getMaSoGhe(), veCu.getGaDi(), veCu.getGaDen(), 
+                veCu.getGioDi() != null ? veCu.getGioDi().toString() : "N/A");
+
+            // 3. Giải phóng ghế cũ
+            if (veCu.getMaSoGhe() != null) {
+                gheDAO.setTrangThai(veCu.getMaSoGhe(), "Trống", conn);
+            }
+
+            // 4. Cập nhật thông tin vé
+            Ve veMoi = new Ve();
+            veMoi.setMaVe(veCu.getMaVe());
+            veMoi.setMaChuyen(request.getMaChuyenMoi() != null ? request.getMaChuyenMoi() : veCu.getMaChuyen());
+            veMoi.setMaSoGhe(request.getMaGheMoi());
+            veMoi.setMaLoaiVe(request.getMaLoaiVeMoi() != null ? request.getMaLoaiVeMoi() : veCu.getMaLoaiVe());
+            veMoi.setNgayIn(veCu.getNgayIn());
+            veMoi.setTrangThai(veCu.getTrangThai());
+            
+            if (chuyenMoi != null) {
+                veMoi.setGaDi(chuyenMoi.getGaDi());
+                veMoi.setGaDen(chuyenMoi.getGaDen());
+                veMoi.setGioDi(chuyenMoi.getGioDi());
+            } else {
+                veMoi.setGaDi(veCu.getGaDi());
+                veMoi.setGaDen(veCu.getGaDen());
+                veMoi.setGioDi(veCu.getGioDi());
+            }
+            
+            veMoi.setSoToa(request.getMaToaMoi() != null ? request.getMaToaMoi() : veCu.getSoToa());
+            veMoi.setLoaiCho(gheMoi.getLoaiGhe() != null ? gheMoi.getLoaiGhe() : veCu.getLoaiCho());
+            veMoi.setLoaiVe(veCu.getLoaiVe());
+            veMoi.setMaBangGia(veCu.getMaBangGia());
+
+            // 5. Tính giá vé mới
+            TinhGiaService.KetQuaGia giaVeMoi = tinhGiaService.tinhGiaChoVe(veMoi);
+            TinhGiaService.KetQuaGia giaVeCu = tinhGiaService.tinhGiaChoVe(veCu);
+            
+            float chenhLechGia = giaVeMoi.giaDaKM - giaVeCu.giaDaKM;
+
+            // 6. Cập nhật vé
+            if (!veDAO.update(veMoi)) {
+                conn.rollback();
+                return new DoiVeResult(false, "Không thể cập nhật thông tin vé");
+            }
+
+            // 7. Đặt ghế mới
+            gheDAO.setTrangThai(request.getMaGheMoi(), "Đã đặt", conn);
+
+            // 8. Cập nhật ChiTietHoaDon nếu có
+            ChiTietHoaDon chiTiet = chiTietHoaDonDAO.findByMaVe(veCu.getMaVe());
+            if (chiTiet != null) {
+                chiTietHoaDonDAO.updateDonGia(chiTiet.getMaHoaDon(), veCu.getMaVe(), 
+                    giaVeMoi.giaGoc, giaVeMoi.giaDaKM, conn);
+            }
+
+            // 9. Lưu lịch sử đổi vé
+            String chiTietMoi = String.format("Chuyến: %s, Ghế: %s, Ga: %s -> %s, Giờ: %s", 
+                veMoi.getMaChuyen(), veMoi.getMaSoGhe(), veMoi.getGaDi(), veMoi.getGaDen(), 
+                veMoi.getGioDi() != null ? veMoi.getGioDi().toString() : "N/A");
+            
+            LichSuDoiVe lichSu = new LichSuDoiVe();
+            lichSu.setMaLichSu(lichSuDoiVeDAO.generateMaLichSu());
+            lichSu.setMaVe(veCu.getMaVe());
+            lichSu.setMaNV(request.getMaNV());
+            lichSu.setThoiGian(LocalDateTime.now());
+            lichSu.setChiTietCu(chiTietCu);
+            lichSu.setChiTietMoi(chiTietMoi);
+            lichSu.setLyDo(request.getLyDo());
+            lichSu.setTrangThai("Đã duyệt");
+            lichSu.setChenhLechGia(chenhLechGia);
+
+            if (!lichSuDoiVeDAO.insert(lichSu, conn)) {
+                conn.rollback();
+                return new DoiVeResult(false, "Không thể lưu lịch sử đổi vé");
+            }
+
+            // 10. Commit transaction
+            conn.commit();
+
+            // Tạo kết quả
+            DoiVeResult result = new DoiVeResult(true, "Đổi vé thành công");
+            result.setVeCu(veCu);
+            result.setVeMoi(veMoi);
+            result.setChenhLechGia(chenhLechGia);
+            result.setCanThanhToan(chenhLechGia > 0);
+            result.setCanHoanTien(chenhLechGia < 0);
+            result.setMaLichSu(lichSu.getMaLichSu());
+
+            return result;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return new DoiVeResult(false, "Lỗi khi đổi vé: " + e.getMessage());
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(originalAutoCommit);
+                    conn.close();
+                } catch (SQLException ignored) {
+                }
+            }
+        }
+    }
+
+    /**
+     * Phê duyệt yêu cầu đổi vé (cho trường hợp cần quản lý duyệt)
+     */
+    public boolean approveDoiVe(String maLichSu, String maNV, boolean chapNhan) {
+        LichSuDoiVe lichSu = lichSuDoiVeDAO.findById(maLichSu);
+        if (lichSu == null) {
+            return false;
+        }
+
+        if (!"Chờ duyệt".equals(lichSu.getTrangThai())) {
+            return false;
+        }
+
+        if (chapNhan) {
+            lichSu.setTrangThai("Đã duyệt");
+        } else {
+            lichSu.setTrangThai("Từ chối");
+        }
+
+        return lichSuDoiVeDAO.update(lichSu);
+    }
+
+    /**
+     * Lấy danh sách yêu cầu đổi vé chờ duyệt
+     */
+    public List<LichSuDoiVe> layDanhSachChoDuyet() {
+        return lichSuDoiVeDAO.findByTrangThai("Chờ duyệt");
+    }
+
+    /**
+     * Lấy lịch sử đổi vé theo mã vé
+     */
+    public List<LichSuDoiVe> layLichSuDoiVe(String maVe) {
+        return lichSuDoiVeDAO.findByMaVe(maVe);
     }
 
 }

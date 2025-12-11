@@ -182,4 +182,62 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
         }
         return list;
     }
+
+    /**
+     * Cập nhật giá vé trong chi tiết hóa đơn (cho đổi vé)
+     */
+    public boolean updateDonGia(String maHoaDon, String maVe, float giaGoc, float giaDaKM) {
+        String sql = "UPDATE ChiTietHoaDon SET giaGoc = ?, giaDaKM = ? WHERE maHoaDon = ? AND maVe = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setFloat(1, giaGoc);
+            pst.setFloat(2, giaDaKM);
+            pst.setString(3, maHoaDon);
+            pst.setString(4, maVe);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Cập nhật giá vé với Connection có sẵn (cho transaction)
+     */
+    public boolean updateDonGia(String maHoaDon, String maVe, float giaGoc, float giaDaKM, Connection conn) throws SQLException {
+        String sql = "UPDATE ChiTietHoaDon SET giaGoc = ?, giaDaKM = ? WHERE maHoaDon = ? AND maVe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setFloat(1, giaGoc);
+            pst.setFloat(2, giaDaKM);
+            pst.setString(3, maHoaDon);
+            pst.setString(4, maVe);
+            return pst.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Tìm chi tiết hóa đơn theo mã vé
+     */
+    public ChiTietHoaDon findByMaVe(String maVe) {
+        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon WHERE maVe = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maVe);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    ChiTietHoaDon ct = new ChiTietHoaDon();
+                    ct.setMaHoaDon(rs.getString("maHoaDon"));
+                    ct.setMaVe(rs.getString("maVe"));
+                    ct.setMaLoaiVe(rs.getString("maLoaiVe"));
+                    ct.setGiaGoc(rs.getFloat("giaGoc"));
+                    ct.setGiaDaKM(rs.getFloat("giaDaKM"));
+                    ct.setMoTa(rs.getString("moTa"));
+                    return ct;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

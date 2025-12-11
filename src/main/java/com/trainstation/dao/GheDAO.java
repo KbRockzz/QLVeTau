@@ -84,4 +84,55 @@ public class GheDAO {
             return false;
         }
     }
+
+    /**
+     * Cập nhật trạng thái ghế (helper method cho đổi vé)
+     */
+    public boolean setTrangThai(String maGhe, String trangThai) {
+        String sql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, trangThai);
+            pst.setString(2, maGhe);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Cập nhật trạng thái ghế với Connection có sẵn (cho transaction)
+     */
+    public boolean setTrangThai(String maGhe, String trangThai, Connection conn) throws SQLException {
+        String sql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, trangThai);
+            pst.setString(2, maGhe);
+            return pst.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Kiểm tra và khóa ghế cho đổi vé (với FOR UPDATE để tránh race condition)
+     */
+    public Ghe findByIdForUpdate(String maGhe, Connection conn) throws SQLException {
+        String sql = "SELECT maGhe, maToa, trangThai, loaiGhe FROM Ghe WITH (UPDLOCK, ROWLOCK) WHERE maGhe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maGhe);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    Ghe g = new Ghe();
+                    g.setMaGhe(rs.getString("maGhe"));
+                    g.setMaToa(rs.getString("maToa"));
+                    g.setTrangThai(rs.getString("trangThai"));
+                    try {
+                        g.setLoaiGhe(rs.getString("loaiGhe"));
+                    } catch (Throwable ignored) {}
+                    return g;
+                }
+            }
+        }
+        return null;
+    }
 }
