@@ -49,7 +49,7 @@ public class FrmChinh extends JFrame {
         pnlNoiDung.add(taoPanelVoiBo(new PnlDoiVe(taiKhoanHienTai)), "changeticket");
         pnlNoiDung.add(taoPanelVoiBo(new PnlQuanLyVe(taiKhoanHienTai)), "ticketbooking");
         pnlNoiDung.add(taoPanelVoiBo(new PnlKhachHang()), "customer");
-        pnlNoiDung.add(taoPanelVoiBo(new PnlTau()), "train");
+        pnlNoiDung.add(taoPanelVoiBo(new PnlDauMay()), "train");
         pnlNoiDung.add(taoPanelVoiBo(new PnlChuyenTau()), "traintimetable");
 
         // Only add employee and account panels for managers

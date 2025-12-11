@@ -3,10 +3,9 @@ package com.trainstation.service;
 import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.dao.ChuyenTauDAO;
 import com.trainstation.dao.VeDAO;
-import com.trainstation.dao.TauDAO;
+import com.trainstation.dao.DauMayDAO;
 import com.trainstation.model.ChuyenTau;
 import com.trainstation.model.Ve;
-import com.trainstation.model.Tau;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -34,14 +33,14 @@ public class ChuyenTauService {
     private static ChuyenTauService instance;
     private final ChuyenTauDAO chuyenTauDAO;
     private final VeDAO veDAO;
-    private final TauDAO tauDAO;
+    private final DauMayDAO dauMayDAO;
 
     private final File actionLogFile;
 
     private ChuyenTauService() {
         chuyenTauDAO = ChuyenTauDAO.getInstance();
         veDAO = VeDAO.getInstance();
-        tauDAO = TauDAO.getInstance();
+        dauMayDAO = DauMayDAO.getInstance();
         // log đơn giản vào file logs/chuyen_actions.log
         File logsDir = new File("logs");
         if (!logsDir.exists()) logsDir.mkdirs();
