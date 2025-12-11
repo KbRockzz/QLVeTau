@@ -23,7 +23,7 @@ public class LoaiNVDAO implements GenericDAO<LoaiNV> {
     @Override
     public List<LoaiNV> getAll() {
         List<LoaiNV> list = new ArrayList<>();
-        String sql = "SELECT maLoai, tenLoai, moTa FROM LoaiNV";
+        String sql = "SELECT maLoai, tenLoai, moTa, isActive FROM LoaiNV WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -31,7 +31,8 @@ public class LoaiNVDAO implements GenericDAO<LoaiNV> {
                 LoaiNV lnv = new LoaiNV(
                         rs.getString("maLoai"),
                         rs.getString("tenLoai"),
-                        rs.getString("moTa")
+                        rs.getString("moTa"),
+                        rs.getBoolean("isActive")
                 );
                 list.add(lnv);
             }
@@ -43,7 +44,7 @@ public class LoaiNVDAO implements GenericDAO<LoaiNV> {
 
     @Override
     public LoaiNV findById(String id) {
-        String sql = "SELECT maLoai, tenLoai, moTa FROM LoaiNV WHERE maLoai = ?";
+        String sql = "SELECT maLoai, tenLoai, moTa, isActive FROM LoaiNV WHERE maLoai = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -52,7 +53,8 @@ public class LoaiNVDAO implements GenericDAO<LoaiNV> {
                     return new LoaiNV(
                             rs.getString("maLoai"),
                             rs.getString("tenLoai"),
-                            rs.getString("moTa")
+                            rs.getString("moTa"),
+                            rs.getBoolean("isActive")
                     );
                 }
             }

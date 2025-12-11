@@ -227,7 +227,9 @@ public class PnlNhanVien extends JPanel {
                     txtSDT.getText().trim(),
                     txtDiaChi.getText().trim(),
                     ngaySinh,
-                    maLoaiNV
+                    maLoaiNV,
+                    "Đang hoạt động",
+                    true
             );
 
             if (nhanVienService.themNhanVien(nv)) {
@@ -265,7 +267,9 @@ public class PnlNhanVien extends JPanel {
                     txtSDT.getText().trim(),
                     txtDiaChi.getText().trim(),
                     ngaySinh,
-                    maLoaiNV
+                    maLoaiNV,
+                    "Đang hoạt động",
+                    true
             );
 
             if (nhanVienService.capNhatNhanVien(nv)) {

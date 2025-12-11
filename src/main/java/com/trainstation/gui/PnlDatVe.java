@@ -398,9 +398,9 @@ public class PnlDatVe extends JPanel {
 
             modelBangChuyenTau.addRow(new Object[]{
                     ct.getMaChuyen(),
-                    ct.getMaTau(),
-                    ct.getGaDi(),
-                    ct.getGaDen(),
+                    ct.getMaDauMay(),
+                    ct.getMaGaDi(),
+                    ct.getMaGaDen(),
                     ngayDiStr,
                     gioDiStr,
                     gioDenStr
@@ -422,11 +422,11 @@ public class PnlDatVe extends JPanel {
         if (chuyenDuocChon == null) return;
 
         modelBangToa.setRowCount(0);
-        List<ToaTau> danhSachToa = toaTauDAO.getByTau(chuyenDuocChon.getMaTau());
+        List<ToaTau> danhSachToa = toaTauDAO.getByTau(chuyenDuocChon.getMaDauMay());
         for (ToaTau toa : danhSachToa) {
             modelBangToa.addRow(new Object[]{
                     toa.getMaToa(),
-                    toa.getTenToa(),
+                    toa.getMaToa(), // Using maToa instead of tenToa
                     toa.getLoaiToa(),
                     toa.getSucChua()
             });
@@ -575,8 +575,8 @@ public class PnlDatVe extends JPanel {
                         "Loại vé: %s\n\n" +
                         "Bạn có chắc chắn muốn đặt vé này?",
                 khachHangDuocChon.getTenKhachHang(),
-                chuyenDuocChon.getGaDi(), chuyenDuocChon.getGaDen(),
-                toaDuocChon.getTenToa(),
+                chuyenDuocChon.getMaGaDi(), chuyenDuocChon.getMaGaDen(),
+                toaDuocChon.getMaToa(),
                 gheDuocChon.getMaGhe(),
                 loaiVe.getTenLoai()
         );
@@ -692,7 +692,7 @@ public class PnlDatVe extends JPanel {
             }
 
             String email = txtCCCD.getText().trim() + "|" + txtDiaChi.getText().trim();
-            KhachHang kh = new KhachHang(maKH, tenKH, email, sdt);
+            KhachHang kh = new KhachHang(maKH, tenKH, email, sdt, true);
 
             if (khachHangDAO.insert(kh)) {
                 JOptionPane.showMessageDialog(dialog, "Thêm khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
@@ -769,10 +769,12 @@ public class PnlDatVe extends JPanel {
             ve.setMaSoGhe(gheDuocChon.getMaGhe());
             ve.setNgayIn(LocalDateTime.now());
             ve.setTrangThai("Chờ xác nhận"); // tạm
-            ve.setGaDi(chuyenDuocChon.getGaDi());
-            ve.setGaDen(chuyenDuocChon.getGaDen());
+            ve.setMaGaDi(chuyenDuocChon.getMaGaDi());
+            ve.setMaGaDen(chuyenDuocChon.getMaGaDen());
+            ve.setTenGaDi(chuyenDuocChon.getMaGaDi()); // Will need proper lookup later
+            ve.setTenGaDen(chuyenDuocChon.getMaGaDen()); // Will need proper lookup later
             ve.setGioDi(chuyenDuocChon.getGioDi());
-            ve.setSoToa(toaDuocChon.getMaToa());
+            ve.setSoToa(Integer.parseInt(toaDuocChon.getMaToa().replaceAll("\\D+", "0"))); // Extract number from maToa
             ve.setLoaiCho(toaDuocChon.getLoaiToa());
             ve.setLoaiVe(loaiVe.getTenLoai());
 

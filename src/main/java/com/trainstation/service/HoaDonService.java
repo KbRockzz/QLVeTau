@@ -414,11 +414,12 @@ public class HoaDonService {
                     if (ve.getNgayIn() != null) pst.setTimestamp(5, Timestamp.valueOf(ve.getNgayIn()));
                     else pst.setNull(5, Types.TIMESTAMP);
                     pst.setString(6, ve.getTrangThai());
-                    pst.setString(7, ve.getGaDi());
-                    pst.setString(8, ve.getGaDen());
+                    pst.setString(7, ve.getMaGaDi());
+                    pst.setString(8, ve.getMaGaDen());
                     if (ve.getGioDi() != null) pst.setTimestamp(9, Timestamp.valueOf(ve.getGioDi()));
                     else pst.setNull(9, Types.TIMESTAMP);
-                    pst.setString(10, ve.getSoToa());
+                    if (ve.getSoToa() != null) pst.setInt(10, ve.getSoToa());
+                    else pst.setNull(10, Types.INTEGER);
                     pst.setString(11, ve.getLoaiCho());
                     pst.setString(12, ve.getLoaiVe());
 
