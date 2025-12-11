@@ -4,20 +4,23 @@ import java.io.Serializable;
 
 public class ChangTau implements Serializable {
     private String maChang;
-    private int soKMToiThieu;
-    private int soKMToiDa;
+    private Integer soKMToiThieu;
+    private Integer soKMToiDa;
     private String moTa;
-    private float giaTien;
+    private Float giaTien;
+    private boolean isActive;
 
     public ChangTau() {
+        this.isActive = true;
     }
 
-    public ChangTau(String maChang, int soKMToiThieu, int soKMToiDa, String moTa, float giaTien) {
+    public ChangTau(String maChang, Integer soKMToiThieu, Integer soKMToiDa, String moTa, Float giaTien, boolean isActive) {
         this.maChang = maChang;
         this.soKMToiThieu = soKMToiThieu;
         this.soKMToiDa = soKMToiDa;
         this.moTa = moTa;
         this.giaTien = giaTien;
+        this.isActive = isActive;
     }
 
     public String getMaChang() {
@@ -28,19 +31,19 @@ public class ChangTau implements Serializable {
         this.maChang = maChang;
     }
 
-    public int getSoKMToiThieu() {
+    public Integer getSoKMToiThieu() {
         return soKMToiThieu;
     }
 
-    public void setSoKMToiThieu(int soKMToiThieu) {
+    public void setSoKMToiThieu(Integer soKMToiThieu) {
         this.soKMToiThieu = soKMToiThieu;
     }
 
-    public int getSoKMToiDa() {
+    public Integer getSoKMToiDa() {
         return soKMToiDa;
     }
 
-    public void setSoKMToiDa(int soKMToiDa) {
+    public void setSoKMToiDa(Integer soKMToiDa) {
         this.soKMToiDa = soKMToiDa;
     }
 
@@ -52,12 +55,20 @@ public class ChangTau implements Serializable {
         this.moTa = moTa;
     }
 
-    public float getGiaTien() {
+    public Float getGiaTien() {
         return giaTien;
     }
 
-    public void setGiaTien(float giaTien) {
+    public void setGiaTien(Float giaTien) {
         this.giaTien = giaTien;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     @Override
@@ -68,6 +79,7 @@ public class ChangTau implements Serializable {
                 ", soKMToiDa=" + soKMToiDa +
                 ", moTa='" + moTa + '\'' +
                 ", giaTien=" + giaTien +
+                ", isActive=" + isActive +
                 '}';
     }
 }
