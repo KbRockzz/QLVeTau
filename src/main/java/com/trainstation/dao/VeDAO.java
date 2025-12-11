@@ -31,42 +31,67 @@ public class VeDAO implements GenericDAO<Ve> {
 
     /**
      * Helper method to ensure station names are properly populated.
-     * If tenGa is null or appears to be a code (short), lookup from GaDAO.
+     * If tenGa is null or appears to be a code, lookup from GaDAO.
+     * Codes typically start with "GA_" or are very short, or match the maGa value.
      */
     private void ensureStationNames(Ve ve) {
         if (ve == null) return;
         
         // Check and fix tenGaDi
         String tenGaDi = ve.getTenGaDi();
-        if (tenGaDi == null || tenGaDi.trim().isEmpty() || tenGaDi.length() <= 3) {
-            // Looks like a code or missing, lookup from database
-            String maGaDi = ve.getMaGaDi();
-            if (maGaDi != null && !maGaDi.isEmpty()) {
-                try {
-                    Ga ga = gaDAO.findById(maGaDi);
-                    if (ga != null) {
-                        ve.setTenGaDi(ga.getTenGa());
-                    }
-                } catch (Exception e) {
-                    // Keep existing value if lookup fails
+        String maGaDi = ve.getMaGaDi();
+        boolean needsLookupDi = false;
+        
+        if (tenGaDi == null || tenGaDi.trim().isEmpty()) {
+            needsLookupDi = true;
+        } else if (tenGaDi.startsWith("GA_") || tenGaDi.startsWith("ga_")) {
+            // Looks like a station code (e.g., GA_SG, GA_HN)
+            needsLookupDi = true;
+        } else if (maGaDi != null && tenGaDi.equals(maGaDi)) {
+            // tenGaDi contains the code instead of the name
+            needsLookupDi = true;
+        } else if (tenGaDi.length() <= 3) {
+            // Very short, likely a code (e.g., SG, HN)
+            needsLookupDi = true;
+        }
+        
+        if (needsLookupDi && maGaDi != null && !maGaDi.isEmpty()) {
+            try {
+                Ga ga = gaDAO.findById(maGaDi);
+                if (ga != null) {
+                    ve.setTenGaDi(ga.getTenGa());
                 }
+            } catch (Exception e) {
+                // Keep existing value if lookup fails
             }
         }
         
         // Check and fix tenGaDen
         String tenGaDen = ve.getTenGaDen();
-        if (tenGaDen == null || tenGaDen.trim().isEmpty() || tenGaDen.length() <= 3) {
-            // Looks like a code or missing, lookup from database
-            String maGaDen = ve.getMaGaDen();
-            if (maGaDen != null && !maGaDen.isEmpty()) {
-                try {
-                    Ga ga = gaDAO.findById(maGaDen);
-                    if (ga != null) {
-                        ve.setTenGaDen(ga.getTenGa());
-                    }
-                } catch (Exception e) {
-                    // Keep existing value if lookup fails
+        String maGaDen = ve.getMaGaDen();
+        boolean needsLookupDen = false;
+        
+        if (tenGaDen == null || tenGaDen.trim().isEmpty()) {
+            needsLookupDen = true;
+        } else if (tenGaDen.startsWith("GA_") || tenGaDen.startsWith("ga_")) {
+            // Looks like a station code (e.g., GA_SG, GA_HN)
+            needsLookupDen = true;
+        } else if (maGaDen != null && tenGaDen.equals(maGaDen)) {
+            // tenGaDen contains the code instead of the name
+            needsLookupDen = true;
+        } else if (tenGaDen.length() <= 3) {
+            // Very short, likely a code (e.g., SG, HN)
+            needsLookupDen = true;
+        }
+        
+        if (needsLookupDen && maGaDen != null && !maGaDen.isEmpty()) {
+            try {
+                Ga ga = gaDAO.findById(maGaDen);
+                if (ga != null) {
+                    ve.setTenGaDen(ga.getTenGa());
                 }
+            } catch (Exception e) {
+                // Keep existing value if lookup fails
             }
         }
     }
