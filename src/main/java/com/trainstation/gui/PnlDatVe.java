@@ -103,9 +103,9 @@ public class PnlDatVe extends JPanel {
         MaterialInitializer.styleButton(btnTimKhachHang);
         pnlTimKhachHang.add(btnTimKhachHang);
 
-//        lblThongTinKhachHang = new JLabel("(Chưa chọn khách hàng)");
-//        lblThongTinKhachHang.setForeground(Color.BLUE);
-//        pnlTimKhachHang.add(lblThongTinKhachHang);
+        lblThongTinKhachHang = new JLabel("(Chưa chọn khách hàng)");
+        lblThongTinKhachHang.setForeground(Color.BLUE);
+        pnlTimKhachHang.add(lblThongTinKhachHang);
 
         // Ticket
         pnlTimKhachHang.add(Box.createHorizontalStrut(20));
