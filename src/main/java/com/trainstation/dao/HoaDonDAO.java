@@ -163,4 +163,29 @@ public class HoaDonDAO implements GenericDAO<HoaDon> {
         }
     }
 
+    /**
+     * Transaction-aware findById method for ticket exchange
+     */
+    public HoaDon findById(String id, Connection conn) throws SQLException {
+        String sql = "SELECT maHoaDon, maNV, maKH, ngayLap, phuongThucThanhToan, trangThai FROM HoaDon WHERE maHoaDon = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    Timestamp ts = rs.getTimestamp("ngayLap");
+                    LocalDateTime ngayLap = ts != null ? ts.toLocalDateTime() : null;
+                    return new HoaDon(
+                            rs.getString("maHoaDon"),
+                            rs.getString("maNV"),
+                            rs.getString("maKH"),
+                            ngayLap,
+                            rs.getString("phuongThucThanhToan"),
+                            rs.getString("trangThai")
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
 }

@@ -352,4 +352,121 @@ public class VeDAO implements GenericDAO<Ve> {
         }
     }
 
+    /**
+     * Transaction-aware insert method for ticket exchange
+     */
+    public boolean insert(Ve v, Connection conn) throws SQLException {
+        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        // Tìm maChang từ maChuyen
+        String maChang = null;
+        try {
+            ChuyenTauDAO ctDAO = ChuyenTauDAO.getInstance();
+            ChuyenTau ct = ctDAO.findById(v.getMaChuyen());
+            if (ct != null) {
+                maChang = ct.getMaChang();
+            }
+        } catch (Exception ignored) {
+            // Nếu không tìm được hoặc ChuyenTau thiếu trường, tiếp tục với maChang = null
+        }
+
+        // Tìm Bảng Giá áp dụng tại thời điểm đặt vé (ngay hiện tại)
+        BangGiaDAO bgDAO = BangGiaDAO.getInstance();
+        LocalDateTime now = LocalDateTime.now();
+        BangGia applicable = null;
+        if (maChang != null && v.getLoaiCho() != null) {
+            applicable = bgDAO.findApplicable(maChang, v.getLoaiCho(), now);
+        }
+
+        if (applicable != null) {
+            v.setMaBangGia(applicable.getMaBangGia());
+        } else {
+            v.setMaBangGia(null);
+        }
+
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, v.getMaVe());
+            pst.setString(2, v.getMaChuyen());
+            pst.setString(3, v.getMaLoaiVe());
+            pst.setString(4, v.getMaSoGhe());
+            if (v.getNgayIn() != null) pst.setTimestamp(5, Timestamp.valueOf(v.getNgayIn())); else pst.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+            pst.setString(6, v.getTrangThai());
+            pst.setString(7, v.getGaDi());
+            pst.setString(8, v.getGaDen());
+            if (v.getGioDi() != null) pst.setTimestamp(9, Timestamp.valueOf(v.getGioDi())); else pst.setNull(9, Types.TIMESTAMP);
+            pst.setString(10, v.getSoToa());
+            pst.setString(11, v.getLoaiCho());
+            pst.setString(12, v.getLoaiVe());
+            pst.setString(13, v.getMaBangGia());
+            return pst.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Transaction-aware update method for ticket exchange
+     */
+    public boolean update(Ve v, Connection conn) throws SQLException {
+        String sql = "UPDATE Ve SET maChuyen = ?, maLoaiVe = ?, maSoGhe = ?, ngayIn = ?, trangThai = ?, gaDi = ?, gaDen = ?, gioDi = ?, soToa = ?, loaiCho = ?, loaiVe = ?, maBangGia = ? WHERE maVe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, v.getMaChuyen());
+            pst.setString(2, v.getMaLoaiVe());
+            pst.setString(3, v.getMaSoGhe());
+            if (v.getNgayIn() != null) {
+                pst.setTimestamp(4, Timestamp.valueOf(v.getNgayIn()));
+            } else {
+                pst.setNull(4, Types.TIMESTAMP);
+            }
+            pst.setString(5, v.getTrangThai());
+            pst.setString(6, v.getGaDi());
+            pst.setString(7, v.getGaDen());
+            if (v.getGioDi() != null) {
+                pst.setTimestamp(8, Timestamp.valueOf(v.getGioDi()));
+            } else {
+                pst.setNull(8, Types.TIMESTAMP);
+            }
+            pst.setString(9, v.getSoToa());
+            pst.setString(10, v.getLoaiCho());
+            pst.setString(11, v.getLoaiVe());
+            pst.setString(12, v.getMaBangGia());
+            pst.setString(13, v.getMaVe());
+            return pst.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Transaction-aware findById method for ticket exchange
+     */
+    public Ve findById(String id, Connection conn) throws SQLException {
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia FROM Ve WHERE maVe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    LocalDateTime ngayIn = null, gioDi = null;
+                    Timestamp ts1 = rs.getTimestamp("ngayIn");
+                    if (ts1 != null) ngayIn = ts1.toLocalDateTime();
+                    Timestamp ts2 = rs.getTimestamp("gioDi");
+                    if (ts2 != null) gioDi = ts2.toLocalDateTime();
+
+                    return new Ve(
+                            rs.getString("maVe"),
+                            rs.getString("maChuyen"),
+                            rs.getString("maLoaiVe"),
+                            rs.getString("maSoGhe"),
+                            ngayIn,
+                            rs.getString("trangThai"),
+                            rs.getString("gaDi"),
+                            rs.getString("gaDen"),
+                            gioDi,
+                            rs.getString("soToa"),
+                            rs.getString("loaiCho"),
+                            rs.getString("loaiVe"),
+                            rs.getString("maBangGia")
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
 }

@@ -182,4 +182,57 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
         }
         return list;
     }
+
+    /**
+     * Transaction-aware findByHoaDon method for ticket exchange
+     */
+    public List<ChiTietHoaDon> findByHoaDon(String maHoaDon, Connection conn) throws SQLException {
+        List<ChiTietHoaDon> list = new ArrayList<>();
+        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon WHERE maHoaDon = ? ORDER BY maVe";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maHoaDon);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    ChiTietHoaDon ct = new ChiTietHoaDon();
+                    ct.setMaHoaDon(rs.getString("maHoaDon"));
+                    ct.setMaVe(rs.getString("maVe"));
+                    ct.setMaLoaiVe(rs.getString("maLoaiVe"));
+                    ct.setGiaGoc(rs.getFloat("giaGoc"));
+                    ct.setGiaDaKM(rs.getFloat("giaDaKM"));
+                    ct.setMoTa(rs.getString("moTa"));
+                    list.add(ct);
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Transaction-aware updateMoTa method for ticket exchange audit trail
+     */
+    public boolean updateMoTa(String maHoaDon, String maVe, String moTa, Connection conn) throws SQLException {
+        String sql = "UPDATE ChiTietHoaDon SET moTa = ? WHERE maHoaDon = ? AND maVe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, moTa);
+            pst.setString(2, maHoaDon);
+            pst.setString(3, maVe);
+            return pst.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Find invoice by ticket ID - transaction-aware
+     */
+    public String findHoaDonByVe(String maVe, Connection conn) throws SQLException {
+        String sql = "SELECT maHoaDon FROM ChiTietHoaDon WHERE maVe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maVe);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("maHoaDon");
+                }
+            }
+        }
+        return null;
+    }
 }

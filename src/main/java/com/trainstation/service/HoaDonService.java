@@ -482,4 +482,17 @@ public class HoaDonService {
             }
         }
     }
+
+    /**
+     * Transaction-aware method to calculate total price for an invoice
+     * Used during ticket exchange to update invoice total
+     */
+    public float capNhatTongTien(String maHoaDon, java.sql.Connection conn) throws SQLException {
+        List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.findByHoaDon(maHoaDon, conn);
+        float tongTien = 0;
+        for (ChiTietHoaDon ct : chiTietList) {
+            tongTien += ct.getGiaDaKM();
+        }
+        return tongTien;
+    }
 }

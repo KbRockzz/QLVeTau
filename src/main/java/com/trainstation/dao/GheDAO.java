@@ -84,4 +84,41 @@ public class GheDAO {
             return false;
         }
     }
+
+    /**
+     * Transaction-aware update method for seat status
+     * Used for ticket exchange to ensure atomicity
+     */
+    public boolean updateTrangThai(String maGhe, String trangThai, Connection conn) throws SQLException {
+        String sql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, trangThai);
+            pst.setString(2, maGhe);
+            return pst.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Transaction-aware findById with SELECT FOR UPDATE lock
+     * Used for ticket exchange to prevent concurrent booking
+     */
+    public Ghe findByIdForUpdate(String maGhe, Connection conn) throws SQLException {
+        String sql = "SELECT maGhe, maToa, trangThai, loaiGhe FROM Ghe WITH (UPDLOCK, ROWLOCK) WHERE maGhe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maGhe);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    Ghe g = new Ghe();
+                    g.setMaGhe(rs.getString("maGhe"));
+                    g.setMaToa(rs.getString("maToa"));
+                    g.setTrangThai(rs.getString("trangThai"));
+                    try {
+                        g.setLoaiGhe(rs.getString("loaiGhe"));
+                    } catch (Throwable ignored) {}
+                    return g;
+                }
+            }
+        }
+        return null;
+    }
 }
