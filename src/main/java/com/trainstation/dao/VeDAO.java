@@ -248,35 +248,42 @@ public class VeDAO implements GenericDAO<Ve> {
      */
     public List<Ve> getByKhachHang(String maKH) {
         List<Ve> list = new ArrayList<>();
-        String sql = "SELECT v.maVe, v.maChuyen, v.maLoaiVe, v.maSoGhe, v.ngayIn, v.trangThai, v.gaDi, v.gaDen, v.gioDi, v.soToa, v.loaiCho, v.loaiVe, v.maBangGia " +
+        String sql = "SELECT v.maVe, v.maChuyen, v.maLoaiVe, v.maSoGhe, v.maGaDi, v.maGaDen, v.tenGaDi, v.tenGaDen, v.ngayIn, v.trangThai, v.gioDi, v.gioDenDuKien, v.soToa, v.loaiCho, v.loaiVe, v.maBangGia, v.giaThanhToan, v.isActive " +
                 "FROM Ve v " +
                 "INNER JOIN HoaDon hd ON v.maVe = hd.maVe " +
-                "WHERE hd.maKH = ?";
+                "WHERE hd.maKH = ? AND v.isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maKH);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    LocalDateTime ngayIn = null, gioDi = null;
+                    LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
                     Timestamp ts1 = rs.getTimestamp("ngayIn");
                     if (ts1 != null) ngayIn = ts1.toLocalDateTime();
                     Timestamp ts2 = rs.getTimestamp("gioDi");
                     if (ts2 != null) gioDi = ts2.toLocalDateTime();
+                    Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
+                    if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
 
                     Ve v = new Ve(
                             rs.getString("maVe"),
                             rs.getString("maChuyen"),
                             rs.getString("maLoaiVe"),
                             rs.getString("maSoGhe"),
+                            rs.getString("maGaDi"),
+                            rs.getString("maGaDen"),
+                            rs.getString("tenGaDi"),
+                            rs.getString("tenGaDen"),
                             ngayIn,
                             rs.getString("trangThai"),
-                            rs.getString("gaDi"),
-                            rs.getString("gaDen"),
                             gioDi,
-                            rs.getString("soToa"),
+                            gioDenDuKien,
+                            rs.getObject("soToa", Integer.class),
                             rs.getString("loaiCho"),
                             rs.getString("loaiVe"),
-                            rs.getString("maBangGia")
+                            rs.getString("maBangGia"),
+                            rs.getObject("giaThanhToan", Float.class),
+                            rs.getBoolean("isActive")
                     );
                     list.add(v);
                 }
@@ -288,31 +295,38 @@ public class VeDAO implements GenericDAO<Ve> {
     }
     public List<Ve> getByChuyen(Connection conn, String maChuyen) throws SQLException {
         List<Ve> list = new ArrayList<>();
-        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia FROM Ve WHERE maChuyen = ?";
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive FROM Ve WHERE maChuyen = ? AND isActive = 1";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maChuyen);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    LocalDateTime ngayIn = null, gioDi = null;
+                    LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
                     Timestamp ts1 = rs.getTimestamp("ngayIn");
                     if (ts1 != null) ngayIn = ts1.toLocalDateTime();
                     Timestamp ts2 = rs.getTimestamp("gioDi");
                     if (ts2 != null) gioDi = ts2.toLocalDateTime();
+                    Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
+                    if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
 
                     Ve v = new Ve(
                             rs.getString("maVe"),
                             rs.getString("maChuyen"),
                             rs.getString("maLoaiVe"),
                             rs.getString("maSoGhe"),
+                            rs.getString("maGaDi"),
+                            rs.getString("maGaDen"),
+                            rs.getString("tenGaDi"),
+                            rs.getString("tenGaDen"),
                             ngayIn,
                             rs.getString("trangThai"),
-                            rs.getString("gaDi"),
-                            rs.getString("gaDen"),
                             gioDi,
-                            rs.getString("soToa"),
+                            gioDenDuKien,
+                            rs.getObject("soToa", Integer.class),
                             rs.getString("loaiCho"),
                             rs.getString("loaiVe"),
-                            rs.getString("maBangGia")
+                            rs.getString("maBangGia"),
+                            rs.getObject("giaThanhToan", Float.class),
+                            rs.getBoolean("isActive")
                     );
                     list.add(v);
                 }

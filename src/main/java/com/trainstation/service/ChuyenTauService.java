@@ -88,10 +88,10 @@ public class ChuyenTauService {
 
             ChuyenTau ct = chuyenTauDAO.findById(maChuyen);
             if (ct == null) throw new SQLException("Không tìm thấy chuyến: " + maChuyen);
-            String maTau = ct.getMaTau();
+            String maDauMay = ct.getMaDauMay();
 
             // Kiểm tra trạng thái chuyến tàu
-            ChuyenTau Ctau = chuyenTauDAO.findById(maTau);
+            ChuyenTau Ctau = chuyenTauDAO.findById(maChuyen);
             if (Ctau != null) {
                 String cur = Ctau.getTrangThai() == null ? "" : Ctau.getTrangThai().trim();
                 // chỉ cho start nếu ctàu đang "Sẵn sàng"

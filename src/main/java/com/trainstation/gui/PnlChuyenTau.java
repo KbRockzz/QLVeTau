@@ -207,9 +207,9 @@ public class PnlChuyenTau extends JPanel {
                         String status = c.getTrangThai() != null ? c.getTrangThai() : "";
                         publish(new Object[]{
                                 c.getMaChuyen(),
-                                c.getMaTau(),
-                                c.getGaDi(),
-                                c.getGaDen(),
+                                c.getMaDauMay(),
+                                c.getMaGaDi(),
+                                c.getMaGaDen(),
                                 runTimeStr,
                                 count,
                                 status
@@ -255,9 +255,9 @@ public class PnlChuyenTau extends JPanel {
                     if (ct == null) return;
                     txtMaChuyen.setText(ct.getMaChuyen());
                     txtMaChuyen.setEnabled(false); // khóa mã khi edit
-                    txtMaTau.setText(ct.getMaTau());
-                    txtGaDi.setText(ct.getGaDi());
-                    txtGaDen.setText(ct.getGaDen());
+                    txtMaTau.setText(ct.getMaDauMay());
+                    txtGaDi.setText(ct.getMaGaDi());
+                    txtGaDen.setText(ct.getMaGaDen());
                     if (ct.getGioDi() != null) {
                         Date d = java.util.Date.from(ct.getGioDi().atZone(ZoneId.systemDefault()).toInstant());
                         spinnerDateTime.setValue(d);
@@ -383,9 +383,9 @@ public class PnlChuyenTau extends JPanel {
     private ChuyenTau buildChuyenFromForm() {
         ChuyenTau ct = new ChuyenTau();
         ct.setMaChuyen(txtMaChuyen.getText().trim());
-        ct.setMaTau(txtMaTau.getText().trim());
-        ct.setGaDi(txtGaDi.getText().trim());
-        ct.setGaDen(txtGaDen.getText().trim());
+        ct.setMaDauMay(txtMaTau.getText().trim());
+        ct.setMaGaDi(txtGaDi.getText().trim());
+        ct.setMaGaDen(txtGaDen.getText().trim());
         if (chkTemplate.isSelected()) {
             ct.setGioDi(null);
             ct.setGioDen(null);
