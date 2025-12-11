@@ -4,20 +4,23 @@ import java.io.Serializable;
 
 public class ToaTau implements Serializable {
     private String maToa;
-    private String tenToa;
     private String loaiToa;
-    private String maTau;
-    private int sucChua;
+    private Integer samSX;
+    private String trangThai;
+    private Integer sucChua;
+    private boolean isActive;
 
     public ToaTau() {
+        this.isActive = true;
     }
 
-    public ToaTau(String maToa, String tenToa, String loaiToa, String maTau, int sucChua) {
+    public ToaTau(String maToa, String loaiToa, Integer samSX, String trangThai, Integer sucChua, boolean isActive) {
         this.maToa = maToa;
-        this.tenToa = tenToa;
         this.loaiToa = loaiToa;
-        this.maTau = maTau;
+        this.samSX = samSX;
+        this.trangThai = trangThai;
         this.sucChua = sucChua;
+        this.isActive = isActive;
     }
 
     public String getMaToa() {
@@ -28,14 +31,6 @@ public class ToaTau implements Serializable {
         this.maToa = maToa;
     }
 
-    public String getTenToa() {
-        return tenToa;
-    }
-
-    public void setTenToa(String tenToa) {
-        this.tenToa = tenToa;
-    }
-
     public String getLoaiToa() {
         return loaiToa;
     }
@@ -44,30 +39,47 @@ public class ToaTau implements Serializable {
         this.loaiToa = loaiToa;
     }
 
-    public String getMaTau() {
-        return maTau;
+    public Integer getSamSX() {
+        return samSX;
     }
 
-    public void setMaTau(String maTau) {
-        this.maTau = maTau;
+    public void setSamSX(Integer samSX) {
+        this.samSX = samSX;
     }
 
-    public int getSucChua() {
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public Integer getSucChua() {
         return sucChua;
     }
 
-    public void setSucChua(int sucChua) {
+    public void setSucChua(Integer sucChua) {
         this.sucChua = sucChua;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     @Override
     public String toString() {
         return "ToaTau{" +
                 "maToa='" + maToa + '\'' +
-                ", tenToa='" + tenToa + '\'' +
                 ", loaiToa='" + loaiToa + '\'' +
-                ", maTau='" + maTau + '\'' +
+                ", samSX=" + samSX +
+                ", trangThai='" + trangThai + '\'' +
                 ", sucChua=" + sucChua +
+                ", isActive=" + isActive +
                 '}';
     }
 }

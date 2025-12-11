@@ -8,33 +8,47 @@ public class Ve implements Serializable {
     private String maChuyen;
     private String maLoaiVe;
     private String maSoGhe;
+    private String maGaDi;
+    private String maGaDen;
+    private String tenGaDi;
+    private String tenGaDen;
     private LocalDateTime ngayIn;
     private String trangThai;
-    private String gaDi;
-    private String gaDen;
     private LocalDateTime gioDi;
-    private String soToa;
+    private LocalDateTime gioDenDuKien;
+    private Integer soToa;
     private String loaiCho;
     private String loaiVe;
     private String maBangGia;
+    private Float giaThanhToan;
+    private boolean isActive;
 
     public Ve() {
+        this.isActive = true;
     }
 
-    public Ve(String maVe, String maChuyen, String maLoaiVe, String maSoGhe, LocalDateTime ngayIn, String trangThai, String gaDi, String gaDen, LocalDateTime gioDi, String soToa, String loaiCho, String loaiVe, String maBangGia) {
+    public Ve(String maVe, String maChuyen, String maLoaiVe, String maSoGhe, String maGaDi, String maGaDen,
+              String tenGaDi, String tenGaDen, LocalDateTime ngayIn, String trangThai, LocalDateTime gioDi,
+              LocalDateTime gioDenDuKien, Integer soToa, String loaiCho, String loaiVe, String maBangGia,
+              Float giaThanhToan, boolean isActive) {
         this.maVe = maVe;
         this.maChuyen = maChuyen;
         this.maLoaiVe = maLoaiVe;
         this.maSoGhe = maSoGhe;
+        this.maGaDi = maGaDi;
+        this.maGaDen = maGaDen;
+        this.tenGaDi = tenGaDi;
+        this.tenGaDen = tenGaDen;
         this.ngayIn = ngayIn;
         this.trangThai = trangThai;
-        this.gaDi = gaDi;
-        this.gaDen = gaDen;
         this.gioDi = gioDi;
+        this.gioDenDuKien = gioDenDuKien;
         this.soToa = soToa;
         this.loaiCho = loaiCho;
         this.loaiVe = loaiVe;
         this.maBangGia = maBangGia;
+        this.giaThanhToan = giaThanhToan;
+        this.isActive = isActive;
     }
 
     public String getMaVe() {
@@ -85,20 +99,44 @@ public class Ve implements Serializable {
         this.trangThai = trangThai;
     }
 
-    public String getGaDi() {
-        return gaDi;
+    public String getMaGaDi() {
+        return maGaDi;
     }
 
-    public void setGaDi(String gaDi) {
-        this.gaDi = gaDi;
+    public void setMaGaDi(String maGaDi) {
+        this.maGaDi = maGaDi;
     }
 
-    public String getGaDen() {
-        return gaDen;
+    public String getMaGaDen() {
+        return maGaDen;
     }
 
-    public void setGaDen(String gaDen) {
-        this.gaDen = gaDen;
+    public void setMaGaDen(String maGaDen) {
+        this.maGaDen = maGaDen;
+    }
+
+    public String getTenGaDi() {
+        return tenGaDi;
+    }
+
+    public void setTenGaDi(String tenGaDi) {
+        this.tenGaDi = tenGaDi;
+    }
+
+    public String getTenGaDen() {
+        return tenGaDen;
+    }
+
+    public void setTenGaDen(String tenGaDen) {
+        this.tenGaDen = tenGaDen;
+    }
+
+    public LocalDateTime getGioDenDuKien() {
+        return gioDenDuKien;
+    }
+
+    public void setGioDenDuKien(LocalDateTime gioDenDuKien) {
+        this.gioDenDuKien = gioDenDuKien;
     }
 
     public LocalDateTime getGioDi() {
@@ -109,12 +147,28 @@ public class Ve implements Serializable {
         this.gioDi = gioDi;
     }
 
-    public String getSoToa() {
+    public Integer getSoToa() {
         return soToa;
     }
 
-    public void setSoToa(String soToa) {
+    public void setSoToa(Integer soToa) {
         this.soToa = soToa;
+    }
+
+    public Float getGiaThanhToan() {
+        return giaThanhToan;
+    }
+
+    public void setGiaThanhToan(Float giaThanhToan) {
+        this.giaThanhToan = giaThanhToan;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public String getLoaiCho() {
@@ -174,15 +228,20 @@ public class Ve implements Serializable {
                 ", maChuyen='" + maChuyen + '\'' +
                 ", maLoaiVe='" + maLoaiVe + '\'' +
                 ", maSoGhe='" + maSoGhe + '\'' +
+                ", maGaDi='" + maGaDi + '\'' +
+                ", maGaDen='" + maGaDen + '\'' +
+                ", tenGaDi='" + tenGaDi + '\'' +
+                ", tenGaDen='" + tenGaDen + '\'' +
                 ", ngayIn=" + ngayIn +
                 ", trangThai='" + trangThai + '\'' +
-                ", gaDi='" + gaDi + '\'' +
-                ", gaDen='" + gaDen + '\'' +
                 ", gioDi=" + gioDi +
-                ", soToa='" + soToa + '\'' +
+                ", gioDenDuKien=" + gioDenDuKien +
+                ", soToa=" + soToa +
                 ", loaiCho='" + loaiCho + '\'' +
                 ", loaiVe='" + loaiVe + '\'' +
                 ", maBangGia='" + maBangGia + '\'' +
+                ", giaThanhToan=" + giaThanhToan +
+                ", isActive=" + isActive +
                 '}';
     }
 }
