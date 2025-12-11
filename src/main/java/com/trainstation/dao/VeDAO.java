@@ -3,6 +3,7 @@ package com.trainstation.dao;
 import com.trainstation.model.BangGia;
 import com.trainstation.model.ChuyenTau;
 import com.trainstation.model.Ve;
+import com.trainstation.model.Ga;
 import com.trainstation.MySQL.ConnectSql;
 
 import java.lang.reflect.Method;
@@ -14,9 +15,11 @@ import java.util.List;
 
 public class VeDAO implements GenericDAO<Ve> {
     private static VeDAO instance;
+    private final GaDAO gaDAO;
 
     private VeDAO() {
         // Không giữ Connection làm trường — lấy connection mỗi lần cần
+        this.gaDAO = GaDAO.getInstance();
     }
 
     public static synchronized VeDAO getInstance() {
@@ -24,6 +27,48 @@ public class VeDAO implements GenericDAO<Ve> {
             instance = new VeDAO();
         }
         return instance;
+    }
+
+    /**
+     * Helper method to ensure station names are properly populated.
+     * If tenGa is null or appears to be a code (short), lookup from GaDAO.
+     */
+    private void ensureStationNames(Ve ve) {
+        if (ve == null) return;
+        
+        // Check and fix tenGaDi
+        String tenGaDi = ve.getTenGaDi();
+        if (tenGaDi == null || tenGaDi.trim().isEmpty() || tenGaDi.length() <= 3) {
+            // Looks like a code or missing, lookup from database
+            String maGaDi = ve.getMaGaDi();
+            if (maGaDi != null && !maGaDi.isEmpty()) {
+                try {
+                    Ga ga = gaDAO.findById(maGaDi);
+                    if (ga != null) {
+                        ve.setTenGaDi(ga.getTenGa());
+                    }
+                } catch (Exception e) {
+                    // Keep existing value if lookup fails
+                }
+            }
+        }
+        
+        // Check and fix tenGaDen
+        String tenGaDen = ve.getTenGaDen();
+        if (tenGaDen == null || tenGaDen.trim().isEmpty() || tenGaDen.length() <= 3) {
+            // Looks like a code or missing, lookup from database
+            String maGaDen = ve.getMaGaDen();
+            if (maGaDen != null && !maGaDen.isEmpty()) {
+                try {
+                    Ga ga = gaDAO.findById(maGaDen);
+                    if (ga != null) {
+                        ve.setTenGaDen(ga.getTenGa());
+                    }
+                } catch (Exception e) {
+                    // Keep existing value if lookup fails
+                }
+            }
+        }
     }
 
     @Override
@@ -62,6 +107,7 @@ public class VeDAO implements GenericDAO<Ve> {
                         rs.getObject("giaThanhToan", Float.class),
                         rs.getBoolean("isActive")
                 );
+                ensureStationNames(v);
                 list.add(v);
             }
         } catch (SQLException e) {
@@ -86,7 +132,7 @@ public class VeDAO implements GenericDAO<Ve> {
                     Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
                     if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
 
-                    return new Ve(
+                    Ve result = new Ve(
                             rs.getString("maVe"),
                             rs.getString("maChuyen"),
                             rs.getString("maLoaiVe"),
@@ -106,6 +152,8 @@ public class VeDAO implements GenericDAO<Ve> {
                             rs.getObject("giaThanhToan", Float.class),
                             rs.getBoolean("isActive")
                     );
+                    ensureStationNames(result);
+                    return result;
                 }
             }
         } catch (SQLException e) {
@@ -285,6 +333,7 @@ public class VeDAO implements GenericDAO<Ve> {
                             rs.getObject("giaThanhToan", Float.class),
                             rs.getBoolean("isActive")
                     );
+                    ensureStationNames(v);
                     list.add(v);
                 }
             }
@@ -328,6 +377,7 @@ public class VeDAO implements GenericDAO<Ve> {
                             rs.getObject("giaThanhToan", Float.class),
                             rs.getBoolean("isActive")
                     );
+                    ensureStationNames(v);
                     list.add(v);
                 }
             }
