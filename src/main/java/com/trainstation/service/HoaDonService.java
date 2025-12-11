@@ -86,6 +86,7 @@ public class HoaDonService {
         if (hoaDon == null) throw new IllegalArgumentException("Không tìm thấy hóa đơn");
 
         KhachHang khachHang = khachHangDAO.findById(hoaDon.getMaKH());
+        NhanVien nhanVien = NhanVienDAO.getInstance().findById(hoaDon.getMaNV());
         List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.getAll().stream()
                 .filter(ct -> ct.getMaHoaDon().equals(maHoaDon))
                 .toList();
@@ -114,7 +115,17 @@ public class HoaDonService {
             document.add(new Paragraph("\n").setFont(font));
 
             document.add(new Paragraph("Mã hóa đơn: " + hoaDon.getMaHoaDon()).setFont(font).setFontSize(11));
-            document.add(new Paragraph("Khách hàng: " + (khachHang != null ? khachHang.getTenKhachHang() : "N/A"))
+            
+            // Customer information - use denormalized fields from HoaDon first, fallback to KhachHang table
+            String tenKH = hoaDon.getTenKH() != null ? hoaDon.getTenKH() : 
+                           (khachHang != null ? khachHang.getTenKhachHang() : "N/A");
+            String sdtKH = hoaDon.getSoDienThoai() != null ? hoaDon.getSoDienThoai() : 
+                           (khachHang != null ? khachHang.getSoDienThoai() : "N/A");
+            document.add(new Paragraph("Khách hàng: " + tenKH).setFont(font).setFontSize(11));
+            document.add(new Paragraph("Số điện thoại: " + sdtKH).setFont(font).setFontSize(11));
+            
+            // Employee information
+            document.add(new Paragraph("Nhân viên: " + (nhanVien != null ? nhanVien.getTenNV() : "N/A"))
                     .setFont(font).setFontSize(11));
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");

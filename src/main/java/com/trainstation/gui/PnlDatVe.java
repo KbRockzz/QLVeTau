@@ -851,7 +851,10 @@ public class PnlDatVe extends JPanel {
                     hd.setMaHoaDon("HD" + System.currentTimeMillis());
                 } catch (Throwable ignored) {
                 }
+                try { hd.setMaNV(taiKhoanHienTai.getMaNV()); } catch (Throwable ignored) {}
                 try { hd.setMaKH(khachHang.getMaKhachHang()); } catch (Throwable ignored) {}
+                try { hd.setTenKH(khachHang.getTenKhachHang()); } catch (Throwable ignored) {}
+                try { hd.setSoDienThoai(khachHang.getSoDienThoai()); } catch (Throwable ignored) {}
                 try { hd.setTrangThai("Chờ xác nhận"); } catch (Throwable ignored) {}
                 try { hd.setNgayLap(LocalDateTime.now()); } catch (Throwable ignored) {}
                 hoaDonMo = hd;
