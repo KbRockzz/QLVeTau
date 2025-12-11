@@ -47,6 +47,7 @@ public class PnlDatVe extends JPanel {
     // Train
     private JComboBox<String> cmbGaDi;
     private JComboBox<String> cmbGaDen;
+    private Map<String, String> mapTenGaToMaGa = new HashMap<>(); // Maps station name to code
     private JDateChooser dateNgayDi;
     private JSpinner spnGioDi;
     private JButton btnTimChuyenTau;
@@ -296,12 +297,19 @@ public class PnlDatVe extends JPanel {
     private void taiDanhSachGa() {
         cmbGaDi.removeAllItems();
         cmbGaDen.removeAllItems();
+        mapTenGaToMaGa.clear();
+        
         cmbGaDi.addItem(""); // Empty option
         cmbGaDen.addItem(""); // Empty option
-        List<String> danhSachGa = chuyenTauDAO.getDistinctStations();
-        for (String ga : danhSachGa) {
-            cmbGaDi.addItem(ga);
-            cmbGaDen.addItem(ga);
+        mapTenGaToMaGa.put("", ""); // Empty mapping
+        
+        // Get distinct station codes from trains
+        List<String> danhSachMaGa = chuyenTauDAO.getDistinctStations();
+        for (String maGa : danhSachMaGa) {
+            String tenGa = layTenGa(maGa);
+            cmbGaDi.addItem(tenGa);
+            cmbGaDen.addItem(tenGa);
+            mapTenGaToMaGa.put(tenGa, maGa);
         }
     }
     
@@ -365,14 +373,16 @@ public class PnlDatVe extends JPanel {
 
     private void timChuyenTau() {
         // Tìm kiếm chuyến tàu dựa trên tiêu chí
-        String gaDi = (String) cmbGaDi.getSelectedItem();
-        if (gaDi != null && gaDi.trim().isEmpty()) {
-            gaDi = null;
+        String tenGaDi = (String) cmbGaDi.getSelectedItem();
+        String maGaDi = null;
+        if (tenGaDi != null && !tenGaDi.trim().isEmpty()) {
+            maGaDi = mapTenGaToMaGa.get(tenGaDi);
         }
 
-        String gaDen = (String) cmbGaDen.getSelectedItem();
-        if (gaDen != null && gaDen.trim().isEmpty()) {
-            gaDen = null;
+        String tenGaDen = (String) cmbGaDen.getSelectedItem();
+        String maGaDen = null;
+        if (tenGaDen != null && !tenGaDen.trim().isEmpty()) {
+            maGaDen = mapTenGaToMaGa.get(tenGaDen);
         }
 
         LocalDate ngayDi = null;
@@ -399,7 +409,7 @@ public class PnlDatVe extends JPanel {
             }
         }
 
-        List<ChuyenTau> ketQua = chuyenTauDAO.timKiemChuyenTau(gaDi, gaDen, ngayDi, gioDi);
+        List<ChuyenTau> ketQua = chuyenTauDAO.timKiemChuyenTau(maGaDi, maGaDen, ngayDi, gioDi);
 
         //
         modelBangChuyenTau.setRowCount(0);
@@ -412,14 +422,14 @@ public class PnlDatVe extends JPanel {
             String gioDenStr = ct.getGioDen() != null ? ct.getGioDen().format(timeFormatter) : "";
             
             // Display station names instead of codes
-            String tenGaDi = layTenGa(ct.getMaGaDi());
-            String tenGaDen = layTenGa(ct.getMaGaDen());
+            String tenGaDiDisplay = layTenGa(ct.getMaGaDi());
+            String tenGaDenDisplay = layTenGa(ct.getMaGaDen());
 
             modelBangChuyenTau.addRow(new Object[]{
                     ct.getMaChuyen(),
                     ct.getMaDauMay(),
-                    tenGaDi,
-                    tenGaDen,
+                    tenGaDiDisplay,
+                    tenGaDenDisplay,
                     ngayDiStr,
                     gioDiStr,
                     gioDenStr
