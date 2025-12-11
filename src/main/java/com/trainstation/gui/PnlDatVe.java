@@ -32,6 +32,7 @@ public class PnlDatVe extends JPanel {
     private GheDAO gheDAO;
     private KhachHangDAO khachHangDAO;
     private LoaiVeDAO loaiVeDAO;
+    private GaDAO gaDAO;
 
     private static final boolean ALLOW_SAME_DAY = true;
     private static final int MIN_ADVANCE_MINUTES = 60; // minimum
@@ -75,6 +76,7 @@ public class PnlDatVe extends JPanel {
         this.gheDAO = GheDAO.getInstance();
         this.khachHangDAO = KhachHangDAO.getInstance();
         this.loaiVeDAO = LoaiVeDAO.getInstance();
+        this.gaDAO = GaDAO.getInstance();
         initComponents();
     }
 
@@ -302,6 +304,19 @@ public class PnlDatVe extends JPanel {
             cmbGaDen.addItem(ga);
         }
     }
+    
+    /**
+     * Helper method to get station name from station code
+     */
+    private String layTenGa(String maGa) {
+        if (maGa == null || maGa.isEmpty()) return "N/A";
+        try {
+            Ga ga = gaDAO.findById(maGa);
+            return ga != null ? ga.getTenGa() : maGa;
+        } catch (Exception e) {
+            return maGa; // fallback to code if lookup fails
+        }
+    }
 
     private void taiDanhSachLoaiVe() {
         cboLoaiVe.removeAllItems();
@@ -395,12 +410,16 @@ public class PnlDatVe extends JPanel {
             String ngayDiStr = ct.getGioDi() != null ? ct.getGioDi().format(dateFormatter) : "";
             String gioDiStr = ct.getGioDi() != null ? ct.getGioDi().format(timeFormatter) : "";
             String gioDenStr = ct.getGioDen() != null ? ct.getGioDen().format(timeFormatter) : "";
+            
+            // Display station names instead of codes
+            String tenGaDi = layTenGa(ct.getMaGaDi());
+            String tenGaDen = layTenGa(ct.getMaGaDen());
 
             modelBangChuyenTau.addRow(new Object[]{
                     ct.getMaChuyen(),
                     ct.getMaDauMay(),
-                    ct.getMaGaDi(),
-                    ct.getMaGaDen(),
+                    tenGaDi,
+                    tenGaDen,
                     ngayDiStr,
                     gioDiStr,
                     gioDenStr
@@ -771,8 +790,9 @@ public class PnlDatVe extends JPanel {
             ve.setTrangThai("Chờ xác nhận"); // tạm
             ve.setMaGaDi(chuyenDuocChon.getMaGaDi());
             ve.setMaGaDen(chuyenDuocChon.getMaGaDen());
-            ve.setTenGaDi(chuyenDuocChon.getMaGaDi()); // Will need proper lookup later
-            ve.setTenGaDen(chuyenDuocChon.getMaGaDen()); // Will need proper lookup later
+            // Lookup and set station names properly
+            ve.setTenGaDi(layTenGa(chuyenDuocChon.getMaGaDi()));
+            ve.setTenGaDen(layTenGa(chuyenDuocChon.getMaGaDen()));
             ve.setGioDi(chuyenDuocChon.getGioDi());
             ve.setSoToa(Integer.parseInt(toaDuocChon.getMaToa().replaceAll("\\D+", "0"))); // Extract number from maToa
             ve.setLoaiCho(toaDuocChon.getLoaiToa());
