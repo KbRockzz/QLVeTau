@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.dao.ChuyenTauDAO;
 import com.trainstation.dao.VeDAO;
 import com.trainstation.model.ChuyenTau;
@@ -62,6 +63,7 @@ public class PnlChuyenTau extends JPanel {
 
         btnRefresh = new JButton("Làm mới");
         btnRefresh.addActionListener(e -> loadData());
+        MaterialInitializer.styleButton(btnRefresh);
         topBar.add(btnRefresh);
 
         add(topBar, BorderLayout.NORTH);
@@ -74,6 +76,8 @@ public class PnlChuyenTau extends JPanel {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane sp = new JScrollPane(table);
         sp.setBorder(BorderFactory.createTitledBorder("Danh sách chuyến"));
+        // Giảm chiều cao bảng để form phía dưới hiển thị đầy đủ
+        MaterialInitializer.setTableScrollPaneSize(sp, 35);
 
         // Form panel
         JPanel form = new JPanel(new GridBagLayout());
@@ -116,18 +120,28 @@ public class PnlChuyenTau extends JPanel {
         c.gridx = 0; c.gridy = row; c.gridwidth = 2; form.add(chkTemplate, c);
         c.gridwidth = 1;
 
-        // Buttons under form
-        JPanel formBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // Buttons under form - Material styled
+        JPanel formBtns = MaterialInitializer.createButtonPanel();
+        formBtns.setLayout(new FlowLayout(FlowLayout.RIGHT, 8, 8));
+        
         btnAdd = new JButton("Thêm");
-        btnUpdate = new JButton("Cập nhật");
-        btnDelete = new JButton("Xóa");
-        btnStart = new JButton("Khởi hành");
-        btnArrived = new JButton("Đến nơi");
-
+        MaterialInitializer.styleButton(btnAdd);
         formBtns.add(btnAdd);
+        
+        btnUpdate = new JButton("Cập nhật");
+        MaterialInitializer.styleButton(btnUpdate);
         formBtns.add(btnUpdate);
+        
+        btnDelete = new JButton("Xóa");
+        MaterialInitializer.styleButton(btnDelete);
         formBtns.add(btnDelete);
+        
+        btnStart = new JButton("Khởi hành");
+        MaterialInitializer.styleButton(btnStart);
         formBtns.add(btnStart);
+        
+        btnArrived = new JButton("Đến nơi");
+        MaterialInitializer.styleButton(btnArrived);
         formBtns.add(btnArrived);
 
         c.gridx = 0; c.gridy = ++row; c.gridwidth = 2; form.add(formBtns, c);

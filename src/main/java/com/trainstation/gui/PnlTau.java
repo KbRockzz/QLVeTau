@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.service.TauService;
 import com.trainstation.model.Tau;
 import javax.swing.*;
@@ -86,25 +87,30 @@ public class PnlTau extends JPanel {
             }
         });
         JScrollPane scrollPane = new JScrollPane(bangTau);
+        // Giảm chiều cao bảng để form phía dưới hiển thị đầy đủ
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 30);
 
         JPanel pnlCenter = new JPanel(new BorderLayout(10, 10));
         pnlCenter.add(pnlInput, BorderLayout.NORTH);
         pnlCenter.add(scrollPane, BorderLayout.CENTER);
         add(pnlCenter, BorderLayout.CENTER);
 
-        // Các nút
-        JPanel pnlButton = new JPanel(new FlowLayout());
+        // Các nút - Material styled
+        JPanel pnlButton = MaterialInitializer.createButtonPanel();
         
         btnThemTau = new JButton("Thêm");
         btnThemTau.addActionListener(e -> themTau());
+        MaterialInitializer.styleButton(btnThemTau);
         pnlButton.add(btnThemTau);
 
         btnSuaTau = new JButton("Sửa");
         btnSuaTau.addActionListener(e -> suaTau());
+        MaterialInitializer.styleButton(btnSuaTau);
         pnlButton.add(btnSuaTau);
 
         btnXoaTau = new JButton("Xóa");
         btnXoaTau.addActionListener(e -> xoaTau());
+        MaterialInitializer.styleButton(btnXoaTau);
         pnlButton.add(btnXoaTau);
 
         btnLamMoi = new JButton("Làm mới");
@@ -112,6 +118,7 @@ public class PnlTau extends JPanel {
             taiDuLieuTau();
             xoaForm();
         });
+        MaterialInitializer.styleButton(btnLamMoi);
         pnlButton.add(btnLamMoi);
 
         add(pnlButton, BorderLayout.SOUTH);

@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.model.TaiKhoan;
 import javax.swing.*;
 import java.awt.*;
@@ -20,11 +21,13 @@ public class NavigationBar extends JPanel {
     
     private void initComponents() {
         setLayout(new BorderLayout());
-        setBackground(new Color(52, 73, 94));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // Material Professional Light - Primary Blue
+        setBackground(new Color(25, 118, 210)); // #1976D2
+        setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+        setPreferredSize(new Dimension(0, 56)); // Fixed height for navigation bar
         
         // Left panel with navigation buttons
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         leftPanel.setOpaque(false);
         
         // Home button
@@ -103,11 +106,11 @@ public class NavigationBar extends JPanel {
         add(leftPanel, BorderLayout.WEST);
         
         // Right panel with employee name
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         rightPanel.setOpaque(false);
         JLabel userLabel = new JLabel(getEmployeeName());
         userLabel.setForeground(Color.WHITE);
-        userLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        userLabel.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         rightPanel.add(userLabel);
         
         add(rightPanel, BorderLayout.EAST);
@@ -115,21 +118,30 @@ public class NavigationBar extends JPanel {
     
     private JButton createNavButton(String text, String action) {
         JButton button = new JButton(text);
-        button.setForeground(Color.WHITE);
-        button.setBackground(new Color(41, 128, 185));
+        // Material Professional Light - White background, blue text
+        button.setForeground(new Color(10, 115, 215)); // #0A73D7 - blue text
+        button.setBackground(Color.WHITE); // White background
         button.setBorderPainted(false);
         button.setFocusPainted(false);
-        button.setFont(new Font("Arial", Font.BOLD, 12));
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
+        button.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(120, 35));
         
-        // Hover effect
+        // Increase width to prevent text truncation, adjust based on text length
+        int buttonWidth = Math.max(80, text.length() * 12 + 10);
+        button.setPreferredSize(new Dimension(buttonWidth, 40));
+        button.setMargin(new Insets(5, 15, 5, 15));
+        
+        // Material hover effect - white background normally, blue background on hover
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(52, 152, 219));
+                button.setBackground(new Color(10, 115, 215)); // #0A73D7 - blue hover
+                button.setForeground(Color.WHITE); // White text on hover
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(41, 128, 185));
+                button.setBackground(Color.WHITE); // Back to white
+                button.setForeground(new Color(10, 115, 215)); // Back to blue text
             }
         });
         

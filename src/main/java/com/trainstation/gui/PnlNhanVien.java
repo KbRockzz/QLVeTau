@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.service.NhanVienService;
 import com.trainstation.model.NhanVien;
 import com.trainstation.dao.LoaiNVDAO;
@@ -54,48 +55,64 @@ public class PnlNhanVien extends JPanel {
             }
         });
         JScrollPane scrollPane = new JScrollPane(bangNhanVien);
+        // Giảm chiều cao bảng để form phía dưới hiển thị đầy đủ
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 35);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Form panel
+        // Form panel - 2 cột song song
         JPanel pnlForm = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Cột 1
         gbc.gridx = 0; gbc.gridy = 0;
+        gbc.weightx = 0.0; // Label không mở rộng
         pnlForm.add(new JLabel("Mã NV:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 0.5; // TextField mở rộng
         txtMaNV = new JTextField(20);
         txtMaNV.setEditable(false);
         pnlForm.add(txtMaNV, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Tên NV:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 0.5;
         txtTenNV = new JTextField(20);
         pnlForm.add(txtTenNV, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("SĐT:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 0.5;
         txtSDT = new JTextField(20);
         pnlForm.add(txtSDT, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3;
+        // Cột 2
+        gbc.gridx = 2; gbc.gridy = 0;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Địa chỉ:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 3;
+        gbc.weightx = 0.5;
         txtDiaChi = new JTextField(20);
         pnlForm.add(txtDiaChi, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.gridx = 2; gbc.gridy = 1;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Ngày sinh (yyyy-mm-dd):"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 3;
+        gbc.weightx = 0.5;
         txtNgaySinh = new JTextField(20);
         pnlForm.add(txtNgaySinh, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 5;
+        gbc.gridx = 2; gbc.gridy = 2;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Loại nhân viên:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 3;
+        gbc.weightx = 0.5;
         cmbLoaiNV = new JComboBox<>();
         List<LoaiNV> danhSachLoaiNV = loaiNVDAO.getAll();
         for (LoaiNV loai : danhSachLoaiNV) {
@@ -103,32 +120,38 @@ public class PnlNhanVien extends JPanel {
         }
         pnlForm.add(cmbLoaiNV, gbc);
 
-        // Buttons
-        JPanel pnlButton = new JPanel(new FlowLayout());
+        // Buttons - Material styled
+        JPanel pnlButton = MaterialInitializer.createButtonPanel();
 
         btnXoaRong = new JButton("Xóa rỗng");
         btnXoaRong.addActionListener(e -> xoaRongForm());
+        MaterialInitializer.styleButton(btnXoaRong);
         pnlButton.add(btnXoaRong);
 
         btnThem = new JButton("Thêm");
         btnThem.addActionListener(e -> themNhanVien());
+        MaterialInitializer.styleButton(btnThem);
         pnlButton.add(btnThem);
 
         btnCapNhat = new JButton("Cập nhật");
         btnCapNhat.addActionListener(e -> capNhatNhanVien());
+        MaterialInitializer.styleButton(btnCapNhat);
         pnlButton.add(btnCapNhat);
 
         btnXoa = new JButton("Xóa");
         btnXoa.addActionListener(e -> xoaNhanVien());
+        MaterialInitializer.styleButton(btnXoa);
         pnlButton.add(btnXoa);
 
         btnLamMoi = new JButton("Làm mới");
         btnLamMoi.addActionListener(e -> taiDuLieuNhanVien());
+        MaterialInitializer.styleButton(btnLamMoi);
         pnlButton.add(btnLamMoi);
 
         JPanel pnlDuoi = new JPanel(new BorderLayout());
         pnlDuoi.add(pnlForm, BorderLayout.CENTER);
         pnlDuoi.add(pnlButton, BorderLayout.SOUTH);
+        pnlDuoi.setPreferredSize(new Dimension(0, 280)); // Đảm bảo có đủ không gian
 
         add(pnlDuoi, BorderLayout.SOUTH);
     }

@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.model.*;
 import com.trainstation.service.*;
 import com.trainstation.dao.*;
@@ -99,23 +100,25 @@ public class PnlDatVe extends JPanel {
 
         btnTimKhachHang = new JButton("Tìm khách hàng");
         btnTimKhachHang.addActionListener(e -> timKhachHang());
+        MaterialInitializer.styleButton(btnTimKhachHang);
         pnlTimKhachHang.add(btnTimKhachHang);
 
-        lblThongTinKhachHang = new JLabel("(Chưa chọn khách hàng)");
-        lblThongTinKhachHang.setForeground(Color.BLUE);
-        pnlTimKhachHang.add(lblThongTinKhachHang);
+//        lblThongTinKhachHang = new JLabel("(Chưa chọn khách hàng)");
+//        lblThongTinKhachHang.setForeground(Color.BLUE);
+//        pnlTimKhachHang.add(lblThongTinKhachHang);
 
         // Ticket
         pnlTimKhachHang.add(Box.createHorizontalStrut(20));
         pnlTimKhachHang.add(new JLabel("Loại vé:"));
         cboLoaiVe = new JComboBox<>();
-        cboLoaiVe.setPreferredSize(new Dimension(150, 25));
+        cboLoaiVe.setPreferredSize(new Dimension(150, 32));
         pnlTimKhachHang.add(cboLoaiVe);
 
         // Add payment button
         btnThanhToan = new JButton("Xác nhận thanh toán");
         btnThanhToan.setToolTipText("Thanh toán cho hóa đơn đang mở (nếu có vé được thêm)");
         btnThanhToan.addActionListener(e -> xacNhanThanhToan());
+        MaterialInitializer.styleButton(btnThanhToan);
         pnlTimKhachHang.add(Box.createHorizontalStrut(10));
         pnlTimKhachHang.add(btnThanhToan);
 
@@ -127,17 +130,17 @@ public class PnlDatVe extends JPanel {
 
         pnlTimChuyenTau.add(new JLabel("Ga đi:"));
         cmbGaDi = new JComboBox<>();
-        cmbGaDi.setPreferredSize(new Dimension(120, 25));
+        cmbGaDi.setPreferredSize(new Dimension(180, 32));
         pnlTimChuyenTau.add(cmbGaDi);
 
         pnlTimChuyenTau.add(new JLabel("Ga đến:"));
         cmbGaDen = new JComboBox<>();
-        cmbGaDen.setPreferredSize(new Dimension(120, 25));
+        cmbGaDen.setPreferredSize(new Dimension(180, 32));
         pnlTimChuyenTau.add(cmbGaDen);
 
         pnlTimChuyenTau.add(new JLabel("Ngày đi:"));
         dateNgayDi = new JDateChooser();
-        dateNgayDi.setPreferredSize(new Dimension(120, 25));
+        dateNgayDi.setPreferredSize(new Dimension(180, 32));
         dateNgayDi.setDateFormatString("dd/MM/yyyy");
         // Set min/max
         applyDateConstraintsToDateChooser();
@@ -167,11 +170,12 @@ public class PnlDatVe extends JPanel {
         spnGioDi = new JSpinner(timeModel);
         JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(spnGioDi, "HH:mm");
         spnGioDi.setEditor(timeEditor);
-        spnGioDi.setPreferredSize(new Dimension(80, 25));
+        spnGioDi.setPreferredSize(new Dimension(100, 32));
         pnlTimChuyenTau.add(spnGioDi);
 
         btnTimChuyenTau = new JButton("Tìm chuyến tàu");
         btnTimChuyenTau.addActionListener(e -> timChuyenTau());
+        MaterialInitializer.styleButton(btnTimChuyenTau);
         pnlTimChuyenTau.add(btnTimChuyenTau);
 
         pnlTop.add(pnlTimChuyenTau, BorderLayout.SOUTH);
@@ -196,7 +200,8 @@ public class PnlDatVe extends JPanel {
         });
         JScrollPane scrollChuyenTau = new JScrollPane(tblChuyenTau);
         scrollChuyenTau.setBorder(BorderFactory.createTitledBorder("Danh sách chuyến tàu"));
-        scrollChuyenTau.setPreferredSize(new Dimension(0, 150));
+        // Giảm chiều cao bảng để có đủ không gian cho form phía dưới
+        scrollChuyenTau.setPreferredSize(new Dimension(0, 120));
         pnlNoiDung.add(scrollChuyenTau, BorderLayout.NORTH);
 
         // Bottom section

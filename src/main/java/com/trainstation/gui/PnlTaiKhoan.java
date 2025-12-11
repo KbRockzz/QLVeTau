@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.service.TaiKhoanService;
 import com.trainstation.service.NhanVienService;
 import com.trainstation.model.TaiKhoan;
@@ -44,39 +45,68 @@ public class PnlTaiKhoan extends JPanel {
         bangTaiKhoan.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) hienThiThongTinTaiKhoan();
         });
-        add(new JScrollPane(bangTaiKhoan), BorderLayout.CENTER);
+        JScrollPane scrollPaneTK = new JScrollPane(bangTaiKhoan);
+        // Giảm chiều cao bảng để form phía dưới hiển thị đầy đủ
+        MaterialInitializer.setTableScrollPaneSize(scrollPaneTK, 35);
+        add(scrollPaneTK, BorderLayout.CENTER);
 
         JPanel pnlForm = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0; gbc.gridy = 0; pnlForm.add(new JLabel("Mã TK:"), gbc);
-        gbc.gridx = 1; txtMaTK = new JTextField(20); txtMaTK.setEditable(false); pnlForm.add(txtMaTK, gbc);
+        // Cột 1
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.0; pnlForm.add(new JLabel("Mã TK:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.5; txtMaTK = new JTextField(20); txtMaTK.setEditable(false); pnlForm.add(txtMaTK, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1; pnlForm.add(new JLabel("Mã NV:"), gbc);
-        gbc.gridx = 1; txtMaNV = new JTextField(20); pnlForm.add(txtMaNV, gbc);
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.0; pnlForm.add(new JLabel("Mã NV:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.5; txtMaNV = new JTextField(20); pnlForm.add(txtMaNV, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2; pnlForm.add(new JLabel("Tên tài khoản:"), gbc);
-        gbc.gridx = 1; txtTenTK = new JTextField(20); pnlForm.add(txtTenTK, gbc);
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0; pnlForm.add(new JLabel("Tên tài khoản:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.5; txtTenTK = new JTextField(20); pnlForm.add(txtTenTK, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3; pnlForm.add(new JLabel("Mật khẩu:"), gbc);
-        gbc.gridx = 1; txtMatKhau = new JPasswordField(20); pnlForm.add(txtMatKhau, gbc);
+        // Cột 2
+        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0.0; pnlForm.add(new JLabel("Mật khẩu:"), gbc);
+        gbc.gridx = 3; gbc.weightx = 0.5; txtMatKhau = new JPasswordField(20); pnlForm.add(txtMatKhau, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4; pnlForm.add(new JLabel("Trạng thái:"), gbc);
-        gbc.gridx = 1; cmbTrangThai = new JComboBox<>(new String[]{"Hoạt động", "Khóa"}); pnlForm.add(cmbTrangThai, gbc);
+        gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0.0; pnlForm.add(new JLabel("Trạng thái:"), gbc);
+        gbc.gridx = 3; gbc.weightx = 0.5; cmbTrangThai = new JComboBox<>(new String[]{"Hoạt động", "Khóa"}); pnlForm.add(cmbTrangThai, gbc);
 
-        JPanel pnlButton = new JPanel(new FlowLayout());
-        btnXoaRong = new JButton("Xóa rỗng"); btnXoaRong.addActionListener(e -> xoaRongForm()); pnlButton.add(btnXoaRong);
-        btnThem = new JButton("Thêm"); btnThem.addActionListener(e -> themTaiKhoan()); pnlButton.add(btnThem);
-        btnCapNhat = new JButton("Cập nhật"); btnCapNhat.addActionListener(e -> capNhatTaiKhoan()); pnlButton.add(btnCapNhat);
-        btnDoiMatKhau = new JButton("Đổi mật khẩu"); btnDoiMatKhau.addActionListener(e -> doiMatKhau()); pnlButton.add(btnDoiMatKhau);
-        btnXoa = new JButton("Xóa"); btnXoa.addActionListener(e -> xoaTaiKhoan()); pnlButton.add(btnXoa);
-        btnLamMoi = new JButton("Làm mới"); btnLamMoi.addActionListener(e -> taiDuLieuTaiKhoan()); pnlButton.add(btnLamMoi);
+        JPanel pnlButton = MaterialInitializer.createButtonPanel();
+        btnXoaRong = new JButton("Xóa rỗng"); 
+        btnXoaRong.addActionListener(e -> xoaRongForm()); 
+        MaterialInitializer.styleButton(btnXoaRong);
+        pnlButton.add(btnXoaRong);
+        
+        btnThem = new JButton("Thêm"); 
+        btnThem.addActionListener(e -> themTaiKhoan()); 
+        MaterialInitializer.styleButton(btnThem);
+        pnlButton.add(btnThem);
+        
+        btnCapNhat = new JButton("Cập nhật"); 
+        btnCapNhat.addActionListener(e -> capNhatTaiKhoan()); 
+        MaterialInitializer.styleButton(btnCapNhat);
+        pnlButton.add(btnCapNhat);
+        
+        btnDoiMatKhau = new JButton("Đổi mật khẩu"); 
+        btnDoiMatKhau.addActionListener(e -> doiMatKhau()); 
+        MaterialInitializer.styleButton(btnDoiMatKhau);
+        pnlButton.add(btnDoiMatKhau);
+        
+        btnXoa = new JButton("Xóa"); 
+        btnXoa.addActionListener(e -> xoaTaiKhoan()); 
+        MaterialInitializer.styleButton(btnXoa);
+        pnlButton.add(btnXoa);
+        
+        btnLamMoi = new JButton("Làm mới"); 
+        btnLamMoi.addActionListener(e -> taiDuLieuTaiKhoan()); 
+        MaterialInitializer.styleButton(btnLamMoi);
+        pnlButton.add(btnLamMoi);
 
         JPanel pnlDuoi = new JPanel(new BorderLayout());
         pnlDuoi.add(pnlForm, BorderLayout.CENTER);
         pnlDuoi.add(pnlButton, BorderLayout.SOUTH);
+        pnlDuoi.setPreferredSize(new Dimension(0, 260)); // Đảm bảo có đủ không gian
         add(pnlDuoi, BorderLayout.SOUTH);
     }
 

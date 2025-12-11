@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.service.ThongKeService;
 import com.toedter.calendar.JDateChooser;
 import javax.swing.*;
@@ -58,18 +59,21 @@ public class PnlThongKe extends JPanel {
 
         btnDoanhThu = new JButton("Thống kê doanh thu");
         btnDoanhThu.setPreferredSize(new Dimension(200, 40));
-        btnDoanhThu.setFont(new Font("Arial", Font.BOLD, 14));
+        btnDoanhThu.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnDoanhThu.addActionListener(e -> showPanel("doanhThu"));
+        MaterialInitializer.styleButton(btnDoanhThu);
 
         btnVeDoiHoan = new JButton("Thống kê vé hoàn/đổi");
         btnVeDoiHoan.setPreferredSize(new Dimension(200, 40));
-        btnVeDoiHoan.setFont(new Font("Arial", Font.BOLD, 14));
+        btnVeDoiHoan.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnVeDoiHoan.addActionListener(e -> showPanel("veDoiHoan"));
+        MaterialInitializer.styleButton(btnVeDoiHoan);
 
         btnDoPhuGhe = new JButton("Thống kê độ phủ ghế");
         btnDoPhuGhe.setPreferredSize(new Dimension(200, 40));
-        btnDoPhuGhe.setFont(new Font("Arial", Font.BOLD, 14));
+        btnDoPhuGhe.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnDoPhuGhe.addActionListener(e -> showPanel("doPhuGhe"));
+        MaterialInitializer.styleButton(btnDoPhuGhe);
 
         pnlNav.add(btnDoanhThu);
         pnlNav.add(btnVeDoiHoan);
@@ -95,18 +99,19 @@ public class PnlThongKe extends JPanel {
         JPanel pnlFilter = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         pnlFilter.add(new JLabel("Từ ngày:"));
         dateDoanhThuTu = new JDateChooser();
-        dateDoanhThuTu.setPreferredSize(new Dimension(150, 25));
+        dateDoanhThuTu.setPreferredSize(new Dimension(150, 32));
         dateDoanhThuTu.setDateFormatString("dd/MM/yyyy");
         pnlFilter.add(dateDoanhThuTu);
 
         pnlFilter.add(new JLabel("Đến ngày:"));
         dateDoanhThuDen = new JDateChooser();
-        dateDoanhThuDen.setPreferredSize(new Dimension(150, 25));
+        dateDoanhThuDen.setPreferredSize(new Dimension(150, 32));
         dateDoanhThuDen.setDateFormatString("dd/MM/yyyy");
         pnlFilter.add(dateDoanhThuDen);
 
         btnThongKeDoanhThu = new JButton("Thống kê");
         btnThongKeDoanhThu.addActionListener(e -> loadDoanhThuData());
+        MaterialInitializer.styleButton(btnThongKeDoanhThu);
         pnlFilter.add(btnThongKeDoanhThu);
 
         panel.add(pnlFilter, BorderLayout.NORTH);
@@ -124,6 +129,8 @@ public class PnlThongKe extends JPanel {
         tblDoanhThu.getColumnModel().getColumn(1).setPreferredWidth(300);
 
         JScrollPane scrollPane = new JScrollPane(tblDoanhThu);
+        // Giảm chiều cao bảng để có đủ không gian
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 40);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel pnlSummary = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
@@ -143,18 +150,19 @@ public class PnlThongKe extends JPanel {
         JPanel pnlFilter = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         pnlFilter.add(new JLabel("Từ ngày:"));
         dateVeDoiHoanTu = new JDateChooser();
-        dateVeDoiHoanTu.setPreferredSize(new Dimension(150, 25));
+        dateVeDoiHoanTu.setPreferredSize(new Dimension(150, 32));
         dateVeDoiHoanTu.setDateFormatString("dd/MM/yyyy");
         pnlFilter.add(dateVeDoiHoanTu);
 
         pnlFilter.add(new JLabel("Đến ngày:"));
         dateVeDoiHoanDen = new JDateChooser();
-        dateVeDoiHoanDen.setPreferredSize(new Dimension(150, 25));
+        dateVeDoiHoanDen.setPreferredSize(new Dimension(150, 32));
         dateVeDoiHoanDen.setDateFormatString("dd/MM/yyyy");
         pnlFilter.add(dateVeDoiHoanDen);
 
         btnThongKeVeDoiHoan = new JButton("Thống kê");
         btnThongKeVeDoiHoan.addActionListener(e -> loadVeDoiHoanData());
+        MaterialInitializer.styleButton(btnThongKeVeDoiHoan);
         pnlFilter.add(btnThongKeVeDoiHoan);
 
         panel.add(pnlFilter, BorderLayout.NORTH);
@@ -170,6 +178,8 @@ public class PnlThongKe extends JPanel {
         tblVeDoiHoan.setRowHeight(25);
 
         JScrollPane scrollPane = new JScrollPane(tblVeDoiHoan);
+        // Giảm chiều cao bảng để có đủ không gian
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 40);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel pnlSummary = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
@@ -190,18 +200,19 @@ public class PnlThongKe extends JPanel {
         JPanel pnlFilter = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         pnlFilter.add(new JLabel("Từ ngày:"));
         dateDoPhuGheTu = new JDateChooser();
-        dateDoPhuGheTu.setPreferredSize(new Dimension(150, 25));
+        dateDoPhuGheTu.setPreferredSize(new Dimension(150, 32));
         dateDoPhuGheTu.setDateFormatString("dd/MM/yyyy");
         pnlFilter.add(dateDoPhuGheTu);
 
         pnlFilter.add(new JLabel("Đến ngày:"));
         dateDoPhuGheDen = new JDateChooser();
-        dateDoPhuGheDen.setPreferredSize(new Dimension(150, 25));
+        dateDoPhuGheDen.setPreferredSize(new Dimension(150, 32));
         dateDoPhuGheDen.setDateFormatString("dd/MM/yyyy");
         pnlFilter.add(dateDoPhuGheDen);
 
         btnThongKeDoPhuGhe = new JButton("Thống kê");
         btnThongKeDoPhuGhe.addActionListener(e -> loadDoPhuGheData());
+        MaterialInitializer.styleButton(btnThongKeDoPhuGhe);
         pnlFilter.add(btnThongKeDoPhuGhe);
 
         panel.add(pnlFilter, BorderLayout.NORTH);
@@ -217,6 +228,8 @@ public class PnlThongKe extends JPanel {
         tblDoPhuGhe.setRowHeight(25);
 
         JScrollPane scrollPane = new JScrollPane(tblDoPhuGhe);
+        // Giảm chiều cao bảng để có đủ không gian
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 40);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel pnlSummary = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));

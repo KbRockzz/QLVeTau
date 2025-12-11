@@ -53,6 +53,19 @@
             <version>1.4</version>
         </dependency>
         
+        <!-- FlatLaf for Material UI -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.2.5</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-intellij-themes</artifactId>
+            <version>3.2.5</version>
+        </dependency>
+        
         <!-- Testing -->
         <dependency>
             <groupId>junit</groupId>

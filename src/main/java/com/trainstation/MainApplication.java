@@ -1,5 +1,6 @@
 package com.trainstation;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.gui.FrmDangNhap;
 import com.trainstation.util.DataInitializer;
 
@@ -8,12 +9,8 @@ import javax.swing.*;
 // Main application
 public class MainApplication {
     public static void main(String[] args) {
-        // Đặt phần giao diện hệ thống
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Khởi tạo Material Professional Light theme trước khi tạo UI
+        MaterialInitializer.initUI();
 
         // Tải dữ liệu mẫu
         DataInitializer.initializeSampleData();

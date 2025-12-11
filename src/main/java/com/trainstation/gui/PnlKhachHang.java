@@ -1,5 +1,6 @@
 package com.trainstation.gui;
 
+import com.trainstation.config.MaterialInitializer;
 import com.trainstation.service.KhachHangService;
 import com.trainstation.model.KhachHang;
 import com.trainstation.service.TauService;
@@ -41,6 +42,7 @@ public class PnlKhachHang extends JPanel {
         pnlTimKiem.add(txtTimKiem);
         btnTimKiem = new JButton("Tìm kiếm");
         btnTimKiem.addActionListener(e -> timKiemTheoSoDienThoai());
+        MaterialInitializer.styleButton(btnTimKiem);
         pnlTimKiem.add(btnTimKiem);
 
         JPanel pnlTren = new JPanel(new BorderLayout());
@@ -53,48 +55,65 @@ public class PnlKhachHang extends JPanel {
         modelBang = new DefaultTableModel(tenCot, 0);
         bangKhachHang = new JTable(modelBang);
         JScrollPane scrollPane = new JScrollPane(bangKhachHang);
+        // Giảm chiều cao bảng để form phía dưới hiển thị đầy đủ
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 35);
         add(scrollPane, BorderLayout.CENTER);
 
-        // panel form
+        // panel form - 2 cột song song giống Quản lý Nhân viên
         JPanel pnlForm = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Cột 1
         gbc.gridx = 0; gbc.gridy = 0;
+        gbc.weightx = 0.0; // Label không mở rộng
         pnlForm.add(new JLabel("Mã KH:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 0.5; // TextField mở rộng
         txtMaKH = new JTextField(20);
         pnlForm.add(txtMaKH, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Tên KH:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 0.5;
         txtTenKH = new JTextField(20);
         pnlForm.add(txtTenKH, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
+        // Cột 2
+        gbc.gridx = 2; gbc.gridy = 0;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Email:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 3;
+        gbc.weightx = 0.5;
         txtEmail = new JTextField(20);
         pnlForm.add(txtEmail, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.gridx = 2; gbc.gridy = 1;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("SĐT:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 3;
+        gbc.weightx = 0.5;
         txtSDT = new JTextField(20);
         pnlForm.add(txtSDT, gbc);
 
-        // Các nút
-        JPanel pnlButton = new JPanel(new FlowLayout());
+        // Các nút - Material styled
+        JPanel pnlButton = MaterialInitializer.createButtonPanel();
         btnThem = new JButton("Thêm");
         btnCapNhat = new JButton("Cập nhật");
         btnXoa = new JButton("Xóa");
         btnLamMoi = new JButton("Làm mới");
 
         btnThem.addActionListener(e -> themKhachHang());
+        MaterialInitializer.styleButton(btnThem);
+        
         btnCapNhat.addActionListener(e -> capNhatKhachHang());
+        MaterialInitializer.styleButton(btnCapNhat);
+        
         btnLamMoi.addActionListener(e -> taiDuLieuKhachHang());
+        MaterialInitializer.styleButton(btnLamMoi);
 
         pnlButton.add(btnThem);
         pnlButton.add(btnCapNhat);
@@ -103,6 +122,7 @@ public class PnlKhachHang extends JPanel {
         JPanel pnlDuoi = new JPanel(new BorderLayout());
         pnlDuoi.add(pnlForm, BorderLayout.CENTER);
         pnlDuoi.add(pnlButton, BorderLayout.SOUTH);
+        pnlDuoi.setPreferredSize(new Dimension(0, 220)); // Đảm bảo có đủ không gian
         add(pnlDuoi, BorderLayout.SOUTH);
 
         // Chọn bảng để hiện thông tin trên mấy cái txt
