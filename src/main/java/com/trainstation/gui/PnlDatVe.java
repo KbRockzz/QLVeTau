@@ -111,7 +111,7 @@ public class PnlDatVe extends JPanel {
         pnlTimKhachHang.add(Box.createHorizontalStrut(20));
         pnlTimKhachHang.add(new JLabel("Loại vé:"));
         cboLoaiVe = new JComboBox<>();
-        cboLoaiVe.setPreferredSize(new Dimension(150, 25));
+        cboLoaiVe.setPreferredSize(new Dimension(150, 32));
         pnlTimKhachHang.add(cboLoaiVe);
 
         // Add payment button
@@ -130,17 +130,17 @@ public class PnlDatVe extends JPanel {
 
         pnlTimChuyenTau.add(new JLabel("Ga đi:"));
         cmbGaDi = new JComboBox<>();
-        cmbGaDi.setPreferredSize(new Dimension(150, 32));
+        cmbGaDi.setPreferredSize(new Dimension(180, 32));
         pnlTimChuyenTau.add(cmbGaDi);
 
         pnlTimChuyenTau.add(new JLabel("Ga đến:"));
         cmbGaDen = new JComboBox<>();
-        cmbGaDen.setPreferredSize(new Dimension(150, 32));
+        cmbGaDen.setPreferredSize(new Dimension(180, 32));
         pnlTimChuyenTau.add(cmbGaDen);
 
         pnlTimChuyenTau.add(new JLabel("Ngày đi:"));
         dateNgayDi = new JDateChooser();
-        dateNgayDi.setPreferredSize(new Dimension(150, 32));
+        dateNgayDi.setPreferredSize(new Dimension(180, 32));
         dateNgayDi.setDateFormatString("dd/MM/yyyy");
         // Set min/max
         applyDateConstraintsToDateChooser();
