@@ -196,15 +196,15 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
     /**
      * Tìm kiếm chuyến theo điều kiện tương tự mã cũ.
      */
-    public List<ChuyenTau> timKiemChuyenTau(String gaDi, String gaDen, LocalDate ngayDi, LocalTime gioDi) {
+    public List<ChuyenTau> timKiemChuyenTau(String maGaDi, String maGaDen, LocalDate ngayDi, LocalTime gioDi) {
         List<ChuyenTau> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT maChuyen, maTau, maNV, gaDi, gaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai, isActive FROM ChuyenTau WHERE isActive = 1");
 
-        if (gaDi != null && !gaDi.trim().isEmpty()) {
-            sql.append(" AND gaDi = ?");
+        if (maGaDi != null && !maGaDi.trim().isEmpty()) {
+            sql.append(" AND maGaDi = ?");
         }
-        if (gaDen != null && !gaDen.trim().isEmpty()) {
-            sql.append(" AND gaDen = ?");
+        if (maGaDen != null && !maGaDen.trim().isEmpty()) {
+            sql.append(" AND maGaDen = ?");
         }
         if (ngayDi != null) {
             sql.append(" AND CAST(gioDi AS DATE) = ?");
@@ -217,11 +217,11 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
              PreparedStatement pst = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
 
-            if (gaDi != null && !gaDi.trim().isEmpty()) {
-                pst.setString(paramIndex++, gaDi);
+            if (maGaDi != null && !maGaDi.trim().isEmpty()) {
+                pst.setString(paramIndex++, maGaDi);
             }
-            if (gaDen != null && !gaDen.trim().isEmpty()) {
-                pst.setString(paramIndex++, gaDen);
+            if (maGaDen != null && !maGaDen.trim().isEmpty()) {
+                pst.setString(paramIndex++, maGaDen);
             }
             if (ngayDi != null) {
                 pst.setDate(paramIndex++, Date.valueOf(ngayDi));
@@ -250,7 +250,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
                             rs.getObject("soKm", Integer.class),
                             rs.getString("maChang"),
                             rs.getString("trangThai"),
-                            true
+                            rs.getBoolean("isActive")
                     );
                     list.add(ct);
                 }
@@ -263,7 +263,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     public List<String> getDistinctStations() {
         Set<String> stations = new HashSet<>();
-        String sql = "SELECT DISTINCT gaDi FROM ChuyenTau UNION SELECT DISTINCT gaDen FROM ChuyenTau ORDER BY 1";
+        String sql = "SELECT DISTINCT maGaDi FROM ChuyenTau WHERE isActive = 1 UNION SELECT DISTINCT maGaDen FROM ChuyenTau WHERE isActive = 1 ORDER BY 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
