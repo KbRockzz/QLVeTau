@@ -29,31 +29,38 @@ public class VeDAO implements GenericDAO<Ve> {
     @Override
     public List<Ve> getAll() {
         List<Ve> list = new ArrayList<>();
-        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia FROM Ve";
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive FROM Ve WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
-                LocalDateTime ngayIn = null, gioDi = null;
+                LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
                 Timestamp ts1 = rs.getTimestamp("ngayIn");
                 if (ts1 != null) ngayIn = ts1.toLocalDateTime();
                 Timestamp ts2 = rs.getTimestamp("gioDi");
                 if (ts2 != null) gioDi = ts2.toLocalDateTime();
+                Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
+                if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
 
                 Ve v = new Ve(
                         rs.getString("maVe"),
                         rs.getString("maChuyen"),
                         rs.getString("maLoaiVe"),
                         rs.getString("maSoGhe"),
+                        rs.getString("maGaDi"),
+                        rs.getString("maGaDen"),
+                        rs.getString("tenGaDi"),
+                        rs.getString("tenGaDen"),
                         ngayIn,
                         rs.getString("trangThai"),
-                        rs.getString("gaDi"),
-                        rs.getString("gaDen"),
                         gioDi,
-                        rs.getString("soToa"),
+                        gioDenDuKien,
+                        rs.getObject("soToa", Integer.class),
                         rs.getString("loaiCho"),
                         rs.getString("loaiVe"),
-                        rs.getString("maBangGia")
+                        rs.getString("maBangGia"),
+                        rs.getObject("giaThanhToan", Float.class),
+                        rs.getBoolean("isActive")
                 );
                 list.add(v);
             }
@@ -65,32 +72,39 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public Ve findById(String id) {
-        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia FROM Ve WHERE maVe = ?";
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive FROM Ve WHERE maVe = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    LocalDateTime ngayIn = null, gioDi = null;
+                    LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
                     Timestamp ts1 = rs.getTimestamp("ngayIn");
                     if (ts1 != null) ngayIn = ts1.toLocalDateTime();
                     Timestamp ts2 = rs.getTimestamp("gioDi");
                     if (ts2 != null) gioDi = ts2.toLocalDateTime();
+                    Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
+                    if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
 
                     return new Ve(
                             rs.getString("maVe"),
                             rs.getString("maChuyen"),
                             rs.getString("maLoaiVe"),
                             rs.getString("maSoGhe"),
+                            rs.getString("maGaDi"),
+                            rs.getString("maGaDen"),
+                            rs.getString("tenGaDi"),
+                            rs.getString("tenGaDen"),
                             ngayIn,
                             rs.getString("trangThai"),
-                            rs.getString("gaDi"),
-                            rs.getString("gaDen"),
                             gioDi,
-                            rs.getString("soToa"),
+                            gioDenDuKien,
+                            rs.getObject("soToa", Integer.class),
                             rs.getString("loaiCho"),
                             rs.getString("loaiVe"),
-                            rs.getString("maBangGia")
+                            rs.getString("maBangGia"),
+                            rs.getObject("giaThanhToan", Float.class),
+                            rs.getBoolean("isActive")
                     );
                 }
             }
@@ -102,7 +116,7 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public boolean insert(Ve v) {
-        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement pst = null;
         try {
@@ -140,15 +154,20 @@ public class VeDAO implements GenericDAO<Ve> {
             pst.setString(2, v.getMaChuyen());
             pst.setString(3, v.getMaLoaiVe());
             pst.setString(4, v.getMaSoGhe());
-            if (v.getNgayIn() != null) pst.setTimestamp(5, Timestamp.valueOf(v.getNgayIn())); else pst.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
-            pst.setString(6, v.getTrangThai());
-            pst.setString(7, v.getGaDi());
-            pst.setString(8, v.getGaDen());
-            if (v.getGioDi() != null) pst.setTimestamp(9, Timestamp.valueOf(v.getGioDi())); else pst.setNull(9, Types.TIMESTAMP);
-            pst.setString(10, v.getSoToa());
-            pst.setString(11, v.getLoaiCho());
-            pst.setString(12, v.getLoaiVe());
-            pst.setString(13, v.getMaBangGia());
+            pst.setString(5, v.getMaGaDi());
+            pst.setString(6, v.getMaGaDen());
+            pst.setString(7, v.getTenGaDi());
+            pst.setString(8, v.getTenGaDen());
+            if (v.getNgayIn() != null) pst.setTimestamp(9, Timestamp.valueOf(v.getNgayIn())); else pst.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+            pst.setString(10, v.getTrangThai());
+            if (v.getGioDi() != null) pst.setTimestamp(11, Timestamp.valueOf(v.getGioDi())); else pst.setNull(11, Types.TIMESTAMP);
+            if (v.getGioDenDuKien() != null) pst.setTimestamp(12, Timestamp.valueOf(v.getGioDenDuKien())); else pst.setNull(12, Types.TIMESTAMP);
+            if (v.getSoToa() != null) pst.setInt(13, v.getSoToa()); else pst.setNull(13, Types.INTEGER);
+            pst.setString(14, v.getLoaiCho());
+            pst.setString(15, v.getLoaiVe());
+            pst.setString(16, v.getMaBangGia());
+            if (v.getGiaThanhToan() != null) pst.setFloat(17, v.getGiaThanhToan()); else pst.setNull(17, Types.FLOAT);
+            pst.setBoolean(18, v.isActive());
             System.out.println("DEBUG Ve.insert: inserting maVe=" + v.getMaVe() + " maBangGia=" + v.getMaBangGia());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -162,30 +181,47 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public boolean update(Ve v) {
-        String sql = "UPDATE Ve SET maChuyen = ?, maLoaiVe = ?, maSoGhe = ?, ngayIn = ?, trangThai = ?, gaDi = ?, gaDen = ?, gioDi = ?, soToa = ?, loaiCho = ?, loaiVe = ?, maBangGia = ? WHERE maVe = ?";
+        String sql = "UPDATE Ve SET maChuyen = ?, maLoaiVe = ?, maSoGhe = ?, maGaDi = ?, maGaDen = ?, tenGaDi = ?, tenGaDen = ?, ngayIn = ?, trangThai = ?, gioDi = ?, gioDenDuKien = ?, soToa = ?, loaiCho = ?, loaiVe = ?, maBangGia = ?, giaThanhToan = ?, isActive = ? WHERE maVe = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, v.getMaChuyen());
             pst.setString(2, v.getMaLoaiVe());
             pst.setString(3, v.getMaSoGhe());
+            pst.setString(4, v.getMaGaDi());
+            pst.setString(5, v.getMaGaDen());
+            pst.setString(6, v.getTenGaDi());
+            pst.setString(7, v.getTenGaDen());
             if (v.getNgayIn() != null) {
-                pst.setTimestamp(4, Timestamp.valueOf(v.getNgayIn()));
-            } else {
-                pst.setNull(4, Types.TIMESTAMP);
-            }
-            pst.setString(5, v.getTrangThai());
-            pst.setString(6, v.getGaDi());
-            pst.setString(7, v.getGaDen());
-            if (v.getGioDi() != null) {
-                pst.setTimestamp(8, Timestamp.valueOf(v.getGioDi()));
+                pst.setTimestamp(8, Timestamp.valueOf(v.getNgayIn()));
             } else {
                 pst.setNull(8, Types.TIMESTAMP);
             }
-            pst.setString(9, v.getSoToa());
-            pst.setString(10, v.getLoaiCho());
-            pst.setString(11, v.getLoaiVe());
-            pst.setString(12, v.getMaBangGia());
-            pst.setString(13, v.getMaVe());
+            pst.setString(9, v.getTrangThai());
+            if (v.getGioDi() != null) {
+                pst.setTimestamp(10, Timestamp.valueOf(v.getGioDi()));
+            } else {
+                pst.setNull(10, Types.TIMESTAMP);
+            }
+            if (v.getGioDenDuKien() != null) {
+                pst.setTimestamp(11, Timestamp.valueOf(v.getGioDenDuKien()));
+            } else {
+                pst.setNull(11, Types.TIMESTAMP);
+            }
+            if (v.getSoToa() != null) {
+                pst.setInt(12, v.getSoToa());
+            } else {
+                pst.setNull(12, Types.INTEGER);
+            }
+            pst.setString(13, v.getLoaiCho());
+            pst.setString(14, v.getLoaiVe());
+            pst.setString(15, v.getMaBangGia());
+            if (v.getGiaThanhToan() != null) {
+                pst.setFloat(16, v.getGiaThanhToan());
+            } else {
+                pst.setNull(16, Types.FLOAT);
+            }
+            pst.setBoolean(17, v.isActive());
+            pst.setString(18, v.getMaVe());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

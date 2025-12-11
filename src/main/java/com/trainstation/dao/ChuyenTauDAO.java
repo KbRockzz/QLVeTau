@@ -241,15 +241,16 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
                     ChuyenTau ct = new ChuyenTau(
                             rs.getString("maChuyen"),
-                            rs.getString("maTau"),
+                            rs.getString("maDauMay"),
                             rs.getString("maNV"),
-                            rs.getString("gaDi"),
-                            rs.getString("gaDen"),
+                            rs.getString("maGaDi"),
+                            rs.getString("maGaDen"),
                             gioDiDT,
                             gioDenDT,
-                            rs.getInt("soKm"),
+                            rs.getObject("soKm", Integer.class),
                             rs.getString("maChang"),
-                            rs.getString("trangThai")
+                            rs.getString("trangThai"),
+                            true
                     );
                     list.add(ct);
                 }

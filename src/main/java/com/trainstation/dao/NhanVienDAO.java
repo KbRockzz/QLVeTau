@@ -41,7 +41,8 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
                         rs.getString("diaChi"),
                         ngaySinh,
                         rs.getString("maLoaiNV"),
-                        rs.getString("trangThai")
+                        rs.getString("trangThai"),
+                        true
                 );
                 list.add(nv);
             }
@@ -71,7 +72,9 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
                             rs.getString("soDienThoai"),
                             rs.getString("diaChi"),
                             ngaySinh,
-                            rs.getString("maLoaiNV")
+                            rs.getString("maLoaiNV"),
+                            "Đang hoạt động",
+                            true
                     );
                 }
             }
