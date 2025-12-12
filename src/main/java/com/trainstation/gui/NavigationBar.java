@@ -63,6 +63,10 @@ public class NavigationBar extends JPanel {
         JButton customerBtn = createNavButton("Khách hàng", "customer");
         leftPanel.add(customerBtn);
         
+        // Station button
+        JButton stationBtn = createNavButton("Ga", "station");
+        leftPanel.add(stationBtn);
+        
         // Train button
         JButton trainBtn = createNavButton("Tàu", "train");
         leftPanel.add(trainBtn);
