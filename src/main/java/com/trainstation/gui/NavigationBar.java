@@ -68,7 +68,7 @@ public class NavigationBar extends JPanel {
         leftPanel.add(stationBtn);
         
         // Train button
-        JButton trainBtn = createNavButton("Tàu", "train");
+        JButton trainBtn = createNavButton("Đầu máy", "train");
         leftPanel.add(trainBtn);
         // Train schedule button
         JButton chuyenBtn = createNavButton("Chuyến Tàu", "traintimetable");

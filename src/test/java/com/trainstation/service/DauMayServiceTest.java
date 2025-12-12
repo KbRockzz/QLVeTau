@@ -10,13 +10,13 @@ import static org.junit.Assert.*;
  * Note: These tests verify the service layer integration and new CRUD methods.
  * Database connectivity is required for full integration tests.
  */
-public class TauServiceTest {
+public class DauMayServiceTest {
 
     @Test
     public void testServiceInstance() {
         // Test singleton pattern
-        TauService service1 = TauService.getInstance();
-        TauService service2 = TauService.getInstance();
+        DauMayService service1 = DauMayService.getInstance();
+        DauMayService service2 = DauMayService.getInstance();
         
         assertNotNull("Service instance should not be null", service1);
         assertSame("Service should be singleton", service1, service2);
@@ -25,7 +25,7 @@ public class TauServiceTest {
     @Test
     public void testLayTauHoatDongMethodExists() {
         // Test that the method to get active trains exists and is accessible
-        TauService service = TauService.getInstance();
+        DauMayService service = DauMayService.getInstance();
         
         try {
             // This will throw exception if method doesn't exist or database is not connected
@@ -43,7 +43,7 @@ public class TauServiceTest {
     @Test
     public void testDungHoatDongTauMethodExists() {
         // Test that the soft delete method exists and is accessible
-        TauService service = TauService.getInstance();
+        DauMayService service = DauMayService.getInstance();
         
         try {
             // This will throw exception if method doesn't exist or database is not connected
@@ -61,7 +61,7 @@ public class TauServiceTest {
     @Test
     public void testThemTauMethodExists() {
         // Test that the add train method exists and is accessible
-        TauService service = TauService.getInstance();
+        DauMayService service = DauMayService.getInstance();
         
         try {
             // This will throw exception if method doesn't exist or database is not connected
@@ -80,7 +80,7 @@ public class TauServiceTest {
     @Test
     public void testCapNhatTauMethodExists() {
         // Test that the update train method exists and is accessible
-        TauService service = TauService.getInstance();
+        DauMayService service = DauMayService.getInstance();
         
         try {
             // This will throw exception if method doesn't exist or database is not connected
