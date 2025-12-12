@@ -36,6 +36,21 @@ public class DauMayDAO implements GenericDAO<DauMay> {
         }
         return list;
     }
+    public List<DauMay> getUnActive(){
+        List<DauMay> list = new ArrayList<>();
+        String sql = "SELECT maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai, isActive FROM DauMay WHERE isActive = 0";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                DauMay dm = mapResultSetToEntity(rs);
+                list.add(dm);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
 
     @Override
@@ -156,5 +171,17 @@ public class DauMayDAO implements GenericDAO<DauMay> {
                 .filter(dauMay -> "Hoạt động".equals(dauMay.getTrangThai()))
                 .forEach(activeList::add);
         return activeList;
+    }
+
+    public boolean khoiPhucDauMay(String maDauMay) {
+        String sql = "UPDATE DauMay SET isActive = 1 WHERE maDauMay = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maDauMay);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
