@@ -67,6 +67,13 @@ public class DauMayService {
         return dauMayDAO.dungHoatDongDauMay(maDauMay);
     }
 
+    public boolean khoiPhucDauMay(String maDauMay) {
+        return dauMayDAO.khoiPhucDauMay(maDauMay);
+    }
+
+    public List<DauMay> layDauMayDaXoa() {
+        return dauMayDAO.getUnActive();
+    }
 
     public List<DauMay> layDauMayDangHoatDong() {
         return dauMayDAO.layDauMayHoatDong();

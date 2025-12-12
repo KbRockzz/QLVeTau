@@ -2,11 +2,10 @@ package com.trainstation.service;
 
 import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.dao.ChuyenTauDAO;
+import com.trainstation.dao.DauMayDAO;
 import com.trainstation.dao.VeDAO;
-import com.trainstation.dao.TauDAO;
 import com.trainstation.model.ChuyenTau;
 import com.trainstation.model.Ve;
-import com.trainstation.model.Tau;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,23 +24,23 @@ import java.util.List;
  * Note:
  * - VeDAO cần phương thức getByChuyenAndDate(Connection, String, LocalDate) hoặc tương đương.
  * - VeDAO có thể có phương thức countByChuyenAndDate(Connection, String, LocalDate) để tối ưu hiển thị.
- * - TauDAO cần phương thức capNhatTrangThai(Connection, String, String) và findById(String).
+ * - DauMayDAO cần phương thức capNhatTrangThai(Connection, String, String) và findById(String).
  * - ChuyenTauDAO đã có getAll() và findById() trong repo.
  *
  * Các chuỗi trạng thái ("Đã khởi hành", "Đã hoòn tất", "Sẵn sàng", "Đã hủy") có thể thay đổi.
  */
 public class ChuyenTauService {
     private static ChuyenTauService instance;
-    private final ChuyenTauDAO chuyenTauDAO;
+    private final ChuyenTauDAO chuyenDauMayDAO;
     private final VeDAO veDAO;
-    private final TauDAO tauDAO;
+    private final DauMayDAO dauMayDAO;
 
     private final File actionLogFile;
 
     private ChuyenTauService() {
-        chuyenTauDAO = ChuyenTauDAO.getInstance();
+        chuyenDauMayDAO = ChuyenTauDAO.getInstance();
         veDAO = VeDAO.getInstance();
-        tauDAO = TauDAO.getInstance();
+        dauMayDAO = DauMayDAO.getInstance();
         // log đơn giản vào file logs/chuyen_actions.log
         File logsDir = new File("logs");
         if (!logsDir.exists()) logsDir.mkdirs();
@@ -54,7 +53,7 @@ public class ChuyenTauService {
     }
 
     public List<ChuyenTau> getAllChuyen() {
-        return chuyenTauDAO.getAll();
+        return chuyenDauMayDAO.getAll();
     }
 
     /**
@@ -86,14 +85,14 @@ public class ChuyenTauService {
             prevAuto = conn.getAutoCommit();
             conn.setAutoCommit(false);
 
-            ChuyenTau ct = chuyenTauDAO.findById(maChuyen);
+            ChuyenTau ct = chuyenDauMayDAO.findById(maChuyen);
             if (ct == null) throw new SQLException("Không tìm thấy chuyến: " + maChuyen);
             String maDauMay = ct.getMaDauMay();
 
             // Kiểm tra trạng thái chuyến tàu
-            ChuyenTau Ctau = chuyenTauDAO.findById(maChuyen);
-            if (Ctau != null) {
-                String cur = Ctau.getTrangThai() == null ? "" : Ctau.getTrangThai().trim();
+            ChuyenTau CdauMay = chuyenDauMayDAO.findById(maChuyen);
+            if (CdauMay != null) {
+                String cur = CdauMay.getTrangThai() == null ? "" : CdauMay.getTrangThai().trim();
                 // chỉ cho start nếu ctàu đang "Sẵn sàng"
                 if (!cur.isEmpty() || !cur.equalsIgnoreCase("Sẵn sàng")){
                     throw new SQLException("Tàu " + maDauMay + " hiện không sẵn sàng: " + cur);
@@ -109,9 +108,9 @@ public class ChuyenTauService {
                 }
             }
 
-            // update chuyen tau status
-//            tauDAO.capNhatTrangThai(conn, maTau, "Đang chạy");
-            chuyenTauDAO.capNhatTrangThai(conn, maChuyen, "Đang chạy");
+            // update chuyen dauMay status
+//            dauMayDAO.capNhatTrangThai(conn, maDauMay, "Đang chạy");
+            chuyenDauMayDAO.capNhatTrangThai(conn, maChuyen, "Đang chạy");
             //
             conn.commit();
             writeActionLog(String.format("START|%s|%s|%s|OK", maChuyen, date.toString(), user));
@@ -141,7 +140,7 @@ public class ChuyenTauService {
             conn.setAutoCommit(false);
 
             // Load chuyến
-            ChuyenTau ct = chuyenTauDAO.findById(maChuyen);
+            ChuyenTau ct = chuyenDauMayDAO.findById(maChuyen);
             if (ct == null) throw new SQLException("Không tìm thấy chuyến: " + maChuyen);
 
             // Check chuyến date match
@@ -200,7 +199,7 @@ public class ChuyenTauService {
             }
 
             // Update chuyến status to Hoàn tất
-            chuyenTauDAO.capNhatTrangThai(conn, maChuyen, "Hoàn tất");
+            chuyenDauMayDAO.capNhatTrangThai(conn, maChuyen, "Hoàn tất");
 
             conn.commit();
             writeActionLog(String.format("ARRIVE|%s|%s|%s|freePaid=%s|updatedSeats=%d|OK",
@@ -230,8 +229,8 @@ public class ChuyenTauService {
         }
     }
 
-    public String getChuyenTauStatus(String maTau) {
-        ChuyenTau CT = chuyenTauDAO.findById(maTau);
+    public String getChuyenTauStatus(String maDauMay) {
+        ChuyenTau CT = chuyenDauMayDAO.findById(maDauMay);
         if (CT == null) return "Không tìm thấy chuyến tàu";
         return CT.getTrangThai();
     }
