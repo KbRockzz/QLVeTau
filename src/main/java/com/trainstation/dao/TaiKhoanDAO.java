@@ -143,14 +143,15 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
     }
 
     /**
-     * Restore a soft-deleted account by setting isActive = 1
+     * Restore a soft-deleted account by setting isActive = true
      */
     public boolean restore(String id) {
         String sql = "UPDATE TaiKhoan SET isActive = 1 WHERE maTK = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
-            return pst.executeUpdate() > 0;
+            int rowsAffected = pst.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

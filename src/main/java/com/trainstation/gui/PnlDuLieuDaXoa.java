@@ -106,7 +106,7 @@ public class PnlDuLieuDaXoa extends JPanel {
     private JPanel createAccountPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
-        String[] tenCot = {"Mã TK", "Mã NV", "Tên tài khoản", "Trạng thái"};
+        String[] tenCot = {"Mã TK", "Mã NV", "Tên tài khoản", "Trạng thái TK"};
         modelTaiKhoan = new DefaultTableModel(tenCot, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
