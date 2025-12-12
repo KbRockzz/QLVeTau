@@ -68,16 +68,7 @@ public class NavigationBar extends JPanel {
         leftPanel.add(stationBtn);
         
         // Train button
-        JButton trainBtn = createNavButton("Đầu máy",null);
-        JMenuItem manageTrainItem = new JMenuItem("Quản lý đầu máy");
-        JMenuItem deletedTrainsItem = new JMenuItem("Dữ liệu đã xóa");
-        deletedTrainsItem.addActionListener(e -> navigateTo("deletedtrains"));
-        manageTrainItem.addActionListener(e -> navigateTo("train"));
-        JPopupMenu trainMenu = new JPopupMenu();
-        trainMenu.add(manageTrainItem);
-        trainMenu.add(deletedTrainsItem);
-        trainBtn.addActionListener(e -> 
-            trainMenu.show(trainBtn, 0, trainBtn.getHeight()));
+        JButton trainBtn = createNavButton("Đầu máy", "train");
         leftPanel.add(trainBtn);
         // Train schedule button
         JButton chuyenBtn = createNavButton("Chuyến Tàu", "traintimetable");
