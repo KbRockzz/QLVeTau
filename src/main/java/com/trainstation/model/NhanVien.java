@@ -10,13 +10,19 @@ public class NhanVien implements Serializable {
     private String diaChi;
     private LocalDate ngaySinh;
     private String maLoaiNV;
-    private String trangThai;
-    private boolean isActive;
+    private String trangThai = "active";
     public NhanVien() {
-        this.isActive = true;
     }
 
-    public NhanVien(String maNV, String tenNV, String soDienThoai, String diaChi, LocalDate ngaySinh, String maLoaiNV, String trangThai, boolean isActive) {
+    public NhanVien(String maNV, String tenNV, String soDienThoai, String diaChi, LocalDate ngaySinh, String maLoaiNV) {
+        this.maNV = maNV;
+        this.tenNV = tenNV;
+        this.soDienThoai = soDienThoai;
+        this.diaChi = diaChi;
+        this.ngaySinh = ngaySinh;
+        this.maLoaiNV = maLoaiNV;
+    }
+    public NhanVien(String maNV, String tenNV, String soDienThoai, String diaChi, LocalDate ngaySinh, String maLoaiNV, String trangThai) {
         this.maNV = maNV;
         this.tenNV = tenNV;
         this.soDienThoai = soDienThoai;
@@ -24,7 +30,6 @@ public class NhanVien implements Serializable {
         this.ngaySinh = ngaySinh;
         this.maLoaiNV = maLoaiNV;
         this.trangThai = trangThai;
-        this.isActive = isActive;
     }
 
     public String getMaNV() {
@@ -78,19 +83,9 @@ public class NhanVien implements Serializable {
     public String getTrangThai() {
         return trangThai;
     }
-
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
     }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
     @Override
     public String toString() {
         return "NhanVien{" +
@@ -100,8 +95,6 @@ public class NhanVien implements Serializable {
                 ", diaChi='" + diaChi + '\'' +
                 ", ngaySinh=" + ngaySinh +
                 ", maLoaiNV='" + maLoaiNV + '\'' +
-                ", trangThai='" + trangThai + '\'' +
-                ", isActive=" + isActive +
                 '}';
     }
 }

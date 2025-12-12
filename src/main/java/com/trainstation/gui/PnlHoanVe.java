@@ -187,8 +187,8 @@ public class PnlHoanVe extends JPanel {
             modelBangVe.addRow(new Object[]{
                     ve.getMaVe(),
                     ve.getMaChuyen(),
-                    ve.getTenGaDi(),
-                    ve.getTenGaDen(),
+                    ve.getGaDi(),
+                    ve.getGaDen(),
                     ve.getGioDi() != null ? ve.getGioDi().format(formatter) : "",
                     ve.getMaSoGhe(),
                     ve.getTrangThai()

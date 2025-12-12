@@ -7,28 +7,20 @@ public class HoaDon implements Serializable {
     private String maHoaDon;
     private String maNV;
     private String maKH;
-    private String tenKH;
-    private String soDienThoai;
     private LocalDateTime ngayLap;
     private String phuongThucThanhToan;
     private String trangThai;
-    private boolean isActive;
 
     public HoaDon() {
-        this.isActive = true;
     }
 
-    public HoaDon(String maHoaDon, String maNV, String maKH, String tenKH, String soDienThoai,
-                  LocalDateTime ngayLap, String phuongThucThanhToan, String trangThai, boolean isActive) {
+    public HoaDon(String maHoaDon, String maNV, String maKH, LocalDateTime ngayLap, String phuongThucThanhToan, String trangThai) {
         this.maHoaDon = maHoaDon;
         this.maNV = maNV;
         this.maKH = maKH;
-        this.tenKH = tenKH;
-        this.soDienThoai = soDienThoai;
         this.ngayLap = ngayLap;
         this.phuongThucThanhToan = phuongThucThanhToan;
         this.trangThai = trangThai;
-        this.isActive = isActive;
     }
 
     public String getMaHoaDon() {
@@ -55,22 +47,6 @@ public class HoaDon implements Serializable {
         this.maKH = maKH;
     }
 
-    public String getTenKH() {
-        return tenKH;
-    }
-
-    public void setTenKH(String tenKH) {
-        this.tenKH = tenKH;
-    }
-
-    public String getSoDienThoai() {
-        return soDienThoai;
-    }
-
-    public void setSoDienThoai(String soDienThoai) {
-        this.soDienThoai = soDienThoai;
-    }
-
     public LocalDateTime getNgayLap() {
         return ngayLap;
     }
@@ -95,26 +71,15 @@ public class HoaDon implements Serializable {
         this.trangThai = trangThai;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
     @Override
     public String toString() {
         return "HoaDon{" +
                 "maHoaDon='" + maHoaDon + '\'' +
                 ", maNV='" + maNV + '\'' +
                 ", maKH='" + maKH + '\'' +
-                ", tenKH='" + tenKH + '\'' +
-                ", soDienThoai='" + soDienThoai + '\'' +
                 ", ngayLap=" + ngayLap +
                 ", phuongThucThanhToan='" + phuongThucThanhToan + '\'' +
                 ", trangThai='" + trangThai + '\'' +
-                ", isActive=" + isActive +
                 '}';
     }
 }

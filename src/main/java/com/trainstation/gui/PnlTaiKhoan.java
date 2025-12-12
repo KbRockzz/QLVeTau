@@ -177,8 +177,7 @@ public class PnlTaiKhoan extends JPanel {
                 txtMaNV.getText().trim(),
                 txtTenTK.getText().trim(),
                 new String(txtMatKhau.getPassword()).trim(),
-                (String) cmbTrangThai.getSelectedItem(),
-                true
+                (String) cmbTrangThai.getSelectedItem()
         );
         if (taiKhoanService.themTaiKhoan(tk)) {
             JOptionPane.showMessageDialog(this, "✔ Thêm thành công!");
@@ -202,8 +201,7 @@ public class PnlTaiKhoan extends JPanel {
                 txtMaNV.getText().trim(),
                 txtTenTK.getText().trim(),
                 mk,
-                (String) cmbTrangThai.getSelectedItem(),
-                true
+                (String) cmbTrangThai.getSelectedItem()
         );
         if (taiKhoanService.capNhatTaiKhoan(tk)) {
             JOptionPane.showMessageDialog(this, "✔ Cập nhật thành công!");

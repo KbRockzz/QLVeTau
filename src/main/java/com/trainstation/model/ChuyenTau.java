@@ -5,35 +5,30 @@ import java.time.LocalDateTime;
 
 public class ChuyenTau implements Serializable {
     private String maChuyen;
-    private String maDauMay;
+    private String maTau;
     private String maNV;
-    private String maGaDi;
-    private String maGaDen;
+    private String gaDi;
+    private String gaDen;
     private LocalDateTime gioDi;
     private LocalDateTime gioDen;
-    private Integer soKm;
+    private int soKm;
     private String maChang;
-    private String trangThai;
-    private boolean isActive;
+    private String trangThai; // Thêm trường trạng thái
 
     public ChuyenTau() {
-        this.isActive = true;
     }
 
-    public ChuyenTau(String maChuyen, String maDauMay, String maNV, String maGaDi, String maGaDen,
-                     LocalDateTime gioDi, LocalDateTime gioDen, Integer soKm, String maChang,
-                     String trangThai, boolean isActive) {
+    public ChuyenTau(String maChuyen, String maTau, String maNV, String gaDi, String gaDen, LocalDateTime gioDi, LocalDateTime gioDen, int soKm, String maChang,String trangThai) {
         this.maChuyen = maChuyen;
-        this.maDauMay = maDauMay;
+        this.maTau = maTau;
         this.maNV = maNV;
-        this.maGaDi = maGaDi;
-        this.maGaDen = maGaDen;
+        this.gaDi = gaDi;
+        this.gaDen = gaDen;
         this.gioDi = gioDi;
         this.gioDen = gioDen;
         this.soKm = soKm;
         this.maChang = maChang;
         this.trangThai = trangThai;
-        this.isActive = isActive;
     }
 
     public String getMaChuyen() {
@@ -44,12 +39,12 @@ public class ChuyenTau implements Serializable {
         this.maChuyen = maChuyen;
     }
 
-    public String getMaDauMay() {
-        return maDauMay;
+    public String getMaTau() {
+        return maTau;
     }
 
-    public void setMaDauMay(String maDauMay) {
-        this.maDauMay = maDauMay;
+    public void setMaTau(String maTau) {
+        this.maTau = maTau;
     }
 
     public String getMaNV() {
@@ -60,20 +55,20 @@ public class ChuyenTau implements Serializable {
         this.maNV = maNV;
     }
 
-    public String getMaGaDi() {
-        return maGaDi;
+    public String getGaDi() {
+        return gaDi;
     }
 
-    public void setMaGaDi(String maGaDi) {
-        this.maGaDi = maGaDi;
+    public void setGaDi(String gaDi) {
+        this.gaDi = gaDi;
     }
 
-    public String getMaGaDen() {
-        return maGaDen;
+    public String getGaDen() {
+        return gaDen;
     }
 
-    public void setMaGaDen(String maGaDen) {
-        this.maGaDen = maGaDen;
+    public void setGaDen(String gaDen) {
+        this.gaDen = gaDen;
     }
 
     public LocalDateTime getGioDi() {
@@ -92,11 +87,11 @@ public class ChuyenTau implements Serializable {
         this.gioDen = gioDen;
     }
 
-    public Integer getSoKm() {
+    public int getSoKm() {
         return soKm;
     }
 
-    public void setSoKm(Integer soKm) {
+    public void setSoKm(int soKm) {
         this.soKm = soKm;
     }
 
@@ -108,36 +103,26 @@ public class ChuyenTau implements Serializable {
         this.maChang = maChang;
     }
 
+    @Override
+    public String toString() {
+        return "ChuyenTau{" +
+                "maChuyen='" + maChuyen + '\'' +
+                ", maTau='" + maTau + '\'' +
+                ", maNV='" + maNV + '\'' +
+                ", gaDi='" + gaDi + '\'' +
+                ", gaDen='" + gaDen + '\'' +
+                ", gioDi=" + gioDi +
+                ", gioDen=" + gioDen +
+                ", soKm=" + soKm +
+                ", maChang='" + maChang + '\'' +
+                '}';
+    }
+
     public String getTrangThai() {
         return trangThai;
     }
 
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    @Override
-    public String toString() {
-        return "ChuyenTau{" +
-                "maChuyen='" + maChuyen + '\'' +
-                ", maDauMay='" + maDauMay + '\'' +
-                ", maNV='" + maNV + '\'' +
-                ", maGaDi='" + maGaDi + '\'' +
-                ", maGaDen='" + maGaDen + '\'' +
-                ", gioDi=" + gioDi +
-                ", gioDen=" + gioDen +
-                ", soKm=" + soKm +
-                ", maChang='" + maChang + '\'' +
-                ", trangThai='" + trangThai + '\'' +
-                ", isActive=" + isActive +
-                '}';
     }
 }

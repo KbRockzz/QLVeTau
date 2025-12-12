@@ -3,9 +3,7 @@ package com.trainstation.gui;
 import com.trainstation.config.MaterialInitializer;
 import com.trainstation.dao.ChuyenTauDAO;
 import com.trainstation.dao.VeDAO;
-import com.trainstation.dao.GaDAO;
 import com.trainstation.model.ChuyenTau;
-import com.trainstation.model.Ga;
 import com.trainstation.util.UIUtils;
 
 import javax.swing.*;
@@ -47,11 +45,8 @@ public class PnlChuyenTau extends JPanel {
     private ScheduledExecutorService scheduler;
 
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    
-    private final GaDAO gaDAO;
 
     public PnlChuyenTau() {
-        gaDAO = GaDAO.getInstance();
         chuyenTauDAO = ChuyenTauDAO.getInstance();
         veDAO = VeDAO.getInstance();
 
@@ -210,15 +205,11 @@ public class PnlChuyenTau extends JPanel {
                         int count = chuyenTauDAO.countTicketsForChuyenOnDate(c.getMaChuyen(), date);
                         String runTimeStr = runTime != null ? runTime.format(DT_FMT) : "";
                         String status = c.getTrangThai() != null ? c.getTrangThai() : "";
-                        // Get station names from GaDAO
-                        String tenGaDi = layTenGa(c.getMaGaDi());
-                        String tenGaDen = layTenGa(c.getMaGaDen());
-                        
                         publish(new Object[]{
                                 c.getMaChuyen(),
-                                c.getMaDauMay(),
-                                tenGaDi,
-                                tenGaDen,
+                                c.getMaTau(),
+                                c.getGaDi(),
+                                c.getGaDen(),
                                 runTimeStr,
                                 count,
                                 status
@@ -264,10 +255,9 @@ public class PnlChuyenTau extends JPanel {
                     if (ct == null) return;
                     txtMaChuyen.setText(ct.getMaChuyen());
                     txtMaChuyen.setEnabled(false); // khóa mã khi edit
-                    txtMaTau.setText(ct.getMaDauMay());
-                    // Display station codes in form (for editing), not names
-                    txtGaDi.setText(ct.getMaGaDi());
-                    txtGaDen.setText(ct.getMaGaDen());
+                    txtMaTau.setText(ct.getMaTau());
+                    txtGaDi.setText(ct.getGaDi());
+                    txtGaDen.setText(ct.getGaDen());
                     if (ct.getGioDi() != null) {
                         Date d = java.util.Date.from(ct.getGioDi().atZone(ZoneId.systemDefault()).toInstant());
                         spinnerDateTime.setValue(d);
@@ -294,19 +284,6 @@ public class PnlChuyenTau extends JPanel {
         spinnerDateTime.setValue(new Date());
         chkTemplate.setSelected(false);
         spinnerDateTime.setEnabled(true);
-    }
-    
-    /**
-     * Helper method to get station name from station code
-     */
-    private String layTenGa(String maGa) {
-        if (maGa == null || maGa.isEmpty()) return "N/A";
-        try {
-            Ga ga = gaDAO.findById(maGa);
-            return ga != null ? ga.getTenGa() : maGa;
-        } catch (Exception e) {
-            return maGa; // fallback to code if lookup fails
-        }
     }
 
     private void addChuyen() {
@@ -406,9 +383,9 @@ public class PnlChuyenTau extends JPanel {
     private ChuyenTau buildChuyenFromForm() {
         ChuyenTau ct = new ChuyenTau();
         ct.setMaChuyen(txtMaChuyen.getText().trim());
-        ct.setMaDauMay(txtMaTau.getText().trim());
-        ct.setMaGaDi(txtGaDi.getText().trim());
-        ct.setMaGaDen(txtGaDen.getText().trim());
+        ct.setMaTau(txtMaTau.getText().trim());
+        ct.setGaDi(txtGaDi.getText().trim());
+        ct.setGaDen(txtGaDen.getText().trim());
         if (chkTemplate.isSelected()) {
             ct.setGioDi(null);
             ct.setGioDen(null);

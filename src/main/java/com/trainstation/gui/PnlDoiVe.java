@@ -121,8 +121,8 @@ public class PnlDoiVe extends JPanel {
             modelBangVe.addRow(new Object[]{
                 ve.getMaVe(),
                 ve.getMaChuyen(),
-                ve.getTenGaDi(),
-                ve.getTenGaDen(),
+                ve.getGaDi(),
+                ve.getGaDen(),
                 ve.getGioDi() != null ? ve.getGioDi().format(formatter) : "",
                 ve.getMaSoGhe(),
                 ve.getTrangThai()
@@ -165,7 +165,7 @@ public class PnlDoiVe extends JPanel {
         List<ChuyenTau> danhSachChuyen = chuyenTauDAO.getAll();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         for (ChuyenTau ct : danhSachChuyen) {
-            String item = ct.getMaChuyen() + " - " + ct.getMaGaDi() + " → " + ct.getMaGaDen();
+            String item = ct.getMaChuyen() + " - " + ct.getGaDi() + " → " + ct.getGaDen();
             if (ct.getGioDi() != null) {
                 item += " (" + ct.getGioDi().format(formatter) + ")";
             }
@@ -195,7 +195,7 @@ public class PnlDoiVe extends JPanel {
             
             // Load seats
             pnlGhe.removeAll();
-            List<ToaTau> danhSachToa = toaTauDAO.getByTau(chuyen.getMaDauMay());
+            List<ToaTau> danhSachToa = toaTauDAO.getByTau(chuyen.getMaTau());
             for (ToaTau toa : danhSachToa) {
                 List<Ghe> danhSachGhe = gheDAO.getByToa(toa.getMaToa());
                 for (Ghe ghe : danhSachGhe) {
@@ -231,10 +231,8 @@ public class PnlDoiVe extends JPanel {
                 Ve veMoi = new Ve();
                 veMoi.setMaChuyen(chuyenChon[0].getMaChuyen());
                 veMoi.setMaSoGhe(gheChon[0].getMaGhe());
-                veMoi.setMaGaDi(chuyenChon[0].getMaGaDi());
-                veMoi.setMaGaDen(chuyenChon[0].getMaGaDen());
-                veMoi.setTenGaDi(chuyenChon[0].getMaGaDi()); // Will need proper lookup
-                veMoi.setTenGaDen(chuyenChon[0].getMaGaDen()); // Will need proper lookup
+                veMoi.setGaDi(chuyenChon[0].getGaDi());
+                veMoi.setGaDen(chuyenChon[0].getGaDen());
                 veMoi.setGioDi(chuyenChon[0].getGioDi());
                 
                 // Exchange ticket

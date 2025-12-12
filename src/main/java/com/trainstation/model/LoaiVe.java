@@ -8,18 +8,15 @@ public class LoaiVe implements Serializable {
     private String tenLoai;
     private BigDecimal heSoGia;
     private String moTa;
-    private boolean isActive;
 
     public LoaiVe() {
-        this.isActive = true;
     }
 
-    public LoaiVe(String maLoaiVe, String tenLoai, BigDecimal heSoGia, String moTa, boolean isActive) {
+    public LoaiVe(String maLoaiVe, String tenLoai, BigDecimal heSoGia, String moTa) {
         this.maLoaiVe = maLoaiVe;
         this.tenLoai = tenLoai;
         this.heSoGia = heSoGia;
         this.moTa = moTa;
-        this.isActive = isActive;
     }
 
     public String getMaLoaiVe() {
@@ -54,14 +51,6 @@ public class LoaiVe implements Serializable {
         this.moTa = moTa;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
     @Override
     public String toString() {
         return "LoaiVe{" +
@@ -69,7 +58,6 @@ public class LoaiVe implements Serializable {
                 ", tenLoai='" + tenLoai + '\'' +
                 ", heSoGia=" + heSoGia +
                 ", moTa='" + moTa + '\'' +
-                ", isActive=" + isActive +
                 '}';
     }
 }
