@@ -23,15 +23,16 @@ public class TauDAO implements GenericDAO<Tau> {
     @Override
     public List<Tau> getAll() {
         List<Tau> list = new ArrayList<>();
-        String sql = "SELECT maTau, soToa, tenTau, trangThai FROM Tau";
+        // Updated to query DauMay table (replaces old Tau table)
+        String sql = "SELECT maDauMay, tenDauMay, trangThai FROM DauMay WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 Tau t = new Tau(
-                        rs.getString("maTau"),
-                        rs.getInt("soToa"),
-                        rs.getString("tenTau"),
+                        rs.getString("maDauMay"),
+                        0, // soToa not available in DauMay table
+                        rs.getString("tenDauMay"),
                         rs.getString("trangThai")
                 );
                 list.add(t);
@@ -44,16 +45,17 @@ public class TauDAO implements GenericDAO<Tau> {
 
     @Override
     public Tau findById(String id) {
-        String sql = "SELECT maTau, soToa, tenTau, trangThai FROM Tau WHERE maTau = ?";
+        // Updated to query DauMay table (replaces old Tau table)
+        String sql = "SELECT maDauMay, tenDauMay, trangThai FROM DauMay WHERE maDauMay = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return new Tau(
-                            rs.getString("maTau"),
-                            rs.getInt("soToa"),
-                            rs.getString("tenTau"),
+                            rs.getString("maDauMay"),
+                            0, // soToa not available in DauMay table
+                            rs.getString("tenDauMay"),
                             rs.getString("trangThai")
                     );
                 }
@@ -66,13 +68,14 @@ public class TauDAO implements GenericDAO<Tau> {
 
     @Override
     public boolean insert(Tau t) {
-        String sql = "INSERT INTO Tau (maTau, soToa, tenTau, trangThai) VALUES (?, ?, ?, ?)";
+        // Updated to insert into DauMay table (replaces old Tau table)
+        String sql = "INSERT INTO DauMay (maDauMay, tenDauMay, trangThai, isActive) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, t.getMaTau());
-            pst.setInt(2, t.getSoToa());
-            pst.setString(3, t.getTenTau());
-            pst.setString(4, t.getTrangThai());
+            pst.setString(2, t.getTenTau());
+            pst.setString(3, t.getTrangThai());
+            pst.setBoolean(4, true);
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -82,13 +85,13 @@ public class TauDAO implements GenericDAO<Tau> {
 
     @Override
     public boolean update(Tau t) {
-        String sql = "UPDATE Tau SET soToa = ?, tenTau = ?, trangThai = ? WHERE maTau = ?";
+        // Updated to update DauMay table (replaces old Tau table)
+        String sql = "UPDATE DauMay SET tenDauMay = ?, trangThai = ? WHERE maDauMay = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, t.getSoToa());
-            pst.setString(2, t.getTenTau());
-            pst.setString(3, t.getTrangThai());
-            pst.setString(4, t.getMaTau());
+            pst.setString(1, t.getTenTau());
+            pst.setString(2, t.getTrangThai());
+            pst.setString(3, t.getMaTau());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -98,7 +101,8 @@ public class TauDAO implements GenericDAO<Tau> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM Tau WHERE maTau = ?";
+        // Updated to soft delete from DauMay table (replaces old Tau table)
+        String sql = "UPDATE DauMay SET isActive = 0 WHERE maDauMay = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -110,7 +114,8 @@ public class TauDAO implements GenericDAO<Tau> {
     }
 
     public boolean dungHoatDongTau(String maTau) {
-        String sql = "UPDATE Tau SET trangThai = N'Dừng hoạt động' WHERE maTau = ?";
+        // Updated to update DauMay table (replaces old Tau table)
+        String sql = "UPDATE DauMay SET trangThai = N'Dừng hoạt động' WHERE maDauMay = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maTau);
@@ -123,15 +128,16 @@ public class TauDAO implements GenericDAO<Tau> {
 
     public List<Tau> layTauHoatDong() {
         List<Tau> list = new ArrayList<>();
-        String sql = "SELECT maTau, soToa, tenTau, trangThai FROM Tau WHERE trangThai != N'Dừng hoạt động'";
+        // Updated to query DauMay table (replaces old Tau table)
+        String sql = "SELECT maDauMay, tenDauMay, trangThai FROM DauMay WHERE trangThai != N'Dừng hoạt động' AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 Tau t = new Tau(
-                        rs.getString("maTau"),
-                        rs.getInt("soToa"),
-                        rs.getString("tenTau"),
+                        rs.getString("maDauMay"),
+                        0, // soToa not available in DauMay table
+                        rs.getString("tenDauMay"),
                         rs.getString("trangThai")
                 );
                 list.add(t);
@@ -143,7 +149,8 @@ public class TauDAO implements GenericDAO<Tau> {
     }
 
     public void capNhatTrangThai(Connection conn, String maTau, String sanSang) {
-        String sql = "UPDATE Tau SET trangThai = ? WHERE maTau = ?";
+        // Updated to update DauMay table (replaces old Tau table)
+        String sql = "UPDATE DauMay SET trangThai = ? WHERE maDauMay = ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, sanSang);
             pst.setString(2, maTau);

@@ -8,16 +8,19 @@ public class TaiKhoan implements Serializable {
     private String tenTaiKhoan;
     private String matKhau;
     private String trangThai;
+    private boolean isActive;
 
     public TaiKhoan() {
+        this.isActive = true;
     }
 
-    public TaiKhoan(String maTK, String maNV, String tenTaiKhoan, String matKhau, String trangThai) {
+    public TaiKhoan(String maTK, String maNV, String tenTaiKhoan, String matKhau, String trangThai, boolean isActive) {
         this.maTK = maTK;
         this.maNV = maNV;
         this.tenTaiKhoan = tenTaiKhoan;
         this.matKhau = matKhau;
         this.trangThai = trangThai;
+        this.isActive = isActive;
     }
 
     public String getMaTK() {
@@ -60,6 +63,14 @@ public class TaiKhoan implements Serializable {
         this.trangThai = trangThai;
     }
 
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
     /**
      * Kiểm tra xem tài khoản có phải quản lý không
      * Nhân viên loại LNV02 (Quản lý) và LNV03 (Admin) có quyền quản lý
@@ -86,6 +97,7 @@ public class TaiKhoan implements Serializable {
                 ", tenTaiKhoan='" + tenTaiKhoan + '\'' +
                 ", matKhau='" + matKhau + '\'' +
                 ", trangThai='" + trangThai + '\'' +
+                ", isActive=" + isActive +
                 '}';
     }
 }

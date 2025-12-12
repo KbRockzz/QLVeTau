@@ -7,15 +7,18 @@ public class KhachHang implements Serializable {
     private String tenKhachHang;
     private String email;
     private String soDienThoai;
+    private boolean isActive;
 
     public KhachHang() {
+        this.isActive = true;
     }
 
-    public KhachHang(String maKhachHang, String tenKhachHang, String email, String soDienThoai) {
+    public KhachHang(String maKhachHang, String tenKhachHang, String email, String soDienThoai, boolean isActive) {
         this.maKhachHang = maKhachHang;
         this.tenKhachHang = tenKhachHang;
         this.email = email;
         this.soDienThoai = soDienThoai;
+        this.isActive = isActive;
     }
 
     public String getMaKhachHang() {
@@ -50,6 +53,14 @@ public class KhachHang implements Serializable {
         this.soDienThoai = soDienThoai;
     }
 
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
     @Override
     public String toString() {
         return "KhachHang{" +
@@ -57,6 +68,7 @@ public class KhachHang implements Serializable {
                 ", tenKhachHang='" + tenKhachHang + '\'' +
                 ", email='" + email + '\'' +
                 ", soDienThoai='" + soDienThoai + '\'' +
+                ", isActive=" + isActive +
                 '}';
     }
 }

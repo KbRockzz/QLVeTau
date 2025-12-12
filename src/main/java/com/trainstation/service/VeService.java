@@ -170,8 +170,10 @@ public class VeService {
         // Cập nhật thông tin vé
         veCu.setMaChuyen(veMoi.getMaChuyen());
         veCu.setMaSoGhe(veMoi.getMaSoGhe());
-        veCu.setGaDi(veMoi.getGaDi());
-        veCu.setGaDen(veMoi.getGaDen());
+        veCu.setMaGaDi(veMoi.getMaGaDi());
+        veCu.setMaGaDen(veMoi.getMaGaDen());
+        veCu.setTenGaDi(veMoi.getTenGaDi());
+        veCu.setTenGaDen(veMoi.getTenGaDen());
         veCu.setGioDi(veMoi.getGioDi());
         veCu.setSoToa(veMoi.getSoToa());
         veCu.setLoaiCho(veMoi.getLoaiCho());
@@ -407,10 +409,10 @@ public class VeService {
                     .setTextAlignment(TextAlignment.CENTER));
 
             gaTable.addCell(new Cell()
-                    .add(new Paragraph(ve.getGaDi() != null ? ve.getGaDi() : "N/A").setFont(font))
+                    .add(new Paragraph(ve.getTenGaDi() != null ? ve.getTenGaDi() : "N/A").setFont(font))
                     .setTextAlignment(TextAlignment.CENTER));
             gaTable.addCell(new Cell()
-                    .add(new Paragraph(ve.getGaDen() != null ? ve.getGaDen() : "N/A").setFont(font))
+                    .add(new Paragraph(ve.getTenGaDen() != null ? ve.getTenGaDen() : "N/A").setFont(font))
                     .setTextAlignment(TextAlignment.CENTER));
 
             document.add(gaTable);
@@ -441,7 +443,7 @@ public class VeService {
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Toa/Coach:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
-                    .add(new Paragraph(ve.getSoToa() != null ? ve.getSoToa() : "N/A").setFont(font)));
+                    .add(new Paragraph(ve.getSoToa() != null ? String.valueOf(ve.getSoToa()) : "N/A").setFont(font)));
 
             // Ghế
             infoTable.addCell(new Cell()

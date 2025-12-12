@@ -88,15 +88,15 @@ public class ChuyenTauService {
 
             ChuyenTau ct = chuyenTauDAO.findById(maChuyen);
             if (ct == null) throw new SQLException("Không tìm thấy chuyến: " + maChuyen);
-            String maTau = ct.getMaTau();
+            String maDauMay = ct.getMaDauMay();
 
             // Kiểm tra trạng thái chuyến tàu
-            ChuyenTau Ctau = chuyenTauDAO.findById(maTau);
+            ChuyenTau Ctau = chuyenTauDAO.findById(maChuyen);
             if (Ctau != null) {
                 String cur = Ctau.getTrangThai() == null ? "" : Ctau.getTrangThai().trim();
                 // chỉ cho start nếu ctàu đang "Sẵn sàng"
                 if (!cur.isEmpty() || !cur.equalsIgnoreCase("Sẵn sàng")){
-                    throw new SQLException("Tàu " + maTau + " hiện không sẵn sàng: " + cur);
+                    throw new SQLException("Tàu " + maDauMay + " hiện không sẵn sàng: " + cur);
                 }
             }
             // Kiểm tra ràng buộc giờ khởi hành với LocalDate

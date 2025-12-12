@@ -86,6 +86,7 @@ public class HoaDonService {
         if (hoaDon == null) throw new IllegalArgumentException("Không tìm thấy hóa đơn");
 
         KhachHang khachHang = khachHangDAO.findById(hoaDon.getMaKH());
+        NhanVien nhanVien = NhanVienDAO.getInstance().findById(hoaDon.getMaNV());
         List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.getAll().stream()
                 .filter(ct -> ct.getMaHoaDon().equals(maHoaDon))
                 .toList();
@@ -114,7 +115,17 @@ public class HoaDonService {
             document.add(new Paragraph("\n").setFont(font));
 
             document.add(new Paragraph("Mã hóa đơn: " + hoaDon.getMaHoaDon()).setFont(font).setFontSize(11));
-            document.add(new Paragraph("Khách hàng: " + (khachHang != null ? khachHang.getTenKhachHang() : "N/A"))
+            
+            // Customer information - use denormalized fields from HoaDon first, fallback to KhachHang table
+            String tenKH = hoaDon.getTenKH() != null ? hoaDon.getTenKH() : 
+                           (khachHang != null ? khachHang.getTenKhachHang() : "N/A");
+            String sdtKH = hoaDon.getSoDienThoai() != null ? hoaDon.getSoDienThoai() : 
+                           (khachHang != null ? khachHang.getSoDienThoai() : "N/A");
+            document.add(new Paragraph("Khách hàng: " + tenKH).setFont(font).setFontSize(11));
+            document.add(new Paragraph("Số điện thoại: " + sdtKH).setFont(font).setFontSize(11));
+            
+            // Employee information
+            document.add(new Paragraph("Nhân viên: " + (nhanVien != null ? nhanVien.getTenNV() : "N/A"))
                     .setFont(font).setFontSize(11));
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -146,8 +157,8 @@ public class HoaDonService {
 
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(stt++)).setFont(font)).setTextAlignment(TextAlignment.CENTER));
                 table.addCell(new Cell().add(new Paragraph(ct.getMaVe()).setFont(font)).setTextAlignment(TextAlignment.CENTER));
-                table.addCell(new Cell().add(new Paragraph(ve != null ? ve.getGaDi() : "N/A").setFont(font)));
-                table.addCell(new Cell().add(new Paragraph(ve != null ? ve.getGaDen() : "N/A").setFont(font)));
+                table.addCell(new Cell().add(new Paragraph(ve != null ? ve.getTenGaDi() : "N/A").setFont(font)));
+                table.addCell(new Cell().add(new Paragraph(ve != null ? ve.getTenGaDen() : "N/A").setFont(font)));
                 table.addCell(new Cell().add(new Paragraph(ve != null && ve.getGioDi() != null ? ve.getGioDi().format(dateFormatter) : "N/A").setFont(font)));
                 table.addCell(new Cell().add(new Paragraph(currencyFormat.format(ct.getGiaDaKM()) + " VNĐ").setFont(font)));
 
@@ -224,15 +235,17 @@ public class HoaDonService {
             if (!existsHd) {
                 hoaDonDAO.insert(hoaDon, connection);
             } else {
-                String updateHdSql = "UPDATE HoaDon SET maNV = ?, maKH = ?, ngayLap = ?, phuongThucThanhToan = ?, trangThai = ? WHERE maHoaDon = ?";
+                String updateHdSql = "UPDATE HoaDon SET maNV = ?, maKH = ?, tenKH = ?, soDienThoai = ?, ngayLap = ?, phuongThucThanhToan = ?, trangThai = ? WHERE maHoaDon = ?";
                 try (PreparedStatement pst = connection.prepareStatement(updateHdSql)) {
                     pst.setString(1, hoaDon.getMaNV());
                     pst.setString(2, hoaDon.getMaKH());
-                    if (hoaDon.getNgayLap() != null) pst.setTimestamp(3, Timestamp.valueOf(hoaDon.getNgayLap()));
-                    else pst.setNull(3, Types.TIMESTAMP);
-                    pst.setString(4, hoaDon.getPhuongThucThanhToan());
-                    pst.setString(5, hoaDon.getTrangThai());
-                    pst.setString(6, hoaDon.getMaHoaDon());
+                    pst.setString(3, hoaDon.getTenKH());
+                    pst.setString(4, hoaDon.getSoDienThoai());
+                    if (hoaDon.getNgayLap() != null) pst.setTimestamp(5, Timestamp.valueOf(hoaDon.getNgayLap()));
+                    else pst.setNull(5, Types.TIMESTAMP);
+                    pst.setString(6, hoaDon.getPhuongThucThanhToan());
+                    pst.setString(7, hoaDon.getTrangThai());
+                    pst.setString(8, hoaDon.getMaHoaDon());
                     pst.executeUpdate();
                 }
             }
@@ -240,10 +253,10 @@ public class HoaDonService {
             // Prepared statements
             String checkVeSql = "SELECT 1 FROM Ve WHERE maVe = ?";
             // INSERT Ve: do model Ve không có donGia, chỉ thêm maBangGia
-            String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             String updateVePriceSql = "UPDATE Ve SET maBangGia = ? WHERE maVe = ?";
             String checkCTHD = "SELECT 1 FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ?";
-            String insertCTHDsql = "INSERT INTO ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa) VALUES (?, ?, ?, ?, ?, ?)";
+            String insertCTHDsql = "INSERT INTO ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa, isActive) VALUES (?, ?, ?, ?, ?, ?, ?)";
             String updateCTHDsql = "UPDATE ChiTietHoaDon SET maLoaiVe = ?, giaGoc = ?, giaDaKM = ?, moTa = ? WHERE maHoaDon = ? AND maVe = ?";
             String updateVeSql = "UPDATE Ve SET trangThai = ? WHERE maVe = ?";
             String updateGheSql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
@@ -276,17 +289,24 @@ public class HoaDonService {
                         pstInsertVe.setString(2, ve.getMaChuyen());
                         pstInsertVe.setString(3, ve.getMaLoaiVe());
                         pstInsertVe.setString(4, ve.getMaSoGhe());
-                        if (ve.getNgayIn() != null) pstInsertVe.setTimestamp(5, Timestamp.valueOf(ve.getNgayIn()));
-                        else pstInsertVe.setNull(5, Types.TIMESTAMP);
-                        pstInsertVe.setString(6, ve.getTrangThai());
-                        pstInsertVe.setString(7, ve.getGaDi());
-                        pstInsertVe.setString(8, ve.getGaDen());
-                        if (ve.getGioDi() != null) pstInsertVe.setTimestamp(9, Timestamp.valueOf(ve.getGioDi()));
+                        pstInsertVe.setString(5, ve.getMaGaDi());
+                        pstInsertVe.setString(6, ve.getMaGaDen());
+                        pstInsertVe.setString(7, ve.getTenGaDi());
+                        pstInsertVe.setString(8, ve.getTenGaDen());
+                        if (ve.getNgayIn() != null) pstInsertVe.setTimestamp(9, Timestamp.valueOf(ve.getNgayIn()));
                         else pstInsertVe.setNull(9, Types.TIMESTAMP);
-                        pstInsertVe.setString(10, ve.getSoToa());
-                        pstInsertVe.setString(11, ve.getLoaiCho());
-                        pstInsertVe.setString(12, ve.getLoaiVe());
-                        if (maBangGiaToPersist != null) pstInsertVe.setString(13, maBangGiaToPersist); else pstInsertVe.setNull(13, Types.VARCHAR);
+                        pstInsertVe.setString(10, ve.getTrangThai());
+                        if (ve.getGioDi() != null) pstInsertVe.setTimestamp(11, Timestamp.valueOf(ve.getGioDi()));
+                        else pstInsertVe.setNull(11, Types.TIMESTAMP);
+                        if (ve.getGioDenDuKien() != null) pstInsertVe.setTimestamp(12, Timestamp.valueOf(ve.getGioDenDuKien()));
+                        else pstInsertVe.setNull(12, Types.TIMESTAMP);
+                        if (ve.getSoToa() != null) pstInsertVe.setInt(13, ve.getSoToa());
+                        else pstInsertVe.setNull(13, Types.INTEGER);
+                        pstInsertVe.setString(14, ve.getLoaiCho());
+                        pstInsertVe.setString(15, ve.getLoaiVe());
+                        if (maBangGiaToPersist != null) pstInsertVe.setString(16, maBangGiaToPersist); else pstInsertVe.setNull(16, Types.VARCHAR);
+                        if (ve.getGiaThanhToan() != null) pstInsertVe.setFloat(17, ve.getGiaThanhToan()); else pstInsertVe.setNull(17, Types.FLOAT);
+                        pstInsertVe.setBoolean(18, true);
 
                         pstInsertVe.executeUpdate();
                     } else {
@@ -322,6 +342,7 @@ public class HoaDonService {
                         pstInsertCT.setFloat(4, kq.giaGoc);
                         pstInsertCT.setFloat(5, kq.giaDaKM);
                         pstInsertCT.setString(6, kq.ghiChu);
+                        pstInsertCT.setBoolean(7, true);
                         pstInsertCT.executeUpdate();
                     }
 
@@ -405,26 +426,33 @@ public class HoaDonService {
             if (!veExistsOnConnection(ve.getMaVe(), connection)) {
                 TinhGiaService.KetQuaGia kq = tinhGia.tinhGiaChoVe(ve);
 
-                String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement pst = connection.prepareStatement(insertVeSql)) {
                     pst.setString(1, ve.getMaVe());
                     pst.setString(2, ve.getMaChuyen());
                     pst.setString(3, ve.getMaLoaiVe());
                     pst.setString(4, ve.getMaSoGhe());
-                    if (ve.getNgayIn() != null) pst.setTimestamp(5, Timestamp.valueOf(ve.getNgayIn()));
-                    else pst.setNull(5, Types.TIMESTAMP);
-                    pst.setString(6, ve.getTrangThai());
-                    pst.setString(7, ve.getGaDi());
-                    pst.setString(8, ve.getGaDen());
-                    if (ve.getGioDi() != null) pst.setTimestamp(9, Timestamp.valueOf(ve.getGioDi()));
+                    pst.setString(5, ve.getMaGaDi());
+                    pst.setString(6, ve.getMaGaDen());
+                    pst.setString(7, ve.getTenGaDi());
+                    pst.setString(8, ve.getTenGaDen());
+                    if (ve.getNgayIn() != null) pst.setTimestamp(9, Timestamp.valueOf(ve.getNgayIn()));
                     else pst.setNull(9, Types.TIMESTAMP);
-                    pst.setString(10, ve.getSoToa());
-                    pst.setString(11, ve.getLoaiCho());
-                    pst.setString(12, ve.getLoaiVe());
+                    pst.setString(10, ve.getTrangThai());
+                    if (ve.getGioDi() != null) pst.setTimestamp(11, Timestamp.valueOf(ve.getGioDi()));
+                    else pst.setNull(11, Types.TIMESTAMP);
+                    if (ve.getGioDenDuKien() != null) pst.setTimestamp(12, Timestamp.valueOf(ve.getGioDenDuKien()));
+                    else pst.setNull(12, Types.TIMESTAMP);
+                    if (ve.getSoToa() != null) pst.setInt(13, ve.getSoToa());
+                    else pst.setNull(13, Types.INTEGER);
+                    pst.setString(14, ve.getLoaiCho());
+                    pst.setString(15, ve.getLoaiVe());
 
                     String maBangGiaToPersist = ve.getMaBangGia();
                     if ((maBangGiaToPersist == null || maBangGiaToPersist.trim().isEmpty()) && kq != null) maBangGiaToPersist = kq.maBangGia;
-                    if (maBangGiaToPersist != null) pst.setString(13, maBangGiaToPersist); else pst.setNull(13, Types.VARCHAR);
+                    if (maBangGiaToPersist != null) pst.setString(16, maBangGiaToPersist); else pst.setNull(16, Types.VARCHAR);
+                    if (ve.getGiaThanhToan() != null) pst.setFloat(17, ve.getGiaThanhToan()); else pst.setNull(17, Types.FLOAT);
+                    pst.setBoolean(18, true);
 
                     pst.executeUpdate();
                 }

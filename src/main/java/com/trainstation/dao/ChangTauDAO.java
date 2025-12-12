@@ -23,17 +23,18 @@ public class ChangTauDAO implements GenericDAO<ChangTau> {
     @Override
     public List<ChangTau> getAll() {
         List<ChangTau> list = new ArrayList<>();
-        String sql = "SELECT maChang, soKMToiThieu, soKMToiDa, moTa, giaTien FROM ChangTau";
+        String sql = "SELECT maChang, soKMToiThieu, soKMToiDa, moTa, giaTien, isActive FROM ChangTau WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 ChangTau ct = new ChangTau(
                         rs.getString("maChang"),
-                        rs.getInt("soKMToiThieu"),
-                        rs.getInt("soKMToiDa"),
+                        rs.getObject("soKMToiThieu", Integer.class),
+                        rs.getObject("soKMToiDa", Integer.class),
                         rs.getString("moTa"),
-                        rs.getFloat("giaTien")
+                        rs.getObject("giaTien", Float.class),
+                        rs.getBoolean("isActive")
                 );
                 list.add(ct);
             }
@@ -45,7 +46,7 @@ public class ChangTauDAO implements GenericDAO<ChangTau> {
 
     @Override
     public ChangTau findById(String id) {
-        String sql = "SELECT maChang, soKMToiThieu, soKMToiDa, moTa, giaTien FROM ChangTau WHERE maChang = ?";
+        String sql = "SELECT maChang, soKMToiThieu, soKMToiDa, moTa, giaTien, isActive FROM ChangTau WHERE maChang = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -53,10 +54,11 @@ public class ChangTauDAO implements GenericDAO<ChangTau> {
                 if (rs.next()) {
                     return new ChangTau(
                             rs.getString("maChang"),
-                            rs.getInt("soKMToiThieu"),
-                            rs.getInt("soKMToiDa"),
+                            rs.getObject("soKMToiThieu", Integer.class),
+                            rs.getObject("soKMToiDa", Integer.class),
                             rs.getString("moTa"),
-                            rs.getFloat("giaTien")
+                            rs.getObject("giaTien", Float.class),
+                            rs.getBoolean("isActive")
                     );
                 }
             }

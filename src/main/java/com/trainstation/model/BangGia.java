@@ -7,20 +7,23 @@ public class BangGia implements Serializable {
     private String maBangGia;
     private String maChang;
     private String loaiGhe;
-    private float giaCoBan;
+    private Float giaCoBan;
     private LocalDateTime ngayBatDau;
     private LocalDateTime ngayKetThuc;
+    private boolean isActive;
 
     public BangGia() {
+        this.isActive = true;
     }
 
-    public BangGia(String maBangGia, String maChang, String loaiGhe, float giaCoBan, LocalDateTime ngayBatDau, LocalDateTime ngayKetThuc) {
+    public BangGia(String maBangGia, String maChang, String loaiGhe, Float giaCoBan, LocalDateTime ngayBatDau, LocalDateTime ngayKetThuc, boolean isActive) {
         this.maBangGia = maBangGia;
         this.maChang = maChang;
         this.loaiGhe = loaiGhe;
         this.giaCoBan = giaCoBan;
         this.ngayBatDau = ngayBatDau;
         this.ngayKetThuc = ngayKetThuc;
+        this.isActive = isActive;
     }
 
     public String getMaBangGia() {
@@ -47,11 +50,11 @@ public class BangGia implements Serializable {
         this.loaiGhe = loaiGhe;
     }
 
-    public float getGiaCoBan() {
+    public Float getGiaCoBan() {
         return giaCoBan;
     }
 
-    public void setGiaCoBan(float giaCoBan) {
+    public void setGiaCoBan(Float giaCoBan) {
         this.giaCoBan = giaCoBan;
     }
 
@@ -71,6 +74,14 @@ public class BangGia implements Serializable {
         this.ngayKetThuc = ngayKetThuc;
     }
 
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
     @Override
     public String toString() {
         return "BangGia{" +
@@ -80,6 +91,7 @@ public class BangGia implements Serializable {
                 ", giaCoBan=" + giaCoBan +
                 ", ngayBatDau=" + ngayBatDau +
                 ", ngayKetThuc=" + ngayKetThuc +
+                ", isActive=" + isActive +
                 '}';
     }
 }
