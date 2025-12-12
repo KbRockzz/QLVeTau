@@ -20,7 +20,7 @@ public class PnlTaiKhoan extends JPanel {
     private JTextField txtMaTK, txtMaNV, txtTenTK;
     private JPasswordField txtMatKhau;
     private JComboBox<String> cmbTrangThai;
-    private JButton btnThem, btnCapNhat, btnXoa, btnLamMoi, btnXoaRong, btnDoiMatKhau;
+    private JButton btnThem, btnCapNhat, btnXoa, btnXoaRong, btnDoiMatKhau;
 
     public PnlTaiKhoan() {
         this.taiKhoanService = TaiKhoanService.getInstance();
@@ -74,7 +74,10 @@ public class PnlTaiKhoan extends JPanel {
 
         JPanel pnlButton = MaterialInitializer.createButtonPanel();
         btnXoaRong = new JButton("Xóa rỗng"); 
-        btnXoaRong.addActionListener(e -> xoaRongForm()); 
+        btnXoaRong.addActionListener(e -> {
+            xoaRongForm();
+            taiDuLieuTaiKhoan();
+        });
         MaterialInitializer.styleButton(btnXoaRong);
         pnlButton.add(btnXoaRong);
         
@@ -97,11 +100,6 @@ public class PnlTaiKhoan extends JPanel {
         btnXoa.addActionListener(e -> xoaTaiKhoan()); 
         MaterialInitializer.styleButton(btnXoa);
         pnlButton.add(btnXoa);
-        
-        btnLamMoi = new JButton("Làm mới"); 
-        btnLamMoi.addActionListener(e -> taiDuLieuTaiKhoan()); 
-        MaterialInitializer.styleButton(btnLamMoi);
-        pnlButton.add(btnLamMoi);
 
         JPanel pnlDuoi = new JPanel(new BorderLayout());
         pnlDuoi.add(pnlForm, BorderLayout.CENTER);

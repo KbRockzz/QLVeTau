@@ -22,7 +22,7 @@ public class PnlNhanVien extends JPanel {
     private DefaultTableModel modelBang;
     private JTextField txtMaNV, txtTenNV, txtSDT, txtDiaChi, txtNgaySinh;
     private JComboBox<String> cmbLoaiNV;
-    private JButton btnThem, btnCapNhat, btnXoa, btnLamMoi, btnXoaRong;
+    private JButton btnThem, btnCapNhat, btnXoa, btnXoaRong;
 
     public PnlNhanVien() {
         this.nhanVienService = NhanVienService.getInstance();
@@ -124,7 +124,10 @@ public class PnlNhanVien extends JPanel {
         JPanel pnlButton = MaterialInitializer.createButtonPanel();
 
         btnXoaRong = new JButton("Xóa rỗng");
-        btnXoaRong.addActionListener(e -> xoaRongForm());
+        btnXoaRong.addActionListener(e -> {
+            xoaRongForm();
+            taiDuLieuNhanVien();
+        });
         MaterialInitializer.styleButton(btnXoaRong);
         pnlButton.add(btnXoaRong);
 
@@ -142,11 +145,6 @@ public class PnlNhanVien extends JPanel {
         btnXoa.addActionListener(e -> xoaNhanVien());
         MaterialInitializer.styleButton(btnXoa);
         pnlButton.add(btnXoa);
-
-        btnLamMoi = new JButton("Làm mới");
-        btnLamMoi.addActionListener(e -> taiDuLieuNhanVien());
-        MaterialInitializer.styleButton(btnLamMoi);
-        pnlButton.add(btnLamMoi);
 
         JPanel pnlDuoi = new JPanel(new BorderLayout());
         pnlDuoi.add(pnlForm, BorderLayout.CENTER);

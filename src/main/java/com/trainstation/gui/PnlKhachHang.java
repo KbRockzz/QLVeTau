@@ -112,11 +112,15 @@ public class PnlKhachHang extends JPanel {
         btnCapNhat.addActionListener(e -> capNhatKhachHang());
         MaterialInitializer.styleButton(btnCapNhat);
         
+        btnXoa.addActionListener(e -> xoaKhachHang());
+        MaterialInitializer.styleButton(btnXoa);
+        
         btnLamMoi.addActionListener(e -> taiDuLieuKhachHang());
         MaterialInitializer.styleButton(btnLamMoi);
 
         pnlButton.add(btnThem);
         pnlButton.add(btnCapNhat);
+        pnlButton.add(btnXoa);
         pnlButton.add(btnLamMoi);
 
         JPanel pnlDuoi = new JPanel(new BorderLayout());
@@ -233,6 +237,8 @@ public class PnlKhachHang extends JPanel {
         txtTenKH.setText("");
         txtEmail.setText("");
         txtSDT.setText("");
+        txtMaKH.setEditable(true);
+        bangKhachHang.clearSelection();
     }
 
     private void timKiemTheoSoDienThoai() {
@@ -258,6 +264,32 @@ public class PnlKhachHang extends JPanel {
             txtSDT.setText(kh.getSoDienThoai());
         } else {
             JOptionPane.showMessageDialog(this, "Không tìm thấy khách hàng với số điện thoại: " + sdt, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    /**
+     * Xóa khách hàng (soft delete)
+     */
+    private void xoaKhachHang() {
+        String maKH = txtMaKH.getText().trim();
+        if (maKH.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng cần xóa!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có chắc chắn muốn xóa khách hàng " + maKH + "?",
+                "Xác nhận xóa",
+                JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            if (khachHangService.xoaKhachHang(maKH)) {
+                JOptionPane.showMessageDialog(this, "Xóa khách hàng thành công!");
+                taiDuLieuKhachHang();
+                xoaTrang();
+            } else {
+                JOptionPane.showMessageDialog(this, "Xóa khách hàng thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }

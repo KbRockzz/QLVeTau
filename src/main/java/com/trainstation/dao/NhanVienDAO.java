@@ -24,7 +24,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
     @Override
     public List<NhanVien> getAll() {
         List<NhanVien> list = new ArrayList<>();
-        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai, isActive FROM NhanVien";
+        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai, isActive FROM NhanVien WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -140,6 +140,55 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Get all employees including soft-deleted ones
+     */
+    public List<NhanVien> getAllIncludingDeleted() {
+        List<NhanVien> list = new ArrayList<>();
+        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai, isActive FROM NhanVien";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                LocalDate ngaySinh = null;
+                Date date = rs.getDate("ngaySinh");
+                if (date != null) {
+                    ngaySinh = date.toLocalDate();
+                }
+                NhanVien nv = new NhanVien(
+                        rs.getString("maNV"),
+                        rs.getString("tenNV"),
+                        rs.getString("soDienThoai"),
+                        rs.getString("diaChi"),
+                        ngaySinh,
+                        rs.getString("maLoaiNV"),
+                        rs.getString("trangThai"),
+                        rs.getBoolean("isActive")
+                );
+                list.add(nv);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
+     * Restore a soft-deleted employee by setting isActive = true
+     */
+    public boolean restore(String id) {
+        String sql = "UPDATE NhanVien SET isActive = 1 WHERE maNV = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, id);
+            int rowsAffected = pst.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
