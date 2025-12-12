@@ -104,7 +104,8 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM TaiKhoan WHERE maTK = ?";
+        // Soft delete: set isActive = 0 instead of deleting the record
+        String sql = "UPDATE TaiKhoan SET isActive = 0 WHERE maTK = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
