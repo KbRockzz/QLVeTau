@@ -5,6 +5,8 @@ import com.formdev.flatlaf.IntelliJTheme;
 import javax.swing.*;
 import java.awt.*;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * MaterialInitializer - Khởi tạo giao diện Material Professional Light
@@ -184,5 +186,9 @@ public class MaterialInitializer {
         // Đặt kích thước ưu tiên cho scroll pane
         scrollPane.setPreferredSize(new Dimension(0, targetHeight));
         scrollPane.setMinimumSize(new Dimension(0, Math.min(200, targetHeight)));
+    }
+
+    public static Date convertToDateViaInstant(LocalDateTime lanBaoTriObj) {
+        return java.util.Date.from(lanBaoTriObj.atZone(java.time.ZoneId.systemDefault()).toInstant());
     }
 }

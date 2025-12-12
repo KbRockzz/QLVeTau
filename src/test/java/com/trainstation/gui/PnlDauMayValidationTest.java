@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
 /**
  * Test class to validate regex patterns used in PnlTau
  */
-public class PnlTauValidationTest {
+public class PnlDauMayValidationTest {
     
     // Same regex patterns as in PnlTau
     private static final Pattern PATTERN_MA_TAU = Pattern.compile("^T\\d{3}$");
