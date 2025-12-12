@@ -100,11 +100,53 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM KhachHang WHERE maKhachHang = ?";
+        // Soft delete: set isActive = 0 instead of deleting the record
+        String sql = "UPDATE KhachHang SET isActive = 0 WHERE maKhachHang = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Get all customers including soft-deleted ones
+     */
+    public List<KhachHang> getAllIncludingDeleted() {
+        List<KhachHang> list = new ArrayList<>();
+        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai, isActive FROM KhachHang";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                KhachHang kh = new KhachHang(
+                        rs.getString("maKhachHang"),
+                        rs.getString("tenKhachHang"),
+                        rs.getString("email"),
+                        rs.getString("soDienThoai"),
+                        rs.getBoolean("isActive")
+                );
+                list.add(kh);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
+     * Restore a soft-deleted customer by setting isActive = true
+     */
+    public boolean restore(String id) {
+        String sql = "UPDATE KhachHang SET isActive = 1 WHERE maKhachHang = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, id);
+            int rowsAffected = pst.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
