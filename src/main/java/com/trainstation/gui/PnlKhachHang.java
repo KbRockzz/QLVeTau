@@ -237,6 +237,8 @@ public class PnlKhachHang extends JPanel {
         txtTenKH.setText("");
         txtEmail.setText("");
         txtSDT.setText("");
+        txtMaKH.setEditable(true);
+        bangKhachHang.clearSelection();
     }
 
     private void timKiemTheoSoDienThoai() {
