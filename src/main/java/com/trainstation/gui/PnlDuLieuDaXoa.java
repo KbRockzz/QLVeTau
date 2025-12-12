@@ -142,14 +142,13 @@ public class PnlDuLieuDaXoa extends JPanel {
     }
 
     /**
-     * Tải dữ liệu các nhân viên có trangThai = "hidden"
+     * Tải dữ liệu các nhân viên có isActive = 0 (đã xóa mềm)
      */
     private void taiDuLieuNhanVienDaXoa() {
         modelNhanVien.setRowCount(0);
-        List<NhanVien> danhSach = nhanVienDAO.getAll();
+        List<NhanVien> danhSach = nhanVienDAO.getAllIncludingDeleted();
         for (NhanVien nv : danhSach) {
-            String trangThai = nv.getTrangThai();
-            if (trangThai != null && trangThai.equalsIgnoreCase("hidden")) {
+            if (!nv.isActive()) {
                 modelNhanVien.addRow(new Object[]{
                         nv.getMaNV(),
                         nv.getTenNV(),
@@ -181,7 +180,7 @@ public class PnlDuLieuDaXoa extends JPanel {
     }
 
     /**
-     * Khôi phục nhân viên đã xóa (set trangThai = "active" và gọi update)
+     * Khôi phục nhân viên đã xóa (set isActive = 1)
      */
     private void khoiPhucNhanVien() {
         int row = bangNhanVien.getSelectedRow();
@@ -197,24 +196,7 @@ public class PnlDuLieuDaXoa extends JPanel {
                 JOptionPane.YES_NO_OPTION);
         if (confirm != JOptionPane.YES_OPTION) return;
 
-        // Lấy toàn bộ danh sách để tìm object NhanVien có đầy đủ trường trangThai (getAll trả về trangThai)
-        List<NhanVien> danhSach = nhanVienDAO.getAll();
-        NhanVien target = null;
-        for (NhanVien nv : danhSach) {
-            if (maNV.equals(nv.getMaNV())) {
-                target = nv;
-                break;
-            }
-        }
-
-        if (target == null) {
-            JOptionPane.showMessageDialog(this, "Không tìm thấy nhân viên " + maNV + " để khôi phục.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        target.setTrangThai("active");
-
-        boolean ok = nhanVienDAO.update(target);
+        boolean ok = nhanVienDAO.restore(maNV);
         if (ok) {
             JOptionPane.showMessageDialog(this, "Khôi phục nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
             taiDuLieuNhanVienDaXoa();
