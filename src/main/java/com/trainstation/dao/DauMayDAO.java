@@ -37,26 +37,20 @@ public class DauMayDAO implements GenericDAO<DauMay> {
         return list;
     }
 
+
     @Override
     public DauMay findById(String id) {
-        String sql = "SELECT maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai, isActive FROM DauMay WHERE maDauMay = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToEntity(rs);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<DauMay> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(dauMay -> dauMay.getMaDauMay().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public boolean insert(DauMay entity) {
-        String sql = "INSERT INTO DauMay (maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai, isActive) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO DauMay (maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai, isActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entity.getMaDauMay());
@@ -73,7 +67,6 @@ public class DauMayDAO implements GenericDAO<DauMay> {
                 pst.setNull(5, Types.TIMESTAMP);
             }
             pst.setString(6, entity.getTrangThai());
-            pst.setBoolean(7, entity.isActive());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -83,7 +76,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
 
     @Override
     public boolean update(DauMay entity) {
-        String sql = "UPDATE DauMay SET loaiDauMay = ?, tenDauMay = ?, namSX = ?, lanBaoTriGanNhat = ?, trangThai = ?, isActive = ? WHERE maDauMay = ?";
+        String sql = "UPDATE DauMay SET loaiDauMay = ?, tenDauMay = ?, namSX = ?, lanBaoTriGanNhat = ?, trangThai = ? WHERE maDauMay = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entity.getLoaiDauMay());
@@ -99,8 +92,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
                 pst.setNull(4, Types.TIMESTAMP);
             }
             pst.setString(5, entity.getTrangThai());
-            pst.setBoolean(6, entity.isActive());
-            pst.setString(7, entity.getMaDauMay());
+            pst.setString(6, entity.getMaDauMay());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -127,15 +119,14 @@ public class DauMayDAO implements GenericDAO<DauMay> {
         if (ts != null) {
             lanBaoTri = ts.toLocalDateTime();
         }
-        
+
         return new DauMay(
                 rs.getString("maDauMay"),
                 rs.getString("loaiDauMay"),
                 rs.getString("tenDauMay"),
                 rs.getObject("namSX", Integer.class),
                 lanBaoTri,
-                rs.getString("trangThai"),
-                rs.getBoolean("isActive")
+                rs.getString("trangThai")
         );
     }
 
@@ -159,31 +150,11 @@ public class DauMayDAO implements GenericDAO<DauMay> {
      */
     public List<DauMay> layDauMayHoatDong() {
         List<DauMay> list = new ArrayList<>();
-        String sql = "SELECT maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai, isActive FROM DauMay WHERE trangThai != N'Dừng hoạt động' AND isActive = 1";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
-            while (rs.next()) {
-                Timestamp timestamp = rs.getTimestamp("lanBaoTriGanNhat");
-                LocalDateTime lanBaoTri = null;
-                if (timestamp != null) {
-                    lanBaoTri = timestamp.toLocalDateTime();
-                }
-                
-                DauMay dauMay = new DauMay(
-                        rs.getString("maDauMay"),
-                        rs.getString("loaiDauMay"),
-                        rs.getString("tenDauMay"),
-                        rs.getObject("namSX", Integer.class),
-                        lanBaoTri,
-                        rs.getString("trangThai"),
-                        rs.getBoolean("isActive")
-                );
-                list.add(dauMay);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
+        list = getAll();
+        List<DauMay> activeList = new ArrayList<>();
+        list.stream()
+                .filter(dauMay -> "Hoạt động".equals(dauMay.getTrangThai()))
+                .forEach(activeList::add);
+        return activeList;
     }
 }
