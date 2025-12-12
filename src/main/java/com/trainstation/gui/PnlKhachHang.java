@@ -200,7 +200,7 @@ public class PnlKhachHang extends JPanel {
         String email = txtEmail.getText().trim();
         String sdt = txtSDT.getText().trim();
 
-        KhachHang kh = new KhachHang(maKH, tenKH, email, sdt, true);
+        KhachHang kh = new KhachHang(maKH, tenKH, email, sdt);
         if (khachHangService.themKhachHang(kh)) {
             JOptionPane.showMessageDialog(this, "Thêm khách hàng thành công!");
             taiDuLieuKhachHang();
@@ -218,7 +218,7 @@ public class PnlKhachHang extends JPanel {
         String email = txtEmail.getText().trim();
         String sdt = txtSDT.getText().trim();
 
-        KhachHang kh = new KhachHang(maKH, tenKH, email, sdt, true);
+        KhachHang kh = new KhachHang(maKH, tenKH, email, sdt);
         if (khachHangService.capNhatKhachHang(kh)) {
             JOptionPane.showMessageDialog(this, "Cập nhật khách hàng thành công!");
             taiDuLieuKhachHang();

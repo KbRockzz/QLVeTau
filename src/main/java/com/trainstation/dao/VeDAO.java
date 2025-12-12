@@ -3,7 +3,6 @@ package com.trainstation.dao;
 import com.trainstation.model.BangGia;
 import com.trainstation.model.ChuyenTau;
 import com.trainstation.model.Ve;
-import com.trainstation.model.Ga;
 import com.trainstation.MySQL.ConnectSql;
 
 import java.lang.reflect.Method;
@@ -15,11 +14,9 @@ import java.util.List;
 
 public class VeDAO implements GenericDAO<Ve> {
     private static VeDAO instance;
-    private final GaDAO gaDAO;
 
     private VeDAO() {
         // Không giữ Connection làm trường — lấy connection mỗi lần cần
-        this.gaDAO = GaDAO.getInstance();
     }
 
     public static synchronized VeDAO getInstance() {
@@ -29,110 +26,35 @@ public class VeDAO implements GenericDAO<Ve> {
         return instance;
     }
 
-    /**
-     * Helper method to ensure station names are properly populated.
-     * If tenGa is null or appears to be a code, lookup from GaDAO.
-     * Codes typically start with "GA_" or are very short, or match the maGa value.
-     */
-    private void ensureStationNames(Ve ve) {
-        if (ve == null) return;
-        
-        // Check and fix tenGaDi
-        String tenGaDi = ve.getTenGaDi();
-        String maGaDi = ve.getMaGaDi();
-        boolean needsLookupDi = false;
-        
-        if (tenGaDi == null || tenGaDi.trim().isEmpty()) {
-            needsLookupDi = true;
-        } else if (tenGaDi.startsWith("GA_") || tenGaDi.startsWith("ga_")) {
-            // Looks like a station code (e.g., GA_SG, GA_HN)
-            needsLookupDi = true;
-        } else if (maGaDi != null && tenGaDi.equals(maGaDi)) {
-            // tenGaDi contains the code instead of the name
-            needsLookupDi = true;
-        } else if (tenGaDi.length() <= 3) {
-            // Very short, likely a code (e.g., SG, HN)
-            needsLookupDi = true;
-        }
-        
-        if (needsLookupDi && maGaDi != null && !maGaDi.isEmpty()) {
-            try {
-                Ga ga = gaDAO.findById(maGaDi);
-                if (ga != null) {
-                    ve.setTenGaDi(ga.getTenGa());
-                }
-            } catch (Exception e) {
-                // Keep existing value if lookup fails
-            }
-        }
-        
-        // Check and fix tenGaDen
-        String tenGaDen = ve.getTenGaDen();
-        String maGaDen = ve.getMaGaDen();
-        boolean needsLookupDen = false;
-        
-        if (tenGaDen == null || tenGaDen.trim().isEmpty()) {
-            needsLookupDen = true;
-        } else if (tenGaDen.startsWith("GA_") || tenGaDen.startsWith("ga_")) {
-            // Looks like a station code (e.g., GA_SG, GA_HN)
-            needsLookupDen = true;
-        } else if (maGaDen != null && tenGaDen.equals(maGaDen)) {
-            // tenGaDen contains the code instead of the name
-            needsLookupDen = true;
-        } else if (tenGaDen.length() <= 3) {
-            // Very short, likely a code (e.g., SG, HN)
-            needsLookupDen = true;
-        }
-        
-        if (needsLookupDen && maGaDen != null && !maGaDen.isEmpty()) {
-            try {
-                Ga ga = gaDAO.findById(maGaDen);
-                if (ga != null) {
-                    ve.setTenGaDen(ga.getTenGa());
-                }
-            } catch (Exception e) {
-                // Keep existing value if lookup fails
-            }
-        }
-    }
-
     @Override
     public List<Ve> getAll() {
         List<Ve> list = new ArrayList<>();
-        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive FROM Ve WHERE isActive = 1";
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia FROM Ve";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
-                LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
+                LocalDateTime ngayIn = null, gioDi = null;
                 Timestamp ts1 = rs.getTimestamp("ngayIn");
                 if (ts1 != null) ngayIn = ts1.toLocalDateTime();
                 Timestamp ts2 = rs.getTimestamp("gioDi");
                 if (ts2 != null) gioDi = ts2.toLocalDateTime();
-                Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
-                if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
 
                 Ve v = new Ve(
                         rs.getString("maVe"),
                         rs.getString("maChuyen"),
                         rs.getString("maLoaiVe"),
                         rs.getString("maSoGhe"),
-                        rs.getString("maGaDi"),
-                        rs.getString("maGaDen"),
-                        rs.getString("tenGaDi"),
-                        rs.getString("tenGaDen"),
                         ngayIn,
                         rs.getString("trangThai"),
+                        rs.getString("gaDi"),
+                        rs.getString("gaDen"),
                         gioDi,
-                        gioDenDuKien,
-                        rs.getObject("soToa", Integer.class),
+                        rs.getString("soToa"),
                         rs.getString("loaiCho"),
                         rs.getString("loaiVe"),
-                        rs.getString("maBangGia"),
-                        rs.getObject("giaThanhToan", Float.class),
-                        rs.getBoolean("isActive")
+                        rs.getString("maBangGia")
                 );
-                ensureStationNames(v);
                 list.add(v);
             }
         } catch (SQLException e) {
@@ -143,42 +65,33 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public Ve findById(String id) {
-        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive FROM Ve WHERE maVe = ?";
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia FROM Ve WHERE maVe = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
+                    LocalDateTime ngayIn = null, gioDi = null;
                     Timestamp ts1 = rs.getTimestamp("ngayIn");
                     if (ts1 != null) ngayIn = ts1.toLocalDateTime();
                     Timestamp ts2 = rs.getTimestamp("gioDi");
                     if (ts2 != null) gioDi = ts2.toLocalDateTime();
-                    Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
-                    if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
 
-                    Ve result = new Ve(
+                    return new Ve(
                             rs.getString("maVe"),
                             rs.getString("maChuyen"),
                             rs.getString("maLoaiVe"),
                             rs.getString("maSoGhe"),
-                            rs.getString("maGaDi"),
-                            rs.getString("maGaDen"),
-                            rs.getString("tenGaDi"),
-                            rs.getString("tenGaDen"),
                             ngayIn,
                             rs.getString("trangThai"),
+                            rs.getString("gaDi"),
+                            rs.getString("gaDen"),
                             gioDi,
-                            gioDenDuKien,
-                            rs.getObject("soToa", Integer.class),
+                            rs.getString("soToa"),
                             rs.getString("loaiCho"),
                             rs.getString("loaiVe"),
-                            rs.getString("maBangGia"),
-                            rs.getObject("giaThanhToan", Float.class),
-                            rs.getBoolean("isActive")
+                            rs.getString("maBangGia")
                     );
-                    ensureStationNames(result);
-                    return result;
                 }
             }
         } catch (SQLException e) {
@@ -189,7 +102,7 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public boolean insert(Ve v) {
-        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement pst = null;
         try {
@@ -227,20 +140,15 @@ public class VeDAO implements GenericDAO<Ve> {
             pst.setString(2, v.getMaChuyen());
             pst.setString(3, v.getMaLoaiVe());
             pst.setString(4, v.getMaSoGhe());
-            pst.setString(5, v.getMaGaDi());
-            pst.setString(6, v.getMaGaDen());
-            pst.setString(7, v.getTenGaDi());
-            pst.setString(8, v.getTenGaDen());
-            if (v.getNgayIn() != null) pst.setTimestamp(9, Timestamp.valueOf(v.getNgayIn())); else pst.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
-            pst.setString(10, v.getTrangThai());
-            if (v.getGioDi() != null) pst.setTimestamp(11, Timestamp.valueOf(v.getGioDi())); else pst.setNull(11, Types.TIMESTAMP);
-            if (v.getGioDenDuKien() != null) pst.setTimestamp(12, Timestamp.valueOf(v.getGioDenDuKien())); else pst.setNull(12, Types.TIMESTAMP);
-            if (v.getSoToa() != null) pst.setInt(13, v.getSoToa()); else pst.setNull(13, Types.INTEGER);
-            pst.setString(14, v.getLoaiCho());
-            pst.setString(15, v.getLoaiVe());
-            pst.setString(16, v.getMaBangGia());
-            if (v.getGiaThanhToan() != null) pst.setFloat(17, v.getGiaThanhToan()); else pst.setNull(17, Types.FLOAT);
-            pst.setBoolean(18, v.isActive());
+            if (v.getNgayIn() != null) pst.setTimestamp(5, Timestamp.valueOf(v.getNgayIn())); else pst.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+            pst.setString(6, v.getTrangThai());
+            pst.setString(7, v.getGaDi());
+            pst.setString(8, v.getGaDen());
+            if (v.getGioDi() != null) pst.setTimestamp(9, Timestamp.valueOf(v.getGioDi())); else pst.setNull(9, Types.TIMESTAMP);
+            pst.setString(10, v.getSoToa());
+            pst.setString(11, v.getLoaiCho());
+            pst.setString(12, v.getLoaiVe());
+            pst.setString(13, v.getMaBangGia());
             System.out.println("DEBUG Ve.insert: inserting maVe=" + v.getMaVe() + " maBangGia=" + v.getMaBangGia());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -254,47 +162,30 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public boolean update(Ve v) {
-        String sql = "UPDATE Ve SET maChuyen = ?, maLoaiVe = ?, maSoGhe = ?, maGaDi = ?, maGaDen = ?, tenGaDi = ?, tenGaDen = ?, ngayIn = ?, trangThai = ?, gioDi = ?, gioDenDuKien = ?, soToa = ?, loaiCho = ?, loaiVe = ?, maBangGia = ?, giaThanhToan = ?, isActive = ? WHERE maVe = ?";
+        String sql = "UPDATE Ve SET maChuyen = ?, maLoaiVe = ?, maSoGhe = ?, ngayIn = ?, trangThai = ?, gaDi = ?, gaDen = ?, gioDi = ?, soToa = ?, loaiCho = ?, loaiVe = ?, maBangGia = ? WHERE maVe = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, v.getMaChuyen());
             pst.setString(2, v.getMaLoaiVe());
             pst.setString(3, v.getMaSoGhe());
-            pst.setString(4, v.getMaGaDi());
-            pst.setString(5, v.getMaGaDen());
-            pst.setString(6, v.getTenGaDi());
-            pst.setString(7, v.getTenGaDen());
             if (v.getNgayIn() != null) {
-                pst.setTimestamp(8, Timestamp.valueOf(v.getNgayIn()));
+                pst.setTimestamp(4, Timestamp.valueOf(v.getNgayIn()));
+            } else {
+                pst.setNull(4, Types.TIMESTAMP);
+            }
+            pst.setString(5, v.getTrangThai());
+            pst.setString(6, v.getGaDi());
+            pst.setString(7, v.getGaDen());
+            if (v.getGioDi() != null) {
+                pst.setTimestamp(8, Timestamp.valueOf(v.getGioDi()));
             } else {
                 pst.setNull(8, Types.TIMESTAMP);
             }
-            pst.setString(9, v.getTrangThai());
-            if (v.getGioDi() != null) {
-                pst.setTimestamp(10, Timestamp.valueOf(v.getGioDi()));
-            } else {
-                pst.setNull(10, Types.TIMESTAMP);
-            }
-            if (v.getGioDenDuKien() != null) {
-                pst.setTimestamp(11, Timestamp.valueOf(v.getGioDenDuKien()));
-            } else {
-                pst.setNull(11, Types.TIMESTAMP);
-            }
-            if (v.getSoToa() != null) {
-                pst.setInt(12, v.getSoToa());
-            } else {
-                pst.setNull(12, Types.INTEGER);
-            }
-            pst.setString(13, v.getLoaiCho());
-            pst.setString(14, v.getLoaiVe());
-            pst.setString(15, v.getMaBangGia());
-            if (v.getGiaThanhToan() != null) {
-                pst.setFloat(16, v.getGiaThanhToan());
-            } else {
-                pst.setNull(16, Types.FLOAT);
-            }
-            pst.setBoolean(17, v.isActive());
-            pst.setString(18, v.getMaVe());
+            pst.setString(9, v.getSoToa());
+            pst.setString(10, v.getLoaiCho());
+            pst.setString(11, v.getLoaiVe());
+            pst.setString(12, v.getMaBangGia());
+            pst.setString(13, v.getMaVe());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -321,44 +212,36 @@ public class VeDAO implements GenericDAO<Ve> {
      */
     public List<Ve> getByKhachHang(String maKH) {
         List<Ve> list = new ArrayList<>();
-        String sql = "SELECT v.maVe, v.maChuyen, v.maLoaiVe, v.maSoGhe, v.maGaDi, v.maGaDen, v.tenGaDi, v.tenGaDen, v.ngayIn, v.trangThai, v.gioDi, v.gioDenDuKien, v.soToa, v.loaiCho, v.loaiVe, v.maBangGia, v.giaThanhToan, v.isActive " +
+        String sql = "SELECT v.maVe, v.maChuyen, v.maLoaiVe, v.maSoGhe, v.ngayIn, v.trangThai, v.gaDi, v.gaDen, v.gioDi, v.soToa, v.loaiCho, v.loaiVe, v.maBangGia " +
                 "FROM Ve v " +
                 "INNER JOIN HoaDon hd ON v.maVe = hd.maVe " +
-                "WHERE hd.maKH = ? AND v.isActive = 1";
+                "WHERE hd.maKH = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maKH);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
+                    LocalDateTime ngayIn = null, gioDi = null;
                     Timestamp ts1 = rs.getTimestamp("ngayIn");
                     if (ts1 != null) ngayIn = ts1.toLocalDateTime();
                     Timestamp ts2 = rs.getTimestamp("gioDi");
                     if (ts2 != null) gioDi = ts2.toLocalDateTime();
-                    Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
-                    if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
 
                     Ve v = new Ve(
                             rs.getString("maVe"),
                             rs.getString("maChuyen"),
                             rs.getString("maLoaiVe"),
                             rs.getString("maSoGhe"),
-                            rs.getString("maGaDi"),
-                            rs.getString("maGaDen"),
-                            rs.getString("tenGaDi"),
-                            rs.getString("tenGaDen"),
                             ngayIn,
                             rs.getString("trangThai"),
+                            rs.getString("gaDi"),
+                            rs.getString("gaDen"),
                             gioDi,
-                            gioDenDuKien,
-                            rs.getObject("soToa", Integer.class),
+                            rs.getString("soToa"),
                             rs.getString("loaiCho"),
                             rs.getString("loaiVe"),
-                            rs.getString("maBangGia"),
-                            rs.getObject("giaThanhToan", Float.class),
-                            rs.getBoolean("isActive")
+                            rs.getString("maBangGia")
                     );
-                    ensureStationNames(v);
                     list.add(v);
                 }
             }
@@ -369,40 +252,32 @@ public class VeDAO implements GenericDAO<Ve> {
     }
     public List<Ve> getByChuyen(Connection conn, String maChuyen) throws SQLException {
         List<Ve> list = new ArrayList<>();
-        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive FROM Ve WHERE maChuyen = ? AND isActive = 1";
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gaDi, gaDen, gioDi, soToa, loaiCho, loaiVe, maBangGia FROM Ve WHERE maChuyen = ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maChuyen);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
+                    LocalDateTime ngayIn = null, gioDi = null;
                     Timestamp ts1 = rs.getTimestamp("ngayIn");
                     if (ts1 != null) ngayIn = ts1.toLocalDateTime();
                     Timestamp ts2 = rs.getTimestamp("gioDi");
                     if (ts2 != null) gioDi = ts2.toLocalDateTime();
-                    Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
-                    if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
 
                     Ve v = new Ve(
                             rs.getString("maVe"),
                             rs.getString("maChuyen"),
                             rs.getString("maLoaiVe"),
                             rs.getString("maSoGhe"),
-                            rs.getString("maGaDi"),
-                            rs.getString("maGaDen"),
-                            rs.getString("tenGaDi"),
-                            rs.getString("tenGaDen"),
                             ngayIn,
                             rs.getString("trangThai"),
+                            rs.getString("gaDi"),
+                            rs.getString("gaDen"),
                             gioDi,
-                            gioDenDuKien,
-                            rs.getObject("soToa", Integer.class),
+                            rs.getString("soToa"),
                             rs.getString("loaiCho"),
                             rs.getString("loaiVe"),
-                            rs.getString("maBangGia"),
-                            rs.getObject("giaThanhToan", Float.class),
-                            rs.getBoolean("isActive")
+                            rs.getString("maBangGia")
                     );
-                    ensureStationNames(v);
                     list.add(v);
                 }
             }

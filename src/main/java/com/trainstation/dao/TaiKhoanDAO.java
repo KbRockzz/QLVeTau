@@ -23,7 +23,7 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
     @Override
     public List<TaiKhoan> getAll() {
         List<TaiKhoan> list = new ArrayList<>();
-        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai, isActive FROM TaiKhoan WHERE isActive = 1";
+        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai FROM TaiKhoan";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -33,8 +33,7 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
                         rs.getString("maNV"),
                         rs.getString("tenTaiKhoan"),
                         rs.getString("matKhau"),
-                        rs.getString("trangThai"),
-                        rs.getBoolean("isActive")
+                        rs.getString("trangThai")
                 );
                 list.add(t);
             }
@@ -46,7 +45,7 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
 
     @Override
     public TaiKhoan findById(String id) {
-        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai, isActive FROM TaiKhoan WHERE maTK = ?";
+        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai FROM TaiKhoan WHERE maTK = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -57,8 +56,7 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
                             rs.getString("maNV"),
                             rs.getString("tenTaiKhoan"),
                             rs.getString("matKhau"),
-                            rs.getString("trangThai"),
-                            rs.getBoolean("isActive")
+                            rs.getString("trangThai")
                     );
                 }
             }

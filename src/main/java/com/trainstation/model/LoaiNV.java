@@ -6,17 +6,14 @@ public class LoaiNV implements Serializable {
     private String maLoai;
     private String tenLoai;
     private String moTa;
-    private boolean isActive;
 
     public LoaiNV() {
-        this.isActive = true;
     }
 
-    public LoaiNV(String maLoai, String tenLoai, String moTa, boolean isActive) {
+    public LoaiNV(String maLoai, String tenLoai, String moTa) {
         this.maLoai = maLoai;
         this.tenLoai = tenLoai;
         this.moTa = moTa;
-        this.isActive = isActive;
     }
 
     public String getMaLoai() {
@@ -43,21 +40,12 @@ public class LoaiNV implements Serializable {
         this.moTa = moTa;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
     @Override
     public String toString() {
         return "LoaiNV{" +
                 "maLoai='" + maLoai + '\'' +
                 ", tenLoai='" + tenLoai + '\'' +
                 ", moTa='" + moTa + '\'' +
-                ", isActive=" + isActive +
                 '}';
     }
 }

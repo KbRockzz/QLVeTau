@@ -8,23 +8,20 @@ public class ChiTietHoaDon implements Serializable {
     private String maHoaDon;
     private String maVe;
     private String maLoaiVe;
-    private Float giaGoc;
-    private Float giaDaKM;
+    private float giaGoc;
+    private float giaDaKM;
     private String moTa;
-    private boolean isActive;
 
     public ChiTietHoaDon() {
-        this.isActive = true;
     }
 
-    public ChiTietHoaDon(String maHoaDon, String maVe, String maLoaiVe, Float giaGoc, Float giaDaKM, String moTa, boolean isActive) {
+    public ChiTietHoaDon(String maHoaDon, String maVe, String maLoaiVe, float giaGoc, float giaDaKM, String moTa) {
         this.maHoaDon = maHoaDon;
         this.maVe = maVe;
         this.maLoaiVe = maLoaiVe;
         this.giaGoc = giaGoc;
         this.giaDaKM = giaDaKM;
         this.moTa = moTa;
-        this.isActive = isActive;
     }
 
     public String getMaHoaDon() {
@@ -51,19 +48,19 @@ public class ChiTietHoaDon implements Serializable {
         this.maLoaiVe = maLoaiVe;
     }
 
-    public Float getGiaGoc() {
+    public float getGiaGoc() {
         return giaGoc;
     }
 
-    public void setGiaGoc(Float giaGoc) {
+    public void setGiaGoc(float giaGoc) {
         this.giaGoc = giaGoc;
     }
 
-    public Float getGiaDaKM() {
+    public float getGiaDaKM() {
         return giaDaKM;
     }
 
-    public void setGiaDaKM(Float giaDaKM) {
+    public void setGiaDaKM(float giaDaKM) {
         this.giaDaKM = giaDaKM;
     }
 
@@ -73,14 +70,6 @@ public class ChiTietHoaDon implements Serializable {
 
     public void setMoTa(String moTa) {
         this.moTa = moTa;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
     }
 
     public void tinhVaGanGiaDaKM(float heSo) {
@@ -107,7 +96,6 @@ public class ChiTietHoaDon implements Serializable {
                 ", giaGoc=" + giaGoc +
                 ", giaDaKM=" + giaDaKM +
                 ", moTa='" + moTa + '\'' +
-                ", isActive=" + isActive +
                 '}';
     }
 }

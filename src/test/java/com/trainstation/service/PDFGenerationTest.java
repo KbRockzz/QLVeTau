@@ -32,12 +32,10 @@ public class PDFGenerationTest {
         Ve ve = new Ve();
         ve.setMaVe("VE_TEST_001");
         ve.setMaChuyen("SE1");
-        ve.setMaGaDi("SG");
-        ve.setMaGaDen("DN");
-        ve.setTenGaDi("Sài Gòn");
-        ve.setTenGaDen("Đồng Nai");
+        ve.setGaDi("Sài Gòn");
+        ve.setGaDen("Đồng Nai");
         ve.setGioDi(LocalDateTime.now());
-        ve.setSoToa(2);
+        ve.setSoToa("02");
         ve.setMaSoGhe("A01");
         ve.setLoaiCho("Ngồi mềm điều hòa");
         ve.setLoaiVe("Người lớn");
@@ -111,10 +109,10 @@ public class PDFGenerationTest {
             
             // Station names row
             gaTable.addCell(new Cell()
-                    .add(new Paragraph(ve.getTenGaDi() != null ? ve.getTenGaDi() : "N/A").setFont(font))
+                    .add(new Paragraph(ve.getGaDi() != null ? ve.getGaDi() : "N/A").setFont(font))
                     .setTextAlignment(TextAlignment.CENTER));
             gaTable.addCell(new Cell()
-                    .add(new Paragraph(ve.getTenGaDen() != null ? ve.getTenGaDen() : "N/A").setFont(font))
+                    .add(new Paragraph(ve.getGaDen() != null ? ve.getGaDen() : "N/A").setFont(font))
                     .setTextAlignment(TextAlignment.CENTER));
             
             document.add(gaTable);
@@ -145,7 +143,7 @@ public class PDFGenerationTest {
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Toa/Coach:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
-                    .add(new Paragraph(ve.getSoToa() != null ? String.valueOf(ve.getSoToa()) : "N/A").setFont(font)));
+                    .add(new Paragraph(ve.getSoToa() != null ? ve.getSoToa() : "N/A").setFont(font)));
 
             // Seat
             infoTable.addCell(new Cell()
