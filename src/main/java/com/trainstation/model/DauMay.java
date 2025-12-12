@@ -10,21 +10,19 @@ public class DauMay implements Serializable {
     private Integer namSX;
     private LocalDateTime lanBaoTriGanNhat;
     private String trangThai;
-    private boolean isActive;
 
     public DauMay() {
-        this.isActive = true;
+
     }
 
-    public DauMay(String maDauMay, String loaiDauMay, String tenDauMay, Integer namSX, 
-                  LocalDateTime lanBaoTriGanNhat, String trangThai, boolean isActive) {
+    public DauMay(String maDauMay, String loaiDauMay, String tenDauMay, Integer namSX,
+                  LocalDateTime lanBaoTriGanNhat, String trangThai) {
         this.maDauMay = maDauMay;
         this.loaiDauMay = loaiDauMay;
         this.tenDauMay = tenDauMay;
         this.namSX = namSX;
         this.lanBaoTriGanNhat = lanBaoTriGanNhat;
         this.trangThai = trangThai;
-        this.isActive = isActive;
     }
 
     public String getMaDauMay() {
@@ -75,14 +73,6 @@ public class DauMay implements Serializable {
         this.trangThai = trangThai;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
     @Override
     public String toString() {
         return "DauMay{" +
@@ -92,7 +82,6 @@ public class DauMay implements Serializable {
                 ", namSX=" + namSX +
                 ", lanBaoTriGanNhat=" + lanBaoTriGanNhat +
                 ", trangThai='" + trangThai + '\'' +
-                ", isActive=" + isActive +
                 '}';
     }
 }
