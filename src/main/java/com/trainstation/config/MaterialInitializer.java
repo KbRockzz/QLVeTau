@@ -101,39 +101,85 @@ public class MaterialInitializer {
      * Đảm bảo các nút OK, Cancel, Yes, No có màu sắc thống nhất
      */
     private static void configureOptionPaneButtons() {
-        // Màu nền và chữ cho các nút trong OptionPane
+        // Màu nền và chữ cho các nút trong OptionPane - chỉ áp dụng cho OptionPane
         Color buttonBackground = new Color(10, 115, 215); // #0A73D7
         Color buttonForeground = Color.WHITE;
         
-        // Cấu hình UIManager cho các nút trong JOptionPane
+        // Cấu hình UIManager CHỈ cho các nút trong JOptionPane (không ảnh hưởng global)
         UIManager.put("OptionPane.buttonFont", createFont(Font.PLAIN, 14));
-        UIManager.put("Button.background", buttonBackground);
-        UIManager.put("Button.foreground", buttonForeground);
-        UIManager.put("Button.select", new Color(8, 89, 166)); // #0859A6 hover
-        UIManager.put("Button.focus", buttonBackground);
-        UIManager.put("Button.disabledBackground", new Color(150, 150, 150));
-        UIManager.put("Button.disabledForeground", new Color(200, 200, 200));
-        
-        // Cấu hình kích thước và padding cho nút
-        UIManager.put("Button.arc", 6); // Bo góc
-        UIManager.put("Button.margin", new Insets(5, 12, 5, 12));
+        UIManager.put("OptionPane.buttonMinimumWidth", 100);
         
         // Hook vào tất cả dialog được tạo để style buttons
         installDialogButtonStyler();
     }
 
     /**
-     * Cài đặt listener để tự động style buttons trong tất cả dialogs
+     * Cài đặt listener để tự động style buttons ONLY trong JOptionPane dialogs
      */
     private static void installDialogButtonStyler() {
         // Tạo listener để theo dõi khi window mới được tạo
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             if (event.getSource() instanceof Window) {
                 Window window = (Window) event.getSource();
-                // Style tất cả buttons trong window
-                styleAllButtons(window);
+                // Chỉ style buttons trong JOptionPane dialogs, không style main frames
+                if (isOptionPaneDialog(window)) {
+                    styleDialogButtons(window);
+                }
             }
         }, AWTEvent.WINDOW_EVENT_MASK);
+    }
+    
+    /**
+     * Kiểm tra xem window có phải là JOptionPane dialog không
+     */
+    private static boolean isOptionPaneDialog(Window window) {
+        if (!(window instanceof JDialog)) {
+            return false;
+        }
+        
+        JDialog dialog = (JDialog) window;
+        // Kiểm tra xem dialog có chứa JOptionPane component không
+        return containsOptionPane(dialog.getContentPane());
+    }
+    
+    /**
+     * Kiểm tra container có chứa JOptionPane không
+     */
+    private static boolean containsOptionPane(Container container) {
+        if (container instanceof JOptionPane) {
+            return true;
+        }
+        
+        for (Component comp : container.getComponents()) {
+            if (comp instanceof JOptionPane) {
+                return true;
+            }
+            if (comp instanceof Container) {
+                if (containsOptionPane((Container) comp)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Style buttons chỉ trong dialog (không ảnh hưởng navigation bar)
+     */
+    private static void styleDialogButtons(Container container) {
+        if (container == null) return;
+        
+        for (Component comp : container.getComponents()) {
+            if (comp instanceof JButton) {
+                JButton button = (JButton) comp;
+                // Chỉ style nếu button chưa có listener (tránh conflict với navigation buttons)
+                if (button.getMouseListeners().length == 0) {
+                    styleButton(button);
+                }
+            } else if (comp instanceof Container) {
+                styleDialogButtons((Container) comp);
+            }
+        }
     }
 
     /**
