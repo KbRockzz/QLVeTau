@@ -60,6 +60,7 @@ public class FrmChinh extends JFrame {
         addPage("daumay", taoPanelVoiBo(new PnlDauMay()));      // Đầu máy
         addPage("ga", taoPanelVoiBo(new PnlGa()));         // Ga
         addPage("chuyentau", taoPanelVoiBo(new PnlChuyenTau())); // Chuyến tàu
+        addPage("timkiemct", taoPanelVoiBo(new PnlTimKiemChuyenTau())); // Tìm kiếm ct
 
         // Ticket-related auxiliary pages
 

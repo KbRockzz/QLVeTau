@@ -39,9 +39,10 @@ public class NavigationBar extends JPanel {
         JButton tripManagementBtn = createNavButton("Chuyến tàu", null);
         JPopupMenu tripMenu = new JPopupMenu();
         tripMenu.add(createMenuItem("Chuyến tàu", "chuyentau"));
-        tripMenu.addSeparator();
         tripMenu.add(createMenuItem("Đầu máy", "daumay"));
-        tripMenu.add(createMenuItem("Ga Tàu","ga"));
+        tripMenu.add(createMenuItem("Ga tàu","ga"));
+        tripMenu.addSeparator();
+        tripMenu.add(createMenuItem("Tìm kiếm", "timkiemct"));
         tripManagementBtn.addActionListener(e -> tripMenu.show(tripManagementBtn, 0, tripManagementBtn.getHeight()));
         leftPanel.add(tripManagementBtn);
 
