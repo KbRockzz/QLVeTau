@@ -111,10 +111,10 @@ public class DlgDoiVe extends JDialog {
         ));
         
         // Seat map with scroll
-        pnlSeatMap = new JPanel(new GridLayout(0, 4, 5, 5));
+        pnlSeatMap = new JPanel();
         pnlSeatMap.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JScrollPane scrollSeatMap = new JScrollPane(pnlSeatMap);
-        scrollSeatMap.setPreferredSize(new Dimension(350, 300));
+        scrollSeatMap.setPreferredSize(new Dimension(400, 300));
         rightPanel.add(scrollSeatMap, BorderLayout.CENTER);
         
         // Legend
@@ -200,6 +200,7 @@ public class DlgDoiVe extends JDialog {
         pnlSeatMap.removeAll();
         
         if (veGoc == null || veGoc.getMaSoGhe() == null) {
+            pnlSeatMap.setLayout(new FlowLayout());
             pnlSeatMap.add(new JLabel("Không có thông tin ghế"));
             pnlSeatMap.revalidate();
             pnlSeatMap.repaint();
@@ -209,6 +210,7 @@ public class DlgDoiVe extends JDialog {
         // Lấy thông tin ghế hiện tại để biết maToa
         Ghe gheHienTai = gheDAO.findById(veGoc.getMaSoGhe());
         if (gheHienTai == null) {
+            pnlSeatMap.setLayout(new FlowLayout());
             pnlSeatMap.add(new JLabel("Không tìm thấy thông tin ghế"));
             pnlSeatMap.revalidate();
             pnlSeatMap.repaint();
@@ -221,46 +223,91 @@ public class DlgDoiVe extends JDialog {
         List<Ghe> danhSachGhe = gheDAO.getByToa(maToa);
         
         if (danhSachGhe.isEmpty()) {
+            pnlSeatMap.setLayout(new FlowLayout());
             pnlSeatMap.add(new JLabel("Không có ghế trong toa này"));
         } else {
-            for (Ghe ghe : danhSachGhe) {
-                JButton btnGhe = new JButton(ghe.getMaGhe());
-                btnGhe.setPreferredSize(new Dimension(80, 40));
-                
-                // Màu sắc theo trạng thái
-                if (ghe.getMaGhe().equals(veGoc.getMaSoGhe())) {
-                    // Ghế hiện tại - màu vàng/cam
-                    btnGhe.setBackground(Color.ORANGE);
-                    btnGhe.setForeground(Color.WHITE);
-                    btnGhe.setEnabled(false);
-                } else if ("Trống".equals(ghe.getTrangThai())) {
-                    // Ghế trống - màu xanh
-                    final String maGhe = ghe.getMaGhe();
-                    btnGhe.setBackground(new Color(34, 139, 34));
-                    btnGhe.setForeground(Color.WHITE);
-                    
-                    // Check if this is the selected seat
-                    if (maGhe.equals(gheChon)) {
-                        btnGhe.setBackground(Color.BLUE);
+            // Sử dụng layout giống PnlDatVe: 2 ghế | lối đi | 2 ghế
+            int soGhe = danhSachGhe.size();
+            int soHang = (int) Math.ceil(soGhe / 4.0);
+            
+            pnlSeatMap.setLayout(new GridLayout(soHang, 5, 5, 5));
+            
+            for (int i = 0; i < soHang; i++) {
+                // 2 ghế bên trái
+                for (int j = 0; j < 2; j++) {
+                    int index = i * 4 + j;
+                    if (index < soGhe) {
+                        pnlSeatMap.add(taoNutGhe(danhSachGhe.get(index)));
+                    } else {
+                        pnlSeatMap.add(new JLabel(""));
                     }
-                    
-                    btnGhe.addActionListener(e -> {
-                        gheChon = maGhe;
-                        updateSeatColors();
-                    });
-                } else {
-                    // Ghế đã đặt - màu đỏ
-                    btnGhe.setBackground(Color.RED);
-                    btnGhe.setForeground(Color.WHITE);
-                    btnGhe.setEnabled(false);
                 }
                 
-                pnlSeatMap.add(btnGhe);
+                // Lối đi (aisle)
+                JPanel pnlLoiDi = new JPanel();
+                pnlLoiDi.setBackground(new Color(200, 200, 200));
+                pnlLoiDi.setPreferredSize(new Dimension(30, 40));
+                pnlSeatMap.add(pnlLoiDi);
+                
+                // 2 ghế bên phải
+                for (int j = 2; j < 4; j++) {
+                    int index = i * 4 + j;
+                    if (index < soGhe) {
+                        pnlSeatMap.add(taoNutGhe(danhSachGhe.get(index)));
+                    } else {
+                        pnlSeatMap.add(new JLabel(""));
+                    }
+                }
             }
         }
         
         pnlSeatMap.revalidate();
         pnlSeatMap.repaint();
+    }
+    
+    /**
+     * Tạo nút ghế với màu sắc tương ứng
+     */
+    private JButton taoNutGhe(Ghe ghe) {
+        JButton btnGhe = new JButton(ghe.getMaGhe());
+        btnGhe.setPreferredSize(new Dimension(80, 40));
+        btnGhe.setFont(new Font("Arial", Font.BOLD, 12));
+        btnGhe.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        
+        // Màu sắc theo trạng thái
+        if (ghe.getMaGhe().equals(veGoc.getMaSoGhe())) {
+            // Ghế hiện tại - màu vàng/cam
+            btnGhe.setBackground(Color.ORANGE);
+            btnGhe.setForeground(Color.BLACK);
+            btnGhe.setEnabled(false);
+            btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Ghế hiện tại");
+        } else if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai()) || "Trống".equalsIgnoreCase(ghe.getTrangThai())) {
+            // Ghế trống - màu xanh (check both "Rảnh" and "Trống" for compatibility)
+            final String maGhe = ghe.getMaGhe();
+            btnGhe.setBackground(new Color(34, 139, 34));
+            btnGhe.setForeground(Color.BLACK);
+            btnGhe.setEnabled(true);
+            btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Trống");
+            
+            // Check if this is the selected seat
+            if (maGhe.equals(gheChon)) {
+                btnGhe.setBackground(Color.BLUE);
+                btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đang chọn");
+            }
+            
+            btnGhe.addActionListener(e -> {
+                gheChon = maGhe;
+                updateSeatColors();
+            });
+        } else {
+            // Ghế đã đặt - màu đỏ
+            btnGhe.setBackground(Color.RED);
+            btnGhe.setForeground(Color.BLACK);
+            btnGhe.setEnabled(false);
+            btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đã đặt");
+        }
+        
+        return btnGhe;
     }
     
     /**
@@ -273,17 +320,19 @@ public class DlgDoiVe extends JDialog {
                 JButton btn = (JButton) comp;
                 String maGhe = btn.getText();
                 
-                // Skip current seat (always orange)
-                if (maGhe.equals(veGoc.getMaSoGhe())) {
+                // Skip current seat (always orange) and disabled seats
+                if (maGhe.equals(veGoc.getMaSoGhe()) || !btn.isEnabled()) {
                     continue;
                 }
                 
                 // Update color based on selection
                 if (maGhe.equals(gheChon)) {
                     btn.setBackground(Color.BLUE);
-                } else if (btn.isEnabled()) {
+                    btn.setToolTipText("Ghế " + maGhe + " - Đang chọn");
+                } else {
                     // Reset to green for available seats
                     btn.setBackground(new Color(34, 139, 34));
+                    btn.setToolTipText("Ghế " + maGhe + " - Trống");
                 }
             }
         }

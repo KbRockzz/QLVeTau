@@ -245,15 +245,16 @@ public class VeService {
                 throw new IllegalStateException("Chỉ được đổi ghế trong cùng một toa. Không thể đổi sang toa khác");
             }
 
-            // 6. Validate ghế mới phải trống
-            if (!"Trống".equals(gheMoi.getTrangThai())) {
+            // 6. Validate ghế mới phải trống (check both "Rảnh" and "Trống" for compatibility)
+            String trangThaiGheMoi = gheMoi.getTrangThai();
+            if (!"Rảnh".equalsIgnoreCase(trangThaiGheMoi) && !"Trống".equalsIgnoreCase(trangThaiGheMoi)) {
                 throw new IllegalStateException("Ghế đã bị đặt");
             }
 
-            // 7. Cập nhật trạng thái ghế cũ -> Trống
-            gheCu.setTrangThai("Trống");
+            // 7. Cập nhật trạng thái ghế cũ -> Rảnh
+            gheCu.setTrangThai("Rảnh");
             try (PreparedStatement pst = conn.prepareStatement("UPDATE Ghe SET trangThai = ? WHERE maGhe = ?")) {
-                pst.setString(1, "Trống");
+                pst.setString(1, "Rảnh");
                 pst.setString(2, gheCu.getMaGhe());
                 pst.executeUpdate();
             }
