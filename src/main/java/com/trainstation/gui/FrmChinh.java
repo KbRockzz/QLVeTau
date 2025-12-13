@@ -7,25 +7,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
-
-/**
- * Form chính của ứng dụng — cập nhật để tương thích với cấu trúc NavigationBar mới.
- *
- * Ghi chú:
- * - Các trang (card) được đăng ký với các khóa khớp với id action mà NavigationBar gửi:
- *   ví dụ: "chuyentau", "chitietchuyen", "daumay", "toatau", "changtau",
- *            "ve", "loaive", "loaighe", "banggia",
- *            "khachhang", "lichsuve",
- *            "nhanvien", "loainhanvien", "taikhoan",
- *            "hoadon", "chitiethoadon",
- *            "deleted_chuyentau", "deleted_ve", "deleted_khachhang",
- *            "deleted_nhanvien", "deleted_taikhoan", "deleted_hoadon"
- *
- * - Nếu một panel chuyên biệt chưa tồn tại trong codebase, FrmChinh sẽ tạo một placeholder panel
- *   hiển thị thông báo "Chưa có giao diện" thay cho panel thật để tránh lỗi ClassNotFound.
- *
- * - Quyền truy cập: các trang dành cho quản lý vẫn chỉ được thêm / hiển thị nếu tài khoản hiện tại là manager.
- */
 public class FrmChinh extends JFrame {
     private TaiKhoan taiKhoanHienTai;
     private JPanel pnlNoiDung;
@@ -69,48 +50,36 @@ public class FrmChinh extends JFrame {
         addPage("bookticket", taoPanelVoiBo(new PnlDatVe(taiKhoanHienTai)));
         addPage("refundticket", taoPanelVoiBo(new PnlHoanVe(taiKhoanHienTai)));
         addPage("changeticket", taoPanelVoiBo(new PnlDoiVe(taiKhoanHienTai)));
-        addPage("ticketbooking", taoPanelVoiBo(new PnlQuanLyVe(taiKhoanHienTai))); // legacy id
+        addPage("searchticket", taoPanelVoiBo(new PnlTimVe()));
 
         // Customer
         addPage("khachhang", taoPanelVoiBo(new PnlKhachHang()));
-        addPage("customer", taoPanelVoiBo(new PnlKhachHang())); // legacy id
+        addPage("searchcustomer", taoPanelVoiBo(new PnlTimKhachHang()));
 
         // Stations / trains
         addPage("daumay", taoPanelVoiBo(new PnlDauMay()));      // Đầu máy
-        addPage("train", taoPanelVoiBo(new PnlDauMay()));       // legacy id
-        addPage("station", taoPanelVoiBo(new PnlGa()));         // Ga
-        addPage("traintimetable", taoPanelVoiBo(new PnlChuyenTau()));
-        addPage("chuyentau", taoPanelVoiBo(new PnlChuyenTau())); // "Chuyến tàu" in new nav
-        addPage("chitietchuyen", taoPanelVoiBo(createPlaceholderPanel("Chi tiết chuyến"))); // placeholder
+        addPage("ga", taoPanelVoiBo(new PnlGa()));         // Ga
+        addPage("chuyentau", taoPanelVoiBo(new PnlChuyenTau())); // Chuyến tàu
 
         // Ticket-related auxiliary pages
 
         addPage("banggia", taoPanelVoiBo(createPlaceholderPanel("Bảng giá"))); // placeholder
 
         // Invoice
-        addPage("hoadon", taoPanelVoiBo(new PnlQuanLyVe(taiKhoanHienTai))); // Reuse ticket management panel as placeholder
-        addPage("chitiethoadon", taoPanelVoiBo(createPlaceholderPanel("Chi tiết hóa đơn"))); // placeholder
+        addPage("hoadon", taoPanelVoiBo(new PnlQuanLyVe(taiKhoanHienTai)));
+        addPage("timhoadon", taoPanelVoiBo(new PnlTimHoaDon()));
+        addPage("baocaodoanhthu", taoPanelVoiBo(new PnlBaoCaoDoanhThu()));
 
         // Employee / account pages (manager only)
         if (taiKhoanHienTai.isManager()) {
             addPage("nhanvien", taoPanelVoiBo(new PnlNhanVien()));
-            addPage("employee", taoPanelVoiBo(new PnlNhanVien())); // legacy id
-            addPage("loainhanvien", taoPanelVoiBo(createPlaceholderPanel("Loại nhân viên"))); // placeholder
+            addPage("timkiemnv-tk", taoPanelVoiBo(new PnlTimKiemNVTK()));
             addPage("taikhoan", taoPanelVoiBo(new PnlTaiKhoan()));
-            addPage("account", taoPanelVoiBo(new PnlTaiKhoan())); // legacy id
-            addPage("statistics", taoPanelVoiBo(new PnlThongKe()));
 
             // Deleted-data management (manager only). Reuse generic deleted-data panel if specific ones don't exist.
-            addPage("deleted_chuyentau", taoPanelVoiBo(new PnlDuLieuDaXoa()));
-            addPage("deleted_ve", taoPanelVoiBo(new PnlDuLieuDaXoa()));
-            addPage("deleted_khachhang", taoPanelVoiBo(new PnlDuLieuDaXoa()));
-            addPage("deleted_nhanvien", taoPanelVoiBo(new PnlDuLieuDaXoa()));
-            addPage("deleted_taikhoan", taoPanelVoiBo(new PnlDuLieuDaXoa()));
-            addPage("deleted_hoadon", taoPanelVoiBo(new PnlDuLieuDaXoa()));
 
             // Backwards-compatible keys
-            addPage("deletedtrains", taoPanelVoiBo(new PnlDauMayDaXoa()));
-            addPage("deletedemployees", taoPanelVoiBo(new PnlDuLieuDaXoa()));
+            addPage("deleteddata", taoPanelVoiBo(new PnlDuLieuDaXoa()));
         } else {
             // For non-managers, ensure deleted pages are not registered
         }

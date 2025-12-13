@@ -39,26 +39,30 @@ public class NavigationBar extends JPanel {
         JButton tripManagementBtn = createNavButton("Chuyến tàu", null);
         JPopupMenu tripMenu = new JPopupMenu();
         tripMenu.add(createMenuItem("Chuyến tàu", "chuyentau"));
-        tripMenu.add(createMenuItem("Chi tiết chuyến", "chitietchuyen"));
         tripMenu.addSeparator();
         tripMenu.add(createMenuItem("Đầu máy", "daumay"));
-        tripMenu.add(createMenuItem("Ga","ga"));
+        tripMenu.add(createMenuItem("Ga Tàu","ga"));
         tripManagementBtn.addActionListener(e -> tripMenu.show(tripManagementBtn, 0, tripManagementBtn.getHeight()));
         leftPanel.add(tripManagementBtn);
 
         // --- Quản lý vé ---
         JButton ticketManagementBtn = createNavButton("Quản lý vé", null);
         JPopupMenu ticketManagementMenu = new JPopupMenu();
-        ticketManagementMenu.add(createMenuItem("Vé", "ticketbooking"));
-        ticketManagementMenu.add(createMenuItem("Đặt vé","bookticket"));
         ticketManagementMenu.add(createMenuItem("Bảng giá", "banggia"));
+        ticketManagementMenu.addSeparator();
+        ticketManagementMenu.add(createMenuItem("Đặt vé","bookticket"));
+        ticketManagementMenu.add(createMenuItem("Tìm vé", "searchticket"));
         ticketManagementMenu.add(createMenuItem("Đổi vé", "changeticket"));
         ticketManagementMenu.add(createMenuItem("Hoàn vé", "refundticket"));
         ticketManagementBtn.addActionListener(e -> ticketManagementMenu.show(ticketManagementBtn, 0, ticketManagementBtn.getHeight()));
         leftPanel.add(ticketManagementBtn);
 
         // --- Quản lý khách hàng ---
-        JButton customerManagementBtn = createNavButton("Khách hàng", "khachhang");
+        JButton customerManagementBtn = createNavButton("Khách hàng", null);
+        JPopupMenu customerMenu = new JPopupMenu();
+        customerMenu.add(createMenuItem("Khách hàng", "khachhang"));
+        customerMenu.add(createMenuItem("Tìm kiếm khách hàng", "searchcustomer"));
+        customerManagementBtn.addActionListener(e -> customerMenu.show(customerManagementBtn, 0, customerManagementBtn.getHeight()));
         leftPanel.add(customerManagementBtn);
 
         // --- Quản lý nhân viên (visible if manager) ---
@@ -67,6 +71,7 @@ public class NavigationBar extends JPanel {
             JPopupMenu staffMenu = new JPopupMenu();
             staffMenu.add(createMenuItem("Nhân viên", "nhanvien"));
             staffMenu.add(createMenuItem("Tài khoản", "taikhoan"));
+            staffMenu.add(createMenuItem("Tìm kiếm", "timkiemnv-tk"));
             staffManagementBtn.addActionListener(e -> staffMenu.show(staffManagementBtn, 0, staffManagementBtn.getHeight()));
             leftPanel.add(staffManagementBtn);
         }
@@ -75,21 +80,14 @@ public class NavigationBar extends JPanel {
         JButton invoiceManagementBtn = createNavButton("Hóa đơn", null);
         JPopupMenu invoiceMenu = new JPopupMenu();
         invoiceMenu.add(createMenuItem("Hóa đơn", "hoadon"));
-        invoiceMenu.add(createMenuItem("Chi tiết hóa đơn", "chitiethoadon"));
+        invoiceMenu.add(createMenuItem("Tìm kiếm hóa đơn", "timkiemhoadon"));
+        invoiceMenu.add(createMenuItem("Báo cáo doanh thu", "baocaodoanhthu"));
         invoiceManagementBtn.addActionListener(e -> invoiceMenu.show(invoiceManagementBtn, 0, invoiceManagementBtn.getHeight()));
         leftPanel.add(invoiceManagementBtn);
 
         // --- Quản lý dữ liệu đã xóa (visible if manager) ---
         if (currentAccount.isManager()) {
-            JButton deletedDataBtn = createNavButton("Dữ liệu đã xóa", null);
-            JPopupMenu deletedMenu = new JPopupMenu();
-            deletedMenu.add(createMenuItem("Chuyến tàu đã xóa", "deleted_chuyentau"));
-            deletedMenu.add(createMenuItem("Vé đã xóa", "deleted_ve"));
-            deletedMenu.add(createMenuItem("Khách hàng đã xóa", "deleted_khachhang"));
-            deletedMenu.add(createMenuItem("Nhân viên đã xóa", "deleted_nhanvien"));
-            deletedMenu.add(createMenuItem("Tài khoản đã xóa", "deleted_taikhoan"));
-            deletedMenu.add(createMenuItem("Hóa đơn đã xóa", "deleted_hoadon"));
-            deletedDataBtn.addActionListener(e -> deletedMenu.show(deletedDataBtn, 0, deletedDataBtn.getHeight()));
+            JButton deletedDataBtn = createNavButton("Dữ liệu đã xóa", "deleteddata");
             leftPanel.add(deletedDataBtn);
         }
 
