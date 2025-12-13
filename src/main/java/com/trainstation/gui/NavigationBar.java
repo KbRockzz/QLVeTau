@@ -62,6 +62,7 @@ public class NavigationBar extends JPanel {
         JButton customerManagementBtn = createNavButton("Khách hàng", null);
         JPopupMenu customerMenu = new JPopupMenu();
         customerMenu.add(createMenuItem("Khách hàng", "khachhang"));
+        customerMenu.addSeparator();
         customerMenu.add(createMenuItem("Tìm kiếm khách hàng", "searchcustomer"));
         customerManagementBtn.addActionListener(e -> customerMenu.show(customerManagementBtn, 0, customerManagementBtn.getHeight()));
         leftPanel.add(customerManagementBtn);
@@ -72,6 +73,7 @@ public class NavigationBar extends JPanel {
             JPopupMenu staffMenu = new JPopupMenu();
             staffMenu.add(createMenuItem("Nhân viên", "nhanvien"));
             staffMenu.add(createMenuItem("Tài khoản", "taikhoan"));
+            staffMenu.addSeparator();
             staffMenu.add(createMenuItem("Tìm kiếm", "timkiemnv-tk"));
             staffManagementBtn.addActionListener(e -> staffMenu.show(staffManagementBtn, 0, staffManagementBtn.getHeight()));
             leftPanel.add(staffManagementBtn);
@@ -81,6 +83,7 @@ public class NavigationBar extends JPanel {
         JButton invoiceManagementBtn = createNavButton("Hóa đơn", null);
         JPopupMenu invoiceMenu = new JPopupMenu();
         invoiceMenu.add(createMenuItem("Hóa đơn", "hoadon"));
+        invoiceMenu.addSeparator();
         invoiceMenu.add(createMenuItem("Tìm kiếm hóa đơn", "timkiemhoadon"));
         invoiceMenu.add(createMenuItem("Báo cáo doanh thu", "baocaodoanhthu"));
         invoiceManagementBtn.addActionListener(e -> invoiceMenu.show(invoiceManagementBtn, 0, invoiceManagementBtn.getHeight()));
