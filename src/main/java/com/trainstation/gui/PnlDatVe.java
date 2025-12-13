@@ -675,29 +675,41 @@ public class PnlDatVe extends JPanel {
         JTextField txtDiaChi = new JTextField(20);
         txtDiaChi.setPreferredSize(new Dimension(250, 32));
 
+        // Labels (column 0) - no horizontal expansion
         gbc.gridx = 0; gbc.gridy = 0;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Mã khách hàng:"), gbc);
+        // Text fields (column 1) - expand horizontally
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         pnlForm.add(txtMaKH, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Họ tên:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         pnlForm.add(txtTenKH, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Số điện thoại:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         pnlForm.add(txtSDT, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("CCCD:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         pnlForm.add(txtCCCD, gbc);
 
         gbc.gridx = 0; gbc.gridy = 4;
+        gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Địa chỉ:"), gbc);
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         pnlForm.add(txtDiaChi, gbc);
 
         dialog.add(pnlForm, BorderLayout.CENTER);

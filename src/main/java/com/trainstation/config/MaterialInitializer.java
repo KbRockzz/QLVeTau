@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.IntelliJTheme;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.AWTEventListener;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -40,6 +41,9 @@ public class MaterialInitializer {
             // Bật anti-aliasing cho text để hiển thị mượt mà hơn
             System.setProperty("awt.useSystemAAFontSettings", "on");
             System.setProperty("swing.aatext", "true");
+
+            // Cấu hình button styling cho JOptionPane
+            configureOptionPaneButtons();
 
             // Cập nhật UI cho tất cả components
             FlatLaf.updateUI();
@@ -90,6 +94,46 @@ public class MaterialInitializer {
         }
         
         return new Font("SansSerif", style, size);
+    }
+
+    /**
+     * Cấu hình styling cho các nút trong JOptionPane
+     * Đảm bảo các nút OK, Cancel, Yes, No có màu sắc thống nhất
+     */
+    private static void configureOptionPaneButtons() {
+        // Màu nền và chữ cho các nút trong OptionPane
+        Color buttonBackground = new Color(10, 115, 215); // #0A73D7
+        Color buttonForeground = Color.WHITE;
+        
+        // Cấu hình UIManager cho các nút trong JOptionPane
+        UIManager.put("OptionPane.buttonFont", createFont(Font.PLAIN, 14));
+        UIManager.put("Button.background", buttonBackground);
+        UIManager.put("Button.foreground", buttonForeground);
+        UIManager.put("Button.select", new Color(8, 89, 166)); // #0859A6 hover
+        UIManager.put("Button.focus", buttonBackground);
+        UIManager.put("Button.disabledBackground", new Color(150, 150, 150));
+        UIManager.put("Button.disabledForeground", new Color(200, 200, 200));
+        
+        // Cấu hình kích thước và padding cho nút
+        UIManager.put("Button.arc", 6); // Bo góc
+        UIManager.put("Button.margin", new Insets(5, 12, 5, 12));
+        
+        // Hook vào tất cả dialog được tạo để style buttons
+        installDialogButtonStyler();
+    }
+
+    /**
+     * Cài đặt listener để tự động style buttons trong tất cả dialogs
+     */
+    private static void installDialogButtonStyler() {
+        // Tạo listener để theo dõi khi window mới được tạo
+        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
+            if (event.getSource() instanceof Window) {
+                Window window = (Window) event.getSource();
+                // Style tất cả buttons trong window
+                styleAllButtons(window);
+            }
+        }, AWTEvent.WINDOW_EVENT_MASK);
     }
 
     /**
