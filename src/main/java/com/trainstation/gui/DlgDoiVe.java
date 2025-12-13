@@ -235,14 +235,18 @@ public class DlgDoiVe extends JDialog {
                     btnGhe.setEnabled(false);
                 } else if ("Trống".equals(ghe.getTrangThai())) {
                     // Ghế trống - màu xanh
+                    final String maGhe = ghe.getMaGhe();
                     btnGhe.setBackground(new Color(34, 139, 34));
                     btnGhe.setForeground(Color.WHITE);
-                    btnGhe.addActionListener(e -> {
-                        gheChon = ghe.getMaGhe();
-                        // Reset all buttons
-                        loadSeatMap();
-                        // Highlight selected
+                    
+                    // Check if this is the selected seat
+                    if (maGhe.equals(gheChon)) {
                         btnGhe.setBackground(Color.BLUE);
+                    }
+                    
+                    btnGhe.addActionListener(e -> {
+                        gheChon = maGhe;
+                        updateSeatColors();
                     });
                 } else {
                     // Ghế đã đặt - màu đỏ
@@ -256,6 +260,33 @@ public class DlgDoiVe extends JDialog {
         }
         
         pnlSeatMap.revalidate();
+        pnlSeatMap.repaint();
+    }
+    
+    /**
+     * Update seat button colors without full reconstruction (more efficient)
+     */
+    private void updateSeatColors() {
+        Component[] components = pnlSeatMap.getComponents();
+        for (Component comp : components) {
+            if (comp instanceof JButton) {
+                JButton btn = (JButton) comp;
+                String maGhe = btn.getText();
+                
+                // Skip current seat (always orange)
+                if (maGhe.equals(veGoc.getMaSoGhe())) {
+                    continue;
+                }
+                
+                // Update color based on selection
+                if (maGhe.equals(gheChon)) {
+                    btn.setBackground(Color.BLUE);
+                } else if (btn.isEnabled()) {
+                    // Reset to green for available seats
+                    btn.setBackground(new Color(34, 139, 34));
+                }
+            }
+        }
         pnlSeatMap.repaint();
     }
     

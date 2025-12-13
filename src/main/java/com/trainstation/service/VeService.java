@@ -215,9 +215,6 @@ public class VeService {
             if (!"Đã thanh toán".equals(trangThai) && !"Đã đặt".equals(trangThai)) {
                 throw new IllegalStateException("Chỉ có thể đổi vé đã đặt hoặc đã thanh toán");
             }
-            if ("Đã hoàn".equals(trangThai) || "Đã hủy".equals(trangThai) || "Đã đổi".equals(trangThai)) {
-                throw new IllegalStateException("Không thể đổi vé này");
-            }
 
             // 3. Validate thời hạn đổi (phải đổi trước 2 giờ so với gioDi)
             if (veCu.getGioDi() != null) {
@@ -269,10 +266,11 @@ public class VeService {
                 pst.executeUpdate();
             }
 
-            // 9. Tạo mã vé mới
-            String maVeMoi = "VE_" + System.currentTimeMillis();
+            // 9. Tạo mã vé mới sử dụng UUID để tránh xung đột
+            String maVeMoi = "VE_" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
 
             // 10. Tạo vé mới (copy từ vé cũ, chỉ thay maSoGhe)
+            final boolean TICKET_ACTIVE = true;
             Ve veMoi = new Ve(
                 maVeMoi,
                 veCu.getMaChuyen(),      // KHÔNG ĐỔI
@@ -291,7 +289,7 @@ public class VeService {
                 veCu.getLoaiVe(),        // KHÔNG ĐỔI
                 veCu.getMaBangGia(),     // KHÔNG ĐỔI
                 veCu.getGiaThanhToan(),  // KHÔNG ĐỔI
-                true
+                TICKET_ACTIVE
             );
 
             // 11. Insert vé mới
