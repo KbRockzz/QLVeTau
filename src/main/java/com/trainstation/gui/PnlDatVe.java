@@ -654,7 +654,7 @@ public class PnlDatVe extends JPanel {
     private void hienThiFormThemKhachHang(String soDienThoai) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Thêm khách hàng mới", true);
         dialog.setLayout(new BorderLayout(10, 10));
-        dialog.setSize(450, 300);
+        dialog.setSize(500, 320);
         dialog.setLocationRelativeTo(this);
 
         JPanel pnlForm = new JPanel(new GridBagLayout());
@@ -664,11 +664,16 @@ public class PnlDatVe extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         JTextField txtMaKH = new JTextField(20);
+        txtMaKH.setPreferredSize(new Dimension(250, 32));
         JTextField txtTenKH = new JTextField(20);
+        txtTenKH.setPreferredSize(new Dimension(250, 32));
         JTextField txtSDT = new JTextField(20);
+        txtSDT.setPreferredSize(new Dimension(250, 32));
         txtSDT.setText(soDienThoai); // Pre-fill with searched phone
         JTextField txtCCCD = new JTextField(20);
+        txtCCCD.setPreferredSize(new Dimension(250, 32));
         JTextField txtDiaChi = new JTextField(20);
+        txtDiaChi.setPreferredSize(new Dimension(250, 32));
 
         gbc.gridx = 0; gbc.gridy = 0;
         pnlForm.add(new JLabel("Mã khách hàng:"), gbc);
@@ -699,6 +704,7 @@ public class PnlDatVe extends JPanel {
 
         JPanel pnlButton = new JPanel(new FlowLayout());
         JButton btnThem = new JButton("Thêm");
+        MaterialInitializer.styleButton(btnThem);
         btnThem.addActionListener(e -> {
             String maKH = txtMaKH.getText().trim();
             String tenKH = txtTenKH.getText().trim();
@@ -730,6 +736,7 @@ public class PnlDatVe extends JPanel {
         });
 
         JButton btnHuy = new JButton("Hủy");
+        MaterialInitializer.styleButton(btnHuy);
         btnHuy.addActionListener(e -> dialog.dispose());
 
         pnlButton.add(btnThem);
