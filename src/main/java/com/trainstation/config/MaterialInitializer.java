@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.IntelliJTheme;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.AWTEventListener;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -40,6 +41,9 @@ public class MaterialInitializer {
             // Bật anti-aliasing cho text để hiển thị mượt mà hơn
             System.setProperty("awt.useSystemAAFontSettings", "on");
             System.setProperty("swing.aatext", "true");
+
+            // Cấu hình button styling cho JOptionPane
+            configureOptionPaneButtons();
 
             // Cập nhật UI cho tất cả components
             FlatLaf.updateUI();
@@ -93,6 +97,91 @@ public class MaterialInitializer {
     }
 
     /**
+     * Cấu hình styling cho các nút trong JOptionPane
+     * Đảm bảo các nút OK, Cancel, Yes, No có màu sắc thống nhất
+     */
+    private static void configureOptionPaneButtons() {
+        // Màu nền và chữ cho các nút trong OptionPane - chỉ áp dụng cho OptionPane
+        Color buttonBackground = new Color(10, 115, 215); // #0A73D7
+        Color buttonForeground = Color.WHITE;
+        
+        // Cấu hình UIManager CHỈ cho các nút trong JOptionPane (không ảnh hưởng global)
+        UIManager.put("OptionPane.buttonFont", createFont(Font.PLAIN, 14));
+        UIManager.put("OptionPane.buttonMinimumWidth", 100);
+        
+        // Hook vào tất cả dialog được tạo để style buttons
+        installDialogButtonStyler();
+    }
+
+    /**
+     * Cài đặt listener để tự động style buttons ONLY trong JOptionPane dialogs
+     */
+    private static void installDialogButtonStyler() {
+        // Tạo listener để theo dõi khi window mới được tạo
+        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
+            if (event.getSource() instanceof Window) {
+                Window window = (Window) event.getSource();
+                // Chỉ style buttons trong JOptionPane dialogs, không style main frames
+                if (isOptionPaneDialog(window)) {
+                    styleDialogButtons(window);
+                }
+            }
+        }, AWTEvent.WINDOW_EVENT_MASK);
+    }
+    
+    /**
+     * Kiểm tra xem window có phải là JOptionPane dialog không
+     */
+    private static boolean isOptionPaneDialog(Window window) {
+        if (!(window instanceof JDialog)) {
+            return false;
+        }
+        
+        JDialog dialog = (JDialog) window;
+        // Kiểm tra xem dialog có chứa JOptionPane component không
+        return containsOptionPane(dialog.getContentPane());
+    }
+    
+    /**
+     * Kiểm tra container có chứa JOptionPane không
+     */
+    private static boolean containsOptionPane(Container container) {
+        if (container instanceof JOptionPane) {
+            return true;
+        }
+        
+        for (Component comp : container.getComponents()) {
+            if (comp instanceof JOptionPane) {
+                return true;
+            }
+            if (comp instanceof Container) {
+                if (containsOptionPane((Container) comp)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Style buttons chỉ trong dialog (không ảnh hưởng navigation bar)
+     */
+    private static void styleDialogButtons(Container container) {
+        if (container == null) return;
+        
+        for (Component comp : container.getComponents()) {
+            if (comp instanceof JButton) {
+                JButton button = (JButton) comp;
+                // Style tất cả buttons trong JOptionPane dialogs
+                // (đã được filter bởi isOptionPaneDialog nên an toàn)
+                styleButton(button);
+            } else if (comp instanceof Container) {
+                styleDialogButtons((Container) comp);
+            }
+        }
+    }
+
+    /**
      * Áp dụng Material styling cho một nút bấm
      * - Bo góc 6px (từ FlatLaf theme)
      * - Màu nền #0A73D7 (xanh header)
@@ -103,6 +192,11 @@ public class MaterialInitializer {
      */
     public static void styleButton(JButton button) {
         if (button == null) return;
+        
+        // Check if button is already styled (has our custom property)
+        if (button.getClientProperty("materialStyled") != null) {
+            return; // Already styled, skip
+        }
         
         // Font
         button.setFont(createFont(Font.PLAIN, 14));
@@ -143,6 +237,9 @@ public class MaterialInitializer {
                 }
             }
         });
+        
+        // Mark button as styled
+        button.putClientProperty("materialStyled", Boolean.TRUE);
     }
 
     /**
