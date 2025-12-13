@@ -41,7 +41,6 @@ public class PnlDatVe extends JPanel {
     // Customer
     private JTextField txtSoDienThoai;
     private JButton btnTimKhachHang;
-    private JLabel lblThongTinKhachHang;
     private KhachHang khachHangDuocChon;
 
     // Train
@@ -105,10 +104,6 @@ public class PnlDatVe extends JPanel {
         btnTimKhachHang.addActionListener(e -> timKhachHang());
         MaterialInitializer.styleButton(btnTimKhachHang);
         pnlTimKhachHang.add(btnTimKhachHang);
-
-        lblThongTinKhachHang = new JLabel("(Chưa chọn khách hàng)");
-        lblThongTinKhachHang.setForeground(Color.BLUE);
-        pnlTimKhachHang.add(lblThongTinKhachHang);
 
         // Ticket
         pnlTimKhachHang.add(Box.createHorizontalStrut(20));
@@ -344,8 +339,8 @@ public class PnlDatVe extends JPanel {
         khachHangDuocChon = khachHangDAO.timTheoSoDienThoai(sdt);
 
         if (khachHangDuocChon != null) {
-            lblThongTinKhachHang.setText("Khách hàng: " + khachHangDuocChon.getTenKhachHang() + " (Mã: " + khachHangDuocChon.getMaKhachHang() + ")");
-            lblThongTinKhachHang.setForeground(new Color(0, 128, 0));
+            // Show customer information in a dialog
+            hienThiThongTinKhachHang(khachHangDuocChon);
 
             // Nếu khách có hoá đơn mở, load vào hoaDonMo và danhSachVeTrongHoaDon
             List<HoaDon> danhSachHoaDon = HoaDonDAO.getInstance().findByKhachHang(khachHangDuocChon.getMaKhachHang());
@@ -726,9 +721,9 @@ public class PnlDatVe extends JPanel {
             if (khachHangDAO.insert(kh)) {
                 JOptionPane.showMessageDialog(dialog, "Thêm khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 khachHangDuocChon = kh;
-                lblThongTinKhachHang.setText("Khách hàng: " + kh.getTenKhachHang() + " (Mã: " + kh.getMaKhachHang() + ")");
-                lblThongTinKhachHang.setForeground(new Color(0, 128, 0));
                 dialog.dispose();
+                // Show customer information in a dialog
+                hienThiThongTinKhachHang(kh);
             } else {
                 JOptionPane.showMessageDialog(dialog, "Lỗi khi thêm khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
@@ -739,6 +734,77 @@ public class PnlDatVe extends JPanel {
 
         pnlButton.add(btnThem);
         pnlButton.add(btnHuy);
+        dialog.add(pnlButton, BorderLayout.SOUTH);
+
+        dialog.setVisible(true);
+    }
+
+    /**
+     * Hiển thị thông tin khách hàng trong dialog
+     */
+    private void hienThiThongTinKhachHang(KhachHang khachHang) {
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Thông tin khách hàng", true);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(400, 250);
+        dialog.setLocationRelativeTo(this);
+
+        // Title panel
+        JPanel pnlTitle = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JLabel lblTitle = new JLabel("TÌM KHÁCH HÀNG THÀNH CÔNG");
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 16));
+        lblTitle.setForeground(new Color(0, 128, 0));
+        pnlTitle.add(lblTitle);
+        dialog.add(pnlTitle, BorderLayout.NORTH);
+
+        // Information panel
+        JPanel pnlInfo = new JPanel(new GridBagLayout());
+        pnlInfo.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Customer ID
+        gbc.gridx = 0; gbc.gridy = 0;
+        JLabel lblMaKH = new JLabel("Mã khách hàng:");
+        lblMaKH.setFont(new Font("Arial", Font.BOLD, 13));
+        pnlInfo.add(lblMaKH, gbc);
+        
+        gbc.gridx = 1;
+        JLabel lblMaKHValue = new JLabel(khachHang.getMaKhachHang());
+        lblMaKHValue.setFont(new Font("Arial", Font.PLAIN, 13));
+        pnlInfo.add(lblMaKHValue, gbc);
+
+        // Customer Name
+        gbc.gridx = 0; gbc.gridy = 1;
+        JLabel lblTenKH = new JLabel("Tên khách hàng:");
+        lblTenKH.setFont(new Font("Arial", Font.BOLD, 13));
+        pnlInfo.add(lblTenKH, gbc);
+        
+        gbc.gridx = 1;
+        JLabel lblTenKHValue = new JLabel(khachHang.getTenKhachHang());
+        lblTenKHValue.setFont(new Font("Arial", Font.PLAIN, 13));
+        pnlInfo.add(lblTenKHValue, gbc);
+
+        // Phone Number
+        gbc.gridx = 0; gbc.gridy = 2;
+        JLabel lblSDT = new JLabel("Số điện thoại:");
+        lblSDT.setFont(new Font("Arial", Font.BOLD, 13));
+        pnlInfo.add(lblSDT, gbc);
+        
+        gbc.gridx = 1;
+        JLabel lblSDTValue = new JLabel(khachHang.getSoDienThoai());
+        lblSDTValue.setFont(new Font("Arial", Font.PLAIN, 13));
+        pnlInfo.add(lblSDTValue, gbc);
+
+        dialog.add(pnlInfo, BorderLayout.CENTER);
+
+        // Button panel
+        JPanel pnlButton = new JPanel(new FlowLayout());
+        JButton btnDongY = new JButton("Đồng ý");
+        btnDongY.addActionListener(e -> dialog.dispose());
+        MaterialInitializer.styleButton(btnDongY);
+        pnlButton.add(btnDongY);
         dialog.add(pnlButton, BorderLayout.SOUTH);
 
         dialog.setVisible(true);
