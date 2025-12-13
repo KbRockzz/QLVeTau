@@ -121,6 +121,7 @@ public class DlgDoiVe extends JDialog {
         JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         legendPanel.add(createLegendItem("Trống", new Color(34, 139, 34)));
         legendPanel.add(createLegendItem("Đã đặt", Color.RED));
+        legendPanel.add(createLegendItem("Hiện tại", Color.ORANGE));
         legendPanel.add(createLegendItem("Đang chọn", Color.BLUE));
         rightPanel.add(legendPanel, BorderLayout.SOUTH);
         
@@ -275,8 +276,8 @@ public class DlgDoiVe extends JDialog {
         
         // Màu sắc theo trạng thái
         if (ghe.getMaGhe().equals(veGoc.getMaSoGhe())) {
-            // Ghế hiện tại - màu đỏ giống ghế đã đặt (không thể chọn)
-            btnGhe.setBackground(Color.RED);
+            // Ghế hiện tại - màu cam để phân biệt
+            btnGhe.setBackground(Color.ORANGE);
             btnGhe.setForeground(Color.BLACK);
             btnGhe.setEnabled(false);
             btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Ghế hiện tại");
