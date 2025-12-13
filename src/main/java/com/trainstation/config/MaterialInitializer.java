@@ -172,10 +172,9 @@ public class MaterialInitializer {
         for (Component comp : container.getComponents()) {
             if (comp instanceof JButton) {
                 JButton button = (JButton) comp;
-                // Chỉ style nếu button chưa có listener (tránh conflict với navigation buttons)
-                if (button.getMouseListeners().length == 0) {
-                    styleButton(button);
-                }
+                // Style tất cả buttons trong JOptionPane dialogs
+                // (đã được filter bởi isOptionPaneDialog nên an toàn)
+                styleButton(button);
             } else if (comp instanceof Container) {
                 styleDialogButtons((Container) comp);
             }
@@ -193,6 +192,11 @@ public class MaterialInitializer {
      */
     public static void styleButton(JButton button) {
         if (button == null) return;
+        
+        // Check if button is already styled (has our custom property)
+        if (button.getClientProperty("materialStyled") != null) {
+            return; // Already styled, skip
+        }
         
         // Font
         button.setFont(createFont(Font.PLAIN, 14));
@@ -233,6 +237,9 @@ public class MaterialInitializer {
                 }
             }
         });
+        
+        // Mark button as styled
+        button.putClientProperty("materialStyled", Boolean.TRUE);
     }
 
     /**
