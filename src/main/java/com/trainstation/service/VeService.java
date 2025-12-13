@@ -134,8 +134,10 @@ public class VeService {
     }
 
     /**
-     * Đổi vé (phát triển trong tương lai)
+     * Đổi vé (phát triển trong tương lai) - OLD VERSION, DEPRECATED
+     * Use thucHienDoiVe() instead for new business rules
      */
+    @Deprecated
     public boolean doiVe(String maVeCu, Ve veMoi) {
         Ve veCu = veDAO.findById(maVeCu);
         if (veCu == null) {
@@ -180,6 +182,184 @@ public class VeService {
         veCu.setMaBangGia(veMoi.getMaBangGia());
 
         return veDAO.update(veCu);
+    }
+
+    /**
+     * Thực hiện đổi vé theo quy tắc mới:
+     * - Chỉ cho phép đổi ghế trong cùng một toa
+     * - Không cho phép đổi sang toa khác hay chuyến khác
+     * - Tạo vé mới, đánh dấu vé cũ = "Đã đổi"
+     * - Ghi audit trail vào ChiTietHoaDon.moTa
+     * 
+     * @param maVeCu Mã vé cũ cần đổi
+     * @param maGheMoi Mã ghế mới (phải cùng toa với ghế cũ)
+     * @param lyDo Lý do đổi vé
+     * @return Vé mới sau khi đổi
+     * @throws IllegalArgumentException Nếu không tìm thấy vé hoặc ghế
+     * @throws IllegalStateException Nếu không đủ điều kiện đổi vé
+     */
+    public Ve thucHienDoiVe(String maVeCu, String maGheMoi, String lyDo) {
+        Connection conn = null;
+        try {
+            conn = ConnectSql.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. Validate vé cũ
+            Ve veCu = veDAO.findById(maVeCu);
+            if (veCu == null) {
+                throw new IllegalArgumentException("Không tìm thấy vé cũ");
+            }
+
+            // 2. Validate trạng thái vé
+            String trangThai = veCu.getTrangThai();
+            if (!"Đã thanh toán".equals(trangThai) && !"Đã đặt".equals(trangThai)) {
+                throw new IllegalStateException("Chỉ có thể đổi vé đã đặt hoặc đã thanh toán");
+            }
+            if ("Đã hoàn".equals(trangThai) || "Đã hủy".equals(trangThai) || "Đã đổi".equals(trangThai)) {
+                throw new IllegalStateException("Không thể đổi vé này");
+            }
+
+            // 3. Validate thời hạn đổi (phải đổi trước 2 giờ so với gioDi)
+            if (veCu.getGioDi() != null) {
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime deadline = veCu.getGioDi().minusHours(2);
+                if (now.isAfter(deadline)) {
+                    throw new IllegalStateException("Đã quá thời hạn đổi vé. Vé phải được đổi trước 2 giờ so với giờ khởi hành");
+                }
+            }
+
+            // 4. Lấy thông tin ghế cũ và ghế mới
+            if (veCu.getMaSoGhe() == null) {
+                throw new IllegalStateException("Vé không có ghế được chỉ định");
+            }
+            
+            Ghe gheCu = gheDAO.findById(veCu.getMaSoGhe());
+            if (gheCu == null) {
+                throw new IllegalArgumentException("Không tìm thấy ghế cũ");
+            }
+
+            Ghe gheMoi = gheDAO.findById(maGheMoi);
+            if (gheMoi == null) {
+                throw new IllegalArgumentException("Không tìm thấy ghế mới");
+            }
+
+            // 5. VALIDATE QUAN TRỌNG: Ghế mới phải cùng toa với ghế cũ
+            if (!gheCu.getMaToa().equals(gheMoi.getMaToa())) {
+                throw new IllegalStateException("Chỉ được đổi ghế trong cùng một toa. Không thể đổi sang toa khác");
+            }
+
+            // 6. Validate ghế mới phải trống
+            if (!"Trống".equals(gheMoi.getTrangThai())) {
+                throw new IllegalStateException("Ghế đã bị đặt");
+            }
+
+            // 7. Cập nhật trạng thái ghế cũ -> Trống
+            gheCu.setTrangThai("Trống");
+            try (PreparedStatement pst = conn.prepareStatement("UPDATE Ghe SET trangThai = ? WHERE maGhe = ?")) {
+                pst.setString(1, "Trống");
+                pst.setString(2, gheCu.getMaGhe());
+                pst.executeUpdate();
+            }
+
+            // 8. Cập nhật trạng thái ghế mới -> Đã đặt
+            gheMoi.setTrangThai("Đã đặt");
+            try (PreparedStatement pst = conn.prepareStatement("UPDATE Ghe SET trangThai = ? WHERE maGhe = ?")) {
+                pst.setString(1, "Đã đặt");
+                pst.setString(2, gheMoi.getMaGhe());
+                pst.executeUpdate();
+            }
+
+            // 9. Tạo mã vé mới
+            String maVeMoi = "VE_" + System.currentTimeMillis();
+
+            // 10. Tạo vé mới (copy từ vé cũ, chỉ thay maSoGhe)
+            Ve veMoi = new Ve(
+                maVeMoi,
+                veCu.getMaChuyen(),      // KHÔNG ĐỔI
+                veCu.getMaLoaiVe(),      // KHÔNG ĐỔI
+                maGheMoi,                // ĐỔI ghế mới
+                veCu.getMaGaDi(),        // KHÔNG ĐỔI
+                veCu.getMaGaDen(),       // KHÔNG ĐỔI
+                veCu.getTenGaDi(),       // KHÔNG ĐỔI
+                veCu.getTenGaDen(),      // KHÔNG ĐỔI
+                LocalDateTime.now(),     // ngayIn mới
+                veCu.getTrangThai(),     // giữ nguyên trạng thái (Đã đặt hoặc Đã thanh toán)
+                veCu.getGioDi(),         // KHÔNG ĐỔI
+                veCu.getGioDenDuKien(),  // KHÔNG ĐỔI
+                veCu.getSoToa(),         // KHÔNG ĐỔI (cùng toa)
+                veCu.getLoaiCho(),       // KHÔNG ĐỔI
+                veCu.getLoaiVe(),        // KHÔNG ĐỔI
+                veCu.getMaBangGia(),     // KHÔNG ĐỔI
+                veCu.getGiaThanhToan(),  // KHÔNG ĐỔI
+                true
+            );
+
+            // 11. Insert vé mới
+            if (!veDAO.insert(veMoi)) {
+                throw new SQLException("Không thể tạo vé mới");
+            }
+
+            // 12. Cập nhật vé cũ -> trangThai = "Đã đổi"
+            veCu.setTrangThai("Đã đổi");
+            if (!veDAO.update(veCu)) {
+                throw new SQLException("Không thể cập nhật vé cũ");
+            }
+
+            // 13. Ghi audit trail vào ChiTietHoaDon
+            // Tìm hóa đơn chứa vé cũ
+            ChiTietHoaDon chiTietCu = chiTietHoaDonDAO.findById(maVeCu);
+            if (chiTietCu != null) {
+                String moTaCu = "Đã đổi sang " + maVeMoi;
+                chiTietHoaDonDAO.updateMoTa(chiTietCu.getMaHoaDon(), maVeCu, moTaCu, conn);
+
+                // Tạo chi tiết hóa đơn cho vé mới
+                ChiTietHoaDon chiTietMoi = new ChiTietHoaDon();
+                chiTietMoi.setMaHoaDon(chiTietCu.getMaHoaDon());
+                chiTietMoi.setMaVe(maVeMoi);
+                chiTietMoi.setMaLoaiVe(chiTietCu.getMaLoaiVe());
+                chiTietMoi.setGiaGoc(chiTietCu.getGiaGoc());
+                chiTietMoi.setGiaDaKM(chiTietCu.getGiaDaKM());
+                
+                String moTaMoi = "Đổi từ " + maVeCu;
+                if (lyDo != null && !lyDo.trim().isEmpty()) {
+                    moTaMoi += "; lý do: " + lyDo;
+                }
+                chiTietMoi.setMoTa(moTaMoi);
+                
+                chiTietHoaDonDAO.insert(chiTietMoi, conn);
+            }
+
+            conn.commit();
+            return veMoi;
+            
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            throw new RuntimeException("Lỗi khi đổi vé: " + e.getMessage(), e);
+        } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
     
     public List<Ve> layTatCaVe() {
