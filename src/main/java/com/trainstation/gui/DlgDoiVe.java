@@ -35,6 +35,12 @@ public class DlgDoiVe extends JDialog {
     
     private boolean thanhCong = false;
     
+    // Color constants for seat states
+    private static final Color COLOR_AVAILABLE = new Color(34, 139, 34);  // Forest green
+    private static final Color COLOR_CURRENT = Color.CYAN;                  // Bright cyan (0, 255, 255)
+    private static final Color COLOR_SELECTED = new Color(30, 144, 255);  // Dodger blue
+    private static final Color COLOR_BOOKED = Color.RED;                    // Red
+    
     public DlgDoiVe(Frame owner, Ve veGoc) {
         super(owner, "Đổi vé", true);
         this.veGoc = veGoc;
@@ -119,10 +125,10 @@ public class DlgDoiVe extends JDialog {
         
         // Legend
         JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        legendPanel.add(createLegendItem("Trống", new Color(34, 139, 34)));
-        legendPanel.add(createLegendItem("Đã đặt", Color.RED));
-        legendPanel.add(createLegendItem("Hiện tại", new Color(0, 255, 255))); // Cyan
-        legendPanel.add(createLegendItem("Đang chọn", new Color(30, 144, 255))); // DodgerBlue
+        legendPanel.add(createLegendItem("Trống", COLOR_AVAILABLE));
+        legendPanel.add(createLegendItem("Đã đặt", COLOR_BOOKED));
+        legendPanel.add(createLegendItem("Hiện tại", COLOR_CURRENT));
+        legendPanel.add(createLegendItem("Đang chọn", COLOR_SELECTED));
         rightPanel.add(legendPanel, BorderLayout.SOUTH);
         
         centerPanel.add(leftPanel);
@@ -280,28 +286,24 @@ public class DlgDoiVe extends JDialog {
         if (ghe.getMaGhe() != null && veGoc.getMaSoGhe() != null && 
             ghe.getMaGhe().equals(veGoc.getMaSoGhe())) {
             // Ghế hiện tại - màu cyan sáng để phân biệt hoàn toàn với đỏ
-            Color cyanColor = new Color(0, 255, 255); // Cyan - bright cyan/aqua
-            btnGhe.setBackground(cyanColor);
+            btnGhe.setBackground(COLOR_CURRENT);
             btnGhe.setForeground(Color.BLACK);
-            // Preserve colors when disabled by using FlatLaf client properties
-            btnGhe.putClientProperty("JButton.buttonType", "roundRect");
-            btnGhe.putClientProperty("JComponent.minimumWidth", 0);
             // Force background color for disabled state in FlatLaf
-            btnGhe.putClientProperty("Button.disabledBackground", cyanColor);
+            btnGhe.putClientProperty("Button.disabledBackground", COLOR_CURRENT);
             btnGhe.putClientProperty("Button.disabledText", Color.BLACK);
             btnGhe.setEnabled(false);
             btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Ghế hiện tại");
         } else if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai()) || "Trống".equalsIgnoreCase(ghe.getTrangThai())) {
             // Ghế trống - màu xanh (check both "Rảnh" and "Trống" for compatibility)
             final String maGhe = ghe.getMaGhe();
-            btnGhe.setBackground(new Color(34, 139, 34));
+            btnGhe.setBackground(COLOR_AVAILABLE);
             btnGhe.setForeground(Color.BLACK);
             btnGhe.setEnabled(true);
             btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Trống");
             
             // Check if this is the selected seat
             if (maGhe.equals(gheChon)) {
-                btnGhe.setBackground(new Color(30, 144, 255)); // DodgerBlue - bright blue
+                btnGhe.setBackground(COLOR_SELECTED);
                 btnGhe.setForeground(Color.WHITE);
                 btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đang chọn");
             }
@@ -312,13 +314,10 @@ public class DlgDoiVe extends JDialog {
             });
         } else {
             // Ghế đã đặt - màu đỏ
-            Color redColor = Color.RED;
-            btnGhe.setBackground(redColor);
+            btnGhe.setBackground(COLOR_BOOKED);
             btnGhe.setForeground(Color.BLACK);
-            // Preserve colors when disabled by using FlatLaf client properties
-            btnGhe.putClientProperty("JButton.buttonType", "roundRect");
-            btnGhe.putClientProperty("JComponent.minimumWidth", 0);
-            btnGhe.putClientProperty("Button.disabledBackground", redColor);
+            // Force background color for disabled state in FlatLaf
+            btnGhe.putClientProperty("Button.disabledBackground", COLOR_BOOKED);
             btnGhe.putClientProperty("Button.disabledText", Color.BLACK);
             btnGhe.setEnabled(false);
             btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đã đặt");
@@ -344,12 +343,12 @@ public class DlgDoiVe extends JDialog {
                 
                 // Update color based on selection
                 if (maGhe.equals(gheChon)) {
-                    btn.setBackground(new Color(30, 144, 255)); // DodgerBlue - bright blue
+                    btn.setBackground(COLOR_SELECTED);
                     btn.setForeground(Color.WHITE);
                     btn.setToolTipText("Ghế " + maGhe + " - Đang chọn");
                 } else {
                     // Reset to green for available seats
-                    btn.setBackground(new Color(34, 139, 34));
+                    btn.setBackground(COLOR_AVAILABLE);
                     btn.setForeground(Color.BLACK);
                     btn.setToolTipText("Ghế " + maGhe + " - Trống");
                 }
