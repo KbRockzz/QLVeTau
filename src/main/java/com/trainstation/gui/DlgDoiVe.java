@@ -37,9 +37,9 @@ public class DlgDoiVe extends JDialog {
     
     // Color constants for seat states
     private static final Color COLOR_AVAILABLE = new Color(34, 139, 34);  // Forest green
-    private static final Color COLOR_CURRENT = Color.CYAN;                  // Bright cyan (0, 255, 255)
+    private static final Color COLOR_CURRENT = Color.CYAN;                  // Cyan constant (equivalent to 0, 255, 255)
     private static final Color COLOR_SELECTED = new Color(30, 144, 255);  // Dodger blue
-    private static final Color COLOR_BOOKED = Color.RED;                    // Red
+    private static final Color COLOR_BOOKED = Color.RED;                    // Red constant
     
     public DlgDoiVe(Frame owner, Ve veGoc) {
         super(owner, "Đổi vé", true);
