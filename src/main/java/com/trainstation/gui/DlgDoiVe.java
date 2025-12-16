@@ -122,7 +122,7 @@ public class DlgDoiVe extends JDialog {
         legendPanel.add(createLegendItem("Trống", new Color(34, 139, 34)));
         legendPanel.add(createLegendItem("Đã đặt", Color.RED));
         legendPanel.add(createLegendItem("Hiện tại", Color.ORANGE));
-        legendPanel.add(createLegendItem("Đang chọn", Color.BLUE));
+        legendPanel.add(createLegendItem("Đang chọn", new Color(30, 144, 255))); // DodgerBlue
         rightPanel.add(legendPanel, BorderLayout.SOUTH);
         
         centerPanel.add(leftPanel);
@@ -291,7 +291,8 @@ public class DlgDoiVe extends JDialog {
             
             // Check if this is the selected seat
             if (maGhe.equals(gheChon)) {
-                btnGhe.setBackground(Color.BLUE);
+                btnGhe.setBackground(new Color(30, 144, 255)); // DodgerBlue - bright blue
+                btnGhe.setForeground(Color.WHITE);
                 btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đang chọn");
             }
             
@@ -327,11 +328,13 @@ public class DlgDoiVe extends JDialog {
                 
                 // Update color based on selection
                 if (maGhe.equals(gheChon)) {
-                    btn.setBackground(Color.BLUE);
+                    btn.setBackground(new Color(30, 144, 255)); // DodgerBlue - bright blue
+                    btn.setForeground(Color.WHITE);
                     btn.setToolTipText("Ghế " + maGhe + " - Đang chọn");
                 } else {
                     // Reset to green for available seats
                     btn.setBackground(new Color(34, 139, 34));
+                    btn.setForeground(Color.BLACK);
                     btn.setToolTipText("Ghế " + maGhe + " - Trống");
                 }
             }
