@@ -38,13 +38,13 @@ public class DlgDoiVe extends JDialog {
     // Modern color palette for seat states - Material Design inspired
     private static final Color COLOR_AVAILABLE = new Color(76, 175, 80);      // Material Green 500
     private static final Color COLOR_AVAILABLE_HOVER = new Color(102, 187, 106); // Material Green 400
-    private static final Color COLOR_CURRENT = new Color(255, 152, 0);        // Material Orange 500
+    private static final Color COLOR_CURRENT = new Color(156, 39, 176);       // Material Purple 500
     private static final Color COLOR_SELECTED = new Color(33, 150, 243);      // Material Blue 500
     private static final Color COLOR_BOOKED = new Color(244, 67, 54);         // Material Red 500
     
     // Outline/border colors (darker shades for borders)
-    private static final Color COLOR_CURRENT_BORDER = new Color(230, 81, 0);      // Darker orange (Orange 900)
-    private static final Color COLOR_CURRENT_BORDER_ALPHA = new Color(230, 81, 0, 200); // Orange with alpha
+    private static final Color COLOR_CURRENT_BORDER = new Color(106, 27, 154);      // Darker purple (Purple 800)
+    private static final Color COLOR_CURRENT_BORDER_ALPHA = new Color(106, 27, 154, 200); // Purple with alpha
     private static final Color COLOR_CURRENT_INNER_BORDER = new Color(255, 255, 255, 100); // White with alpha
     private static final Color COLOR_SELECTED_BORDER = new Color(21, 101, 192);    // Darker blue
     private static final Color COLOR_AVAILABLE_BORDER = new Color(56, 142, 60);    // Darker green
@@ -310,7 +310,7 @@ public class DlgDoiVe extends JDialog {
         // Màu sắc theo trạng thái
         if (ghe.getMaGhe() != null && veGoc.getMaSoGhe() != null && 
             ghe.getMaGhe().equals(veGoc.getMaSoGhe())) {
-            // Ghế hiện tại - màu cam với outline và shadow nổi bật
+            // Ghế hiện tại - màu tím với outline và shadow nổi bật
             styleSeatButton(btnGhe, COLOR_CURRENT, Color.WHITE, false, 
                 ICON_CURRENT + " " + ghe.getMaGhe() + " - Ghế hiện tại");
             // Add prominent outline with shadow for current seat
@@ -321,8 +321,8 @@ public class DlgDoiVe extends JDialog {
                 ),
                 BorderFactory.createEmptyBorder(2, 7, 2, 7)
             ));
-            // Enhanced shadow for current seat (orange glow)
-            btnGhe.putClientProperty("FlatLaf.style", "borderWidth: 2; shadowColor: rgba(255,152,0,0.4); shadowWidth: 5");
+            // Enhanced shadow for current seat (purple glow)
+            btnGhe.putClientProperty("FlatLaf.style", "borderWidth: 2; shadowColor: rgba(156,39,176,0.4); shadowWidth: 5");
         } else if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai()) || "Trống".equalsIgnoreCase(ghe.getTrangThai())) {
             // Ghế trống - màu xanh với outline, shadow và hover effect
             final String maGhe = ghe.getMaGhe();
