@@ -53,11 +53,6 @@ public class LoaiGhe implements Serializable {
 
     @Override
     public String toString() {
-        return "LoaiGhe{" +
-                "maLoai='" + maLoai + '\'' +
-                ", tenLoai='" + tenLoai + '\'' +
-                ", moTa='" + moTa + '\'' +
-                ", isActive=" + isActive +
-                '}';
+        return tenLoai;
     }
 }

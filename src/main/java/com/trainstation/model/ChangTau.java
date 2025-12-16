@@ -73,13 +73,6 @@ public class ChangTau implements Serializable {
 
     @Override
     public String toString() {
-        return "ChangTau{" +
-                "maChang='" + maChang + '\'' +
-                ", soKMToiThieu=" + soKMToiThieu +
-                ", soKMToiDa=" + soKMToiDa +
-                ", moTa='" + moTa + '\'' +
-                ", giaTien=" + giaTien +
-                ", isActive=" + isActive +
-                '}';
+        return maChang;
     }
 }

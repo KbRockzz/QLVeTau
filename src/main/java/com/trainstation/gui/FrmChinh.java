@@ -64,8 +64,9 @@ public class FrmChinh extends JFrame {
 
         // Ticket-related auxiliary pages
 
-        addPage("banggia", taoPanelVoiBo(createPlaceholderPanel("Bảng giá"))); // placeholder
+//        addPage("banggia", taoPanelVoiBo(createPlaceholderPanel("Bảng giá"))); // placeholder
 
+        addPage("banggia", taoPanelVoiBo(new PnlBangGia())); // Bảng giá
         // Invoice
         addPage("hoadon", taoPanelVoiBo(new PnlQuanLyVe(taiKhoanHienTai)));
         addPage("timhoadon", taoPanelVoiBo(new PnlTimHoaDon()));
