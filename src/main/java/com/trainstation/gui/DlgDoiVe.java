@@ -273,9 +273,11 @@ public class DlgDoiVe extends JDialog {
         btnGhe.setPreferredSize(new Dimension(80, 40));
         btnGhe.setFont(new Font("Arial", Font.BOLD, 12));
         btnGhe.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        btnGhe.setOpaque(true); // Ensure button is opaque to preserve colors
         
         // Màu sắc theo trạng thái
-        if (ghe.getMaGhe().equals(veGoc.getMaSoGhe())) {
+        if (ghe.getMaGhe() != null && veGoc.getMaSoGhe() != null && 
+            ghe.getMaGhe().equals(veGoc.getMaSoGhe())) {
             // Ghế hiện tại - màu cyan sáng để phân biệt hoàn toàn với đỏ
             btnGhe.setBackground(new Color(0, 255, 255)); // Cyan - bright cyan/aqua
             btnGhe.setForeground(Color.BLACK);
@@ -321,7 +323,7 @@ public class DlgDoiVe extends JDialog {
                 JButton btn = (JButton) comp;
                 String maGhe = btn.getText();
                 
-                // Skip current seat (always orange) and disabled seats
+                // Skip current seat (always cyan) and disabled seats
                 if (maGhe.equals(veGoc.getMaSoGhe()) || !btn.isEnabled()) {
                     continue;
                 }
