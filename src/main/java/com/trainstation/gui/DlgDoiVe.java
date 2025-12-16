@@ -35,11 +35,13 @@ public class DlgDoiVe extends JDialog {
     
     private boolean thanhCong = false;
     
-    // Color constants for seat states
-    private static final Color COLOR_AVAILABLE = new Color(34, 139, 34);  // Forest green
-    private static final Color COLOR_CURRENT = Color.CYAN;                  // Cyan constant (equivalent to 0, 255, 255)
-    private static final Color COLOR_SELECTED = new Color(30, 144, 255);  // Dodger blue
-    private static final Color COLOR_BOOKED = Color.RED;                    // Red constant
+    // Modern color palette for seat states - Material Design inspired
+    private static final Color COLOR_AVAILABLE = new Color(76, 175, 80);      // Material Green 500
+    private static final Color COLOR_AVAILABLE_HOVER = new Color(102, 187, 106); // Material Green 400
+    private static final Color COLOR_CURRENT = new Color(0, 188, 212);        // Material Cyan 600
+    private static final Color COLOR_SELECTED = new Color(33, 150, 243);      // Material Blue 500
+    private static final Color COLOR_BOOKED = new Color(244, 67, 54);         // Material Red 500
+    private static final Color COLOR_SHADOW = new Color(0, 0, 0, 20);         // Subtle shadow
     
     public DlgDoiVe(Frame owner, Ve veGoc) {
         super(owner, "Đổi vé", true);
@@ -232,11 +234,11 @@ public class DlgDoiVe extends JDialog {
             pnlSeatMap.setLayout(new FlowLayout());
             pnlSeatMap.add(new JLabel("Không có ghế trong toa này"));
         } else {
-            // Sử dụng layout giống PnlDatVe: 2 ghế | lối đi | 2 ghế
+            // Modern seat map layout with better spacing: 2 ghế | lối đi | 2 ghế
             int soGhe = danhSachGhe.size();
             int soHang = (int) Math.ceil(soGhe / 4.0);
             
-            pnlSeatMap.setLayout(new GridLayout(soHang, 5, 5, 5));
+            pnlSeatMap.setLayout(new GridLayout(soHang, 5, 8, 8)); // Increased spacing for modern look
             
             for (int i = 0; i < soHang; i++) {
                 // 2 ghế bên trái
@@ -249,10 +251,14 @@ public class DlgDoiVe extends JDialog {
                     }
                 }
                 
-                // Lối đi (aisle)
+                // Lối đi (aisle) - modern styling
                 JPanel pnlLoiDi = new JPanel();
-                pnlLoiDi.setBackground(new Color(200, 200, 200));
-                pnlLoiDi.setPreferredSize(new Dimension(30, 40));
+                pnlLoiDi.setBackground(new Color(224, 224, 224));
+                pnlLoiDi.setPreferredSize(new Dimension(35, 45));
+                pnlLoiDi.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(189, 189, 189), 1),
+                    BorderFactory.createEmptyBorder(2, 2, 2, 2)
+                ));
                 pnlSeatMap.add(pnlLoiDi);
                 
                 // 2 ghế bên phải
@@ -272,40 +278,60 @@ public class DlgDoiVe extends JDialog {
     }
     
     /**
-     * Tạo nút ghế với màu sắc tương ứng
+     * Tạo nút ghế với thiết kế hiện đại theo Material Design
      */
     private JButton taoNutGhe(Ghe ghe) {
         JButton btnGhe = new JButton(ghe.getMaGhe());
-        btnGhe.setPreferredSize(new Dimension(80, 40));
-        btnGhe.setFont(new Font("Arial", Font.BOLD, 12));
-        btnGhe.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        btnGhe.setOpaque(true); // Ensure button is opaque to preserve colors
-        btnGhe.setContentAreaFilled(true); // Ensure button content area is filled
+        
+        // Modern styling with rounded corners
+        btnGhe.setPreferredSize(new Dimension(85, 45));
+        btnGhe.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnGhe.setFocusPainted(false);
+        btnGhe.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnGhe.setOpaque(true);
+        btnGhe.setContentAreaFilled(true);
+        
+        // Rounded border with FlatLaf properties for modern look
+        btnGhe.putClientProperty("JButton.buttonType", "roundRect");
+        btnGhe.putClientProperty("JComponent.roundRect", "6,6,6,6"); // 6px radius matching theme
+        btnGhe.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         
         // Màu sắc theo trạng thái
         if (ghe.getMaGhe() != null && veGoc.getMaSoGhe() != null && 
             ghe.getMaGhe().equals(veGoc.getMaSoGhe())) {
-            // Ghế hiện tại - màu cyan sáng để phân biệt hoàn toàn với đỏ
-            btnGhe.setBackground(COLOR_CURRENT);
-            btnGhe.setForeground(Color.BLACK);
-            // Force background color for disabled state in FlatLaf
-            btnGhe.putClientProperty("Button.disabledBackground", COLOR_CURRENT);
-            btnGhe.putClientProperty("Button.disabledText", Color.BLACK);
-            btnGhe.setEnabled(false);
-            btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Ghế hiện tại");
+            // Ghế hiện tại - màu cyan với hiệu ứng đặc biệt
+            styleSeatButton(btnGhe, COLOR_CURRENT, Color.WHITE, false, "🎯 " + ghe.getMaGhe() + " - Ghế hiện tại");
+            // Add subtle border to highlight current seat
+            btnGhe.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0, 150, 170), 2),
+                BorderFactory.createEmptyBorder(3, 8, 3, 8)
+            ));
         } else if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai()) || "Trống".equalsIgnoreCase(ghe.getTrangThai())) {
-            // Ghế trống - màu xanh (check both "Rảnh" and "Trống" for compatibility)
+            // Ghế trống - màu xanh với hover effect
             final String maGhe = ghe.getMaGhe();
-            btnGhe.setBackground(COLOR_AVAILABLE);
-            btnGhe.setForeground(Color.BLACK);
-            btnGhe.setEnabled(true);
-            btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Trống");
             
             // Check if this is the selected seat
             if (maGhe.equals(gheChon)) {
-                btnGhe.setBackground(COLOR_SELECTED);
-                btnGhe.setForeground(Color.WHITE);
-                btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đang chọn");
+                styleSeatButton(btnGhe, COLOR_SELECTED, Color.WHITE, true, "✓ " + ghe.getMaGhe() + " - Đang chọn");
+            } else {
+                styleSeatButton(btnGhe, COLOR_AVAILABLE, Color.WHITE, true, "✓ " + ghe.getMaGhe() + " - Trống");
+                
+                // Add modern hover effect
+                btnGhe.addMouseListener(new java.awt.event.MouseAdapter() {
+                    @Override
+                    public void mouseEntered(java.awt.event.MouseEvent evt) {
+                        if (btnGhe.isEnabled() && !maGhe.equals(gheChon)) {
+                            btnGhe.setBackground(COLOR_AVAILABLE_HOVER);
+                        }
+                    }
+                    
+                    @Override
+                    public void mouseExited(java.awt.event.MouseEvent evt) {
+                        if (btnGhe.isEnabled() && !maGhe.equals(gheChon)) {
+                            btnGhe.setBackground(COLOR_AVAILABLE);
+                        }
+                    }
+                });
             }
             
             btnGhe.addActionListener(e -> {
@@ -313,17 +339,27 @@ public class DlgDoiVe extends JDialog {
                 updateSeatColors();
             });
         } else {
-            // Ghế đã đặt - màu đỏ
-            btnGhe.setBackground(COLOR_BOOKED);
-            btnGhe.setForeground(Color.BLACK);
-            // Force background color for disabled state in FlatLaf
-            btnGhe.putClientProperty("Button.disabledBackground", COLOR_BOOKED);
-            btnGhe.putClientProperty("Button.disabledText", Color.BLACK);
-            btnGhe.setEnabled(false);
-            btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đã đặt");
+            // Ghế đã đặt - màu đỏ với visual indicator
+            styleSeatButton(btnGhe, COLOR_BOOKED, Color.WHITE, false, "✕ " + ghe.getMaGhe() + " - Đã đặt");
         }
         
         return btnGhe;
+    }
+    
+    /**
+     * Áp dụng styling hiện đại cho nút ghế
+     */
+    private void styleSeatButton(JButton btn, Color bgColor, Color fgColor, boolean enabled, String tooltip) {
+        btn.setBackground(bgColor);
+        btn.setForeground(fgColor);
+        btn.setEnabled(enabled);
+        btn.setToolTipText(tooltip);
+        
+        // FlatLaf properties to preserve colors when disabled
+        if (!enabled) {
+            btn.putClientProperty("Button.disabledBackground", bgColor);
+            btn.putClientProperty("Button.disabledText", fgColor);
+        }
     }
     
     /**
@@ -336,6 +372,11 @@ public class DlgDoiVe extends JDialog {
                 JButton btn = (JButton) comp;
                 String maGhe = btn.getText();
                 
+                // Extract seat code from button text (may have emoji prefix)
+                if (maGhe.contains(" ")) {
+                    maGhe = maGhe.split(" ")[1]; // Get part after emoji
+                }
+                
                 // Skip current seat (always cyan) and disabled seats
                 if (maGhe.equals(veGoc.getMaSoGhe()) || !btn.isEnabled()) {
                     continue;
@@ -345,12 +386,12 @@ public class DlgDoiVe extends JDialog {
                 if (maGhe.equals(gheChon)) {
                     btn.setBackground(COLOR_SELECTED);
                     btn.setForeground(Color.WHITE);
-                    btn.setToolTipText("Ghế " + maGhe + " - Đang chọn");
+                    btn.setToolTipText("✓ " + maGhe + " - Đang chọn");
                 } else {
                     // Reset to green for available seats
                     btn.setBackground(COLOR_AVAILABLE);
-                    btn.setForeground(Color.BLACK);
-                    btn.setToolTipText("Ghế " + maGhe + " - Trống");
+                    btn.setForeground(Color.WHITE);
+                    btn.setToolTipText("✓ " + maGhe + " - Trống");
                 }
             }
         }
