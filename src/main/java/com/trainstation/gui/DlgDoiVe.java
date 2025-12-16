@@ -274,13 +274,21 @@ public class DlgDoiVe extends JDialog {
         btnGhe.setFont(new Font("Arial", Font.BOLD, 12));
         btnGhe.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         btnGhe.setOpaque(true); // Ensure button is opaque to preserve colors
+        btnGhe.setContentAreaFilled(true); // Ensure button content area is filled
         
         // Màu sắc theo trạng thái
         if (ghe.getMaGhe() != null && veGoc.getMaSoGhe() != null && 
             ghe.getMaGhe().equals(veGoc.getMaSoGhe())) {
             // Ghế hiện tại - màu cyan sáng để phân biệt hoàn toàn với đỏ
-            btnGhe.setBackground(new Color(0, 255, 255)); // Cyan - bright cyan/aqua
+            Color cyanColor = new Color(0, 255, 255); // Cyan - bright cyan/aqua
+            btnGhe.setBackground(cyanColor);
             btnGhe.setForeground(Color.BLACK);
+            // Preserve colors when disabled by using FlatLaf client properties
+            btnGhe.putClientProperty("JButton.buttonType", "roundRect");
+            btnGhe.putClientProperty("JComponent.minimumWidth", 0);
+            // Force background color for disabled state in FlatLaf
+            btnGhe.putClientProperty("Button.disabledBackground", cyanColor);
+            btnGhe.putClientProperty("Button.disabledText", Color.BLACK);
             btnGhe.setEnabled(false);
             btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Ghế hiện tại");
         } else if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai()) || "Trống".equalsIgnoreCase(ghe.getTrangThai())) {
@@ -304,8 +312,14 @@ public class DlgDoiVe extends JDialog {
             });
         } else {
             // Ghế đã đặt - màu đỏ
-            btnGhe.setBackground(Color.RED);
+            Color redColor = Color.RED;
+            btnGhe.setBackground(redColor);
             btnGhe.setForeground(Color.BLACK);
+            // Preserve colors when disabled by using FlatLaf client properties
+            btnGhe.putClientProperty("JButton.buttonType", "roundRect");
+            btnGhe.putClientProperty("JComponent.minimumWidth", 0);
+            btnGhe.putClientProperty("Button.disabledBackground", redColor);
+            btnGhe.putClientProperty("Button.disabledText", Color.BLACK);
             btnGhe.setEnabled(false);
             btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đã đặt");
         }
