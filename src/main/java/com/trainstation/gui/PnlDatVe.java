@@ -553,7 +553,8 @@ public class PnlDatVe extends JPanel {
         btnGhe.setPreferredSize(new Dimension(80, 40));
         btnGhe.setFont(new Font("Arial", Font.BOLD, 12));
         btnGhe.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai())) {
+        // Treat both "Rảnh" (idle) and "Trống" (empty/refunded) as available seats
+        if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai()) || "Trống".equalsIgnoreCase(ghe.getTrangThai())) {
             btnGhe.setBackground(new Color(34, 139, 34)); // Xanh
             btnGhe.setForeground(Color.BLACK);
             btnGhe.setEnabled(true);
@@ -892,7 +893,10 @@ public class PnlDatVe extends JPanel {
                 return;
             }
             String trangThaiDB = gheDB.getTrangThai();
-            if (trangThaiDB != null && !"Rảnh".equalsIgnoreCase(trangThaiDB) && !"RANH".equalsIgnoreCase(trangThaiDB)) {
+            if (trangThaiDB != null && 
+                !"Rảnh".equalsIgnoreCase(trangThaiDB) && 
+                !"Trống".equalsIgnoreCase(trangThaiDB) && 
+                !"RANH".equalsIgnoreCase(trangThaiDB)) {
                 // Ghế đã bị đặt/giữ bởi người khác
                 JOptionPane.showMessageDialog(this, "Ghế này đã không còn trống (" + trangThaiDB + "). Vui lòng chọn ghế khác.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 // refresh seat map để hiển thị trạng thái thực tế
