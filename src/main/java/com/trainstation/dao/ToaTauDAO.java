@@ -1,7 +1,6 @@
 package com.trainstation.dao;
 
 import com.trainstation.model.ToaTau;
-import com.trainstation.model.ChiTietChuyenTau;
 import com.trainstation.MySQL.ConnectSql;
 import java.sql.*;
 import java.util.ArrayList;
@@ -137,19 +136,30 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
             return result;
         }
         
-        try {
-            // Get ChiTietChuyenTau records for this train
-            ChiTietChuyenTauDAO chiTietDAO = ChiTietChuyenTauDAO.getInstance();
-            List<ChiTietChuyenTau> chiTietList = chiTietDAO.findByChuyenTau(maChuyenTau);
-            
-            // For each ChiTietChuyenTau, get the corresponding ToaTau
-            for (ChiTietChuyenTau chiTiet : chiTietList) {
-                ToaTau toa = findById(chiTiet.getMaToaTau());
-                if (toa != null) {
+        // Use a JOIN query to fetch all coaches in one database round-trip
+        String sql = "SELECT t.maToa, t.loaiToa, t.samSX, t.trangThai, t.sucChua, t.isActive " +
+                     "FROM ToaTau t " +
+                     "INNER JOIN ChiTietChuyenTau ct ON t.maToa = ct.maToaTau " +
+                     "WHERE ct.maChuyenTau = ? AND ct.isActive = 1 AND t.isActive = 1 " +
+                     "ORDER BY ct.soThuTuToa";
+        
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maChuyenTau);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    ToaTau toa = new ToaTau(
+                            rs.getString("maToa"),
+                            rs.getString("loaiToa"),
+                            rs.getObject("samSX", Integer.class),
+                            rs.getString("trangThai"),
+                            rs.getObject("sucChua", Integer.class),
+                            rs.getBoolean("isActive")
+                    );
                     result.add(toa);
                 }
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         
