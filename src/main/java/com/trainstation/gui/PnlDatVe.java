@@ -29,6 +29,7 @@ public class PnlDatVe extends JPanel {
     private VeService veService;
     private ChuyenTauDAO chuyenTauDAO;
     private ToaTauDAO toaTauDAO;
+    private ChiTietChuyenTauDAO chiTietChuyenTauDAO;
     private GheDAO gheDAO;
     private KhachHangDAO khachHangDAO;
     private LoaiVeDAO loaiVeDAO;
@@ -72,6 +73,7 @@ public class PnlDatVe extends JPanel {
         this.veService = VeService.getInstance();
         this.chuyenTauDAO = ChuyenTauDAO.getInstance();
         this.toaTauDAO = ToaTauDAO.getInstance();
+        this.chiTietChuyenTauDAO = ChiTietChuyenTauDAO.getInstance();
         this.gheDAO = GheDAO.getInstance();
         this.khachHangDAO = KhachHangDAO.getInstance();
         this.loaiVeDAO = LoaiVeDAO.getInstance();
@@ -421,20 +423,52 @@ public class PnlDatVe extends JPanel {
 
         if (chuyenDuocChon == null) return;
 
+        // Clear the coach table and seat map
         modelBangToa.setRowCount(0);
-        List<ToaTau> danhSachToa = toaTauDAO.getByTau(chuyenDuocChon.getMaTau());
-        for (ToaTau toa : danhSachToa) {
-            modelBangToa.addRow(new Object[]{
-                    toa.getMaToa(),
-                    toa.getTenToa(),
-                    toa.getLoaiToa(),
-                    toa.getSucChua()
-            });
-        }
-
         pnlSoDoGhe.removeAll();
         pnlSoDoGhe.revalidate();
         pnlSoDoGhe.repaint();
+
+        // Load coaches dynamically based on the selected trip using ChiTietChuyenTau
+        try {
+            List<ToaTau> danhSachToa = chiTietChuyenTauDAO.getCoachesByTrip(maChuyen);
+            
+            if (danhSachToa.isEmpty()) {
+                // Handle edge case: no coaches assigned to this trip
+                // Try fallback to loading by train ID (maTau) for backward compatibility
+                System.out.println("No coaches found in ChiTietChuyenTau for trip " + maChuyen + 
+                                   ", falling back to loading by train ID");
+                danhSachToa = toaTauDAO.getByTau(chuyenDuocChon.getMaTau());
+                
+                if (danhSachToa.isEmpty()) {
+                    // Still no coaches found
+                    JOptionPane.showMessageDialog(this, 
+                        "Không có toa tàu nào được gán cho chuyến tàu này.\nVui lòng liên hệ quản trị viên.", 
+                        "Không có toa tàu", 
+                        JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+            
+            // Populate the coach table
+            for (ToaTau toa : danhSachToa) {
+                modelBangToa.addRow(new Object[]{
+                        toa.getMaToa(),
+                        toa.getTenToa(),
+                        toa.getLoaiToa(),
+                        toa.getSucChua()
+                });
+            }
+        } catch (Exception e) {
+            // Handle edge case: database connection issues
+            System.err.println("Error loading coaches for trip " + maChuyen + ": " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, 
+                "Lỗi khi tải danh sách toa tàu: " + e.getMessage() + 
+                "\nVui lòng thử lại hoặc liên hệ quản trị viên.", 
+                "Lỗi kết nối", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void chonToaTau() {
