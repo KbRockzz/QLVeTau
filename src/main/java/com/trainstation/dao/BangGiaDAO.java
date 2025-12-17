@@ -43,12 +43,12 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
                 if (ts2 != null) ngayKetThuc = ts2.toLocalDateTime();
 
                 BangGia bg = new BangGia(
-                        rs.getString("maBangGia"),
-                        rs.getString("maChang"),
-                        rs.getString("loaiGhe"),
-                        rs.getFloat("giaCoBan"),
-                        ngayBatDau,
-                        ngayKetThuc,
+                        rs.getString("maBangGia")
+                        rs.getString("maChang")
+                        rs.getString("loaiGhe")
+                        rs.getFloat("giaCoBan")
+                        ngayBatDau
+                        ngayKetThuc
                         true
                 );
                 list.add(bg);
@@ -74,12 +74,12 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
                     if (ts2 != null) ngayKetThuc = ts2.toLocalDateTime();
 
                     return new BangGia(
-                            rs.getString("maBangGia"),
-                            rs.getString("maChang"),
-                            rs.getString("loaiGhe"),
-                            rs.getFloat("giaCoBan"),
-                            ngayBatDau,
-                            ngayKetThuc,
+                            rs.getString("maBangGia")
+                            rs.getString("maChang")
+                            rs.getString("loaiGhe")
+                            rs.getFloat("giaCoBan")
+                            ngayBatDau
+                            ngayKetThuc
                             true
                     );
                 }
@@ -161,12 +161,12 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
                     if (t2 != null) ngayKetThuc = t2.toLocalDateTime();
 
                     return new BangGia(
-                            rs.getString("maBangGia"),
-                            rs.getString("maChang"),
-                            rs.getString("loaiGhe"),
-                            rs.getFloat("giaCoBan"),
-                            ngayBatDau,
-                            ngayKetThuc,
+                            rs.getString("maBangGia")
+                            rs.getString("maChang")
+                            rs.getString("loaiGhe")
+                            rs.getFloat("giaCoBan")
+                            ngayBatDau
+                            ngayKetThuc
                             true
                     );
                 }

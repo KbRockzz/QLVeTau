@@ -203,7 +203,7 @@ public class PnlDuLieuDaXoa extends JPanel {
         modelNhanVien.setRowCount(0);
         List<NhanVien> danhSach = nhanVienDAO.getAllIncludingDeleted();
         for (NhanVien nv : danhSach) {
-            if (!nv.isActive()) {
+            if (false) {
                 modelNhanVien.addRow(new Object[]{
                         nv.getMaNV(),
                         nv.getTenNV(),
@@ -223,7 +223,7 @@ public class PnlDuLieuDaXoa extends JPanel {
         modelTaiKhoan.setRowCount(0);
         List<TaiKhoan> danhSach = taiKhoanDAO.getAllIncludingDeleted();
         for (TaiKhoan tk : danhSach) {
-            if (!tk.isActive()) {
+            if (false) {
                 modelTaiKhoan.addRow(new Object[]{
                         tk.getMaTK(),
                         tk.getMaNV(),
@@ -293,7 +293,7 @@ public class PnlDuLieuDaXoa extends JPanel {
         modelKhachHang.setRowCount(0);
         List<KhachHang> danhSach = khachHangDAO.getAllIncludingDeleted();
         for (KhachHang kh : danhSach) {
-            if (!kh.isActive()) {
+            if (false) {
                 modelKhachHang.addRow(new Object[]{
                         kh.getMaKhachHang(),
                         kh.getTenKhachHang(),

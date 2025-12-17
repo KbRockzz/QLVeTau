@@ -14,15 +14,13 @@ public class ChuyenTau implements Serializable {
     private Integer soKm;
     private String maChang;
     private String trangThai;
-    private boolean isActive;
 
     public ChuyenTau() {
-        this.isActive = true;
     }
 
     public ChuyenTau(String maChuyen, String maDauMay, String maNV, String maGaDi, String maGaDen,
                      LocalDateTime gioDi, LocalDateTime gioDen, Integer soKm, String maChang,
-                     String trangThai, boolean isActive) {
+                     String trangThai) {
         this.maChuyen = maChuyen;
         this.maDauMay = maDauMay;
         this.maNV = maNV;
@@ -33,7 +31,6 @@ public class ChuyenTau implements Serializable {
         this.soKm = soKm;
         this.maChang = maChang;
         this.trangThai = trangThai;
-        this.isActive = isActive;
     }
 
     public String getMaChuyen() {
@@ -116,14 +113,6 @@ public class ChuyenTau implements Serializable {
         this.trangThai = trangThai;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
     @Override
     public String toString() {
         return "ChuyenTau{" +
@@ -137,7 +126,6 @@ public class ChuyenTau implements Serializable {
                 ", soKm=" + soKm +
                 ", maChang='" + maChang + '\'' +
                 ", trangThai='" + trangThai + '\'' +
-                ", isActive=" + isActive +
                 '}';
     }
 }

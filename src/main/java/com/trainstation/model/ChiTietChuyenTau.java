@@ -7,18 +7,15 @@ public class ChiTietChuyenTau implements Serializable {
     private String maToaTau;
     private Integer soThuTuToa;
     private Integer sucChua;
-    private boolean isActive;
 
     public ChiTietChuyenTau() {
-        this.isActive = true;
     }
 
-    public ChiTietChuyenTau(String maChuyenTau, String maToaTau, Integer soThuTuToa, Integer sucChua, boolean isActive) {
+    public ChiTietChuyenTau(String maChuyenTau, String maToaTau, Integer soThuTuToa, Integer sucChua) {
         this.maChuyenTau = maChuyenTau;
         this.maToaTau = maToaTau;
         this.soThuTuToa = soThuTuToa;
         this.sucChua = sucChua;
-        this.isActive = isActive;
     }
 
     public String getMaChuyenTau() {
@@ -53,14 +50,6 @@ public class ChiTietChuyenTau implements Serializable {
         this.sucChua = sucChua;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
     @Override
     public String toString() {
         return "ChiTietChuyenTau{" +
@@ -68,7 +57,6 @@ public class ChiTietChuyenTau implements Serializable {
                 ", maToaTau='" + maToaTau + '\'' +
                 ", soThuTuToa=" + soThuTuToa +
                 ", sucChua=" + sucChua +
-                ", isActive=" + isActive +
                 '}';
     }
 }

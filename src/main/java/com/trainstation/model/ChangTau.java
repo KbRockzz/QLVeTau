@@ -8,20 +8,16 @@ public class ChangTau implements Serializable {
     private Integer soKMToiDa;
     private String moTa;
     private Float giaTien;
-    private boolean isActive;
 
     public ChangTau() {
-        this.isActive = true;
     }
 
-    public ChangTau(String maChang, Integer soKMToiThieu, Integer soKMToiDa, String moTa, Float giaTien, boolean isActive) {
+    public ChangTau(String maChang, Integer soKMToiThieu, Integer soKMToiDa, String moTa, Float giaTien) {
         this.maChang = maChang;
         this.soKMToiThieu = soKMToiThieu;
         this.soKMToiDa = soKMToiDa;
         this.moTa = moTa;
-        this.giaTien = giaTien;
-        this.isActive = isActive;
-    }
+        this.giaTien = giaTien;    }
 
     public String getMaChang() {
         return maChang;
@@ -61,25 +57,14 @@ public class ChangTau implements Serializable {
 
     public void setGiaTien(Float giaTien) {
         this.giaTien = giaTien;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    @Override
+    }    @Override
     public String toString() {
         return "ChangTau{" +
                 "maChang='" + maChang + '\'' +
                 ", soKMToiThieu=" + soKMToiThieu +
                 ", soKMToiDa=" + soKMToiDa +
                 ", moTa='" + moTa + '\'' +
-                ", giaTien=" + giaTien +
-                ", isActive=" + isActive +
+                ", giaTien=" + giaTien + +
                 '}';
     }
 }
