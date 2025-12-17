@@ -98,22 +98,26 @@ public class ChiTietChuyenTauDAO implements GenericDAO<ChiTietChuyenTau> {
     public List<ToaTau> getCoachesByTrip(String maChuyenTau) {
         List<ToaTau> coaches = new ArrayList<>();
         
-        // Query to get coach IDs from ChiTietChuyenTau, ordered by coach sequence
-        String sql = "SELECT maToaTau FROM ChiTietChuyenTau " +
-                     "WHERE maChuyenTau = ? AND isActive = 1 " +
-                     "ORDER BY soThuTuToa";
+        // Query to get coach details using JOIN to avoid N+1 query problem
+        String sql = "SELECT t.maToa, t.tenToa, t.loaiToa, t.maTau, t.sucChua " +
+                     "FROM ChiTietChuyenTau ct " +
+                     "INNER JOIN ToaTau t ON ct.maToaTau = t.maToa " +
+                     "WHERE ct.maChuyenTau = ? AND ct.isActive = 1 " +
+                     "ORDER BY ct.soThuTuToa";
         
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maChuyenTau);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    String maToaTau = rs.getString("maToaTau");
-                    // Fetch the full ToaTau details
-                    ToaTau coach = toaTauDAO.findById(maToaTau);
-                    if (coach != null) {
-                        coaches.add(coach);
-                    }
+                    ToaTau coach = new ToaTau(
+                        rs.getString("maToa"),
+                        rs.getString("tenToa"),
+                        rs.getString("loaiToa"),
+                        rs.getString("maTau"),
+                        rs.getInt("sucChua")
+                    );
+                    coaches.add(coach);
                 }
             }
         } catch (SQLException e) {
