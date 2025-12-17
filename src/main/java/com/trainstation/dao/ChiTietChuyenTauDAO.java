@@ -53,8 +53,10 @@ public class ChiTietChuyenTauDAO implements GenericDAO<ChiTietChuyenTau> {
     @Override
     public ChiTietChuyenTau findById(String id) {
         // This table has a composite primary key (maChuyenTau, maToaTau)
-        // This method is not directly applicable; use findByCompositeKey instead
-        return null;
+        // This method is not applicable; use findByCompositeKey instead
+        throw new UnsupportedOperationException(
+            "ChiTietChuyenTau has a composite primary key. Use findByCompositeKey(maChuyenTau, maToaTau) instead."
+        );
     }
 
     /**
@@ -213,9 +215,11 @@ public class ChiTietChuyenTauDAO implements GenericDAO<ChiTietChuyenTau> {
 
     @Override
     public boolean delete(String id) {
-        // This table has a composite primary key
-        // This method is not directly applicable
-        return false;
+        // This table has a composite primary key (maChuyenTau, maToaTau)
+        // This method is not applicable; use softDelete or hardDelete instead
+        throw new UnsupportedOperationException(
+            "ChiTietChuyenTau has a composite primary key. Use softDelete(maChuyenTau, maToaTau) or hardDelete(maChuyenTau, maToaTau) instead."
+        );
     }
 
     /**
