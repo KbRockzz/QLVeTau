@@ -46,7 +46,8 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
 
     @Override
     public TaiKhoan findById(String id) {
-        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai FROM TaiKhoan WHERE maTK = ?";
+        // Only find active accounts (isActive = 1)
+        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai FROM TaiKhoan WHERE maTK = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);

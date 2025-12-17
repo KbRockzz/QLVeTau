@@ -39,7 +39,8 @@ public class GaDAO implements GenericDAO<Ga> {
 
     @Override
     public Ga findById(String id) {
-        String sql = "SELECT maGa, tenGa, moTa, tinhTrang, diaChi FROM Ga WHERE maGa = ?";
+        // Only find active stations (isActive = 1)
+        String sql = "SELECT maGa, tenGa, moTa, tinhTrang, diaChi FROM Ga WHERE maGa = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);

@@ -45,7 +45,8 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
 
     @Override
     public KhachHang findById(String id) {
-        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE maKhachHang = ?";
+        // Only find active customers (isActive = 1)
+        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE maKhachHang = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -155,7 +156,8 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     }
 
     public KhachHang timTheoSoDienThoai(String soDienThoai) {
-        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE soDienThoai = ?";
+        // Only find active customers (isActive = 1)
+        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE soDienThoai = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, soDienThoai);

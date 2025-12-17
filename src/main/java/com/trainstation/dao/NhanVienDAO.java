@@ -55,7 +55,8 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public NhanVien findById(String id) {
-        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien WHERE maNV = ?";
+        // Only find active employees (isActive = 1)
+        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien WHERE maNV = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
