@@ -4,9 +4,11 @@ import com.trainstation.config.MaterialInitializer;
 import com.trainstation.dao.NhanVienDAO;
 import com.trainstation.dao.TaiKhoanDAO;
 import com.trainstation.dao.KhachHangDAO;
+import com.trainstation.dao.GaDAO;
 import com.trainstation.model.NhanVien;
 import com.trainstation.model.TaiKhoan;
 import com.trainstation.model.KhachHang;
+import com.trainstation.model.Ga;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -14,13 +16,14 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Panel hiển thị dữ liệu đã xóa cho Nhân viên, Tài khoản và Khách hàng
+ * Panel hiển thị dữ liệu đã xóa cho Nhân viên, Tài khoản, Khách hàng và Ga
  * Cho phép khôi phục những dữ liệu đã xóa.
  */
 public class PnlDuLieuDaXoa extends JPanel {
     private NhanVienDAO nhanVienDAO;
     private TaiKhoanDAO taiKhoanDAO;
     private KhachHangDAO khachHangDAO;
+    private GaDAO gaDAO;
     
     // Employee tab components
     private JTable bangNhanVien;
@@ -37,14 +40,21 @@ public class PnlDuLieuDaXoa extends JPanel {
     private DefaultTableModel modelKhachHang;
     private JButton btnKhoiPhucKH, btnLamMoiKH, btnXoaRongKH;
 
+    // Station tab components
+    private JTable bangGa;
+    private DefaultTableModel modelGa;
+    private JButton btnKhoiPhucGa, btnLamMoiGa, btnXoaRongGa;
+
     public PnlDuLieuDaXoa() {
         this.nhanVienDAO = NhanVienDAO.getInstance();
         this.taiKhoanDAO = TaiKhoanDAO.getInstance();
         this.khachHangDAO = KhachHangDAO.getInstance();
+        this.gaDAO = GaDAO.getInstance();
         initComponents();
         taiDuLieuNhanVienDaXoa();
         taiDuLieuTaiKhoanDaXoa();
         taiDuLieuKhachHangDaXoa();
+        taiDuLieuGaDaXoa();
     }
 
     private void initComponents() {
@@ -69,6 +79,10 @@ public class PnlDuLieuDaXoa extends JPanel {
         // Customer tab
         JPanel customerPanel = createCustomerPanel();
         tabbedPane.addTab("Khách hàng", customerPanel);
+        
+        // Station tab
+        JPanel stationPanel = createStationPanel();
+        tabbedPane.addTab("Ga", stationPanel);
         
         add(tabbedPane, BorderLayout.CENTER);
     }
@@ -358,6 +372,95 @@ public class PnlDuLieuDaXoa extends JPanel {
         } else {
             JOptionPane.showMessageDialog(this, 
                 "Khôi phục khách hàng thất bại!", 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Create station restore panel
+     */
+    private JPanel createStationPanel() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+
+        // Table
+        String[] columns = {"Mã ga", "Tên ga", "Mô tả", "Tình trạng", "Địa chỉ"};
+        modelGa = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        bangGa = new JTable(modelGa);
+        JScrollPane scrollPane = new JScrollPane(bangGa);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        // Buttons
+        JPanel pnlButton = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        btnKhoiPhucGa = new JButton("Khôi phục");
+        btnLamMoiGa = new JButton("Làm mới");
+        
+        btnKhoiPhucGa.addActionListener(e -> khoiPhucGa());
+        btnLamMoiGa.addActionListener(e -> taiDuLieuGaDaXoa());
+        
+        pnlButton.add(btnKhoiPhucGa);
+        pnlButton.add(btnLamMoiGa);
+        
+        panel.add(pnlButton, BorderLayout.SOUTH);
+        return panel;
+    }
+
+    /**
+     * Tải dữ liệu các ga có isActive = 0 (đã xóa mềm)
+     */
+    private void taiDuLieuGaDaXoa() {
+        modelGa.setRowCount(0);
+        List<Ga> danhSach = gaDAO.getDeletedStations();
+        for (Ga ga : danhSach) {
+            modelGa.addRow(new Object[]{
+                    ga.getMaGa(),
+                    ga.getTenGa(),
+                    ga.getMoTa(),
+                    ga.getTinhTrang(),
+                    ga.getDiaChi()
+            });
+        }
+    }
+
+    /**
+     * Khôi phục ga đã xóa (set isActive = 1)
+     */
+    private void khoiPhucGa() {
+        int row = bangGa.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, 
+                "Vui lòng chọn ga cần khôi phục!", 
+                "Thông báo", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String maGa = (String) modelGa.getValueAt(row, 0);
+        String tenGa = (String) modelGa.getValueAt(row, 1);
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có chắc chắn muốn khôi phục ga:\n" + maGa + " - " + tenGa + "?",
+                "Xác nhận khôi phục",
+                JOptionPane.YES_NO_OPTION);
+        
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        if (gaDAO.restoreStation(maGa)) {
+            JOptionPane.showMessageDialog(this, 
+                "Khôi phục ga thành công!", 
+                "Thành công", 
+                JOptionPane.INFORMATION_MESSAGE);
+            taiDuLieuGaDaXoa(); // Reload the table
+        } else {
+            JOptionPane.showMessageDialog(this, 
+                "Khôi phục ga thất bại!", 
                 "Lỗi", 
                 JOptionPane.ERROR_MESSAGE);
         }
