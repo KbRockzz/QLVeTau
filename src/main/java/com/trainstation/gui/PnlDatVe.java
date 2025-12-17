@@ -443,22 +443,50 @@ public class PnlDatVe extends JPanel {
         String maChuyen = (String) modelBangChuyenTau.getValueAt(row, 0);
         chuyenDuocChon = chuyenTauDAO.findById(maChuyen);
 
-        if (chuyenDuocChon == null) return;
-
-        modelBangToa.setRowCount(0);
-        List<ToaTau> danhSachToa = toaTauDAO.getByTau(chuyenDuocChon.getMaDauMay());
-        for (ToaTau toa : danhSachToa) {
-            modelBangToa.addRow(new Object[]{
-                    toa.getMaToa(),
-                    toa.getMaToa(), // Using maToa instead of tenToa
-                    toa.getLoaiToa(),
-                    toa.getSucChua()
-            });
+        if (chuyenDuocChon == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Không thể tải thông tin chuyến tàu. Vui lòng thử lại.", 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
+        // Clear previous coach selection
+        modelBangToa.setRowCount(0);
         pnlSoDoGhe.removeAll();
         pnlSoDoGhe.revalidate();
         pnlSoDoGhe.repaint();
+        
+        try {
+            // Load coaches for the selected train using ChiTietChuyenTau relationship
+            List<ToaTau> danhSachToa = toaTauDAO.getByChuyenTau(chuyenDuocChon.getMaChuyen());
+            
+            if (danhSachToa == null || danhSachToa.isEmpty()) {
+                // No coaches found for this train
+                JOptionPane.showMessageDialog(this, 
+                    "Chuyến tàu này chưa được cấu hình toa tàu. Vui lòng chọn chuyến khác.", 
+                    "Thông báo", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            
+            // Populate the coach table
+            for (ToaTau toa : danhSachToa) {
+                modelBangToa.addRow(new Object[]{
+                        toa.getMaToa(),
+                        toa.getMaToa(), // Using maToa instead of tenToa
+                        toa.getLoaiToa(),
+                        toa.getSucChua()
+                });
+            }
+        } catch (Exception e) {
+            // Handle database or connection errors
+            JOptionPane.showMessageDialog(this, 
+                "Lỗi khi tải danh sách toa tàu: " + e.getMessage(), 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 
     private void chonToaTau() {

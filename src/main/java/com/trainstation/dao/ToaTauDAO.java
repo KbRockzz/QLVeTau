@@ -1,6 +1,7 @@
 package com.trainstation.dao;
 
 import com.trainstation.model.ToaTau;
+import com.trainstation.model.ChiTietChuyenTau;
 import com.trainstation.MySQL.ConnectSql;
 import java.sql.*;
 import java.util.ArrayList;
@@ -122,5 +123,36 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
     public List<ToaTau> getByTau(String maTau) {
         // Since ToaTau no longer has maTau column, return all active ToaTau
         return getAll();
+    }
+
+    /**
+     * Get coaches (ToaTau) for a specific train trip (ChuyenTau) using ChiTietChuyenTau relationship
+     * @param maChuyenTau Train trip ID
+     * @return List of coaches associated with the train trip, ordered by soThuTuToa
+     */
+    public List<ToaTau> getByChuyenTau(String maChuyenTau) {
+        List<ToaTau> result = new ArrayList<>();
+        
+        if (maChuyenTau == null || maChuyenTau.trim().isEmpty()) {
+            return result;
+        }
+        
+        try {
+            // Get ChiTietChuyenTau records for this train
+            ChiTietChuyenTauDAO chiTietDAO = ChiTietChuyenTauDAO.getInstance();
+            List<ChiTietChuyenTau> chiTietList = chiTietDAO.findByChuyenTau(maChuyenTau);
+            
+            // For each ChiTietChuyenTau, get the corresponding ToaTau
+            for (ChiTietChuyenTau chiTiet : chiTietList) {
+                ToaTau toa = findById(chiTiet.getMaToaTau());
+                if (toa != null) {
+                    result.add(toa);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return result;
     }
 }
