@@ -206,6 +206,11 @@ public class VeDAO implements GenericDAO<Ve> {
             } catch (Exception ignored) {
                 // Nếu không tìm được hoặc ChuyenTau thiếu trường, tiếp tục với maChang = null
             }
+            
+            // Fallback: nếu maChang vẫn null, thử tạo từ maGaDi và maGaDen
+            if (maChang == null && v.getMaGaDi() != null && v.getMaGaDen() != null) {
+                maChang = v.getMaGaDi() + "-" + v.getMaGaDen();
+            }
 
             // Tìm Bảng Giá áp dụng tại thời điểm đặt vé (ngay hiện tại)
             BangGiaDAO bgDAO = BangGiaDAO.getInstance();
