@@ -21,7 +21,7 @@ public class ChiTietChuyenTauDAO {
 
     public List<ChiTietChuyenTau> getAll() {
         List<ChiTietChuyenTau> list = new ArrayList<>();
-        String sql = "SELECT maChuyenTau, maToaTau, soThuTuToa, sucChua, isActive FROM ChiTietChuyenTau WHERE isActive = 1";
+        String sql = "SELECT maChuyenTau, maToaTau, soThuTuToa, sucChua FROM ChiTietChuyenTau";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -37,7 +37,7 @@ public class ChiTietChuyenTauDAO {
 
     public List<ChiTietChuyenTau> findByChuyenTau(String maChuyenTau) {
         List<ChiTietChuyenTau> list = new ArrayList<>();
-        String sql = "SELECT maChuyenTau, maToaTau, soThuTuToa, sucChua, isActive FROM ChiTietChuyenTau WHERE maChuyenTau = ? AND isActive = 1 ORDER BY soThuTuToa";
+        String sql = "SELECT maChuyenTau, maToaTau, soThuTuToa, sucChua FROM ChiTietChuyenTau WHERE maChuyenTau = ? ORDER BY soThuTuToa";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maChuyenTau);
@@ -54,7 +54,7 @@ public class ChiTietChuyenTauDAO {
     }
 
     public ChiTietChuyenTau findById(String maChuyenTau, String maToaTau) {
-        String sql = "SELECT maChuyenTau, maToaTau, soThuTuToa, sucChua, isActive FROM ChiTietChuyenTau WHERE maChuyenTau = ? AND maToaTau = ?";
+        String sql = "SELECT maChuyenTau, maToaTau, soThuTuToa, sucChua FROM ChiTietChuyenTau WHERE maChuyenTau = ? AND maToaTau = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maChuyenTau);
@@ -71,7 +71,7 @@ public class ChiTietChuyenTauDAO {
     }
 
     public boolean add(ChiTietChuyenTau entity) {
-        String sql = "INSERT INTO ChiTietChuyenTau (maChuyenTau, maToaTau, soThuTuToa, sucChua, isActive) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ChiTietChuyenTau (maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entity.getMaChuyenTau());
@@ -95,7 +95,7 @@ public class ChiTietChuyenTauDAO {
     }
 
     public boolean update(ChiTietChuyenTau entity) {
-        String sql = "UPDATE ChiTietChuyenTau SET soThuTuToa = ?, sucChua = ?, isActive = ? WHERE maChuyenTau = ? AND maToaTau = ?";
+        String sql = "UPDATE ChiTietChuyenTau SET soThuTuToa = ?, sucChua = ? WHERE maChuyenTau = ? AND maToaTau = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             if (entity.getSoThuTuToa() != null) {
@@ -119,7 +119,7 @@ public class ChiTietChuyenTauDAO {
     }
 
     public boolean delete(String maChuyenTau, String maToaTau) {
-        String sql = "UPDATE ChiTietChuyenTau SET isActive = 0 WHERE maChuyenTau = ? AND maToaTau = ?";
+        String sql = "DELETE FROM ChiTietChuyenTau WHERE maChuyenTau = ? AND maToaTau = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maChuyenTau);
@@ -136,8 +136,7 @@ public class ChiTietChuyenTauDAO {
                 rs.getString("maChuyenTau"),
                 rs.getString("maToaTau"),
                 rs.getObject("soThuTuToa", Integer.class),
-                rs.getObject("sucChua", Integer.class),
-                rs.getBoolean("isActive")
+                rs.getObject("sucChua", Integer.class)
         );
     }
 }

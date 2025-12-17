@@ -23,7 +23,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     @Override
     public List<KhachHang> getAll() {
         List<KhachHang> list = new ArrayList<>();
-        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai, isActive FROM KhachHang WHERE isActive = 1";
+        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -32,8 +32,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
                         rs.getString("maKhachHang"),
                         rs.getString("tenKhachHang"),
                         rs.getString("email"),
-                        rs.getString("soDienThoai"),
-                        rs.getBoolean("isActive")
+                        rs.getString("soDienThoai")
                 );
                 list.add(kh);
             }
@@ -45,7 +44,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
 
     @Override
     public KhachHang findById(String id) {
-        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai, isActive FROM KhachHang WHERE maKhachHang = ?";
+        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE maKhachHang = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -55,8 +54,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
                             rs.getString("maKhachHang"),
                             rs.getString("tenKhachHang"),
                             rs.getString("email"),
-                            rs.getString("soDienThoai"),
-                            rs.getBoolean("isActive")
+                            rs.getString("soDienThoai")
                     );
                 }
             }
@@ -100,8 +98,8 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
 
     @Override
     public boolean delete(String id) {
-        // Soft delete: set isActive = 0 instead of deleting the record
-        String sql = "UPDATE KhachHang SET isActive = 0 WHERE maKhachHang = ?";
+        // Hard delete: remove the record from database
+        String sql = "DELETE FROM KhachHang WHERE maKhachHang = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -117,7 +115,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
      */
     public List<KhachHang> getAllIncludingDeleted() {
         List<KhachHang> list = new ArrayList<>();
-        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai, isActive FROM KhachHang";
+        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -126,8 +124,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
                         rs.getString("maKhachHang"),
                         rs.getString("tenKhachHang"),
                         rs.getString("email"),
-                        rs.getString("soDienThoai"),
-                        rs.getBoolean("isActive")
+                        rs.getString("soDienThoai")
                 );
                 list.add(kh);
             }
@@ -154,7 +151,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     }
 
     public KhachHang timTheoSoDienThoai(String soDienThoai) {
-        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai, isActive FROM KhachHang WHERE soDienThoai = ?";
+        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE soDienThoai = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, soDienThoai);
@@ -164,8 +161,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
                             rs.getString("maKhachHang"),
                             rs.getString("tenKhachHang"),
                             rs.getString("email"),
-                            rs.getString("soDienThoai"),
-                            rs.getBoolean("isActive")
+                            rs.getString("soDienThoai")
                     );
                 }
             }

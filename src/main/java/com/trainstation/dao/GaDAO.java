@@ -22,7 +22,7 @@ public class GaDAO implements GenericDAO<Ga> {
     @Override
     public List<Ga> getAll() {
         List<Ga> list = new ArrayList<>();
-        String sql = "SELECT maGa, tenGa, moTa, tinhTrang, diaChi, isActive FROM Ga WHERE isActive = 1";
+        String sql = "SELECT maGa, tenGa, moTa, tinhTrang, diaChi FROM Ga";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -38,7 +38,7 @@ public class GaDAO implements GenericDAO<Ga> {
 
     @Override
     public Ga findById(String id) {
-        String sql = "SELECT maGa, tenGa, moTa, tinhTrang, diaChi, isActive FROM Ga WHERE maGa = ?";
+        String sql = "SELECT maGa, tenGa, moTa, tinhTrang, diaChi FROM Ga WHERE maGa = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -55,7 +55,7 @@ public class GaDAO implements GenericDAO<Ga> {
 
     @Override
     public boolean insert(Ga entity) {
-        String sql = "INSERT INTO Ga (maGa, tenGa, moTa, tinhTrang, diaChi, isActive) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Ga (maGa, tenGa, moTa, tinhTrang, diaChi) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entity.getMaGa());
@@ -73,7 +73,7 @@ public class GaDAO implements GenericDAO<Ga> {
 
     @Override
     public boolean update(Ga entity) {
-        String sql = "UPDATE Ga SET tenGa = ?, moTa = ?, tinhTrang = ?, diaChi = ?, isActive = ? WHERE maGa = ?";
+        String sql = "UPDATE Ga SET tenGa = ?, moTa = ?, tinhTrang = ?, diaChi = ? WHERE maGa = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entity.getTenGa());
@@ -91,7 +91,7 @@ public class GaDAO implements GenericDAO<Ga> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "UPDATE Ga SET isActive = 0 WHERE maGa = ?";
+        String sql = "DELETE FROM Ga WHERE maGa = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -108,8 +108,7 @@ public class GaDAO implements GenericDAO<Ga> {
                 rs.getString("tenGa"),
                 rs.getString("moTa"),
                 rs.getString("tinhTrang"),
-                rs.getString("diaChi"),
-                rs.getBoolean("isActive")
+                rs.getString("diaChi")
         );
     }
 }

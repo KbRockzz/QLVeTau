@@ -29,10 +29,10 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 TaiKhoan t = new TaiKhoan(
-                        rs.getString("maTK")
-                        rs.getString("maNV")
-                        rs.getString("tenTaiKhoan")
-                        rs.getString("matKhau")
+                        rs.getString("maTK"),
+                        rs.getString("maNV"),
+                        rs.getString("tenTaiKhoan"),
+                        rs.getString("matKhau"),
                         rs.getString("trangThai")
                 );
                 list.add(t);
@@ -52,10 +52,10 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return new TaiKhoan(
-                            rs.getString("maTK")
-                            rs.getString("maNV")
-                            rs.getString("tenTaiKhoan")
-                            rs.getString("matKhau")
+                            rs.getString("maTK"),
+                            rs.getString("maNV"),
+                            rs.getString("tenTaiKhoan"),
+                            rs.getString("matKhau"),
                             rs.getString("trangThai")
                     );
                 }

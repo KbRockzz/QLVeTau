@@ -24,7 +24,7 @@ public class LoaiVeDAO implements GenericDAO<LoaiVe> {
     @Override
     public List<LoaiVe> getAll() {
         List<LoaiVe> list = new ArrayList<>();
-        String sql = "SELECT maLoaiVe, tenLoai, heSoGia, moTa, isActive FROM LoaiVe WHERE isActive = 1";
+        String sql = "SELECT maLoaiVe, tenLoai, heSoGia, moTa FROM LoaiVe";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -33,8 +33,7 @@ public class LoaiVeDAO implements GenericDAO<LoaiVe> {
                         rs.getString("maLoaiVe"),
                         rs.getString("tenLoai"),
                         rs.getBigDecimal("heSoGia"),
-                        rs.getString("moTa"),
-                        rs.getBoolean("isActive")
+                        rs.getString("moTa")
                 );
                 list.add(lv);
             }
@@ -46,7 +45,7 @@ public class LoaiVeDAO implements GenericDAO<LoaiVe> {
 
     @Override
     public LoaiVe findById(String id) {
-        String sql = "SELECT maLoaiVe, tenLoai, heSoGia, moTa, isActive FROM LoaiVe WHERE maLoaiVe = ?";
+        String sql = "SELECT maLoaiVe, tenLoai, heSoGia, moTa FROM LoaiVe WHERE maLoaiVe = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -56,8 +55,7 @@ public class LoaiVeDAO implements GenericDAO<LoaiVe> {
                             rs.getString("maLoaiVe"),
                             rs.getString("tenLoai"),
                             rs.getBigDecimal("heSoGia"),
-                            rs.getString("moTa"),
-                            rs.getBoolean("isActive")
+                            rs.getString("moTa")
                     );
                 }
             }

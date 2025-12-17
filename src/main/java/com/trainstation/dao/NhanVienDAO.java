@@ -35,12 +35,12 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
                     ngaySinh = date.toLocalDate();
                 }
                 NhanVien nv = new NhanVien(
-                        rs.getString("maNV")
-                        rs.getString("tenNV")
-                        rs.getString("soDienThoai")
-                        rs.getString("diaChi")
-                        ngaySinh
-                        rs.getString("maLoaiNV")
+                        rs.getString("maNV"),
+                        rs.getString("tenNV"),
+                        rs.getString("soDienThoai"),
+                        rs.getString("diaChi"),
+                        ngaySinh,
+                        rs.getString("maLoaiNV"),
                         rs.getString("trangThai")
                 );
                 list.add(nv);
@@ -66,12 +66,12 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
                         ngaySinh = date.toLocalDate();
                     }
                     return new NhanVien(
-                            rs.getString("maNV")
-                            rs.getString("tenNV")
-                            rs.getString("soDienThoai")
-                            rs.getString("diaChi")
-                            ngaySinh
-                            rs.getString("maLoaiNV")
+                            rs.getString("maNV"),
+                            rs.getString("tenNV"),
+                            rs.getString("soDienThoai"),
+                            rs.getString("diaChi"),
+                            ngaySinh,
+                            rs.getString("maLoaiNV"),
                             rs.getString("trangThai")
                     );
                 }
