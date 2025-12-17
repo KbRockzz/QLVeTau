@@ -112,12 +112,18 @@ public class ChiTietChuyenTauDAO implements GenericDAO<ChiTietChuyenTau> {
             pst.setString(1, maChuyenTau);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
+                    // Handle potential null value for sucChua
+                    int sucChua = rs.getInt("sucChua");
+                    if (rs.wasNull()) {
+                        sucChua = 0; // Default value for null capacity
+                    }
+                    
                     ToaTau coach = new ToaTau(
                         rs.getString("maToa"),
                         rs.getString("tenToa"),
                         rs.getString("loaiToa"),
                         rs.getString("maTau"),
-                        rs.getInt("sucChua")
+                        sucChua
                     );
                     coaches.add(coach);
                 }
