@@ -23,7 +23,8 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     @Override
     public List<KhachHang> getAll() {
         List<KhachHang> list = new ArrayList<>();
-        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang";
+        // Only get active customers (isActive = 1)
+        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -66,7 +67,8 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
 
     @Override
     public boolean insert(KhachHang kh) {
-        String sql = "INSERT INTO KhachHang (maKhachHang, tenKhachHang, email, soDienThoai) VALUES (?, ?, ?, ?)";
+        // Set isActive = 1 by default for new customers
+        String sql = "INSERT INTO KhachHang (maKhachHang, tenKhachHang, email, soDienThoai, isActive) VALUES (?, ?, ?, ?, 1)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, kh.getMaKhachHang());
@@ -98,8 +100,8 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
 
     @Override
     public boolean delete(String id) {
-        // Hard delete: remove the record from database
-        String sql = "DELETE FROM KhachHang WHERE maKhachHang = ?";
+        // Soft delete: set isActive = 0
+        String sql = "UPDATE KhachHang SET isActive = 0 WHERE maKhachHang = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -111,11 +113,12 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     }
 
     /**
-     * Get all customers including soft-deleted ones
+     * Get all deleted customers (isActive = 0)
+     * @return List of soft-deleted customers
      */
-    public List<KhachHang> getAllIncludingDeleted() {
+    public List<KhachHang> getDeletedCustomers() {
         List<KhachHang> list = new ArrayList<>();
-        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang";
+        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE isActive = 0";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -132,6 +135,23 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
             e.printStackTrace();
         }
         return list;
+    }
+
+    /**
+     * Restore a soft-deleted customer (set isActive = 1)
+     * @param id Customer ID to restore
+     * @return true if restore was successful
+     */
+    public boolean restoreCustomer(String id) {
+        String sql = "UPDATE KhachHang SET isActive = 1 WHERE maKhachHang = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, id);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public KhachHang timTheoSoDienThoai(String soDienThoai) {

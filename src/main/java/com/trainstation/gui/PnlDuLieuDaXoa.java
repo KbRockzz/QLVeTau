@@ -309,20 +309,57 @@ public class PnlDuLieuDaXoa extends JPanel {
     }
 
     /**
-     * Tải dữ liệu các khách hàng đã xóa - chức năng không khả dụng do đã loại bỏ soft delete
+     * Tải dữ liệu các khách hàng có isActive = 0 (đã xóa mềm)
      */
     private void taiDuLieuKhachHangDaXoa() {
         modelKhachHang.setRowCount(0);
-        // Soft delete removed - no longer showing deleted data
+        List<KhachHang> danhSach = khachHangDAO.getDeletedCustomers();
+        for (KhachHang kh : danhSach) {
+            modelKhachHang.addRow(new Object[]{
+                    kh.getMaKhachHang(),
+                    kh.getTenKhachHang(),
+                    kh.getEmail(),
+                    kh.getSoDienThoai()
+            });
+        }
     }
 
     /**
-     * Khôi phục khách hàng đã xóa - chức năng không khả dụng do đã loại bỏ soft delete
+     * Khôi phục khách hàng đã xóa (set isActive = 1)
      */
     private void khoiPhucKhachHang() {
-        JOptionPane.showMessageDialog(this, 
-            "Chức năng khôi phục không khả dụng do đã loại bỏ soft delete.\nDữ liệu đã xóa sẽ bị xóa vĩnh viễn.", 
-            "Thông báo", 
-            JOptionPane.INFORMATION_MESSAGE);
+        int row = bangKhachHang.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, 
+                "Vui lòng chọn khách hàng cần khôi phục!", 
+                "Thông báo", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String maKH = (String) modelKhachHang.getValueAt(row, 0);
+        String tenKH = (String) modelKhachHang.getValueAt(row, 1);
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có chắc chắn muốn khôi phục khách hàng:\n" + maKH + " - " + tenKH + "?",
+                "Xác nhận khôi phục",
+                JOptionPane.YES_NO_OPTION);
+        
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        if (khachHangDAO.restoreCustomer(maKH)) {
+            JOptionPane.showMessageDialog(this, 
+                "Khôi phục khách hàng thành công!", 
+                "Thành công", 
+                JOptionPane.INFORMATION_MESSAGE);
+            taiDuLieuKhachHangDaXoa(); // Reload the table
+        } else {
+            JOptionPane.showMessageDialog(this, 
+                "Khôi phục khách hàng thất bại!", 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
