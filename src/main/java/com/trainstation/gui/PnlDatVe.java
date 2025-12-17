@@ -261,7 +261,9 @@ public class PnlDatVe extends JPanel {
         // Legend panel - updated with Material Design colors
         JPanel pnlChuThich = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pnlChuThich.add(createLegendItem("Trống", COLOR_AVAILABLE));
+        pnlChuThich.add(Box.createHorizontalStrut(20));
         pnlChuThich.add(createLegendItem("Đã đặt", COLOR_BOOKED));
+        pnlChuThich.add(Box.createHorizontalStrut(20));
         pnlChuThich.add(createLegendItem("Đang giữ (chưa thanh toán)", COLOR_HELD));
         add(pnlChuThich, BorderLayout.SOUTH);
 
@@ -571,7 +573,7 @@ public class PnlDatVe extends JPanel {
             final String maGhe = ghe.getMaGhe();
             
             styleSeatButton(btnGhe, COLOR_AVAILABLE, Color.WHITE, true, 
-                createTooltip(ICON_AVAILABLE, ghe.getMaGhe(), "Trống"));
+                createTooltip(ICON_AVAILABLE, maGhe, "Trống"));
             // Subtle outline and shadow for available seats
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_AVAILABLE_BORDER, 1),
