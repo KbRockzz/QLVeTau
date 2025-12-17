@@ -548,13 +548,28 @@ public class PnlDatVe extends JPanel {
         pnlSoDoGhe.repaint();
     }
 
+    /**
+     * Check if a seat is available for booking based on its status
+     * @param trangThai Seat status from database
+     * @return true if seat can be booked (Rảnh/RANH = idle, Trống = empty/refunded)
+     */
+    private boolean isAvailableSeat(String trangThai) {
+        if (trangThai == null) {
+            return false;
+        }
+        // Handle both "Rảnh" (idle) and "RANH" (database variations)
+        // Also include "Trống" (empty/refunded seats available for rebooking)
+        return "Rảnh".equalsIgnoreCase(trangThai) || 
+               "Trống".equalsIgnoreCase(trangThai) || 
+               "RANH".equalsIgnoreCase(trangThai);
+    }
+
     private JButton taoNutGhe(Ghe ghe) {
         JButton btnGhe = new JButton(ghe.getMaGhe());
         btnGhe.setPreferredSize(new Dimension(80, 40));
         btnGhe.setFont(new Font("Arial", Font.BOLD, 12));
         btnGhe.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        // Treat both "Rảnh" (idle) and "Trống" (empty/refunded) as available seats
-        if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai()) || "Trống".equalsIgnoreCase(ghe.getTrangThai())) {
+        if (isAvailableSeat(ghe.getTrangThai())) {
             btnGhe.setBackground(new Color(34, 139, 34)); // Xanh
             btnGhe.setForeground(Color.BLACK);
             btnGhe.setEnabled(true);
@@ -893,10 +908,7 @@ public class PnlDatVe extends JPanel {
                 return;
             }
             String trangThaiDB = gheDB.getTrangThai();
-            if (trangThaiDB != null && 
-                !"Rảnh".equalsIgnoreCase(trangThaiDB) && 
-                !"Trống".equalsIgnoreCase(trangThaiDB) && 
-                !"RANH".equalsIgnoreCase(trangThaiDB)) {
+            if (!isAvailableSeat(trangThaiDB)) {
                 // Ghế đã bị đặt/giữ bởi người khác
                 JOptionPane.showMessageDialog(this, "Ghế này đã không còn trống (" + trangThaiDB + "). Vui lòng chọn ghế khác.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 // refresh seat map để hiển thị trạng thái thực tế
