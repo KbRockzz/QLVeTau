@@ -568,7 +568,7 @@ public class PnlDatVe extends JPanel {
                 BorderFactory.createEmptyBorder(3, 8, 3, 8)
             ));
             btnGhe.putClientProperty("FlatLaf.style", SHADOW_HELD);
-        } else if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai())) {
+        } else if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai()) || "Trống".equalsIgnoreCase(ghe.getTrangThai())) {
             // Ghế trống - màu xanh với outline, shadow và hover effect
             final String maGhe = ghe.getMaGhe();
             
