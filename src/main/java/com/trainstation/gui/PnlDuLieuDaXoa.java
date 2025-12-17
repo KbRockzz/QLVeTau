@@ -21,17 +21,17 @@ public class PnlDuLieuDaXoa extends JPanel {
     private NhanVienDAO nhanVienDAO;
     private TaiKhoanDAO taiKhoanDAO;
     private KhachHangDAO khachHangDAO;
-    
+
     // Employee tab components
     private JTable bangNhanVien;
     private DefaultTableModel modelNhanVien;
     private JButton btnKhoiPhucNV, btnLamMoiNV, btnXoaRongNV;
-    
+
     // Account tab components
     private JTable bangTaiKhoan;
     private DefaultTableModel modelTaiKhoan;
     private JButton btnKhoiPhucTK, btnLamMoiTK, btnXoaRongTK;
-    
+
     // Customer tab components
     private JTable bangKhachHang;
     private DefaultTableModel modelKhachHang;
@@ -57,19 +57,19 @@ public class PnlDuLieuDaXoa extends JPanel {
 
         // Create tabbed pane
         JTabbedPane tabbedPane = new JTabbedPane();
-        
+
         // Employee tab
         JPanel employeePanel = createEmployeePanel();
         tabbedPane.addTab("Nhân viên", employeePanel);
-        
+
         // Account tab
         JPanel accountPanel = createAccountPanel();
         tabbedPane.addTab("Tài khoản", accountPanel);
-        
+
         // Customer tab
         JPanel customerPanel = createCustomerPanel();
         tabbedPane.addTab("Khách hàng", customerPanel);
-        
+
         add(tabbedPane, BorderLayout.CENTER);
     }
 
@@ -329,4 +329,5 @@ public class PnlDuLieuDaXoa extends JPanel {
             JOptionPane.showMessageDialog(this, "Khôi phục thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 }
