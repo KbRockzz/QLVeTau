@@ -53,6 +53,10 @@ public class PnlDatVe extends JPanel {
     private static final String ICON_AVAILABLE = "✓";
     private static final String ICON_BOOKED = "✕";
     private static final String ICON_HELD = "⏸";
+    
+    // Shadow styles for FlatLaf
+    private static final String SHADOW_HELD = "shadowColor: rgba(33,150,243,89); shadowWidth: 4";
+    private static final String SHADOW_DEFAULT = "shadowColor: rgba(0,0,0,64); shadowWidth: 3";
 
     // Customer
     private JTextField txtSoDienThoai;
@@ -555,25 +559,25 @@ public class PnlDatVe extends JPanel {
         if (heldVeMap.containsKey(ghe.getMaGhe())) {
             // Ghế đang giữ - màu xanh dương với outline và shadow
             styleSeatButton(btnGhe, COLOR_HELD, Color.WHITE, false, 
-                ICON_HELD + " " + ghe.getMaGhe() + " - Đang giữ (chưa thanh toán)");
+                createTooltip(ICON_HELD, ghe.getMaGhe(), "Đang giữ (chưa thanh toán)"));
             // Outline for held seats
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_HELD_BORDER, 2),
                 BorderFactory.createEmptyBorder(3, 8, 3, 8)
             ));
-            btnGhe.putClientProperty("FlatLaf.style", "shadowColor: rgba(33,150,243,89); shadowWidth: 4");
+            btnGhe.putClientProperty("FlatLaf.style", SHADOW_HELD);
         } else if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai())) {
             // Ghế trống - màu xanh với outline, shadow và hover effect
             final String maGhe = ghe.getMaGhe();
             
             styleSeatButton(btnGhe, COLOR_AVAILABLE, Color.WHITE, true, 
-                ICON_AVAILABLE + " " + ghe.getMaGhe() + " - Trống");
+                createTooltip(ICON_AVAILABLE, ghe.getMaGhe(), "Trống"));
             // Subtle outline and shadow for available seats
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_AVAILABLE_BORDER, 1),
                 BorderFactory.createEmptyBorder(4, 9, 4, 9)
             ));
-            btnGhe.putClientProperty("FlatLaf.style", "shadowColor: rgba(0,0,0,64); shadowWidth: 3");
+            btnGhe.putClientProperty("FlatLaf.style", SHADOW_DEFAULT);
             
             // Add modern hover effect
             btnGhe.addMouseListener(createHoverListener(btnGhe, maGhe));
@@ -581,13 +585,13 @@ public class PnlDatVe extends JPanel {
         } else {
             // Ghế đã đặt - màu đỏ với outline và shadow
             styleSeatButton(btnGhe, COLOR_BOOKED, Color.WHITE, false, 
-                ICON_BOOKED + " " + ghe.getMaGhe() + " - Đã đặt");
+                createTooltip(ICON_BOOKED, ghe.getMaGhe(), "Đã đặt"));
             // Outline for booked seats
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_BOOKED_BORDER, 1),
                 BorderFactory.createEmptyBorder(4, 9, 4, 9)
             ));
-            btnGhe.putClientProperty("FlatLaf.style", "shadowColor: rgba(0,0,0,64); shadowWidth: 3");
+            btnGhe.putClientProperty("FlatLaf.style", SHADOW_DEFAULT);
         }
         
         return btnGhe;
@@ -642,6 +646,13 @@ public class PnlDatVe extends JPanel {
         panel.add(colorLabel);
         panel.add(new JLabel(text));
         return panel;
+    }
+    
+    /**
+     * Tạo tooltip text cho ghế
+     */
+    private String createTooltip(String icon, String maGhe, String status) {
+        return icon + " " + maGhe + " - " + status;
     }
 
     private void chonGhe(Ghe ghe) {
