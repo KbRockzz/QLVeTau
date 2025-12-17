@@ -28,11 +28,13 @@ public class ToaTauDAOTest {
     public void testGetByChuyenTauExpectations() {
         System.out.println("ToaTauDAO.getByChuyenTau() expectations:");
         System.out.println("1. Method should accept a train ID (maChuyenTau)");
-        System.out.println("2. Should use ChiTietChuyenTauDAO to find coach associations");
+        System.out.println("2. Should use a JOIN query between ToaTau and ChiTietChuyenTau tables");
         System.out.println("3. Should return only coaches associated with the specific train");
-        System.out.println("4. Should return empty list if train has no coaches");
-        System.out.println("5. Should handle null/empty input gracefully");
-        System.out.println("6. Should handle database errors gracefully");
+        System.out.println("4. Should order results by soThuTuToa for correct coach sequence");
+        System.out.println("5. Should return empty list if train has no coaches");
+        System.out.println("6. Should handle null/empty input gracefully");
+        System.out.println("7. Should handle database errors gracefully");
+        System.out.println("8. Should use a single query (no N+1 problem)");
         
         assertTrue("ToaTauDAO.getByChuyenTau() expectations documented", true);
     }

@@ -137,6 +137,7 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
         }
         
         // Use a JOIN query to fetch all coaches in one database round-trip
+        // Note: ChiTietChuyenTau.maToaTau references ToaTau.maToa (legacy naming convention)
         String sql = "SELECT t.maToa, t.loaiToa, t.samSX, t.trangThai, t.sucChua, t.isActive " +
                      "FROM ToaTau t " +
                      "INNER JOIN ChiTietChuyenTau ct ON t.maToa = ct.maToaTau " +
