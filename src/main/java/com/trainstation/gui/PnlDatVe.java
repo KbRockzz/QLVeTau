@@ -320,10 +320,15 @@ public class PnlDatVe extends JPanel {
         // Get distinct station codes from trains
         List<String> danhSachMaGa = chuyenTauDAO.getDistinctStations();
         for (String maGa : danhSachMaGa) {
-            String tenGa = layTenGa(maGa);
-            cmbGaDi.addItem(tenGa);
-            cmbGaDen.addItem(tenGa);
-            mapTenGaToMaGa.put(tenGa, maGa);
+            // Try to get station info - skip if station is soft-deleted (isActive = 0)
+            Ga ga = gaDAO.findById(maGa);
+            if (ga != null) {
+                String tenGa = ga.getTenGa();
+                cmbGaDi.addItem(tenGa);
+                cmbGaDen.addItem(tenGa);
+                mapTenGaToMaGa.put(tenGa, maGa);
+            }
+            // If ga is null (soft-deleted), skip this station - don't add to combobox
         }
     }
     
