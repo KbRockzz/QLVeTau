@@ -123,4 +123,47 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
         // Since ToaTau no longer has maTau column, return all active ToaTau
         return getAll();
     }
+
+    /**
+     * Get coaches (ToaTau) for a specific train trip (ChuyenTau) using ChiTietChuyenTau relationship
+     * @param maChuyenTau Train trip ID
+     * @return List of coaches associated with the train trip, ordered by soThuTuToa
+     */
+    public List<ToaTau> getByChuyenTau(String maChuyenTau) {
+        List<ToaTau> result = new ArrayList<>();
+        
+        if (maChuyenTau == null || maChuyenTau.trim().isEmpty()) {
+            return result;
+        }
+        
+        // Use a JOIN query to fetch all coaches in one database round-trip
+        // Note: ChiTietChuyenTau.maToaTau references ToaTau.maToa (legacy naming convention)
+        String sql = "SELECT t.maToa, t.loaiToa, t.samSX, t.trangThai, t.sucChua, t.isActive " +
+                     "FROM ToaTau t " +
+                     "INNER JOIN ChiTietChuyenTau ct ON t.maToa = ct.maToaTau " +
+                     "WHERE ct.maChuyenTau = ? AND ct.isActive = 1 AND t.isActive = 1 " +
+                     "ORDER BY ct.soThuTuToa";
+        
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maChuyenTau);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    ToaTau toa = new ToaTau(
+                            rs.getString("maToa"),
+                            rs.getString("loaiToa"),
+                            rs.getObject("samSX", Integer.class),
+                            rs.getString("trangThai"),
+                            rs.getObject("sucChua", Integer.class),
+                            rs.getBoolean("isActive")
+                    );
+                    result.add(toa);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return result;
+    }
 }
