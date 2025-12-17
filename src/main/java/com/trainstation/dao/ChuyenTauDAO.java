@@ -42,7 +42,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
     @Override
     public List<ChuyenTau> getAll() {
         List<ChuyenTau> list = new ArrayList<>();
-        String sql = "SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai, isActive FROM ChuyenTau WHERE isActive = 1";
+        String sql = "SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -64,8 +64,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
                         gioDen,
                         rs.getObject("soKm", Integer.class),
                         rs.getString("maChang"),
-                        rs.getString("trangThai"),
-                        rs.getBoolean("isActive")
+                        rs.getString("trangThai")
                 );
                 list.add(ct);
             }
@@ -77,7 +76,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     @Override
     public ChuyenTau findById(String id) {
-        String sql = "SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai, isActive FROM ChuyenTau WHERE maChuyen = ?";
+        String sql = "SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE maChuyen = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -99,8 +98,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
                             gioDen,
                             rs.getObject("soKm", Integer.class),
                             rs.getString("maChang"),
-                            rs.getString("trangThai"),
-                            rs.getBoolean("isActive")
+                            rs.getString("trangThai")
                     );
                 }
             }
@@ -112,7 +110,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     @Override
     public boolean insert(ChuyenTau ct) {
-        String sql = "INSERT INTO ChuyenTau (maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ChuyenTau (maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, ct.getMaChuyen());
@@ -137,7 +135,6 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
             }
             pst.setString(9, ct.getMaChang());
             pst.setString(10, ct.getTrangThai());
-            pst.setBoolean(11, ct.isActive());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -147,7 +144,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     @Override
     public boolean update(ChuyenTau ct) {
-        String sql = "UPDATE ChuyenTau SET maDauMay = ?, maNV = ?, maGaDi = ?, maGaDen = ?, gioDi = ?, gioDen = ?, soKm = ?, maChang = ?, trangThai = ?, isActive = ? WHERE maChuyen = ?";
+        String sql = "UPDATE ChuyenTau SET maDauMay = ?, maNV = ?, maGaDi = ?, maGaDen = ?, gioDi = ?, gioDen = ?, soKm = ?, maChang = ?, trangThai = ? WHERE maChuyen = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, ct.getMaDauMay());
@@ -171,7 +168,6 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
             }
             pst.setString(8, ct.getMaChang());
             pst.setString(9, ct.getTrangThai());
-            pst.setBoolean(10, ct.isActive());
             pst.setString(11, ct.getMaChuyen());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -198,7 +194,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
      */
     public List<ChuyenTau> timKiemChuyenTau(String maGaDi, String maGaDen, LocalDate ngayDi, LocalTime gioDi) {
         List<ChuyenTau> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai, isActive FROM ChuyenTau WHERE isActive = 1");
+        StringBuilder sql = new StringBuilder("SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau");
 
         if (maGaDi != null && !maGaDi.trim().isEmpty()) {
             sql.append(" AND maGaDi = ?");
@@ -249,8 +245,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
                             gioDenDT,
                             rs.getObject("soKm", Integer.class),
                             rs.getString("maChang"),
-                            rs.getString("trangThai"),
-                            rs.getBoolean("isActive")
+                            rs.getString("trangThai")
                     );
                     list.add(ct);
                 }
@@ -263,7 +258,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     public List<String> getDistinctStations() {
         Set<String> stations = new HashSet<>();
-        String sql = "SELECT DISTINCT maGaDi FROM ChuyenTau WHERE isActive = 1 UNION SELECT DISTINCT maGaDen FROM ChuyenTau WHERE isActive = 1 ORDER BY 1";
+        String sql = "SELECT DISTINCT maGaDi FROM ChuyenTau UNION SELECT DISTINCT maGaDen FROM ChuyenTau ORDER BY 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {

@@ -12,14 +12,12 @@ public class HoaDon implements Serializable {
     private LocalDateTime ngayLap;
     private String phuongThucThanhToan;
     private String trangThai;
-    private boolean isActive;
 
     public HoaDon() {
-        this.isActive = true;
     }
 
     public HoaDon(String maHoaDon, String maNV, String maKH, String tenKH, String soDienThoai,
-                  LocalDateTime ngayLap, String phuongThucThanhToan, String trangThai, boolean isActive) {
+                  LocalDateTime ngayLap, String phuongThucThanhToan, String trangThai) {
         this.maHoaDon = maHoaDon;
         this.maNV = maNV;
         this.maKH = maKH;
@@ -27,9 +25,7 @@ public class HoaDon implements Serializable {
         this.soDienThoai = soDienThoai;
         this.ngayLap = ngayLap;
         this.phuongThucThanhToan = phuongThucThanhToan;
-        this.trangThai = trangThai;
-        this.isActive = isActive;
-    }
+        this.trangThai = trangThai;    }
 
     public String getMaHoaDon() {
         return maHoaDon;
@@ -93,17 +89,7 @@ public class HoaDon implements Serializable {
 
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    @Override
+    }    @Override
     public String toString() {
         return "HoaDon{" +
                 "maHoaDon='" + maHoaDon + '\'' +
@@ -113,8 +99,7 @@ public class HoaDon implements Serializable {
                 ", soDienThoai='" + soDienThoai + '\'' +
                 ", ngayLap=" + ngayLap +
                 ", phuongThucThanhToan='" + phuongThucThanhToan + '\'' +
-                ", trangThai='" + trangThai + '\'' +
-                ", isActive=" + isActive +
+                ", trangThai='" + trangThai + '\'' + +
                 '}';
     }
 }

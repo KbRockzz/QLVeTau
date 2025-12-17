@@ -23,7 +23,7 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
     @Override
     public List<ToaTau> getAll() {
         List<ToaTau> list = new ArrayList<>();
-        String sql = "SELECT maToa, loaiToa, samSX, trangThai, sucChua, isActive FROM ToaTau WHERE isActive = 1";
+        String sql = "SELECT maToa, loaiToa, samSX, trangThai, sucChua FROM ToaTau";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -33,8 +33,7 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
                         rs.getString("loaiToa"),
                         rs.getObject("samSX", Integer.class),
                         rs.getString("trangThai"),
-                        rs.getObject("sucChua", Integer.class),
-                        rs.getBoolean("isActive")
+                        rs.getObject("sucChua", Integer.class)
                 );
                 list.add(t);
             }
@@ -46,7 +45,7 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
 
     @Override
     public ToaTau findById(String id) {
-        String sql = "SELECT maToa, loaiToa, samSX, trangThai, sucChua, isActive FROM ToaTau WHERE maToa = ?";
+        String sql = "SELECT maToa, loaiToa, samSX, trangThai, sucChua FROM ToaTau WHERE maToa = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -57,8 +56,7 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
                             rs.getString("loaiToa"),
                             rs.getObject("samSX", Integer.class),
                             rs.getString("trangThai"),
-                            rs.getObject("sucChua", Integer.class),
-                            rs.getBoolean("isActive")
+                            rs.getObject("sucChua", Integer.class)
                     );
                 }
             }
@@ -70,7 +68,7 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
 
     @Override
     public boolean insert(ToaTau t) {
-        String sql = "INSERT INTO ToaTau (maToa, loaiToa, samSX, trangThai, sucChua, isActive) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, t.getMaToa());
@@ -78,7 +76,6 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
             if (t.getSamSX() != null) pst.setInt(3, t.getSamSX()); else pst.setNull(3, Types.INTEGER);
             pst.setString(4, t.getTrangThai());
             if (t.getSucChua() != null) pst.setInt(5, t.getSucChua()); else pst.setNull(5, Types.INTEGER);
-            pst.setBoolean(6, t.isActive());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -88,14 +85,13 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
 
     @Override
     public boolean update(ToaTau t) {
-        String sql = "UPDATE ToaTau SET loaiToa = ?, samSX = ?, trangThai = ?, sucChua = ?, isActive = ? WHERE maToa = ?";
+        String sql = "UPDATE ToaTau SET loaiToa = ?, samSX = ?, trangThai = ?, sucChua = ? WHERE maToa = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, t.getLoaiToa());
             if (t.getSamSX() != null) pst.setInt(2, t.getSamSX()); else pst.setNull(2, Types.INTEGER);
             pst.setString(3, t.getTrangThai());
             if (t.getSucChua() != null) pst.setInt(4, t.getSucChua()); else pst.setNull(4, Types.INTEGER);
-            pst.setBoolean(5, t.isActive());
             pst.setString(6, t.getMaToa());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -106,7 +102,7 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "UPDATE ToaTau SET isActive = 0 WHERE maToa = ?";
+        String sql = "DELETE FROM ToaTau WHERE maToa = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -122,5 +118,47 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
     public List<ToaTau> getByTau(String maTau) {
         // Since ToaTau no longer has maTau column, return all active ToaTau
         return getAll();
+    }
+
+    /**
+     * Get coaches (ToaTau) for a specific train trip (ChuyenTau) using ChiTietChuyenTau relationship
+     * @param maChuyenTau Train trip ID
+     * @return List of coaches associated with the train trip, ordered by soThuTuToa
+     */
+    public List<ToaTau> getByChuyenTau(String maChuyenTau) {
+        List<ToaTau> result = new ArrayList<>();
+        
+        if (maChuyenTau == null || maChuyenTau.trim().isEmpty()) {
+            return result;
+        }
+        
+        // Use a JOIN query to fetch all coaches in one database round-trip
+        // Note: ChiTietChuyenTau.maToaTau references ToaTau.maToa (legacy naming convention)
+        String sql = "SELECT t.maToa, t.loaiToa, t.samSX, t.trangThai, t.sucChua, t.isActive " +
+                     "FROM ToaTau t " +
+                     "INNER JOIN ChiTietChuyenTau ct ON t.maToa = ct.maToaTau " +
+                     "WHERE ct.maChuyenTau = ? AND ct.isActive = 1 AND t.isActive = 1 " +
+                     "ORDER BY ct.soThuTuToa";
+        
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maChuyenTau);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    ToaTau toa = new ToaTau(
+                            rs.getString("maToa"),
+                            rs.getString("loaiToa"),
+                            rs.getObject("samSX", Integer.class),
+                            rs.getString("trangThai"),
+                            rs.getObject("sucChua", Integer.class)
+                    );
+                    result.add(toa);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return result;
     }
 }

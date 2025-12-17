@@ -11,12 +11,11 @@ public class NhanVien implements Serializable {
     private LocalDate ngaySinh;
     private String maLoaiNV;
     private String trangThai;
-    private boolean isActive;
+
     public NhanVien() {
-        this.isActive = true;
     }
 
-    public NhanVien(String maNV, String tenNV, String soDienThoai, String diaChi, LocalDate ngaySinh, String maLoaiNV, String trangThai, boolean isActive) {
+    public NhanVien(String maNV, String tenNV, String soDienThoai, String diaChi, LocalDate ngaySinh, String maLoaiNV, String trangThai) {
         this.maNV = maNV;
         this.tenNV = tenNV;
         this.soDienThoai = soDienThoai;
@@ -24,7 +23,6 @@ public class NhanVien implements Serializable {
         this.ngaySinh = ngaySinh;
         this.maLoaiNV = maLoaiNV;
         this.trangThai = trangThai;
-        this.isActive = isActive;
     }
 
     public String getMaNV() {
@@ -83,14 +81,6 @@ public class NhanVien implements Serializable {
         this.trangThai = trangThai;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
     @Override
     public String toString() {
         return "NhanVien{" +
@@ -101,7 +91,6 @@ public class NhanVien implements Serializable {
                 ", ngaySinh=" + ngaySinh +
                 ", maLoaiNV='" + maLoaiNV + '\'' +
                 ", trangThai='" + trangThai + '\'' +
-                ", isActive=" + isActive +
                 '}';
     }
 }

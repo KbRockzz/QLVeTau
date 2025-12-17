@@ -48,8 +48,7 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
                         rs.getString("loaiGhe"),
                         rs.getFloat("giaCoBan"),
                         ngayBatDau,
-                        ngayKetThuc,
-                        true
+                        ngayKetThuc
                 );
                 list.add(bg);
             }
@@ -79,8 +78,7 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
                             rs.getString("loaiGhe"),
                             rs.getFloat("giaCoBan"),
                             ngayBatDau,
-                            ngayKetThuc,
-                            true
+                            ngayKetThuc
                     );
                 }
             }
@@ -166,8 +164,7 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
                             rs.getString("loaiGhe"),
                             rs.getFloat("giaCoBan"),
                             ngayBatDau,
-                            ngayKetThuc,
-                            true
+                            ngayKetThuc
                     );
                 }
             }

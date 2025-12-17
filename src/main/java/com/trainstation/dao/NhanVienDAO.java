@@ -24,7 +24,8 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
     @Override
     public List<NhanVien> getAll() {
         List<NhanVien> list = new ArrayList<>();
-        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai, isActive FROM NhanVien WHERE isActive = 1";
+        // Only get active employees (isActive = 1)
+        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -41,8 +42,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
                         rs.getString("diaChi"),
                         ngaySinh,
                         rs.getString("maLoaiNV"),
-                        rs.getString("trangThai"),
-                        rs.getBoolean("isActive")
+                        rs.getString("trangThai")
                 );
                 list.add(nv);
             }
@@ -55,7 +55,8 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public NhanVien findById(String id) {
-        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai, isActive FROM NhanVien WHERE maNV = ?";
+        // Only find active employees (isActive = 1)
+        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien WHERE maNV = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -73,8 +74,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
                             rs.getString("diaChi"),
                             ngaySinh,
                             rs.getString("maLoaiNV"),
-                            rs.getString("trangThai"),
-                            rs.getBoolean("isActive")
+                            rs.getString("trangThai")
                     );
                 }
             }
@@ -86,7 +86,8 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public boolean insert(NhanVien nv) {
-        String sql = "INSERT INTO NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        // Set isActive = 1 by default for new employees
+        String sql = "INSERT INTO NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, 1)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, nv.getMaNV());
@@ -100,7 +101,6 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
             }
             pst.setString(6, nv.getMaLoaiNV());
             pst.setString(7, nv.getTrangThai());
-            pst.setBoolean(8, nv.isActive());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -110,7 +110,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public boolean update(NhanVien nv) {
-        String sql = "UPDATE NhanVien SET tenNV = ?, soDienThoai = ?, diaChi = ?, ngaySinh = ?, maLoaiNV = ?, trangThai = ?, isActive = ? WHERE maNV = ?";
+        String sql = "UPDATE NhanVien SET tenNV = ?, soDienThoai = ?, diaChi = ?, ngaySinh = ?, maLoaiNV = ?, trangThai = ? WHERE maNV = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, nv.getTenNV());
@@ -123,8 +123,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
             }
             pst.setString(5, nv.getMaLoaiNV());
             pst.setString(6, nv.getTrangThai());
-            pst.setBoolean(7, nv.isActive());
-            pst.setString(8, nv.getMaNV());
+            pst.setString(7, nv.getMaNV());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -134,7 +133,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public boolean delete(String id) {
-        // Soft delete using isActive field
+        // Soft delete: set isActive = 0
         String sql = "UPDATE NhanVien SET isActive = 0 WHERE maNV = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -147,11 +146,12 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
     }
 
     /**
-     * Get all employees including soft-deleted ones
+     * Get all deleted employees (isActive = 0)
+     * @return List of soft-deleted employees
      */
-    public List<NhanVien> getAllIncludingDeleted() {
+    public List<NhanVien> getDeletedEmployees() {
         List<NhanVien> list = new ArrayList<>();
-        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai, isActive FROM NhanVien";
+        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien WHERE isActive = 0";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -168,8 +168,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
                         rs.getString("diaChi"),
                         ngaySinh,
                         rs.getString("maLoaiNV"),
-                        rs.getString("trangThai"),
-                        rs.getBoolean("isActive")
+                        rs.getString("trangThai")
                 );
                 list.add(nv);
             }
@@ -180,15 +179,16 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
     }
 
     /**
-     * Restore a soft-deleted employee by setting isActive = true
+     * Restore a soft-deleted employee (set isActive = 1)
+     * @param id Employee ID to restore
+     * @return true if restore was successful
      */
-    public boolean restore(String id) {
+    public boolean restoreEmployee(String id) {
         String sql = "UPDATE NhanVien SET isActive = 1 WHERE maNV = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
-            int rowsAffected = pst.executeUpdate();
-            return rowsAffected > 0;
+            return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

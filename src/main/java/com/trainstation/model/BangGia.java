@@ -10,21 +10,17 @@ public class BangGia implements Serializable {
     private Float giaCoBan;
     private LocalDateTime ngayBatDau;
     private LocalDateTime ngayKetThuc;
-    private boolean isActive;
 
     public BangGia() {
-        this.isActive = true;
     }
 
-    public BangGia(String maBangGia, String maChang, String loaiGhe, Float giaCoBan, LocalDateTime ngayBatDau, LocalDateTime ngayKetThuc, boolean isActive) {
+    public BangGia(String maBangGia, String maChang, String loaiGhe, Float giaCoBan, LocalDateTime ngayBatDau, LocalDateTime ngayKetThuc) {
         this.maBangGia = maBangGia;
         this.maChang = maChang;
         this.loaiGhe = loaiGhe;
         this.giaCoBan = giaCoBan;
         this.ngayBatDau = ngayBatDau;
-        this.ngayKetThuc = ngayKetThuc;
-        this.isActive = isActive;
-    }
+        this.ngayKetThuc = ngayKetThuc;    }
 
     public String getMaBangGia() {
         return maBangGia;
@@ -72,17 +68,7 @@ public class BangGia implements Serializable {
 
     public void setNgayKetThuc(LocalDateTime ngayKetThuc) {
         this.ngayKetThuc = ngayKetThuc;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    @Override
+    }    @Override
     public String toString() {
         return "BangGia{" +
                 "maBangGia='" + maBangGia + '\'' +
@@ -90,8 +76,7 @@ public class BangGia implements Serializable {
                 ", loaiGhe='" + loaiGhe + '\'' +
                 ", giaCoBan=" + giaCoBan +
                 ", ngayBatDau=" + ngayBatDau +
-                ", ngayKetThuc=" + ngayKetThuc +
-                ", isActive=" + isActive +
+                ", ngayKetThuc=" + ngayKetThuc + +
                 '}';
     }
 }

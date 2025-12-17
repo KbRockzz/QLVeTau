@@ -21,16 +21,14 @@ public class Ve implements Serializable {
     private String loaiVe;
     private String maBangGia;
     private Float giaThanhToan;
-    private boolean isActive;
 
     public Ve() {
-        this.isActive = true;
     }
 
     public Ve(String maVe, String maChuyen, String maLoaiVe, String maSoGhe, String maGaDi, String maGaDen,
               String tenGaDi, String tenGaDen, LocalDateTime ngayIn, String trangThai, LocalDateTime gioDi,
               LocalDateTime gioDenDuKien, Integer soToa, String loaiCho, String loaiVe, String maBangGia,
-              Float giaThanhToan, boolean isActive) {
+              Float giaThanhToan) {
         this.maVe = maVe;
         this.maChuyen = maChuyen;
         this.maLoaiVe = maLoaiVe;
@@ -47,9 +45,7 @@ public class Ve implements Serializable {
         this.loaiCho = loaiCho;
         this.loaiVe = loaiVe;
         this.maBangGia = maBangGia;
-        this.giaThanhToan = giaThanhToan;
-        this.isActive = isActive;
-    }
+        this.giaThanhToan = giaThanhToan;    }
 
     public String getMaVe() {
         return maVe;
@@ -161,17 +157,7 @@ public class Ve implements Serializable {
 
     public void setGiaThanhToan(Float giaThanhToan) {
         this.giaThanhToan = giaThanhToan;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public String getLoaiCho() {
+    }    public String getLoaiCho() {
         return loaiCho;
     }
 
@@ -240,8 +226,7 @@ public class Ve implements Serializable {
                 ", loaiCho='" + loaiCho + '\'' +
                 ", loaiVe='" + loaiVe + '\'' +
                 ", maBangGia='" + maBangGia + '\'' +
-                ", giaThanhToan=" + giaThanhToan +
-                ", isActive=" + isActive +
+                ", giaThanhToan=" + giaThanhToan + +
                 '}';
     }
 }

@@ -202,7 +202,7 @@ public class PnlGa extends JPanel {
             }
 
             // Tạo đối tượng ga mới
-            Ga ga = new Ga(maGa, tenGa, moTa, tinhTrang, diaChi, true);
+            Ga ga = new Ga(maGa, tenGa, moTa, tinhTrang, diaChi);
             
             if (gaService.themGa(ga)) {
                 JOptionPane.showMessageDialog(this, 
@@ -258,7 +258,7 @@ public class PnlGa extends JPanel {
             }
 
             // Tạo đối tượng ga với thông tin cập nhật
-            Ga ga = new Ga(maGa, tenGa, moTa, tinhTrang, diaChi, true);
+            Ga ga = new Ga(maGa, tenGa, moTa, tinhTrang, diaChi);
             
             if (gaService.capNhatGa(ga)) {
                 JOptionPane.showMessageDialog(this, 

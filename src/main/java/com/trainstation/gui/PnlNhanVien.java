@@ -158,17 +158,14 @@ public class PnlNhanVien extends JPanel {
         modelBang.setRowCount(0);
         List<NhanVien> danhSach = nhanVienService.layTatCaNhanVien();
         for (NhanVien nv : danhSach) {
-            // Use isActive instead of trangThai to avoid NullPointerException
-            if (nv.isActive()) {
-                modelBang.addRow(new Object[]{
-                        nv.getMaNV(),
-                        nv.getTenNV(),
-                        nv.getSoDienThoai(),
-                        nv.getDiaChi(),
-                        nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "",
-                        nv.getMaLoaiNV()
-                });
-            }
+            modelBang.addRow(new Object[]{
+                    nv.getMaNV(),
+                    nv.getTenNV(),
+                    nv.getSoDienThoai(),
+                    nv.getDiaChi(),
+                    nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "",
+                    nv.getMaLoaiNV()
+            });
         }
     }
 
@@ -227,8 +224,7 @@ public class PnlNhanVien extends JPanel {
                     txtDiaChi.getText().trim(),
                     ngaySinh,
                     maLoaiNV,
-                    "Đang hoạt động",
-                    true
+                    "Đang hoạt động"
             );
 
             if (nhanVienService.themNhanVien(nv)) {
@@ -267,8 +263,7 @@ public class PnlNhanVien extends JPanel {
                     txtDiaChi.getText().trim(),
                     ngaySinh,
                     maLoaiNV,
-                    "Đang hoạt động",
-                    true
+                    "Đang hoạt động"
             );
 
             if (nhanVienService.capNhatNhanVien(nv)) {

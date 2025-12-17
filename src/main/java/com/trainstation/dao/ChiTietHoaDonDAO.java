@@ -182,4 +182,34 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
         }
         return list;
     }
+
+    /**
+     * Update moTa field for audit trail (ticket exchange tracking)
+     */
+    public boolean updateMoTa(String maHoaDon, String maVe, String moTa) {
+        String sql = "UPDATE ChiTietHoaDon SET moTa = ? WHERE maHoaDon = ? AND maVe = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, moTa);
+            pst.setString(2, maHoaDon);
+            pst.setString(3, maVe);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Update moTa field using provided connection (for transactional operations)
+     */
+    public boolean updateMoTa(String maHoaDon, String maVe, String moTa, Connection conn) throws SQLException {
+        String sql = "UPDATE ChiTietHoaDon SET moTa = ? WHERE maHoaDon = ? AND maVe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, moTa);
+            pst.setString(2, maHoaDon);
+            pst.setString(3, maVe);
+            return pst.executeUpdate() > 0;
+        }
+    }
 }

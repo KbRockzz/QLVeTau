@@ -6,18 +6,14 @@ public class LoaiGhe implements Serializable {
     private String maLoai;
     private String tenLoai;
     private String moTa;
-    private boolean isActive;
 
     public LoaiGhe() {
-        this.isActive = true;
     }
 
-    public LoaiGhe(String maLoai, String tenLoai, String moTa, boolean isActive) {
+    public LoaiGhe(String maLoai, String tenLoai, String moTa) {
         this.maLoai = maLoai;
         this.tenLoai = tenLoai;
-        this.moTa = moTa;
-        this.isActive = isActive;
-    }
+        this.moTa = moTa;    }
 
     public String getMaLoai() {
         return maLoai;
@@ -41,17 +37,7 @@ public class LoaiGhe implements Serializable {
 
     public void setMoTa(String moTa) {
         this.moTa = moTa;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    @Override
+    }    @Override
     public String toString() {
         return tenLoai;
     }

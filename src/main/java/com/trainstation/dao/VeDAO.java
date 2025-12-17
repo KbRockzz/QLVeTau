@@ -99,7 +99,7 @@ public class VeDAO implements GenericDAO<Ve> {
     @Override
     public List<Ve> getAll() {
         List<Ve> list = new ArrayList<>();
-        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive FROM Ve WHERE isActive = 1";
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan FROM Ve";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -129,8 +129,7 @@ public class VeDAO implements GenericDAO<Ve> {
                         rs.getString("loaiCho"),
                         rs.getString("loaiVe"),
                         rs.getString("maBangGia"),
-                        rs.getObject("giaThanhToan", Float.class),
-                        rs.getBoolean("isActive")
+                        rs.getObject("giaThanhToan", Float.class)
                 );
                 ensureStationNames(v);
                 list.add(v);
@@ -143,7 +142,7 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public Ve findById(String id) {
-        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive FROM Ve WHERE maVe = ?";
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan FROM Ve WHERE maVe = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -174,8 +173,7 @@ public class VeDAO implements GenericDAO<Ve> {
                             rs.getString("loaiCho"),
                             rs.getString("loaiVe"),
                             rs.getString("maBangGia"),
-                            rs.getObject("giaThanhToan", Float.class),
-                            rs.getBoolean("isActive")
+                            rs.getObject("giaThanhToan", Float.class)
                     );
                     ensureStationNames(result);
                     return result;
@@ -189,7 +187,7 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public boolean insert(Ve v) {
-        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement pst = null;
         try {
@@ -240,7 +238,6 @@ public class VeDAO implements GenericDAO<Ve> {
             pst.setString(15, v.getLoaiVe());
             pst.setString(16, v.getMaBangGia());
             if (v.getGiaThanhToan() != null) pst.setFloat(17, v.getGiaThanhToan()); else pst.setNull(17, Types.FLOAT);
-            pst.setBoolean(18, v.isActive());
             System.out.println("DEBUG Ve.insert: inserting maVe=" + v.getMaVe() + " maBangGia=" + v.getMaBangGia());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -254,7 +251,7 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public boolean update(Ve v) {
-        String sql = "UPDATE Ve SET maChuyen = ?, maLoaiVe = ?, maSoGhe = ?, maGaDi = ?, maGaDen = ?, tenGaDi = ?, tenGaDen = ?, ngayIn = ?, trangThai = ?, gioDi = ?, gioDenDuKien = ?, soToa = ?, loaiCho = ?, loaiVe = ?, maBangGia = ?, giaThanhToan = ?, isActive = ? WHERE maVe = ?";
+        String sql = "UPDATE Ve SET maChuyen = ?, maLoaiVe = ?, maSoGhe = ?, maGaDi = ?, maGaDen = ?, tenGaDi = ?, tenGaDen = ?, ngayIn = ?, trangThai = ?, gioDi = ?, gioDenDuKien = ?, soToa = ?, loaiCho = ?, loaiVe = ?, maBangGia = ?, giaThanhToan = ? WHERE maVe = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, v.getMaChuyen());
@@ -293,7 +290,6 @@ public class VeDAO implements GenericDAO<Ve> {
             } else {
                 pst.setNull(16, Types.FLOAT);
             }
-            pst.setBoolean(17, v.isActive());
             pst.setString(18, v.getMaVe());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -355,8 +351,7 @@ public class VeDAO implements GenericDAO<Ve> {
                             rs.getString("loaiCho"),
                             rs.getString("loaiVe"),
                             rs.getString("maBangGia"),
-                            rs.getObject("giaThanhToan", Float.class),
-                            rs.getBoolean("isActive")
+                            rs.getObject("giaThanhToan", Float.class)
                     );
                     ensureStationNames(v);
                     list.add(v);
@@ -369,7 +364,7 @@ public class VeDAO implements GenericDAO<Ve> {
     }
     public List<Ve> getByChuyen(Connection conn, String maChuyen) throws SQLException {
         List<Ve> list = new ArrayList<>();
-        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive FROM Ve WHERE maChuyen = ? AND isActive = 1";
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan FROM Ve WHERE maChuyen = ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maChuyen);
             try (ResultSet rs = pst.executeQuery()) {
@@ -399,8 +394,7 @@ public class VeDAO implements GenericDAO<Ve> {
                             rs.getString("loaiCho"),
                             rs.getString("loaiVe"),
                             rs.getString("maBangGia"),
-                            rs.getObject("giaThanhToan", Float.class),
-                            rs.getBoolean("isActive")
+                            rs.getObject("giaThanhToan", Float.class)
                     );
                     ensureStationNames(v);
                     list.add(v);

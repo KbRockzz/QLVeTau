@@ -67,6 +67,25 @@ public class PnlDatVe extends JPanel {
     private JButton btnThanhToan; // nút xác nhận thanh toán (finalize)
 
     private final Map<String, Ve> heldVeMap = new HashMap<>();
+    
+    // Modern color palette for seat states - Material Design inspired (matching DlgDoiVe)
+    private static final Color COLOR_AVAILABLE = new Color(76, 175, 80);      // Material Green 500
+    private static final Color COLOR_AVAILABLE_HOVER = new Color(102, 187, 106); // Material Green 400
+    private static final Color COLOR_SELECTED = new Color(33, 150, 243);      // Material Blue 500
+    private static final Color COLOR_BOOKED = new Color(244, 67, 54);         // Material Red 500
+    
+    // Outline/border colors (darker shades for borders)
+    private static final Color COLOR_SELECTED_BORDER = new Color(21, 101, 192);    // Darker blue
+    private static final Color COLOR_AVAILABLE_BORDER = new Color(56, 142, 60);    // Darker green
+    private static final Color COLOR_BOOKED_BORDER = new Color(198, 40, 40);       // Darker red
+    
+    // Visual indicators (emoji icons)
+    private static final String ICON_AVAILABLE = "✓";
+    private static final String ICON_BOOKED = "✕";
+    private static final String ICON_HELD = "⌛";
+    
+    // Modern design constants
+    private static final String ROUND_RECT_ARC = "6,6,6,6"; // 6px radius for rounded corners
 
     public PnlDatVe(TaiKhoan taiKhoan) {
         this.taiKhoanHienTai = taiKhoan;
@@ -241,11 +260,11 @@ public class PnlDatVe extends JPanel {
         // Legend panel
         JPanel pnlChuThich = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel lblTrong = new JLabel("■ Trống");
-        lblTrong.setForeground(new Color(34, 139, 34));
+        lblTrong.setForeground(COLOR_AVAILABLE);
         JLabel lblDaDat = new JLabel("■ Đã đặt");
-        lblDaDat.setForeground(Color.RED);
+        lblDaDat.setForeground(COLOR_BOOKED);
         JLabel lblDaGiu = new JLabel("■ Đang giữ (chưa thanh toán)");
-        lblDaGiu.setForeground(Color.BLUE);
+        lblDaGiu.setForeground(COLOR_SELECTED);
         pnlChuThich.add(lblTrong);
         pnlChuThich.add(Box.createHorizontalStrut(20));
         pnlChuThich.add(lblDaDat);
@@ -301,10 +320,15 @@ public class PnlDatVe extends JPanel {
         // Get distinct station codes from trains
         List<String> danhSachMaGa = chuyenTauDAO.getDistinctStations();
         for (String maGa : danhSachMaGa) {
-            String tenGa = layTenGa(maGa);
-            cmbGaDi.addItem(tenGa);
-            cmbGaDen.addItem(tenGa);
-            mapTenGaToMaGa.put(tenGa, maGa);
+            // Try to get station info - skip if station is soft-deleted (isActive = 0)
+            Ga ga = gaDAO.findById(maGa);
+            if (ga != null) {
+                String tenGa = ga.getTenGa();
+                cmbGaDi.addItem(tenGa);
+                cmbGaDen.addItem(tenGa);
+                mapTenGaToMaGa.put(tenGa, maGa);
+            }
+            // If ga is null (soft-deleted), skip this station - don't add to combobox
         }
     }
     
@@ -443,22 +467,50 @@ public class PnlDatVe extends JPanel {
         String maChuyen = (String) modelBangChuyenTau.getValueAt(row, 0);
         chuyenDuocChon = chuyenTauDAO.findById(maChuyen);
 
-        if (chuyenDuocChon == null) return;
-
-        modelBangToa.setRowCount(0);
-        List<ToaTau> danhSachToa = toaTauDAO.getByTau(chuyenDuocChon.getMaDauMay());
-        for (ToaTau toa : danhSachToa) {
-            modelBangToa.addRow(new Object[]{
-                    toa.getMaToa(),
-                    toa.getMaToa(), // Using maToa instead of tenToa
-                    toa.getLoaiToa(),
-                    toa.getSucChua()
-            });
+        if (chuyenDuocChon == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Không thể tải thông tin chuyến tàu. Vui lòng thử lại.", 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
+        // Clear previous coach selection
+        modelBangToa.setRowCount(0);
         pnlSoDoGhe.removeAll();
         pnlSoDoGhe.revalidate();
         pnlSoDoGhe.repaint();
+        
+        try {
+            // Load coaches for the selected train using ChiTietChuyenTau relationship
+            List<ToaTau> danhSachToa = toaTauDAO.getByChuyenTau(chuyenDuocChon.getMaChuyen());
+            
+            if (danhSachToa == null || danhSachToa.isEmpty()) {
+                // No coaches found for this train
+                JOptionPane.showMessageDialog(this, 
+                    "Chuyến tàu này chưa được cấu hình toa tàu. Vui lòng chọn chuyến khác.", 
+                    "Thông báo", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            
+            // Populate the coach table
+            for (ToaTau toa : danhSachToa) {
+                modelBangToa.addRow(new Object[]{
+                        toa.getMaToa(),
+                        toa.getMaToa(), // Using maToa instead of tenToa
+                        toa.getLoaiToa(),
+                        toa.getSucChua()
+                });
+            }
+        } catch (Exception e) {
+            // Handle database or connection errors
+            JOptionPane.showMessageDialog(this, 
+                "Lỗi khi tải danh sách toa tàu: " + e.getMessage(), 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 
     private void chonToaTau() {
@@ -487,7 +539,7 @@ public class PnlDatVe extends JPanel {
             int soHang = (int) Math.ceil(soGhe / 4.0);
 
 
-            pnlSoDoGhe.setLayout(new GridLayout(soHang, 5, 5, 5));
+            pnlSoDoGhe.setLayout(new GridLayout(soHang, 5, 8, 8)); // Increased spacing for modern look
 
             for (int i = 0; i < soHang; i++) {
 
@@ -500,9 +552,14 @@ public class PnlDatVe extends JPanel {
                     }
                 }
 
+                // Lối đi (aisle) - modern styling
                 JPanel pnlLoiDi = new JPanel();
-                pnlLoiDi.setBackground(new Color(200, 200, 200));
-                pnlLoiDi.setPreferredSize(new Dimension(30, 40));
+                pnlLoiDi.setBackground(new Color(224, 224, 224));
+                pnlLoiDi.setPreferredSize(new Dimension(35, 45));
+                pnlLoiDi.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(189, 189, 189), 1),
+                    BorderFactory.createEmptyBorder(2, 2, 2, 2)
+                ));
                 pnlSoDoGhe.add(pnlLoiDi);
 
                 for (int j = 2; j < 4; j++) {
@@ -520,31 +577,129 @@ public class PnlDatVe extends JPanel {
         pnlSoDoGhe.repaint();
     }
 
+    /**
+     * Check if a seat is available for booking based on its status
+     * @param trangThai Seat status from database
+     * @return true if seat can be booked (Rảnh/RANH = idle, Trống = empty/refunded)
+     */
+    private boolean isAvailableSeat(String trangThai) {
+        if (trangThai == null) {
+            return false;
+        }
+        // Handle both "Rảnh" (idle) and "RANH" (database variations)
+        // Also include "Trống" (empty/refunded seats available for rebooking)
+        return "Rảnh".equalsIgnoreCase(trangThai) || 
+               "Trống".equalsIgnoreCase(trangThai) || 
+               "RANH".equalsIgnoreCase(trangThai);
+    }
+
+    /**
+     * Tạo nút ghế với thiết kế hiện đại theo Material Design (matching DlgDoiVe)
+     */
     private JButton taoNutGhe(Ghe ghe) {
         JButton btnGhe = new JButton(ghe.getMaGhe());
-        btnGhe.setPreferredSize(new Dimension(80, 40));
-        btnGhe.setFont(new Font("Arial", Font.BOLD, 12));
-        btnGhe.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        if ("Rảnh".equalsIgnoreCase(ghe.getTrangThai())) {
-            btnGhe.setBackground(new Color(34, 139, 34)); // Xanh
-            btnGhe.setForeground(Color.BLACK);
-            btnGhe.setEnabled(true);
-            btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Trống");
-            btnGhe.addActionListener(e -> chonGhe(ghe));
-        } else {
-            btnGhe.setBackground(Color.RED);
-            btnGhe.setForeground(Color.BLACK);
-            btnGhe.setEnabled(false);
-            btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đã đặt");
-        }
+        
+        // Modern styling with rounded corners
+        btnGhe.setPreferredSize(new Dimension(85, 45));
+        btnGhe.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnGhe.setFocusPainted(false);
+        btnGhe.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnGhe.setOpaque(true);
+        btnGhe.setContentAreaFilled(true);
+        
+        // Rounded border with FlatLaf properties for modern look
+        btnGhe.putClientProperty("JButton.buttonType", "roundRect");
+        btnGhe.putClientProperty("JComponent.roundRect", ROUND_RECT_ARC);
+        
+        // Check if seat is held in current session
         if (heldVeMap.containsKey(ghe.getMaGhe())) {
-            // hiển thị as 'Đã giữ' (blue)
-            btnGhe.setBackground(Color.BLUE);
-            btnGhe.setEnabled(false);
-            btnGhe.setToolTipText("Ghế " + ghe.getMaGhe() + " - Đang giữ (chưa thanh toán)");
+            // Display as 'Held' (blue)
+            styleSeatButton(btnGhe, COLOR_SELECTED, Color.WHITE, false, 
+                createTooltip(ICON_HELD, ghe.getMaGhe(), "Đang giữ (chưa thanh toán)"));
+            // Outline for held seats
+            btnGhe.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(COLOR_SELECTED_BORDER, 2),
+                BorderFactory.createEmptyBorder(3, 8, 3, 8)
+            ));
+            btnGhe.putClientProperty("FlatLaf.style", "shadowColor: rgba(33,150,243,89); shadowWidth: 4");
             return btnGhe;
         }
+        
+        // Màu sắc theo trạng thái
+        if (isAvailableSeat(ghe.getTrangThai())) {
+            // Ghế trống - màu xanh với outline, shadow và hover effect
+            final String maGhe = ghe.getMaGhe();
+            
+            styleSeatButton(btnGhe, COLOR_AVAILABLE, Color.WHITE, true, 
+                createTooltip(ICON_AVAILABLE, ghe.getMaGhe(), "Trống"));
+            // Subtle outline and shadow for available seats
+            btnGhe.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(COLOR_AVAILABLE_BORDER, 1),
+                BorderFactory.createEmptyBorder(4, 9, 4, 9)
+            ));
+            btnGhe.putClientProperty("FlatLaf.style", "shadowColor: rgba(0,0,0,64); shadowWidth: 3");
+            
+            // Add modern hover effect
+            btnGhe.addMouseListener(createHoverListener(btnGhe, maGhe));
+            
+            btnGhe.addActionListener(e -> chonGhe(ghe));
+        } else {
+            // Ghế đã đặt - màu đỏ với outline và shadow
+            styleSeatButton(btnGhe, COLOR_BOOKED, Color.WHITE, false, 
+                createTooltip(ICON_BOOKED, ghe.getMaGhe(), "Đã đặt"));
+            // Outline for booked seats
+            btnGhe.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(COLOR_BOOKED_BORDER, 1),
+                BorderFactory.createEmptyBorder(4, 9, 4, 9)
+            ));
+            btnGhe.putClientProperty("FlatLaf.style", "shadowColor: rgba(0,0,0,64); shadowWidth: 3");
+        }
+        
         return btnGhe;
+    }
+    
+    /**
+     * Tạo hover listener cho ghế trống (reusable)
+     */
+    private java.awt.event.MouseAdapter createHoverListener(JButton btn, String maGhe) {
+        return new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (btn.isEnabled() && !heldVeMap.containsKey(maGhe)) {
+                    btn.setBackground(COLOR_AVAILABLE_HOVER);
+                }
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (btn.isEnabled() && !heldVeMap.containsKey(maGhe)) {
+                    btn.setBackground(COLOR_AVAILABLE);
+                }
+            }
+        };
+    }
+    
+    /**
+     * Áp dụng styling hiện đại cho nút ghế
+     */
+    private void styleSeatButton(JButton btn, Color bgColor, Color fgColor, boolean enabled, String tooltip) {
+        btn.setBackground(bgColor);
+        btn.setForeground(fgColor);
+        btn.setEnabled(enabled);
+        btn.setToolTipText(tooltip);
+        
+        // FlatLaf properties to preserve colors when disabled
+        if (!enabled) {
+            btn.putClientProperty("Button.disabledBackground", bgColor);
+            btn.putClientProperty("Button.disabledText", fgColor);
+        }
+    }
+    
+    /**
+     * Tạo tooltip text cho nút ghế
+     */
+    private String createTooltip(String icon, String maGhe, String status) {
+        return icon + " " + maGhe + " - " + status;
     }
 
     private void chonGhe(Ghe ghe) {
@@ -734,7 +889,7 @@ public class PnlDatVe extends JPanel {
             }
 
             String email = txtCCCD.getText().trim() + "|" + txtDiaChi.getText().trim();
-            KhachHang kh = new KhachHang(maKH, tenKH, email, sdt, true);
+            KhachHang kh = new KhachHang(maKH, tenKH, email, sdt);
 
             if (khachHangDAO.insert(kh)) {
                 JOptionPane.showMessageDialog(dialog, "Thêm khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
@@ -864,7 +1019,7 @@ public class PnlDatVe extends JPanel {
                 return;
             }
             String trangThaiDB = gheDB.getTrangThai();
-            if (trangThaiDB != null && !"Rảnh".equalsIgnoreCase(trangThaiDB) && !"RANH".equalsIgnoreCase(trangThaiDB)) {
+            if (!isAvailableSeat(trangThaiDB)) {
                 // Ghế đã bị đặt/giữ bởi người khác
                 JOptionPane.showMessageDialog(this, "Ghế này đã không còn trống (" + trangThaiDB + "). Vui lòng chọn ghế khác.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 // refresh seat map để hiển thị trạng thái thực tế
