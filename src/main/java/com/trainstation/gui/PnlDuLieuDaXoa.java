@@ -215,11 +215,19 @@ public class PnlDuLieuDaXoa extends JPanel {
     }
 
     /**
-     * Tải dữ liệu các tài khoản đã xóa - chức năng không khả dụng do đã loại bỏ soft delete
+     * Tải dữ liệu các tài khoản có isActive = 0 (đã xóa mềm)
      */
     private void taiDuLieuTaiKhoanDaXoa() {
         modelTaiKhoan.setRowCount(0);
-        // Soft delete removed - no longer showing deleted data
+        List<TaiKhoan> danhSach = taiKhoanDAO.getDeletedAccounts();
+        for (TaiKhoan tk : danhSach) {
+            modelTaiKhoan.addRow(new Object[]{
+                    tk.getMaTK(),
+                    tk.getMaNV(),
+                    tk.getTenTaiKhoan(),
+                    tk.getTrangThai()
+            });
+        }
     }
 
     /**
@@ -262,13 +270,42 @@ public class PnlDuLieuDaXoa extends JPanel {
     }
 
     /**
-     * Khôi phục tài khoản đã xóa - chức năng không khả dụng do đã loại bỏ soft delete
+     * Khôi phục tài khoản đã xóa (set isActive = 1)
      */
     private void khoiPhucTaiKhoan() {
-        JOptionPane.showMessageDialog(this, 
-            "Chức năng khôi phục không khả dụng do đã loại bỏ soft delete.\nDữ liệu đã xóa sẽ bị xóa vĩnh viễn.", 
-            "Thông báo", 
-            JOptionPane.INFORMATION_MESSAGE);
+        int row = bangTaiKhoan.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, 
+                "Vui lòng chọn tài khoản cần khôi phục!", 
+                "Thông báo", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String maTK = (String) modelTaiKhoan.getValueAt(row, 0);
+        String tenTK = (String) modelTaiKhoan.getValueAt(row, 2);
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có chắc chắn muốn khôi phục tài khoản:\n" + maTK + " - " + tenTK + "?",
+                "Xác nhận khôi phục",
+                JOptionPane.YES_NO_OPTION);
+        
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        if (taiKhoanDAO.restoreAccount(maTK)) {
+            JOptionPane.showMessageDialog(this, 
+                "Khôi phục tài khoản thành công!", 
+                "Thành công", 
+                JOptionPane.INFORMATION_MESSAGE);
+            taiDuLieuTaiKhoanDaXoa(); // Reload the table
+        } else {
+            JOptionPane.showMessageDialog(this, 
+                "Khôi phục tài khoản thất bại!", 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
