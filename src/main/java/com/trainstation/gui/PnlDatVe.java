@@ -82,6 +82,10 @@ public class PnlDatVe extends JPanel {
     // Visual indicators (emoji icons)
     private static final String ICON_AVAILABLE = "✓";
     private static final String ICON_BOOKED = "✕";
+    private static final String ICON_HELD = "⌛";
+    
+    // Modern design constants
+    private static final String ROUND_RECT_ARC = "6,6,6,6"; // 6px radius for rounded corners
 
     public PnlDatVe(TaiKhoan taiKhoan) {
         this.taiKhoanHienTai = taiKhoan;
@@ -600,13 +604,13 @@ public class PnlDatVe extends JPanel {
         
         // Rounded border with FlatLaf properties for modern look
         btnGhe.putClientProperty("JButton.buttonType", "roundRect");
-        btnGhe.putClientProperty("JComponent.roundRect", "6,6,6,6"); // 6px radius matching theme
+        btnGhe.putClientProperty("JComponent.roundRect", ROUND_RECT_ARC);
         
         // Check if seat is held in current session
         if (heldVeMap.containsKey(ghe.getMaGhe())) {
             // Display as 'Held' (blue)
             styleSeatButton(btnGhe, COLOR_SELECTED, Color.WHITE, false, 
-                ICON_AVAILABLE + " " + ghe.getMaGhe() + " - Đang giữ (chưa thanh toán)");
+                createTooltip(ICON_HELD, ghe.getMaGhe(), "Đang giữ (chưa thanh toán)"));
             // Outline for held seats
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_SELECTED_BORDER, 2),
@@ -622,7 +626,7 @@ public class PnlDatVe extends JPanel {
             final String maGhe = ghe.getMaGhe();
             
             styleSeatButton(btnGhe, COLOR_AVAILABLE, Color.WHITE, true, 
-                ICON_AVAILABLE + " " + ghe.getMaGhe() + " - Trống");
+                createTooltip(ICON_AVAILABLE, ghe.getMaGhe(), "Trống"));
             // Subtle outline and shadow for available seats
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_AVAILABLE_BORDER, 1),
@@ -637,7 +641,7 @@ public class PnlDatVe extends JPanel {
         } else {
             // Ghế đã đặt - màu đỏ với outline và shadow
             styleSeatButton(btnGhe, COLOR_BOOKED, Color.WHITE, false, 
-                ICON_BOOKED + " " + ghe.getMaGhe() + " - Đã đặt");
+                createTooltip(ICON_BOOKED, ghe.getMaGhe(), "Đã đặt"));
             // Outline for booked seats
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_BOOKED_BORDER, 1),
@@ -684,6 +688,13 @@ public class PnlDatVe extends JPanel {
             btn.putClientProperty("Button.disabledBackground", bgColor);
             btn.putClientProperty("Button.disabledText", fgColor);
         }
+    }
+    
+    /**
+     * Tạo tooltip text cho nút ghế
+     */
+    private String createTooltip(String icon, String maGhe, String status) {
+        return icon + " " + maGhe + " - " + status;
     }
 
     private void chonGhe(Ghe ghe) {
