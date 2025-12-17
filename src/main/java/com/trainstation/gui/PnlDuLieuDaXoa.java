@@ -392,20 +392,30 @@ public class PnlDuLieuDaXoa extends JPanel {
             }
         };
         bangGa = new JTable(modelGa);
+        bangGa.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
         JScrollPane scrollPane = new JScrollPane(bangGa);
+        MaterialInitializer.setTableScrollPaneSize(scrollPane, 45);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         // Buttons
-        JPanel pnlButton = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JPanel pnlButton = MaterialInitializer.createButtonPanel();
+
         btnKhoiPhucGa = new JButton("Khôi phục");
-        btnLamMoiGa = new JButton("Làm mới");
-        
         btnKhoiPhucGa.addActionListener(e -> khoiPhucGa());
-        btnLamMoiGa.addActionListener(e -> taiDuLieuGaDaXoa());
-        
+        MaterialInitializer.styleButton(btnKhoiPhucGa);
         pnlButton.add(btnKhoiPhucGa);
+
+        btnLamMoiGa = new JButton("Làm mới");
+        btnLamMoiGa.addActionListener(e -> taiDuLieuGaDaXoa());
+        MaterialInitializer.styleButton(btnLamMoiGa);
         pnlButton.add(btnLamMoiGa);
-        
+
+        btnXoaRongGa = new JButton("Bỏ chọn");
+        btnXoaRongGa.addActionListener(e -> bangGa.clearSelection());
+        MaterialInitializer.styleButton(btnXoaRongGa);
+        pnlButton.add(btnXoaRongGa);
+
         panel.add(pnlButton, BorderLayout.SOUTH);
         return panel;
     }
