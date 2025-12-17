@@ -288,7 +288,7 @@ public class VeService {
                 veCu.getSoToa(),         // KHÔNG ĐỔI (cùng toa)
                 veCu.getLoaiCho(),       // KHÔNG ĐỔI
                 veCu.getLoaiVe(),        // KHÔNG ĐỔI
-                veCu.getMaBangGia(),     // KHÔNG ĐỔI
+                null,                    // maBangGia - để VeDAO.insert() tự tìm bảng giá phù hợp
                 veCu.getGiaThanhToan(),  // KHÔNG ĐỔI
                 TICKET_ACTIVE
             );
