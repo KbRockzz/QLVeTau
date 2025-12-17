@@ -24,7 +24,8 @@ public class PnlDoiVe extends JPanel {
     private ChiTietHoaDonDAO chiTietHoaDonDAO;
     private VeDAO veDAO;
     
-    private JTextField txtMaKH;
+    private JTextField txtTimKiem;
+    private JComboBox<String> cmbTimKiemTheo;
     private JButton btnTimKiem;
     private JTable bangVe;
     private DefaultTableModel modelBangVe;
@@ -52,10 +53,15 @@ public class PnlDoiVe extends JPanel {
         add(lblTieuDe, BorderLayout.NORTH);
 
         // Search panel
-        JPanel pnlTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        pnlTimKiem.add(new JLabel("Mã khách hàng:"));
-        txtMaKH = new JTextField(20);
-        pnlTimKiem.add(txtMaKH);
+        JPanel pnlTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        pnlTimKiem.add(new JLabel("Tìm kiếm theo:"));
+        
+        cmbTimKiemTheo = new JComboBox<>(new String[]{"Số điện thoại", "Mã vé"});
+        pnlTimKiem.add(cmbTimKiemTheo);
+        
+        txtTimKiem = new JTextField(20);
+        pnlTimKiem.add(txtTimKiem);
+        
         btnTimKiem = new JButton("Tìm kiếm");
         btnTimKiem.addActionListener(e -> timKiemVe());
         MaterialInitializer.styleButton(btnTimKiem);
@@ -92,32 +98,58 @@ public class PnlDoiVe extends JPanel {
     }
 
     private void timKiemVe() {
-        String maKH = txtMaKH.getText().trim();
-        if (maKH.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập mã khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        String timKiem = txtTimKiem.getText().trim();
+        if (timKiem.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Vui lòng nhập thông tin tìm kiếm!", 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
             return;
         }
         
         modelBangVe.setRowCount(0);
         
-        // Lấy tất cả vé của khách hàng thông qua HoaDon → ChiTietHoaDon → Ve
-        List<HoaDon> danhSachHoaDon = hoaDonDAO.findByKhachHang(maKH);
+        String loaiTimKiem = (String) cmbTimKiemTheo.getSelectedItem();
         List<Ve> danhSachVe = new ArrayList<>();
         
-        for (HoaDon hoaDon : danhSachHoaDon) {
-            List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.findByHoaDon(hoaDon.getMaHoaDon());
-            for (ChiTietHoaDon chiTiet : chiTietList) {
-                Ve ve = veDAO.findById(chiTiet.getMaVe());
-                if (ve != null) {
-                    danhSachVe.add(ve);
+        if ("Số điện thoại".equals(loaiTimKiem)) {
+            // Tìm theo số điện thoại - lấy từ HoaDon
+            List<HoaDon> danhSachHoaDon = hoaDonDAO.getAll().stream()
+                .filter(hd -> timKiem.equals(hd.getSoDienThoai()))
+                .collect(java.util.stream.Collectors.toList());
+            
+            for (HoaDon hoaDon : danhSachHoaDon) {
+                List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.findByHoaDon(hoaDon.getMaHoaDon());
+                for (ChiTietHoaDon chiTiet : chiTietList) {
+                    Ve ve = veDAO.findById(chiTiet.getMaVe());
+                    if (ve != null && ve.isActive()) {
+                        danhSachVe.add(ve);
+                    }
                 }
+            }
+            
+            if (danhSachVe.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Không tìm thấy vé nào với số điện thoại: " + timKiem,
+                    "Thông báo",
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            // Tìm theo mã vé
+            Ve ve = veDAO.findById(timKiem);
+            if (ve != null && ve.isActive()) {
+                danhSachVe.add(ve);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                    "Không tìm thấy vé với mã: " + timKiem,
+                    "Thông báo",
+                    JOptionPane.INFORMATION_MESSAGE);
             }
         }
         
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         
         for (Ve ve : danhSachVe) {
-            // Hiển thị tất cả vé, kể cả đã hoàn tất
             modelBangVe.addRow(new Object[]{
                 ve.getMaVe(),
                 ve.getMaChuyen(),
@@ -133,7 +165,10 @@ public class PnlDoiVe extends JPanel {
     private void chonVeDeDoiVe() {
         int row = bangVe.getSelectedRow();
         if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn vé cần đổi!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "Vui lòng chọn vé cần đổi!", 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
             return;
         }
         
@@ -141,128 +176,30 @@ public class PnlDoiVe extends JPanel {
         veHienTai = veService.timVeTheoMa(maVe);
         
         if (veHienTai == null) {
-            JOptionPane.showMessageDialog(this, "Không tìm thấy vé!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "Không tìm thấy vé!", 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        // Show dialog to select new train/seat
-        hienThiDialogChonChuyenMoi();
-    }
-
-    private void hienThiDialogChonChuyenMoi() {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chọn chuyến và ghế mới", true);
-        dialog.setLayout(new BorderLayout(10, 10));
-        dialog.setSize(800, 600);
-        dialog.setLocationRelativeTo(this);
-        
-        JPanel pnlNoiDung = new JPanel(new BorderLayout(10, 10));
-        pnlNoiDung.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        // Train selection
-        JPanel pnlChonChuyen = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        pnlChonChuyen.add(new JLabel("Chọn chuyến mới:"));
-        JComboBox<String> cmbChuyen = new JComboBox<>();
-        List<ChuyenTau> danhSachChuyen = chuyenTauDAO.getAll();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        for (ChuyenTau ct : danhSachChuyen) {
-            String item = ct.getMaChuyen() + " - " + ct.getMaGaDi() + " → " + ct.getMaGaDen();
-            if (ct.getGioDi() != null) {
-                item += " (" + ct.getGioDi().format(formatter) + ")";
-            }
-            cmbChuyen.addItem(item);
-        }
-        pnlChonChuyen.add(cmbChuyen);
-        pnlNoiDung.add(pnlChonChuyen, BorderLayout.NORTH);
-        
-        // Seat selection panel
-        JPanel pnlGhe = new JPanel(new GridLayout(0, 5, 5, 5));
-        JScrollPane scrollGhe = new JScrollPane(pnlGhe);
-        scrollGhe.setBorder(BorderFactory.createTitledBorder("Chọn ghế mới"));
-        pnlNoiDung.add(scrollGhe, BorderLayout.CENTER);
-        
-        final Ghe[] gheChon = {null};
-        final ChuyenTau[] chuyenChon = {null};
-        
-        cmbChuyen.addActionListener(e -> {
-            String selected = (String) cmbChuyen.getSelectedItem();
-            if (selected == null) return;
-            
-            String maChuyen = selected.split(" - ")[0];
-            ChuyenTau chuyen = chuyenTauDAO.findById(maChuyen);
-            chuyenChon[0] = chuyen;
-            
-            if (chuyen == null) return;
-            
-            // Load seats
-            pnlGhe.removeAll();
-            List<ToaTau> danhSachToa = toaTauDAO.getByTau(chuyen.getMaDauMay());
-            for (ToaTau toa : danhSachToa) {
-                List<Ghe> danhSachGhe = gheDAO.getByToa(toa.getMaToa());
-                for (Ghe ghe : danhSachGhe) {
-                    if ("Trống".equals(ghe.getTrangThai())) {
-                        JButton btnGhe = new JButton(ghe.getMaGhe());
-                        btnGhe.setBackground(new Color(34, 139, 34));
-                        btnGhe.setForeground(Color.WHITE);
-                        btnGhe.addActionListener(evt -> {
-                            gheChon[0] = ghe;
-                            btnGhe.setBackground(Color.ORANGE);
-                        });
-                        pnlGhe.add(btnGhe);
-                    }
-                }
-            }
-            pnlGhe.revalidate();
-            pnlGhe.repaint();
-        });
-        
-        dialog.add(pnlNoiDung, BorderLayout.CENTER);
-        
-        // Buttons
-        JPanel pnlButton = new JPanel(new FlowLayout());
-        JButton btnXacNhan = new JButton("Xác nhận đổi vé");
-        btnXacNhan.addActionListener(e -> {
-            if (gheChon[0] == null || chuyenChon[0] == null) {
-                JOptionPane.showMessageDialog(dialog, "Vui lòng chọn ghế mới!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            
-            try {
-                // Create new ticket info
-                Ve veMoi = new Ve();
-                veMoi.setMaChuyen(chuyenChon[0].getMaChuyen());
-                veMoi.setMaSoGhe(gheChon[0].getMaGhe());
-                veMoi.setMaGaDi(chuyenChon[0].getMaGaDi());
-                veMoi.setMaGaDen(chuyenChon[0].getMaGaDen());
-                veMoi.setTenGaDi(chuyenChon[0].getMaGaDi()); // Will need proper lookup
-                veMoi.setTenGaDen(chuyenChon[0].getMaGaDen()); // Will need proper lookup
-                veMoi.setGioDi(chuyenChon[0].getGioDi());
-                
-                // Exchange ticket
-                veService.doiVe(veHienTai.getMaVe(), veMoi);
-                
-                JOptionPane.showMessageDialog(dialog, "Đổi vé thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-                dialog.dispose();
-                
-                // Refresh ticket list
-                timKiemVe();
-                
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "Lỗi khi đổi vé: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-        
-        JButton btnHuy = new JButton("Hủy");
-        btnHuy.addActionListener(e -> dialog.dispose());
-        
-        pnlButton.add(btnXacNhan);
-        pnlButton.add(btnHuy);
-        dialog.add(pnlButton, BorderLayout.SOUTH);
-        
-        // Trigger initial load
-        if (cmbChuyen.getItemCount() > 0) {
-            cmbChuyen.setSelectedIndex(0);
+        // Kiểm tra trạng thái vé trước khi mở dialog
+        String trangThai = veHienTai.getTrangThai();
+        if ("Đã hoàn".equals(trangThai) || "Đã hủy".equals(trangThai) || "Đã đổi".equals(trangThai)) {
+            JOptionPane.showMessageDialog(this,
+                "Không thể đổi vé có trạng thái: " + trangThai,
+                "Lỗi",
+                JOptionPane.ERROR_MESSAGE);
+            return;
         }
         
+        // Mở dialog đổi vé mới
+        DlgDoiVe dialog = new DlgDoiVe((Frame) SwingUtilities.getWindowAncestor(this), veHienTai);
         dialog.setVisible(true);
+        
+        // Nếu đổi vé thành công, refresh lại danh sách
+        if (dialog.isThanhCong()) {
+            timKiemVe();
+        }
     }
 }
