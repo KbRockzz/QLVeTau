@@ -23,7 +23,7 @@ public class ChangTauDAO implements GenericDAO<ChangTau> {
     @Override
     public List<ChangTau> getAll() {
         List<ChangTau> list = new ArrayList<>();
-        String sql = "SELECT maChang, soKMToiThieu, soKMToiDa, moTa, giaTien, isActive FROM ChangTau WHERE isActive = 1";
+        String sql = "SELECT maChang, soKMToiThieu, soKMToiDa, moTa, giaTien FROM ChangTau";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -33,8 +33,7 @@ public class ChangTauDAO implements GenericDAO<ChangTau> {
                         rs.getObject("soKMToiThieu", Integer.class),
                         rs.getObject("soKMToiDa", Integer.class),
                         rs.getString("moTa"),
-                        rs.getObject("giaTien", Float.class),
-                        rs.getBoolean("isActive")
+                        rs.getObject("giaTien", Float.class)
                 );
                 list.add(ct);
             }
@@ -46,7 +45,7 @@ public class ChangTauDAO implements GenericDAO<ChangTau> {
 
     @Override
     public ChangTau findById(String id) {
-        String sql = "SELECT maChang, soKMToiThieu, soKMToiDa, moTa, giaTien, isActive FROM ChangTau WHERE maChang = ?";
+        String sql = "SELECT maChang, soKMToiThieu, soKMToiDa, moTa, giaTien FROM ChangTau WHERE maChang = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -57,8 +56,7 @@ public class ChangTauDAO implements GenericDAO<ChangTau> {
                             rs.getObject("soKMToiThieu", Integer.class),
                             rs.getObject("soKMToiDa", Integer.class),
                             rs.getString("moTa"),
-                            rs.getObject("giaTien", Float.class),
-                            rs.getBoolean("isActive")
+                            rs.getObject("giaTien", Float.class)
                     );
                 }
             }

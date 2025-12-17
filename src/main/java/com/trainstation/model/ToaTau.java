@@ -8,20 +8,16 @@ public class ToaTau implements Serializable {
     private Integer samSX;
     private String trangThai;
     private Integer sucChua;
-    private boolean isActive;
 
     public ToaTau() {
-        this.isActive = true;
     }
 
-    public ToaTau(String maToa, String loaiToa, Integer samSX, String trangThai, Integer sucChua, boolean isActive) {
+    public ToaTau(String maToa, String loaiToa, Integer samSX, String trangThai, Integer sucChua) {
         this.maToa = maToa;
         this.loaiToa = loaiToa;
         this.samSX = samSX;
         this.trangThai = trangThai;
-        this.sucChua = sucChua;
-        this.isActive = isActive;
-    }
+        this.sucChua = sucChua;    }
 
     public String getMaToa() {
         return maToa;
@@ -61,25 +57,14 @@ public class ToaTau implements Serializable {
 
     public void setSucChua(Integer sucChua) {
         this.sucChua = sucChua;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    @Override
+    }    @Override
     public String toString() {
         return "ToaTau{" +
                 "maToa='" + maToa + '\'' +
                 ", loaiToa='" + loaiToa + '\'' +
                 ", samSX=" + samSX +
                 ", trangThai='" + trangThai + '\'' +
-                ", sucChua=" + sucChua +
-                ", isActive=" + isActive +
+                ", sucChua=" + sucChua + +
                 '}';
     }
 }

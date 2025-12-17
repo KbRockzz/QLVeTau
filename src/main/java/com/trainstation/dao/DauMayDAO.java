@@ -23,7 +23,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
     @Override
     public List<DauMay> getAll() {
         List<DauMay> list = new ArrayList<>();
-        String sql = "SELECT maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai, isActive FROM DauMay WHERE isActive = 1";
+        String sql = "SELECT maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai FROM DauMay";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -50,7 +50,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
 
     @Override
     public boolean insert(DauMay entity) {
-        String sql = "INSERT INTO DauMay (maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai, isActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
+        String sql = "INSERT INTO DauMay (maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai) VALUES (?, ?, ?, ?, ?, ?, 1)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entity.getMaDauMay());
@@ -102,7 +102,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "UPDATE DauMay SET isActive = 0 WHERE maDauMay = ?";
+        String sql = "DELETE FROM DauMay WHERE maDauMay = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);

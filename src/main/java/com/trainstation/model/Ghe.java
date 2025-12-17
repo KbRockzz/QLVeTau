@@ -7,19 +7,15 @@ public class Ghe implements Serializable {
     private String maToa;
     private String loaiGhe;
     private String trangThai;
-    private boolean isActive;
 
     public Ghe() {
-        this.isActive = true;
     }
 
-    public Ghe(String maGhe, String maToa, String loaiGhe, String trangThai, boolean isActive) {
+    public Ghe(String maGhe, String maToa, String loaiGhe, String trangThai) {
         this.maGhe = maGhe;
         this.maToa = maToa;
         this.loaiGhe = loaiGhe;
-        this.trangThai = trangThai;
-        this.isActive = isActive;
-    }
+        this.trangThai = trangThai;    }
 
     public String getMaGhe() {
         return maGhe;
@@ -51,24 +47,13 @@ public class Ghe implements Serializable {
 
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    @Override
+    }    @Override
     public String toString() {
         return "Ghe{" +
                 "maGhe='" + maGhe + '\'' +
                 ", maToa='" + maToa + '\'' +
                 ", loaiGhe='" + loaiGhe + '\'' +
-                ", trangThai='" + trangThai + '\'' +
-                ", isActive=" + isActive +
+                ", trangThai='" + trangThai + '\'' + +
                 '}';
     }
 }

@@ -8,20 +8,16 @@ public class Ga implements Serializable {
     private String moTa;
     private String tinhTrang;
     private String diaChi;
-    private boolean isActive;
 
     public Ga() {
-        this.isActive = true;
     }
 
-    public Ga(String maGa, String tenGa, String moTa, String tinhTrang, String diaChi, boolean isActive) {
+    public Ga(String maGa, String tenGa, String moTa, String tinhTrang, String diaChi) {
         this.maGa = maGa;
         this.tenGa = tenGa;
         this.moTa = moTa;
         this.tinhTrang = tinhTrang;
-        this.diaChi = diaChi;
-        this.isActive = isActive;
-    }
+        this.diaChi = diaChi;    }
 
     public String getMaGa() {
         return maGa;
@@ -61,25 +57,14 @@ public class Ga implements Serializable {
 
     public void setDiaChi(String diaChi) {
         this.diaChi = diaChi;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    @Override
+    }    @Override
     public String toString() {
         return "Ga{" +
                 "maGa='" + maGa + '\'' +
                 ", tenGa='" + tenGa + '\'' +
                 ", moTa='" + moTa + '\'' +
                 ", tinhTrang='" + tinhTrang + '\'' +
-                ", diaChi='" + diaChi + '\'' +
-                ", isActive=" + isActive +
+                ", diaChi='" + diaChi + '\'' + +
                 '}';
     }
 }

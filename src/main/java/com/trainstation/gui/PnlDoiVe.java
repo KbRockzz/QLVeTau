@@ -122,7 +122,7 @@ public class PnlDoiVe extends JPanel {
                 List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.findByHoaDon(hoaDon.getMaHoaDon());
                 for (ChiTietHoaDon chiTiet : chiTietList) {
                     Ve ve = veDAO.findById(chiTiet.getMaVe());
-                    if (ve != null && ve.isActive()) {
+                    if (ve != null) {
                         danhSachVe.add(ve);
                     }
                 }
@@ -137,7 +137,7 @@ public class PnlDoiVe extends JPanel {
         } else {
             // Tìm theo mã vé
             Ve ve = veDAO.findById(timKiem);
-            if (ve != null && ve.isActive()) {
+            if (ve != null) {
                 danhSachVe.add(ve);
             } else {
                 JOptionPane.showMessageDialog(this,

@@ -11,21 +11,17 @@ public class ChiTietHoaDon implements Serializable {
     private Float giaGoc;
     private Float giaDaKM;
     private String moTa;
-    private boolean isActive;
 
     public ChiTietHoaDon() {
-        this.isActive = true;
     }
 
-    public ChiTietHoaDon(String maHoaDon, String maVe, String maLoaiVe, Float giaGoc, Float giaDaKM, String moTa, boolean isActive) {
+    public ChiTietHoaDon(String maHoaDon, String maVe, String maLoaiVe, Float giaGoc, Float giaDaKM, String moTa) {
         this.maHoaDon = maHoaDon;
         this.maVe = maVe;
         this.maLoaiVe = maLoaiVe;
         this.giaGoc = giaGoc;
         this.giaDaKM = giaDaKM;
-        this.moTa = moTa;
-        this.isActive = isActive;
-    }
+        this.moTa = moTa;    }
 
     public String getMaHoaDon() {
         return maHoaDon;
@@ -73,17 +69,7 @@ public class ChiTietHoaDon implements Serializable {
 
     public void setMoTa(String moTa) {
         this.moTa = moTa;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public void tinhVaGanGiaDaKM(float heSo) {
+    }    public void tinhVaGanGiaDaKM(float heSo) {
         this.giaDaKM = lamTronGia(this.giaGoc * heSo);
     }
 
@@ -106,8 +92,7 @@ public class ChiTietHoaDon implements Serializable {
                 ", maLoaiVe='" + maLoaiVe + '\'' +
                 ", giaGoc=" + giaGoc +
                 ", giaDaKM=" + giaDaKM +
-                ", moTa='" + moTa + '\'' +
-                ", isActive=" + isActive +
+                ", moTa='" + moTa + '\'' + +
                 '}';
     }
 }
