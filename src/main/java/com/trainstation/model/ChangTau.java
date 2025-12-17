@@ -59,12 +59,6 @@ public class ChangTau implements Serializable {
         this.giaTien = giaTien;
     }    @Override
     public String toString() {
-        return "ChangTau{" +
-                "maChang='" + maChang + '\'' +
-                ", soKMToiThieu=" + soKMToiThieu +
-                ", soKMToiDa=" + soKMToiDa +
-                ", moTa='" + moTa + '\'' +
-                ", giaTien=" + giaTien + +
-                '}';
+        return maChang;
     }
 }

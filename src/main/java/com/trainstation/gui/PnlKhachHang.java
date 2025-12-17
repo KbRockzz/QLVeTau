@@ -34,20 +34,20 @@ public class PnlKhachHang extends JPanel {
         JLabel lblTieuDe = new JLabel("QUẢN LÝ KHÁCH HÀNG", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
 
-        // panel tìm kiếm
-        JPanel pnlTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        pnlTimKiem.add(new JLabel("Tìm theo SĐT:"));
-        txtTimKiem = new JTextField(20);
-        pnlTimKiem.add(txtTimKiem);
-        btnTimKiem = new JButton("Tìm kiếm");
-        btnTimKiem.addActionListener(e -> timKiemTheoSoDienThoai());
-        MaterialInitializer.styleButton(btnTimKiem);
-        pnlTimKiem.add(btnTimKiem);
-
-        JPanel pnlTren = new JPanel(new BorderLayout());
-        pnlTren.add(lblTieuDe, BorderLayout.NORTH);
-        pnlTren.add(pnlTimKiem, BorderLayout.SOUTH);
-        add(pnlTren, BorderLayout.NORTH);
+//        // panel tìm kiếm
+//        JPanel pnlTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT));
+//        pnlTimKiem.add(new JLabel("Tìm theo SĐT:"));
+//        txtTimKiem = new JTextField(20);
+//        pnlTimKiem.add(txtTimKiem);
+//        btnTimKiem = new JButton("Tìm kiếm");
+//        btnTimKiem.addActionListener(e -> timKiemTheoSoDienThoai());
+//        MaterialInitializer.styleButton(btnTimKiem);
+//        pnlTimKiem.add(btnTimKiem);
+//
+//        JPanel pnlTren = new JPanel(new BorderLayout());
+//        pnlTren.add(lblTieuDe, BorderLayout.NORTH);
+//        pnlTren.add(pnlTimKiem, BorderLayout.SOUTH);
+//        add(pnlTren, BorderLayout.NORTH);
 
         // Table
         String[] tenCot = {"Mã KH", "Tên khách hàng", "Email", "Số điện thoại"};

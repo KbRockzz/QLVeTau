@@ -39,10 +39,6 @@ public class LoaiGhe implements Serializable {
         this.moTa = moTa;
     }    @Override
     public String toString() {
-        return "LoaiGhe{" +
-                "maLoai='" + maLoai + '\'' +
-                ", tenLoai='" + tenLoai + '\'' +
-                ", moTa='" + moTa + '\'' + +
-                '}';
+        return tenLoai;
     }
 }

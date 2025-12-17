@@ -1,64 +1,95 @@
 package com.trainstation.gui;
 
+import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.config.MaterialInitializer;
+import com.trainstation.dao.ChiTietChuyenTauDAO;
 import com.trainstation.dao.ChuyenTauDAO;
-import com.trainstation.dao.VeDAO;
+import com.trainstation.dao.DauMayDAO;
 import com.trainstation.dao.GaDAO;
+import com.trainstation.dao.NhanVienDAO;
+import com.trainstation.dao.ChangTauDAO;
+import com.trainstation.dao.VeDAO;
+import com.trainstation.model.ChiTietChuyenTau;
 import com.trainstation.model.ChuyenTau;
 import com.trainstation.model.Ga;
+import com.trainstation.model.DauMay;
+import com.trainstation.model.NhanVien;
+import com.trainstation.model.ChangTau;
 import com.trainstation.util.UIUtils;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiPredicate;
 
 /**
- * Panel quản lý chuyến tàu (CRUD inline, không dùng dialog).
- * - Dùng trực tiếp ChuyenTauDAO để insert/update/delete, start và arrive.
- * - Dùng ChuyenTauDAO.countTicketsForChuyenOnDate(...) để đếm vé.
- * - Có form nhỏ ở trên để thêm/sửa; khi chọn hàng, form được populate.
+ * PnlChuyenTau - Panel quản lý chuyến tàu.
+ *
+ * Thay đổi chính:
+ *  - Khi mở dialog "Thêm Toa", combobox chỉ chứa các mã toa khả dụng vào khoảng thời gian của chuyến (không xung đột).
+ *  - Khi thực hiện thêm, dùng MySQL GET_LOCK("toa_<maToa>") + kiểm tra overlap trong cùng connection để tránh race condition.
+ *
+ * LƯU Ý:
+ *  - Nếu chuyến chưa có thời gian (template), combobox chứa tất cả mã toa hiện có trong ChiTietChuyenTau.
+ *  - Các thông báo lỗi/khóa timeout được hiển thị cho người dùng.
  */
 public class PnlChuyenTau extends JPanel {
+    private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    // DAOs
+    private final ChuyenTauDAO chuyenTauDAO = ChuyenTauDAO.getInstance();
+    private final VeDAO veDAO = VeDAO.getInstance();
+    private final GaDAO gaDAO = GaDAO.getInstance();
+    private final DauMayDAO dauMayDAO = DauMayDAO.getInstance();
+    private final ChiTietChuyenTauDAO ctctDAO = ChiTietChuyenTauDAO.getInstance();
+    private final NhanVienDAO nhanVienDAO = NhanVienDAO.getInstance();
+    private final ChangTauDAO changTauDAO = ChangTauDAO.getInstance();
+
+    // UI components - main list
     private final JTable table;
     private final DefaultTableModel model;
 
+    // Form fields for ChuyenTau
     private final JTextField txtMaChuyen;
-    private final JTextField txtMaTau;
-    private final JTextField txtGaDi;
-    private final JTextField txtGaDen;
-    private final JSpinner spinnerDateTime;
-    private final JCheckBox chkTemplate;
+    private final JComboBox<String> cbMaTau;     // đầu máy (maDauMay) - editable
+    private final JComboBox<String> cbGaDi;      // ga đi - editable
+    private final JComboBox<String> cbGaDen;     // ga đến - editable
+    private final JComboBox<String> cbNhanVien;  // mã nhân viên (maNV) - editable
+    private final JComboBox<String> cbMaChang;   // mã chặng - editable
+    private final JComboBox<String> cbTrangThai; // trạng thái - editable
+    private final JSpinner spinnerGioDi;
+    private final JSpinner spinnerGioDen;
+    private final JSpinner dateSpinner;
 
-    private final JButton btnRefresh, btnAdd, btnUpdate, btnDelete, btnStart, btnArrived;
+    // Buttons for ChuyenTau actions
+    private final JButton btnRefresh, btnAdd, btnUpdate, btnDelete;
+//    ,btnStart, btnArrived;
 
-    private final JSpinner dateSpinner; // chọn ngày để hiển thị danh sách
-    private final ChuyenTauDAO chuyenTauDAO;
-    private final VeDAO veDAO;
+    // Composition (Chi tiet chuyen - Toa) UI
+    private final JTable tblComposition;
+    private final DefaultTableModel compositionModel;
+    private final JButton btnCompRefresh, btnCompAdd, btnCompRemove, btnCompUp, btnCompDown, btnCompSaveOrder;
+    // add near other fields
+    private final JLabel lblInfo;                 // hiển thị tóm tắt thông tin chuyến
+    private List<String> lastAvailableToa = null; // cache danh sách toa khả dụng cho chuyến đang chọn
 
     private ScheduledExecutorService scheduler;
 
-    private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    
-    private final GaDAO gaDAO;
-
     public PnlChuyenTau() {
-        gaDAO = GaDAO.getInstance();
-        chuyenTauDAO = ChuyenTauDAO.getInstance();
-        veDAO = VeDAO.getInstance();
-
         setLayout(new BorderLayout(8, 8));
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
-        // Top: date selector + buttons
+        // --- Top bar: ngày + refresh ---
         JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topBar.add(new JLabel("Chọn ngày:"));
         SpinnerDateModel dateModel = new SpinnerDateModel(new Date(), null, null, java.util.Calendar.DAY_OF_MONTH);
@@ -67,24 +98,23 @@ public class PnlChuyenTau extends JPanel {
         topBar.add(dateSpinner);
 
         btnRefresh = new JButton("Làm mới");
-        btnRefresh.addActionListener(e -> loadData());
         MaterialInitializer.styleButton(btnRefresh);
+        btnRefresh.addActionListener(e -> loadData());
         topBar.add(btnRefresh);
 
         add(topBar, BorderLayout.NORTH);
 
-        // Middle: left = table, right = inline form
-        model = new DefaultTableModel(new String[]{"Mã chuyến", "Mã tàu", "Ga đi", "Ga đến", "Ngày giờ chạy", "Số vé (ngày)", "Trạng thái"}, 0) {
-            @Override public boolean isCellEditable(int row, int col) { return false; }
+        // --- Main table (ChuyenTau) ---
+        model = new DefaultTableModel(new String[]{"Mã chuyến", "Mã đầu máy", "Ga đi", "Ga đến", "Ngày giờ chạy", "Số vé (ngày)", "Trạng thái"}, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         table = new JTable(model);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane sp = new JScrollPane(table);
         sp.setBorder(BorderFactory.createTitledBorder("Danh sách chuyến"));
-        // Giảm chiều cao bảng để form phía dưới hiển thị đầy đủ
         MaterialInitializer.setTableScrollPaneSize(sp, 35);
 
-        // Form panel
+        // --- Form (inline) for ChuyenTau ---
         JPanel form = new JPanel(new GridBagLayout());
         form.setBorder(BorderFactory.createTitledBorder("Thông tin chuyến (inline)"));
         GridBagConstraints c = new GridBagConstraints();
@@ -92,93 +122,915 @@ public class PnlChuyenTau extends JPanel {
         c.anchor = GridBagConstraints.WEST;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1.0;
+
         int row = 0;
-
         txtMaChuyen = new JTextField(15);
-        txtMaTau = new JTextField(15);
-        txtGaDi = new JTextField(15);
-        txtGaDen = new JTextField(15);
 
-        SpinnerDateModel dtModel = new SpinnerDateModel(new Date(), null, null, java.util.Calendar.MINUTE);
-        spinnerDateTime = new JSpinner(dtModel);
-        spinnerDateTime.setEditor(new JSpinner.DateEditor(spinnerDateTime, "dd/MM/yyyy HH:mm"));
+        // cbMaTau: populate from DauMayDAO; editable so user can type custom code
+        cbMaTau = new JComboBox<>();
+        cbMaTau.setEditable(true);
+        refreshDauMayCombo();
 
-        chkTemplate = new JCheckBox("Template (không có ngày giờ chạy)");
-        chkTemplate.addActionListener(e -> spinnerDateTime.setEnabled(!chkTemplate.isSelected()));
+        // cbGaDi / cbGaDen: populate from GaDAO; editable
+        cbGaDi = new JComboBox<>();
+        cbGaDi.setEditable(true);
+        cbGaDen = new JComboBox<>();
+        cbGaDen.setEditable(true);
+        refreshGaCombos();
 
-        // Helper to add rows
+        // cbNhanVien
+        cbNhanVien = new JComboBox<>();
+        cbNhanVien.setEditable(true);
+        refreshNhanVienCombo();
+
+        // cbMaChang
+        cbMaChang = new JComboBox<>();
+        cbMaChang.setEditable(true);
+        refreshChangCombo();
+
+        // cbTrangThai - predefined choices (editable)
+        cbTrangThai = new JComboBox<>(new String[] {"Chưa khởi hành","Đã khởi hành","Đã đến","Hủy"});
+        cbTrangThai.setEditable(true);
+
+        SpinnerDateModel dtModelDi = new SpinnerDateModel(new Date(), null, null, java.util.Calendar.MINUTE);
+        spinnerGioDi = new JSpinner(dtModelDi);
+        spinnerGioDi.setEditor(new JSpinner.DateEditor(spinnerGioDi, "dd/MM/yyyy HH:mm"));
+
+        SpinnerDateModel dtModelDen = new SpinnerDateModel(new Date(), null, null, java.util.Calendar.MINUTE);
+        spinnerGioDen = new JSpinner(dtModelDen);
+        spinnerGioDen.setEditor(new JSpinner.DateEditor(spinnerGioDen, "dd/MM/yyyy HH:mm"));
+
         c.gridx = 0; c.gridy = row; c.weightx = 0.0; form.add(new JLabel("Mã chuyến:"), c);
         c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(txtMaChuyen, c);
 
-        c.gridx = 0; c.gridy = row; c.weightx = 0.0; form.add(new JLabel("Mã tàu:"), c);
-        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(txtMaTau, c);
+        c.gridx = 0; c.gridy = row; c.weightx = 0.0; form.add(new JLabel("Mã đầu máy:"), c);
+        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(cbMaTau, c);
 
-        c.gridx = 0; c.gridy = row; c.weightx = 0.0; form.add(new JLabel("Ga đi:"), c);
-        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(txtGaDi, c);
+        c.gridx = 0; c.gridy = row; c.weightx = 0.0; form.add(new JLabel("Mã nhân viên:"), c);
+        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(cbNhanVien, c);
 
-        c.gridx = 0; c.gridy = row; c.weightx = 0.0; form.add(new JLabel("Ga đến:"), c);
-        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(txtGaDen, c);
+        c.gridx = 0; c.gridy = row; c.weightx = 0.0; form.add(new JLabel("Mã chặng:"), c);
+        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(cbMaChang, c);
+
+        c.gridx = 0; c.gridy = row; c.weightx = 0.0; form.add(new JLabel("Ga đi (mã):"), c);
+        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(cbGaDi, c);
+
+        c.gridx = 0; c.gridy = row; c.weightx = 0.0; form.add(new JLabel("Ga đến (mã):"), c);
+        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(cbGaDen, c);
 
         c.gridx = 0; c.gridy = row; c.weightx = 0.0; form.add(new JLabel("Ngày giờ chạy:"), c);
-        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(spinnerDateTime, c);
+        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(spinnerGioDi, c);
 
-        c.gridx = 0; c.gridy = row; c.gridwidth = 2; form.add(chkTemplate, c);
+        c.gridx = 0; c.gridy = row; c.weightx = 0.0; form.add(new JLabel("Ngày giờ đến dự kiến:"), c);
+        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(spinnerGioDen, c);
+
         c.gridwidth = 1;
 
-        // Buttons under form - Material styled
+        // trạng thái
+        c.gridx = 0; c.gridy = ++row; c.weightx = 0.0; form.add(new JLabel("Trạng thái:"), c);
+        c.gridx = 1; c.gridy = row++; c.weightx = 1.0; form.add(cbTrangThai, c);
+
+        // Buttons for CRUD on ChuyenTau
         JPanel formBtns = MaterialInitializer.createButtonPanel();
         formBtns.setLayout(new FlowLayout(FlowLayout.RIGHT, 8, 8));
-        
         btnAdd = new JButton("Thêm");
-        MaterialInitializer.styleButton(btnAdd);
-        formBtns.add(btnAdd);
-        
         btnUpdate = new JButton("Cập nhật");
-        MaterialInitializer.styleButton(btnUpdate);
-        formBtns.add(btnUpdate);
-        
         btnDelete = new JButton("Xóa");
+//        btnStart = new JButton("Khởi hành");
+//        btnArrived = new JButton("Đến nơi");
+        MaterialInitializer.styleButton(btnAdd);
+        MaterialInitializer.styleButton(btnUpdate);
         MaterialInitializer.styleButton(btnDelete);
-        formBtns.add(btnDelete);
-        
-        btnStart = new JButton("Khởi hành");
-        MaterialInitializer.styleButton(btnStart);
-        formBtns.add(btnStart);
-        
-        btnArrived = new JButton("Đến nơi");
-        MaterialInitializer.styleButton(btnArrived);
-        formBtns.add(btnArrived);
+//        MaterialInitializer.styleButton(btnStart);
+//        MaterialInitializer.styleButton(btnArrived);
+        formBtns.add(btnAdd); formBtns.add(btnUpdate); formBtns.add(btnDelete);
+//        formBtns.add(btnStart); formBtns.add(btnArrived);
 
         c.gridx = 0; c.gridy = ++row; c.gridwidth = 2; form.add(formBtns, c);
+        c.gridwidth = 1;
 
-        // Split pane
-        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp, form);
+        // --- Composition panel: Chi tiết chuyến (Toa) ---
+        JPanel compPanel = new JPanel(new BorderLayout(6,6));
+        compPanel.setBorder(BorderFactory.createTitledBorder("Chi tiết chuyến (Toa)"));
+
+        compositionModel = new DefaultTableModel(new String[]{"Mã Toa", "Số thứ tự", "Sức chứa"}, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+        tblComposition = new JTable(compositionModel);
+        tblComposition.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane spComp = new JScrollPane(tblComposition);
+        spComp.setPreferredSize(new Dimension(360, 180));
+        compPanel.add(spComp, BorderLayout.CENTER);
+
+        // composition controls
+        JPanel compControls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 6));
+        btnCompRefresh = new JButton("Làm mới");
+        btnCompAdd = new JButton("Thêm Toa");
+        btnCompRemove = new JButton("Xóa Toa");
+        btnCompUp = new JButton("Lên");
+        btnCompDown = new JButton("Xuống");
+        btnCompSaveOrder = new JButton("Lưu thứ tự");
+        MaterialInitializer.styleButton(btnCompRefresh);
+        MaterialInitializer.styleButton(btnCompAdd);
+        MaterialInitializer.styleButton(btnCompRemove);
+        MaterialInitializer.styleButton(btnCompUp);
+        MaterialInitializer.styleButton(btnCompDown);
+        MaterialInitializer.styleButton(btnCompSaveOrder);
+        compControls.add(btnCompRefresh);
+        compControls.add(btnCompAdd);
+        compControls.add(btnCompRemove);
+        compControls.add(btnCompUp);
+        compControls.add(btnCompDown);
+        compControls.add(btnCompSaveOrder);
+        compPanel.add(compControls, BorderLayout.SOUTH);
+
+        // Put composition panel below form (stacked vertically)
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.add(form, BorderLayout.NORTH);
+        rightPanel.add(compPanel, BorderLayout.CENTER);
+
+        // Split pane: left = main list, right = form + composition
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp, rightPanel);
         split.setResizeWeight(0.65);
         add(split, BorderLayout.CENTER);
 
         // Bottom info
+        lblInfo = new JLabel(""); // khởi tạo
         JPanel bottom = new JPanel(new BorderLayout());
         bottom.add(new JLabel("Chọn 1 chuyến để sửa hoặc thao tác. Thêm/chỉnh sửa sẽ cập nhật DB trực tiếp."), BorderLayout.WEST);
+        bottom.add(lblInfo, BorderLayout.EAST); // hiển thị tóm tắt trạng thái
         add(bottom, BorderLayout.SOUTH);
 
-        // Listeners
-        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting()) populateFormFromSelection();
-            }
+        // --- Listeners ---
+        table.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
+            if (!e.getValueIsAdjusting()) populateFormFromSelection();
         });
 
         btnAdd.addActionListener(e -> addChuyen());
         btnUpdate.addActionListener(e -> updateChuyen());
         btnDelete.addActionListener(e -> deleteChuyen());
-        btnStart.addActionListener(e -> startSelected());
-        btnArrived.addActionListener(e -> arrivedSelected());
+//        btnStart.addActionListener(e -> startSelected());
+//        btnArrived.addActionListener(e -> arrivedSelected());
+
+        btnCompRefresh.addActionListener(e -> loadCompositionForSelected());
+        btnCompAdd.addActionListener(e -> showAddToaDialog());
+        btnCompRemove.addActionListener(e -> removeSelectedToa());
+        btnCompUp.addActionListener(e -> moveSelectedToaUp());
+        btnCompDown.addActionListener(e -> moveSelectedToaDown());
+        btnCompSaveOrder.addActionListener(e -> saveCompositionOrder());
 
         try { UIUtils.adjustTableForScale(table, 1.2f); } catch (Throwable ignored) {}
 
         startAutoStarter();
         loadData();
     }
+
+    // ---------- helpers to populate combo boxes ----------
+    // đặt ở trong class PnlChuyenTau
+
+    /**
+     * Khởi tạo background scheduler để tự động đánh dấu các chuyến "Đã khởi hành"
+     * khi thời gian xuất phát (gioDi) <= now (chỉ cho chuyến cùng ngày).
+     *
+     * Ghi chú:
+     * - Tạo thread daemon để không ngăn JVM tắt.
+     * - Nếu có lỗi trong task thì sẽ in stacktrace nhưng không dừng scheduler.
+     * - Thời gian: initial delay 15s, lặp mỗi 60s (có thể điều chỉnh).
+     */
+    private void startAutoStarter() {
+        // nếu đã tạo rồi thì bỏ qua
+        if (scheduler != null && !scheduler.isShutdown()) return;
+
+        scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "ChuyenTau-AutoStarter");
+            t.setDaemon(true);
+            return t;
+        });
+
+        // initial delay 15s, run every 60s
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                checkAndAutoStart();
+            } catch (Throwable t) {
+                // log để biết lỗi nhưng không phá scheduler
+                t.printStackTrace();
+            }
+        }, 15, 60, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Kiểm tra danh sách chuyến và gọi chuyenTauDAO.startChuyenOnDate(...) cho những chuyến
+     * có gioDi không null, thuộc ngày hôm nay và thời gian chạy <= hiện tại, và chưa có trạng thái "khởi hành".
+     *
+     * - Hàm này đọc toàn bộ chuyến (chuyenTauDAO.getAll()) rồi lọc theo điều kiện.
+     * - Sau khi cập nhật trạng thái thành công với DAO, sẽ gọi SwingUtilities.invokeLater(this::loadData)
+     *   để refresh UI (chạy trên EDT).
+     */
+    private void checkAndAutoStart() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+
+        List<ChuyenTau> list = chuyenTauDAO.getAll();
+        if (list == null) return;
+
+        for (ChuyenTau c : list) {
+            try {
+                LocalDateTime gioDi = c.getGioDi();
+                if (gioDi == null) continue; // template không tự start
+                if (!gioDi.toLocalDate().equals(today)) continue; // chỉ quan tâm chuyến hôm nay
+
+                String status = c.getTrangThai();
+                boolean alreadyStarted = status != null && status.toLowerCase().contains("khởi hành");
+                if (alreadyStarted) continue;
+
+                // nếu giờ đi <= giờ hiện tại => khởi hành
+                if (!gioDi.isAfter(now)) {
+                    boolean ok = chuyenTauDAO.startChuyenOnDate(c.getMaChuyen(), today, "AUTO");
+                    if (ok) {
+                        // cập nhật UI trên EDT
+                        SwingUtilities.invokeLater(this::loadData);
+                    }
+                }
+            } catch (Exception ex) {
+                // log lỗi chuyến đó rồi tiếp tục
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Đảm bảo gọi khi panel đóng để shutdown scheduler.
+     * (Bạn đã có phương thức dispose(); đảm bảo nó gọi scheduler.shutdownNow())
+     */
+    @Override
+    public void removeNotify() {
+        // optional: khi panel bị remove khỏi container, dọn scheduler
+        try {
+            if (scheduler != null && !scheduler.isShutdown()) scheduler.shutdownNow();
+        } catch (Throwable ignored) {}
+        super.removeNotify();
+    }
+    private void refreshDauMayCombo() {
+        cbMaTau.removeAllItems();
+        try {
+            List<DauMay> list = dauMayDAO.getAll();
+            if (list != null) {
+                for (DauMay d : list) {
+                    if (d != null && d.getMaDauMay() != null) cbMaTau.addItem(d.getMaDauMay());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void refreshGaCombos() {
+        cbGaDi.removeAllItems();
+        cbGaDen.removeAllItems();
+        try {
+            List<Ga> list = gaDAO.getAll();
+            if (list != null) {
+                for (Ga g : list) {
+                    if (g != null && g.getMaGa() != null) {
+                        cbGaDi.addItem(g.getMaGa());
+                        cbGaDen.addItem(g.getMaGa());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void refreshNhanVienCombo() {
+        cbNhanVien.removeAllItems();
+        try {
+            List<NhanVien> list = nhanVienDAO.getAll();
+            if (list != null) {
+                for (NhanVien n : list) {
+                    if (n != null && n.getMaNV() != null) cbNhanVien.addItem(n.getMaNV());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void refreshChangCombo() {
+        cbMaChang.removeAllItems();
+        try {
+            List<ChangTau> list = changTauDAO.getAll();
+            if (list != null) {
+                for (ChangTau ch : list) {
+                    if (ch != null && ch.getMaChang() != null) cbMaChang.addItem(ch.getMaChang());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Return list of available toa codes for the given chuyến's time window.
+     * If chuyến has no time (gioDi or gioDen null) => return all known toa codes (from ChiTietChuyenTau).
+     *
+     * Excludes toa that are assigned to a different active chuyến that overlaps the given [start,end).
+     */
+    private List<String> getAvailableToaForChuyen(String maChuyen) {
+        List<String> result = new ArrayList<>();
+
+        // Load target chuyến
+        ChuyenTau target = chuyenTauDAO.findById(maChuyen);
+        if (target == null) return result;
+
+        LocalDateTime start = target.getGioDi();
+        LocalDateTime end = target.getGioDen();
+
+        // Load all assignments and build helper structures in-memory
+        List<ChiTietChuyenTau> allAssignments = ctctDAO.getAll();
+        if (allAssignments == null) allAssignments = Collections.emptyList();
+
+        // Collect all known toa codes (preserve insertion order)
+        LinkedHashSet<String> allToas = new LinkedHashSet<>();
+        for (ChiTietChuyenTau a : allAssignments) {
+            if (a != null && a.getMaToaTau() != null) allToas.add(a.getMaToaTau());
+        }
+
+        // If target has no time window, return all known toas (application-level fallback)
+        if (start == null || end == null) {
+            result.addAll(allToas);
+            return result;
+        }
+
+        // Build map: maChuyen -> set(maToa)
+        Map<String, Set<String>> chuyenToToas = new HashMap<>();
+        for (ChiTietChuyenTau a : allAssignments) {
+            if (a == null) continue;
+            String mc = a.getMaChuyenTau();
+            String mt = a.getMaToaTau();
+            if (mc == null || mt == null) continue;
+            chuyenToToas.computeIfAbsent(mc, k -> new HashSet<>()).add(mt);
+        }
+
+        // Load all chuyens (in-memory) to check time windows
+        List<ChuyenTau> allChuyens = chuyenTauDAO.getAll();
+        if (allChuyens == null) allChuyens = Collections.emptyList();
+
+        // Helper overlap check: returns true if [start,end) overlaps [oStart,oEnd)
+        // Using same semantics as SQL: overlap iff NOT (oEnd <= start OR oStart >= end)
+        BiPredicate<LocalDateTime, LocalDateTime> overlapsWithTarget = (oStart, oEnd) -> {
+            if (oStart == null || oEnd == null) return false;
+            // oEnd <= start OR oStart >= end  => no overlap
+            if (oEnd.isBefore(start) || oEnd.isEqual(start)) return false;
+            if (oStart.isAfter(end) || oStart.isEqual(end)) return false;
+            return true; // otherwise overlap
+        };
+
+        // For each known toa, check if any other chuyến (not target) uses it and overlaps
+        for (String toa : allToas) {
+            boolean available = true;
+            // iterate over allChuyens and see if chuy uses this toa
+            for (ChuyenTau other : allChuyens) {
+                if (other == null) continue;
+                String otherMa = other.getMaChuyen();
+                if (maChuyen.equals(otherMa)) continue; // skip target itself
+                Set<String> otherToas = chuyenToToas.get(otherMa);
+                if (otherToas == null || !otherToas.contains(toa)) continue; // this other chuyến doesn't use the toa
+                // only consider active chuyens with both times set
+                if (!other.isActive()) continue;
+                LocalDateTime oStart = other.getGioDi();
+                LocalDateTime oEnd = other.getGioDen();
+                if (overlapsWithTarget.test(oStart, oEnd)) { available = false; break; }
+            }
+            if (available) result.add(toa);
+        }
+
+        return result;
+    }
+
+    /**
+     * Try to add toa to chuyến using GET_LOCK to serialize by toa.
+     *
+     * Returns:
+     *  - null on unexpected error
+     *  - Collections.singletonList("LOCK_TIMEOUT") if lock not acquired
+     *  - Collections.singletonList("NO_TIME") if chuyến has no start/end and we require times
+     *  - non-empty list of conflicting maChuyen (no insert)
+     *  - empty list => success (insert performed)
+     */
+    private List<String> tryAddToaWithLock(String maChuyen, String maToa, Integer sucChua, int insertPos,
+                                           LocalDateTime start, LocalDateTime end, int lockTimeoutSeconds) {
+        if (start == null || end == null) {
+            return Collections.singletonList("NO_TIME");
+        }
+
+        String lockName = "toa_" + maToa;
+        List<String> conflicts = new ArrayList<>();
+
+        // SQL Server: get applock, release applock
+        String getAppLockSql =
+                "DECLARE @rc int; " +
+                        "EXEC @rc = sp_getapplock @Resource = ?, @LockMode = 'Exclusive', @LockOwner = 'Session', @LockTimeout = ?; " +
+                        "SELECT @rc AS rc;";
+        String releaseAppLockSql =
+                "DECLARE @rc int; " +
+                        "EXEC @rc = sp_releaseapplock @Resource = ?, @LockOwner = 'Session'; " +
+                        "SELECT @rc AS rc;";
+
+        // overlap query: find other active chuyens using same toa that overlap [start, end)
+        String overlapSql =
+                "SELECT DISTINCT c.maChuyen " +
+                        "FROM ChiTietChuyenTau t " +
+                        "JOIN ChuyenTau c ON t.maChuyenTau = c.maChuyen " +
+                        "WHERE t.maToaTau = ? AND c.isActive = 1 AND c.gioDi IS NOT NULL AND c.gioDen IS NOT NULL " +
+                        "  AND NOT (c.gioDen <= ? OR c.gioDi >= ?)";
+
+        String shiftSql = "UPDATE ChiTietChuyenTau SET soThuTuToa = soThuTuToa + 1 WHERE maChuyenTau = ? AND soThuTuToa >= ?";
+        String insertSql = "INSERT INTO ChiTietChuyenTau (maChuyenTau, maToaTau, soThuTuToa, sucChua, isActive) VALUES (?, ?, ?, ?, 1)";
+
+        Connection conn = null;
+        boolean gotLock = false;
+        try {
+            conn = ConnectSql.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            // 1) Acquire application lock (SQL Server)
+            try (PreparedStatement pst = conn.prepareStatement(getAppLockSql)) {
+                pst.setString(1, lockName);
+                pst.setInt(2, lockTimeoutSeconds);
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (rs.next()) {
+                        int rc = rs.getInt("rc"); // 0 = timeout, 1 = success, -1/-2 = error
+                        gotLock = (rc == 1);
+                    }
+                }
+            }
+
+            if (!gotLock) {
+                conn.rollback();
+                return Collections.singletonList("LOCK_TIMEOUT");
+            }
+
+            // 2) Check overlap (other chuyens using the same toa with overlapping interval)
+            try (PreparedStatement pst = conn.prepareStatement(overlapSql)) {
+                pst.setString(1, maToa);
+                pst.setTimestamp(2, Timestamp.valueOf(start)); // other.gioDen <= start -> no overlap
+                pst.setTimestamp(3, Timestamp.valueOf(end));   // other.gioDi >= end -> no overlap
+                try (ResultSet rs = pst.executeQuery()) {
+                    while (rs.next()) {
+                        String conflictMa = rs.getString("maChuyen");
+                        if (!maChuyen.equals(conflictMa)) conflicts.add(conflictMa);
+                    }
+                }
+            }
+
+            if (!conflicts.isEmpty()) {
+                // release lock then return conflicts
+                try (PreparedStatement pstRel = conn.prepareStatement(releaseAppLockSql)) {
+                    pstRel.setString(1, lockName);
+                    try (ResultSet rsRel = pstRel.executeQuery()) { /* ignore rc */ }
+                } catch (Exception ex) {
+                    // ignore release errors
+                }
+                conn.rollback();
+                return conflicts;
+            }
+
+            // 3) Shift orders within the same chuyến (if necessary)
+            try (PreparedStatement pstShift = conn.prepareStatement(shiftSql)) {
+                pstShift.setString(1, maChuyen);
+                pstShift.setInt(2, insertPos);
+                pstShift.executeUpdate();
+            }
+
+            // 4) Insert new ChiTietChuyenTau
+            try (PreparedStatement pstIns = conn.prepareStatement(insertSql)) {
+                pstIns.setString(1, maChuyen);
+                pstIns.setString(2, maToa);
+                pstIns.setInt(3, insertPos);
+                if (sucChua != null) pstIns.setInt(4, sucChua);
+                else pstIns.setNull(4, Types.INTEGER);
+                pstIns.executeUpdate();
+            }
+
+            conn.commit();
+
+            // 5) Release application lock
+            try (PreparedStatement pstRel = conn.prepareStatement(releaseAppLockSql)) {
+                pstRel.setString(1, lockName);
+                try (ResultSet rsRel = pstRel.executeQuery()) { /* ignore rc */ }
+            } catch (Exception ex) {
+                // log but treat operation as success
+                ex.printStackTrace();
+            }
+
+            return Collections.emptyList();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ignore) {}
+                // attempt release if lock was acquired
+                if (gotLock) {
+                    try (PreparedStatement pstRel = conn.prepareStatement(releaseAppLockSql)) {
+                        pstRel.setString(1, lockName);
+                        try (ResultSet rsRel = pstRel.executeQuery()) { /* ignore */ }
+                    } catch (Exception ignore) {}
+                }
+            }
+            return null;
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ignore) {}
+            }
+        }
+//    }
+//    private List<String> tryAddToaWithLock(String maChuyen, String maToa, Integer sucChua, int insertPos,
+//                                           LocalDateTime start, LocalDateTime end, int lockTimeoutSeconds) {
+//        if (start == null || end == null) {
+//            return Collections.singletonList("NO_TIME");
+//        }
+//        String lockName = "toa_" + maToa;
+//        List<String> conflicts = new ArrayList<>();
+//        String getLockSql = "SELECT GET_LOCK(?, ?)";
+//        String releaseSql = "SELECT RELEASE_LOCK(?)";
+//        String overlapSql =
+//                "SELECT DISTINCT c.maChuyen FROM ChiTietChuyenTau t " +
+//                        "JOIN ChuyenTau c ON t.maChuyenTau = c.maChuyen " +
+//                        "WHERE t.maToaTau = ? AND c.isActive = 1 AND c.gioDi IS NOT NULL AND c.gioDen IS NOT NULL " +
+//                        "  AND NOT (c.gioDen <= ? OR c.gioDi >= ?)";
+//        String shiftSql = "UPDATE ChiTietChuyenTau SET soThuTuToa = soThuTuToa + 1 WHERE maChuyenTau = ? AND soThuTuToa >= ?";
+//        String insertSql = "INSERT INTO ChiTietChuyenTau (maChuyenTau, maToaTau, soThuTuToa, sucChua, isActive) VALUES (?, ?, ?, ?, 1)";
+//
+//        Connection conn = null;
+//        boolean lockAcquired = false;
+//        try {
+//            conn = ConnectSql.getInstance().getConnection();
+//            conn.setAutoCommit(false);
+//
+//            // 1) GET_LOCK
+//            try (PreparedStatement pstLock = conn.prepareStatement(getLockSql)) {
+//                pstLock.setString(1, lockName);
+//                pstLock.setInt(2, lockTimeoutSeconds);
+//                try (ResultSet rs = pstLock.executeQuery()) {
+//                    if (rs.next()) {
+//                        int val = rs.getInt(1); // 1 = got lock, 0 = timeout, NULL = error
+//                        lockAcquired = (val == 1);
+//                    }
+//                }
+//            }
+//            if (!lockAcquired) {
+//                conn.rollback();
+//                return Collections.singletonList("LOCK_TIMEOUT");
+//            }
+//
+//            // 2) Check overlap (only consider other chuyến that have gioDi/gioDen)
+//            try (PreparedStatement pst = conn.prepareStatement(overlapSql)) {
+//                pst.setString(1, maToa);
+//                pst.setTimestamp(2, Timestamp.valueOf(start));
+//                pst.setTimestamp(3, Timestamp.valueOf(end));
+//                try (ResultSet rs = pst.executeQuery()) {
+//                    while (rs.next()) {
+//                        String conflictMa = rs.getString("maChuyen");
+//                        if (!maChuyen.equals(conflictMa)) conflicts.add(conflictMa);
+//                    }
+//                }
+//            }
+//
+//            if (!conflicts.isEmpty()) {
+//                conn.rollback();
+//                // release lock before returning
+//                try (PreparedStatement pstRel = conn.prepareStatement(releaseSql)) {
+//                    pstRel.setString(1, lockName);
+//                    pstRel.executeQuery();
+//                } catch (Exception ex) { /* ignore */ }
+//                return conflicts;
+//            }
+//
+//            // 3) shift existing orders in the same chuyến (using same connection)
+//            try (PreparedStatement pstShift = conn.prepareStatement(shiftSql)) {
+//                pstShift.setString(1, maChuyen);
+//                pstShift.setInt(2, insertPos);
+//                pstShift.executeUpdate();
+//            }
+//
+//            // 4) insert new chi tiết
+//            try (PreparedStatement pstIns = conn.prepareStatement(insertSql)) {
+//                pstIns.setString(1, maChuyen);
+//                pstIns.setString(2, maToa);
+//                pstIns.setInt(3, insertPos);
+//                if (sucChua != null) pstIns.setInt(4, sucChua);
+//                else pstIns.setNull(4, Types.INTEGER);
+//                pstIns.executeUpdate();
+//            }
+//
+//            conn.commit();
+//
+//            // 5) release lock
+//            try (PreparedStatement pstRel = conn.prepareStatement(releaseSql)) {
+//                pstRel.setString(1, lockName);
+//                pstRel.executeQuery();
+//            } catch (Exception ex) {
+//                ex.printStackTrace();
+//            }
+//
+//            return Collections.emptyList();
+//        } catch (SQLException ex) {
+//            ex.printStackTrace();
+//            if (conn != null) {
+//                try { conn.rollback(); } catch (SQLException ignore) {}
+//                if (lockAcquired) {
+//                    try (PreparedStatement pstRel = conn.prepareStatement(releaseSql)) {
+//                        pstRel.setString(1, lockName);
+//                        pstRel.executeQuery();
+//                    } catch (Exception ignore) {}
+//                }
+//            }
+//            return null;
+//        } finally {
+//            if (conn != null) {
+//                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ignore) {}
+//            }
+//        }
+    }
+
+    private void loadCompositionForSelected() {
+        String ma = getSelectedMaChuyenFromTable();
+        if (ma == null) { JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến trước.", "Thông báo", JOptionPane.INFORMATION_MESSAGE); return; }
+        loadCompositionForChuyen(ma);
+    }
+
+    private void loadCompositionForChuyen(String maChuyen) {
+        btnCompRefresh.setEnabled(false);
+        compositionModel.setRowCount(0);
+        SwingWorker<Void, Object[]> w = new SwingWorker<>() {
+            @Override protected Void doInBackground() {
+                List<ChiTietChuyenTau> list = ctctDAO.findByChuyenTau(maChuyen);
+                if (list == null) return null;
+                for (ChiTietChuyenTau t : list) {
+                    publish(new Object[]{ t.getMaToaTau(), t.getSoThuTuToa(), t.getSucChua() });
+                }
+                return null;
+            }
+            @Override protected void process(List<Object[]> chunks) { for (Object[] r : chunks) compositionModel.addRow(r); }
+            @Override protected void done() {
+                btnCompRefresh.setEnabled(true);
+            }
+        };
+        w.execute();
+    }
+
+    private void showAddToaDialog() {
+        String maChuyen = getSelectedMaChuyenFromTable();
+        if (maChuyen == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến trước.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        JComboBox<String> comboMaToa = new JComboBox<>();
+        comboMaToa.setEditable(true);
+
+        List<String> available = lastAvailableToa != null ? lastAvailableToa : getAvailableToaForChuyen(maChuyen);
+        if (available == null) available = Collections.emptyList();
+
+        if (available.isEmpty()) {
+            // fallback: show known toa
+            List<ChiTietChuyenTau> all = ctctDAO.getAll();
+            LinkedHashSet<String> set = new LinkedHashSet<>();
+            if (all != null) for (ChiTietChuyenTau t : all) if (t != null && t.getMaToaTau() != null) set.add(t.getMaToaTau());
+            for (String s : set) comboMaToa.addItem(s);
+        } else {
+            for (String s : available) comboMaToa.addItem(s);
+        }
+
+        JTextField fldSucChua = new JTextField(6);
+        JTextField fldPos = new JTextField(4);
+
+        JPanel p = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5,5,5,5);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0; gbc.gridy = 0; p.add(new JLabel("Mã Toa:"), gbc);
+        gbc.gridx = 1; p.add(comboMaToa, gbc);
+        gbc.gridx = 0; gbc.gridy = 1; p.add(new JLabel("Sức chứa (số):"), gbc);
+        gbc.gridx = 1; p.add(fldSucChua, gbc);
+        gbc.gridx = 0; gbc.gridy = 2; p.add(new JLabel("Vị trí (số thứ tự, optional):"), gbc);
+        gbc.gridx = 1; p.add(fldPos, gbc);
+
+        int rc = JOptionPane.showConfirmDialog(this, p, "Thêm Toa vào chuyến " + maChuyen, JOptionPane.OK_CANCEL_OPTION);
+        if (rc != JOptionPane.OK_OPTION) return;
+
+        Object selToa = comboMaToa.getSelectedItem();
+        String maToa = selToa != null ? selToa.toString().trim() : "";
+        if (maToa.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Mã toa không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        Integer suc = null;
+        try { String s = fldSucChua.getText().trim(); if (!s.isEmpty()) suc = Integer.parseInt(s); }
+        catch (NumberFormatException ex) { JOptionPane.showMessageDialog(this, "Sức chứa phải là số.", "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+        Integer pos = null;
+        try { String s = fldPos.getText().trim(); if (!s.isEmpty()) pos = Integer.parseInt(s); }
+        catch (NumberFormatException ex) { JOptionPane.showMessageDialog(this, "Vị trí phải là số.", "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+
+        final Integer finalSuc = suc;
+        final Integer finalPos = pos;
+        final String finalMaToa = maToa;
+
+        btnCompAdd.setEnabled(false);
+
+        SwingWorker<String, Void> w = new SwingWorker<>() {
+            @Override
+            protected String doInBackground() {
+                try {
+                    // load chuyến và times (for app-level availability)
+                    ChuyenTau chuy = chuyenTauDAO.findById(maChuyen);
+                    if (chuy == null) return "ERROR";
+
+                    LocalDateTime start = chuy.getGioDi();
+                    LocalDateTime end = chuy.getGioDen();
+
+                    // compute insert position
+                    List<ChiTietChuyenTau> current = ctctDAO.findByChuyenTau(maChuyen);
+                    int insertPos;
+                    if (finalPos == null || finalPos <= 0) insertPos = (current == null || current.isEmpty()) ? 1 : current.size() + 1;
+                    else insertPos = Math.min(Math.max(finalPos, 1), (current == null ? 0 : current.size()) + 1);
+
+                    // application-level availability check (fast)
+                    List<String> avail = lastAvailableToa != null ? lastAvailableToa : getAvailableToaForChuyen(maChuyen);
+                    if (avail != null && !avail.isEmpty() && !avail.contains(finalMaToa)) {
+                        return "APP_CONFLICT";
+                    }
+
+                    // Now perform shift and insert using DAO (no DB locking)
+                    // 1) shift existing items with soThuTu >= insertPos
+                    if (current != null) {
+                        // sort current by soThuTu descending to avoid PK conflicts when updating to +1
+                        current.sort((a,b) -> {
+                            Integer xa = a.getSoThuTuToa() == null ? 0 : a.getSoThuTuToa();
+                            Integer xb = b.getSoThuTuToa() == null ? 0 : b.getSoThuTuToa();
+                            return xb.compareTo(xa);
+                        });
+                        for (ChiTietChuyenTau t : current) {
+                            Integer stt = t.getSoThuTuToa() == null ? 0 : t.getSoThuTuToa();
+                            if (stt >= insertPos) {
+                                t.setSoThuTuToa(stt + 1);
+                                boolean ok = ctctDAO.update(t);
+                                if (!ok) {
+                                    // rollback-like behaviour not possible at DAO level; return error
+                                    return "ERROR";
+                                }
+                            }
+                        }
+                    }
+
+                    // 2) insert new record
+                    ChiTietChuyenTau newT = new ChiTietChuyenTau(maChuyen, finalMaToa, insertPos, finalSuc, true);
+                    boolean added = ctctDAO.add(newT);
+                    return added ? "OK" : "ERROR";
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    return "ERROR";
+                }
+            }
+
+            @Override
+            protected void done() {
+                btnCompAdd.setEnabled(true);
+                try {
+                    String result = get();
+                    if ("APP_CONFLICT".equals(result)) {
+                        JOptionPane.showMessageDialog(PnlChuyenTau.this,
+                                "Toa không khả dụng theo dữ liệu ứng dụng (có xung đột). Vui lòng làm mới danh sách và thử lại.",
+                                "Toa không khả dụng", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    if ("ERROR".equals(result) || result == null) {
+                        JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã có lỗi khi thêm toa. Xem log.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    // success
+                    JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã thêm toa.", "Kết quả", JOptionPane.INFORMATION_MESSAGE);
+                    // refresh composition and available cache
+                    loadCompositionForChuyen(maChuyen);
+                    lastAvailableToa = getAvailableToaForChuyen(maChuyen);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(PnlChuyenTau.this, "Lỗi khi xử lý kết quả.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        w.execute();
+    }
+
+    private void removeSelectedToa() {
+        String maChuyen = getSelectedMaChuyenFromTable();
+        if (maChuyen == null) { JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến trước.", "Thông báo", JOptionPane.INFORMATION_MESSAGE); return; }
+        int r = tblComposition.getSelectedRow();
+        if (r < 0) { JOptionPane.showMessageDialog(this, "Vui lòng chọn toa để xóa.", "Thông báo", JOptionPane.INFORMATION_MESSAGE); return; }
+        String maToa = (String) compositionModel.getValueAt(r, 0);
+        Integer stt = (Integer) compositionModel.getValueAt(r, 1);
+        int conf = JOptionPane.showConfirmDialog(this, "Xác nhận xóa toa " + maToa + " (thứ tự " + stt + ")?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+        if (conf != JOptionPane.YES_OPTION) return;
+
+        btnCompRemove.setEnabled(false);
+        SwingWorker<Boolean, Void> w = new SwingWorker<>() {
+            @Override protected Boolean doInBackground() {
+                boolean ok = ctctDAO.delete(maChuyen, maToa);
+                if (!ok) return false;
+                // renumber remaining items to be contiguous starting at 1
+                List<ChiTietChuyenTau> remaining = ctctDAO.findByChuyenTau(maChuyen);
+                if (remaining == null) return true;
+                int idx = 1;
+                for (ChiTietChuyenTau t : remaining) {
+                    t.setSoThuTuToa(idx++);
+                    ctctDAO.update(t);
+                }
+                return true;
+            }
+            @Override protected void done() {
+                btnCompRemove.setEnabled(true);
+                try {
+                    boolean ok = get();
+                    if (ok) { JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã xóa toa.", "Kết quả", JOptionPane.INFORMATION_MESSAGE); loadCompositionForChuyen(maChuyen); }
+                    else JOptionPane.showMessageDialog(PnlChuyenTau.this, "Không thể xóa toa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) { ex.printStackTrace(); }
+            }
+        };
+        w.execute();
+    }
+
+    private void moveSelectedToaUp() { moveSelectedToa(-1); }
+    private void moveSelectedToaDown() { moveSelectedToa(1); }
+
+    private void moveSelectedToa(int direction) {
+        String maChuyen = getSelectedMaChuyenFromTable();
+        if (maChuyen == null) { JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến trước.", "Thông báo", JOptionPane.INFORMATION_MESSAGE); return; }
+        int r = tblComposition.getSelectedRow();
+        if (r < 0) { JOptionPane.showMessageDialog(this, "Vui lòng chọn toa để di chuyển.", "Thông báo", JOptionPane.INFORMATION_MESSAGE); return; }
+        int targetRow = r + direction;
+        if (targetRow < 0 || targetRow >= compositionModel.getRowCount()) return;
+
+        String maToaA = (String) compositionModel.getValueAt(r, 0);
+        String maToaB = (String) compositionModel.getValueAt(targetRow, 0);
+
+        btnCompUp.setEnabled(false); btnCompDown.setEnabled(false);
+        SwingWorker<Boolean, Void> w = new SwingWorker<>() {
+            @Override protected Boolean doInBackground() {
+                ChiTietChuyenTau a = ctctDAO.findById(maChuyen, maToaA);
+                ChiTietChuyenTau b = ctctDAO.findById(maChuyen, maToaB);
+                if (a == null || b == null) return false;
+                Integer tmp = a.getSoThuTuToa();
+                a.setSoThuTuToa(b.getSoThuTuToa());
+                b.setSoThuTuToa(tmp);
+                boolean ok1 = ctctDAO.update(a);
+                boolean ok2 = ctctDAO.update(b);
+                return ok1 && ok2;
+            }
+            @Override protected void done() {
+                btnCompUp.setEnabled(true); btnCompDown.setEnabled(true);
+                try {
+                    boolean ok = get();
+                    if (ok) {
+                        loadCompositionForChuyen(maChuyen);
+                        tblComposition.getSelectionModel().setSelectionInterval(Math.max(0, targetRow), Math.max(0, targetRow));
+                    } else JOptionPane.showMessageDialog(PnlChuyenTau.this, "Không thể di chuyển toa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) { ex.printStackTrace(); }
+            }
+        };
+        w.execute();
+    }
+
+    private void saveCompositionOrder() {
+        String maChuyen = getSelectedMaChuyenFromTable();
+        if (maChuyen == null) { JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến trước.", "Thông báo", JOptionPane.INFORMATION_MESSAGE); return; }
+        // read order from table rows: set soThuTu based on current row index (1-based)
+        btnCompSaveOrder.setEnabled(false);
+        SwingWorker<Boolean, Void> w = new SwingWorker<>() {
+            @Override protected Boolean doInBackground() {
+                int rows = compositionModel.getRowCount();
+                for (int i = 0; i < rows; i++) {
+                    String maToa = (String) compositionModel.getValueAt(i, 0);
+                    ChiTietChuyenTau t = ctctDAO.findById(maChuyen, maToa);
+                    if (t == null) continue;
+                    t.setSoThuTuToa(i + 1);
+                    ctctDAO.update(t);
+                }
+                return true;
+            }
+            @Override protected void done() {
+                btnCompSaveOrder.setEnabled(true);
+                try {
+                    boolean ok = get();
+                    if (ok) { JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã lưu thứ tự.", "Kết quả", JOptionPane.INFORMATION_MESSAGE); loadCompositionForChuyen(maChuyen); }
+                } catch (Exception ex) { ex.printStackTrace(); }
+            }
+        };
+        w.execute();
+    }
+
+    // ---------- ChuyenTau list / form operations (unchanged) ----------
 
     private LocalDate getSelectedDate() {
         Date d = (Date) dateSpinner.getValue();
@@ -190,19 +1042,16 @@ public class PnlChuyenTau extends JPanel {
         model.setRowCount(0);
         LocalDate date = getSelectedDate();
 
-        SwingWorker<Void, Object[]> w = new SwingWorker<>() {
-            @Override
-            protected Void doInBackground() {
+        SwingWorker<Void, Object[]> worker = new SwingWorker<>() {
+            @Override protected Void doInBackground() {
                 List<ChuyenTau> list = chuyenTauDAO.getAll();
                 if (list == null) return null;
                 for (ChuyenTau c : list) {
                     try {
                         boolean include = false;
                         LocalDateTime runTime = c.getGioDi();
-                        if (runTime != null) {
-                            include = runTime.toLocalDate().equals(date);
-                        } else {
-                            // template: include if there are tickets for that date
+                        if (runTime != null) include = runTime.toLocalDate().equals(date);
+                        else {
                             int cnt = chuyenTauDAO.countTicketsForChuyenOnDate(c.getMaChuyen(), date);
                             include = cnt > 0;
                         }
@@ -210,73 +1059,136 @@ public class PnlChuyenTau extends JPanel {
                         int count = chuyenTauDAO.countTicketsForChuyenOnDate(c.getMaChuyen(), date);
                         String runTimeStr = runTime != null ? runTime.format(DT_FMT) : "";
                         String status = c.getTrangThai() != null ? c.getTrangThai() : "";
-                        // Get station names from GaDAO
                         String tenGaDi = layTenGa(c.getMaGaDi());
                         String tenGaDen = layTenGa(c.getMaGaDen());
-                        
-                        publish(new Object[]{
-                                c.getMaChuyen(),
-                                c.getMaDauMay(),
-                                tenGaDi,
-                                tenGaDen,
-                                runTimeStr,
-                                count,
-                                status
-                        });
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+
+                        publish(new Object[]{ c.getMaChuyen(), c.getMaDauMay(), tenGaDi, tenGaDen, runTimeStr, count, status });
+                    } catch (Exception ex) { ex.printStackTrace(); }
                 }
                 return null;
             }
 
-            @Override
-            protected void process(List<Object[]> chunks) {
-                for (Object[] r : chunks) model.addRow(r);
-            }
+            @Override protected void process(List<Object[]> chunks) { for (Object[] r : chunks) model.addRow(r); }
 
-            @Override
-            protected void done() {
+            @Override protected void done() {
                 btnRefresh.setEnabled(true);
                 try { UIUtils.adjustTableForScale(table, 1.2f); } catch (Throwable ignored) {}
             }
         };
-        w.execute();
+        worker.execute();
     }
 
     private void populateFormFromSelection() {
         int r = table.getSelectedRow();
         if (r < 0) {
             clearForm();
+            compositionModel.setRowCount(0);
+            lastAvailableToa = null;
+            lblInfo.setText("");
+            setCompositionControlsEnabled(false);
             return;
         }
         String ma = (String) model.getValueAt(r, 0);
         if (ma == null) return;
+
+        setCompositionControlsEnabled(false);
         SwingWorker<ChuyenTau, Void> w = new SwingWorker<>() {
+            private List<ChiTietChuyenTau> composition;
+
             @Override
             protected ChuyenTau doInBackground() {
-                return chuyenTauDAO.findById(ma);
+                // load chuyến và composition, ticket count, available toa
+                ChuyenTau ct = chuyenTauDAO.findById(ma);
+                try {
+                    composition = ctctDAO.findByChuyenTau(ma);
+                } catch (Exception ex) {
+                    composition = Collections.emptyList();
+                }
+                return ct;
             }
+
             @Override
             protected void done() {
                 try {
                     ChuyenTau ct = get();
                     if (ct == null) return;
+
+                    // populate basic fields
                     txtMaChuyen.setText(ct.getMaChuyen());
-                    txtMaChuyen.setEnabled(false); // khóa mã khi edit
-                    txtMaTau.setText(ct.getMaDauMay());
-                    // Display station codes in form (for editing), not names
-                    txtGaDi.setText(ct.getMaGaDi());
-                    txtGaDen.setText(ct.getMaGaDen());
+                    txtMaChuyen.setEnabled(false);
+
+                    cbMaTau.setSelectedItem(ct.getMaDauMay() != null ? ct.getMaDauMay() : "");
+                    cbNhanVien.setSelectedItem(ct.getMaNV() != null ? ct.getMaNV() : "");
+                    cbMaChang.setSelectedItem(ct.getMaChang() != null ? ct.getMaChang() : "");
+                    cbGaDi.setSelectedItem(ct.getMaGaDi() != null ? ct.getMaGaDi() : "");
+                    cbGaDen.setSelectedItem(ct.getMaGaDen() != null ? ct.getMaGaDen() : "");
+
+                    // set tooltips for ga combos (show tên ga nếu có)
+                    try {
+                        if (ct.getMaGaDi() != null) {
+                            Ga g = gaDAO.findById(ct.getMaGaDi());
+                            if (g != null && g.getTenGa() != null) cbGaDi.setToolTipText(g.getTenGa());
+                            else cbGaDi.setToolTipText(null);
+                        } else cbGaDi.setToolTipText(null);
+
+                        if (ct.getMaGaDen() != null) {
+                            Ga g2 = gaDAO.findById(ct.getMaGaDen());
+                            if (g2 != null && g2.getTenGa() != null) cbGaDen.setToolTipText(g2.getTenGa());
+                            else cbGaDen.setToolTipText(null);
+                        } else cbGaDen.setToolTipText(null);
+                    } catch (Exception ignored) {}
+
+                    // giờ đi / đến
                     if (ct.getGioDi() != null) {
-                        Date d = java.util.Date.from(ct.getGioDi().atZone(ZoneId.systemDefault()).toInstant());
-                        spinnerDateTime.setValue(d);
-                        chkTemplate.setSelected(false);
-                        spinnerDateTime.setEnabled(true);
+                        Date d = Date.from(ct.getGioDi().atZone(ZoneId.systemDefault()).toInstant());
+                        spinnerGioDi.setValue(d);
+                        spinnerGioDi.setEnabled(true);
                     } else {
-                        chkTemplate.setSelected(true);
-                        spinnerDateTime.setEnabled(false);
+                        spinnerGioDi.setEnabled(false);
                     }
+                    if (ct.getGioDen() != null) {
+                        Date d2 = Date.from(ct.getGioDen().atZone(ZoneId.systemDefault()).toInstant());
+                        spinnerGioDen.setValue(d2);
+                        spinnerGioDen.setEnabled(true);
+                    } else {
+                        spinnerGioDen.setEnabled(false);
+                    }
+
+                    cbTrangThai.setSelectedItem(ct.getTrangThai() != null ? ct.getTrangThai() : "");
+
+                    // load composition into table
+                    compositionModel.setRowCount(0);
+                    int totalCapacity = 0;
+                    if (composition != null) {
+                        for (ChiTietChuyenTau t : composition) {
+                            int suc = t.getSucChua() != null ? t.getSucChua() : 0;
+                            totalCapacity += suc;
+                            compositionModel.addRow(new Object[]{ t.getMaToaTau(), t.getSoThuTuToa(), suc });
+                        }
+                    }
+
+                    // ticket count for selected date
+                    int ticketsToday = 0;
+                    try {
+                        ticketsToday = chuyenTauDAO.countTicketsForChuyenOnDate(ct.getMaChuyen(), getSelectedDate());
+                    } catch (Exception ignored) {}
+
+                    // set info label
+                    String info = String.format("Toa: %d   Tổng sức chứa: %d   Vé (%s): %d",
+                            composition != null ? composition.size() : 0,
+                            totalCapacity,
+                            getSelectedDate().toString(),
+                            ticketsToday);
+                    lblInfo.setText(info);
+
+                    // cache available toa for add dialog (so add dialog can use cached list)
+                    try {
+                        lastAvailableToa = getAvailableToaForChuyen(ct.getMaChuyen());
+                    } catch (Exception ex) {
+                        lastAvailableToa = null;
+                    }
+
+                    setCompositionControlsEnabled(true);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -285,56 +1197,94 @@ public class PnlChuyenTau extends JPanel {
         w.execute();
     }
 
+    // helper to enable/disable composition-related buttons
+    private void setCompositionControlsEnabled(boolean enabled) {
+        btnCompRefresh.setEnabled(enabled);
+        btnCompAdd.setEnabled(enabled);
+        btnCompRemove.setEnabled(enabled);
+        btnCompUp.setEnabled(enabled);
+        btnCompDown.setEnabled(enabled);
+        btnCompSaveOrder.setEnabled(enabled);
+    }
+
     private void clearForm() {
         txtMaChuyen.setText("");
         txtMaChuyen.setEnabled(true);
-        txtMaTau.setText("");
-        txtGaDi.setText("");
-        txtGaDen.setText("");
-        spinnerDateTime.setValue(new Date());
-        chkTemplate.setSelected(false);
-        spinnerDateTime.setEnabled(true);
+        cbMaTau.setSelectedItem("");
+        cbNhanVien.setSelectedItem("");
+        cbMaChang.setSelectedItem("");
+        cbGaDi.setSelectedItem("");
+        cbGaDen.setSelectedItem("");
+        spinnerGioDi.setValue(new Date());
+        spinnerGioDen.setValue(new Date());
+        spinnerGioDi.setEnabled(true);
+        spinnerGioDen.setEnabled(true);
+        cbTrangThai.setSelectedItem("");
+        compositionModel.setRowCount(0);
     }
-    
-    /**
-     * Helper method to get station name from station code
-     */
+
     private String layTenGa(String maGa) {
-        if (maGa == null || maGa.isEmpty()) return "N/A";
+        if (maGa == null || maGa.trim().isEmpty()) return "N/A";
         try {
-            Ga ga = gaDAO.findById(maGa);
-            return ga != null ? ga.getTenGa() : maGa;
+            Ga g = gaDAO.findById(maGa);
+            return g != null ? g.getTenGa() : maGa;
         } catch (Exception e) {
-            return maGa; // fallback to code if lookup fails
+            return maGa;
         }
+    }
+
+    private ChuyenTau buildChuyenFromForm() {
+        ChuyenTau ct = new ChuyenTau();
+        ct.setMaChuyen(txtMaChuyen.getText().trim());
+
+        Object dauMaySel = cbMaTau.getSelectedItem();
+        ct.setMaDauMay(dauMaySel != null ? dauMaySel.toString().trim() : null);
+
+        Object nvSel = cbNhanVien.getSelectedItem();
+        ct.setMaNV(nvSel != null ? nvSel.toString().trim() : null);
+
+        Object changSel = cbMaChang.getSelectedItem();
+        ct.setMaChang(changSel != null ? changSel.toString().trim() : null);
+
+        Object gaDiSel = cbGaDi.getSelectedItem();
+        ct.setMaGaDi(gaDiSel != null ? gaDiSel.toString().trim() : null);
+
+        Object gaDenSel = cbGaDen.getSelectedItem();
+        ct.setMaGaDen(gaDenSel != null ? gaDenSel.toString().trim() : null);
+
+        Date d = (Date) spinnerGioDi.getValue();
+        if (d != null) ct.setGioDi(Instant.ofEpochMilli(d.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime());
+        Date d2 = (Date) spinnerGioDen.getValue();
+        if (d2 != null) ct.setGioDen(Instant.ofEpochMilli(d2.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime());
+
+        Object statusSel = cbTrangThai.getSelectedItem();
+        ct.setTrangThai(statusSel != null ? statusSel.toString().trim() : null);
+
+        return ct;
+    }
+
+    private String getSelectedMaChuyenFromTable() {
+        int r = table.getSelectedRow();
+        if (r < 0) return null;
+        Object o = model.getValueAt(r, 0);
+        return o != null ? o.toString() : null;
     }
 
     private void addChuyen() {
         String ma = txtMaChuyen.getText().trim();
-        if (ma.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Mã chuyến không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        if (ma.isEmpty()) { JOptionPane.showMessageDialog(this, "Mã chuyến không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
         ChuyenTau ct = buildChuyenFromForm();
+
+        btnAdd.setEnabled(false);
         SwingWorker<Boolean, Void> w = new SwingWorker<>() {
-            @Override
-            protected Boolean doInBackground() {
-                return chuyenTauDAO.insert(ct);
-            }
-            @Override
-            protected void done() {
+            @Override protected Boolean doInBackground() { return chuyenTauDAO.insert(ct); }
+            @Override protected void done() {
+                btnAdd.setEnabled(true);
                 try {
                     boolean ok = get();
-                    if (ok) {
-                        JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã thêm chuyến.", "Kết quả", JOptionPane.INFORMATION_MESSAGE);
-                        loadData();
-                        clearForm();
-                    } else {
-                        JOptionPane.showMessageDialog(PnlChuyenTau.this, "Không thể thêm chuyến.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                    if (ok) { JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã thêm chuyến.", "Kết quả", JOptionPane.INFORMATION_MESSAGE); loadData(); clearForm(); }
+                    else JOptionPane.showMessageDialog(PnlChuyenTau.this, "Không thể thêm chuyến.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) { ex.printStackTrace(); }
             }
         };
         w.execute();
@@ -342,29 +1292,19 @@ public class PnlChuyenTau extends JPanel {
 
     private void updateChuyen() {
         String ma = txtMaChuyen.getText().trim();
-        if (ma.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn hoặc nhập mã chuyến.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
+        if (ma.isEmpty()) { JOptionPane.showMessageDialog(this, "Vui lòng chọn hoặc nhập mã chuyến.", "Thông báo", JOptionPane.INFORMATION_MESSAGE); return; }
         ChuyenTau ct = buildChuyenFromForm();
+
+        btnUpdate.setEnabled(false);
         SwingWorker<Boolean, Void> w = new SwingWorker<>() {
-            @Override
-            protected Boolean doInBackground() {
-                return chuyenTauDAO.update(ct);
-            }
-            @Override
-            protected void done() {
+            @Override protected Boolean doInBackground() { return chuyenTauDAO.update(ct); }
+            @Override protected void done() {
+                btnUpdate.setEnabled(true);
                 try {
                     boolean ok = get();
-                    if (ok) {
-                        JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã cập nhật chuyến.", "Kết quả", JOptionPane.INFORMATION_MESSAGE);
-                        loadData();
-                    } else {
-                        JOptionPane.showMessageDialog(PnlChuyenTau.this, "Không thể cập nhật chuyến.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                    if (ok) { JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã cập nhật chuyến.", "Kết quả", JOptionPane.INFORMATION_MESSAGE); loadData(); }
+                    else JOptionPane.showMessageDialog(PnlChuyenTau.this, "Không thể cập nhật chuyến.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) { ex.printStackTrace(); }
             }
         };
         w.execute();
@@ -372,167 +1312,81 @@ public class PnlChuyenTau extends JPanel {
 
     private void deleteChuyen() {
         String ma = txtMaChuyen.getText().trim();
-        if (ma.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến để xóa.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
+        if (ma.isEmpty()) { JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến để xóa.", "Thông báo", JOptionPane.INFORMATION_MESSAGE); return; }
         int conf = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa chuyến " + ma + "?", "Xác nhận", JOptionPane.YES_NO_OPTION);
         if (conf != JOptionPane.YES_OPTION) return;
 
+        btnDelete.setEnabled(false);
         SwingWorker<Boolean, Void> w = new SwingWorker<>() {
-            @Override
-            protected Boolean doInBackground() {
-                return chuyenTauDAO.delete(ma);
-            }
-            @Override
-            protected void done() {
-                try {
-                    boolean ok = get();
-                    if (ok) {
-                        JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã xóa.", "Kết quả", JOptionPane.INFORMATION_MESSAGE);
-                        loadData();
-                        clearForm();
-                    } else {
-                        JOptionPane.showMessageDialog(PnlChuyenTau.this, "Không thể xóa chuyến.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        };
-        w.execute();
-    }
-
-    private ChuyenTau buildChuyenFromForm() {
-        ChuyenTau ct = new ChuyenTau();
-        ct.setMaChuyen(txtMaChuyen.getText().trim());
-        ct.setMaDauMay(txtMaTau.getText().trim());
-        ct.setMaGaDi(txtGaDi.getText().trim());
-        ct.setMaGaDen(txtGaDen.getText().trim());
-        if (chkTemplate.isSelected()) {
-            ct.setGioDi(null);
-            ct.setGioDen(null);
-        } else {
-            Date d = (Date) spinnerDateTime.getValue();
-            LocalDateTime ldt = Instant.ofEpochMilli(d.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-            ct.setGioDi(ldt);
-            // giữ nguyên gioDen nếu không muốn set
-            ct.setGioDen(null);
-        }
-        // không set maNV / soKm / maChang / trangThai ở form này — nếu cần, bạn có thể mở rộng form
-        return ct;
-    }
-
-    private String getSelectedMaChuyenFromTable() {
-        int r = table.getSelectedRow();
-        if (r < 0) return null;
-        return (String) model.getValueAt(r, 0);
-    }
-
-    private void startSelected() {
-        String ma = getSelectedMaChuyenFromTable();
-        if (ma == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến để khởi hành.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        LocalDate date = getSelectedDate();
-        int cf = JOptionPane.showConfirmDialog(this, "Xác nhận đánh dấu chuyến " + ma + " ngày " + date + " là 'Đã khởi hành'?", "Xác nhận", JOptionPane.YES_NO_OPTION);
-        if (cf != JOptionPane.YES_OPTION) return;
-        btnStart.setEnabled(false);
-        SwingWorker<Boolean, Void> w = new SwingWorker<>() {
-            @Override protected Boolean doInBackground() {
-                return chuyenTauDAO.startChuyenOnDate(ma, date, "UI");
-            }
+            @Override protected Boolean doInBackground() { return chuyenTauDAO.delete(ma); }
             @Override protected void done() {
-                btnStart.setEnabled(true);
+                btnDelete.setEnabled(true);
                 try {
                     boolean ok = get();
-                    JOptionPane.showMessageDialog(PnlChuyenTau.this, ok ? "Đã cập nhật: Khởi hành." : "Không thể cập nhật trạng thái.", "Kết quả", JOptionPane.INFORMATION_MESSAGE);
-                    loadData();
+                    if (ok) { JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã xóa.", "Kết quả", JOptionPane.INFORMATION_MESSAGE); loadData(); clearForm(); }
+                    else JOptionPane.showMessageDialog(PnlChuyenTau.this, "Không thể xóa chuyến.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) { ex.printStackTrace(); }
             }
         };
         w.execute();
     }
 
-    private void arrivedSelected() {
-        String ma = getSelectedMaChuyenFromTable();
-        if (ma == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến để đánh dấu đến nơi.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        LocalDate date = getSelectedDate();
-        String[] options = {"Chỉ giải phóng vé chưa thanh toán", "Giải phóng cả vé đã thanh toán", "Hủy"};
-        int choice = JOptionPane.showOptionDialog(this,
-                "Chọn chính sách giải phóng ghế cho chuyến " + ma + " ngày " + date + ":",
-                "Chính sách giải phóng ghế",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                options,
-                options[0]);
-        if (choice == 2 || choice == JOptionPane.CLOSED_OPTION) return;
-        boolean freePaid = (choice == 1);
+//    private void startSelected() {
+//        String ma = getSelectedMaChuyenFromTable();
+//        if (ma == null) { JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến để khởi hành.", "Thông báo", JOptionPane.INFORMATION_MESSAGE); return; }
+//        LocalDate date = getSelectedDate();
+//        int cf = JOptionPane.showConfirmDialog(this, "Xác nhận đánh dấu chuyến " + ma + " ngày " + date + " là 'Đã khởi hành'?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+//        if (cf != JOptionPane.YES_OPTION) return;
+//        btnStart.setEnabled(false);
+//        SwingWorker<Boolean, Void> w = new SwingWorker<>() {
+//            @Override protected Boolean doInBackground() { return chuyenTauDAO.startChuyenOnDate(ma, date, "UI"); }
+//            @Override protected void done() {
+//                btnStart.setEnabled(true);
+//                try {
+//                    boolean ok = get();
+//                    JOptionPane.showMessageDialog(PnlChuyenTau.this, ok ? "Đã cập nhật: Khởi hành." : "Không thể cập nhật trạng thái.", "Kết quả", JOptionPane.INFORMATION_MESSAGE);
+//                    loadData();
+//                } catch (Exception ex) { ex.printStackTrace(); }
+//            }
+//        };
+//        w.execute();
+//    }
 
-        int confirm = JOptionPane.showConfirmDialog(this, "Xác nhận đánh dấu chuyến " + ma + " ngày " + date + " là 'Đã đến' và giải phóng ghế?", "Xác nhận", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
-
-        btnArrived.setEnabled(false);
-        SwingWorker<Integer, Void> w = new SwingWorker<>() {
-            @Override protected Integer doInBackground() {
-                return chuyenTauDAO.arriveChuyenOnDate(ma, date, freePaid, "UI");
-            }
-            @Override protected void done() {
-                btnArrived.setEnabled(true);
-                try {
-                    int updated = get();
-                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(PnlChuyenTau.this,
-                            updated > 0 ? "Đã xử lý - ghế đã được giải phóng: " + updated : "Đã cập nhật trạng thái chuyến, nhưng không có ghế nào thay đổi.",
-                            "Kết quả", JOptionPane.INFORMATION_MESSAGE));
-                    loadData();
-                } catch (Exception ex) { ex.printStackTrace(); }
-            }
-        };
-        w.execute();
-    }
-
-    private void startAutoStarter() {
-        scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "ChuyenTau-AutoStarter");
-            t.setDaemon(true);
-            return t;
-        });
-        scheduler.scheduleAtFixedRate(() -> {
-            try {
-                checkAndAutoStart();
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }, 15, 60, TimeUnit.SECONDS);
-    }
-
-    private void checkAndAutoStart() {
-        LocalDate today = LocalDate.now();
-        LocalDateTime now = LocalDateTime.now();
-        List<ChuyenTau> list = chuyenTauDAO.getAll();
-        if (list == null) return;
-        for (ChuyenTau c : list) {
-            try {
-                LocalDateTime gioDi = c.getGioDi();
-                if (gioDi == null) continue; // template không tự start
-                if (!gioDi.toLocalDate().equals(today)) continue;
-                String status = c.getTrangThai();
-                boolean alreadyStarted = status != null && status.toLowerCase().contains("khởi hành");
-                if (alreadyStarted) continue;
-                if (!gioDi.isAfter(now)) {
-                    chuyenTauDAO.startChuyenOnDate(c.getMaChuyen(), today, "AUTO");
-                    SwingUtilities.invokeLater(this::loadData);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
+//    private void arrivedSelected() {
+//        String ma = getSelectedMaChuyenFromTable();
+//        if (ma == null) { JOptionPane.showMessageDialog(this, "Vui lòng chọn chuyến để đánh dấu đến nơi.", "Thông báo", JOptionPane.INFORMATION_MESSAGE); return; }
+//        LocalDate date = getSelectedDate();
+//        String[] options = {"Chỉ giải phóng vé chưa thanh toán", "Giải phóng cả vé đã thanh toán", "Hủy"};
+//        int choice = JOptionPane.showOptionDialog(this,
+//                "Chọn chính sách giải phóng ghế cho chuyến " + ma + " ngày " + date + ":",
+//                "Chính sách giải phóng ghế",
+//                JOptionPane.DEFAULT_OPTION,
+//                JOptionPane.QUESTION_MESSAGE,
+//                null,
+//                options,
+//                options[0]);
+//        if (choice == 2 || choice == JOptionPane.CLOSED_OPTION) return;
+//        boolean freePaid = (choice == 1);
+//
+//        int confirm = JOptionPane.showConfirmDialog(this, "Xác nhận đánh dấu chuyến " + ma + " ngày " + date + " là 'Đã đến' và giải phóng ghế?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+//        if (confirm != JOptionPane.YES_OPTION) return;
+//
+//        btnArrived.setEnabled(false);
+//        SwingWorker<Integer, Void> w = new SwingWorker<>() {
+//            @Override protected Integer doInBackground() { return chuyenTauDAO.arriveChuyenOnDate(ma, date, freePaid, "UI"); }
+//            @Override protected void done() {
+//                btnArrived.setEnabled(true);
+//                try {
+//                    int updated = get();
+//                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(PnlChuyenTau.this,
+//                            updated > 0 ? "Đã xử lý - ghế đã được giải phóng: " + updated : "Đã cập nhật trạng thái chuyến, nhưng không có ghế nào thay đổi.",
+//                            "Kết quả", JOptionPane.INFORMATION_MESSAGE));
+//                    loadData();
+//                } catch (Exception ex) { ex.printStackTrace(); }
+//            }
+//        };
+//        w.execute();
+//    }
 
     /**
      * Gọi khi panel/khung chứa panel đóng để shutdown scheduler.
