@@ -24,7 +24,8 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
     @Override
     public List<NhanVien> getAll() {
         List<NhanVien> list = new ArrayList<>();
-        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien";
+        // Only get active employees (isActive = 1)
+        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -84,7 +85,8 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public boolean insert(NhanVien nv) {
-        String sql = "INSERT INTO NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        // Set isActive = 1 by default for new employees
+        String sql = "INSERT INTO NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, 1)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, nv.getMaNV());
@@ -130,8 +132,8 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public boolean delete(String id) {
-        // Hard delete: remove the record from database
-        String sql = "DELETE FROM NhanVien WHERE maNV = ?";
+        // Soft delete: set isActive = 0
+        String sql = "UPDATE NhanVien SET isActive = 0 WHERE maNV = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
