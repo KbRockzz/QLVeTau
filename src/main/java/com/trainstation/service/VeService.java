@@ -271,7 +271,6 @@ public class VeService {
             String maVeMoi = "VE_" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
 
             // 10. Tạo vé mới (copy từ vé cũ, chỉ thay maSoGhe)
-            final boolean TICKET_ACTIVE = true;
             Ve veMoi = new Ve(
                 maVeMoi,
                 veCu.getMaChuyen(),      // KHÔNG ĐỔI
@@ -289,8 +288,7 @@ public class VeService {
                 veCu.getLoaiCho(),       // KHÔNG ĐỔI
                 veCu.getLoaiVe(),        // KHÔNG ĐỔI
                 null,                    // maBangGia - để VeDAO.insert() tự tìm bảng giá phù hợp
-                veCu.getGiaThanhToan(),  // KHÔNG ĐỔI
-                TICKET_ACTIVE
+                veCu.getGiaThanhToan()   // KHÔNG ĐỔI
             );
 
             // 11. Insert vé mới

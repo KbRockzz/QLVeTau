@@ -135,7 +135,6 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
             }
             pst.setString(9, ct.getMaChang());
             pst.setString(10, ct.getTrangThai());
-            pst.setBoolean(11, ct.isActive());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -169,7 +168,6 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
             }
             pst.setString(8, ct.getMaChang());
             pst.setString(9, ct.getTrangThai());
-            pst.setBoolean(10, ct.isActive());
             pst.setString(11, ct.getMaChuyen());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {

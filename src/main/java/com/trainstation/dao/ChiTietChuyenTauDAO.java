@@ -86,7 +86,6 @@ public class ChiTietChuyenTauDAO {
             } else {
                 pst.setNull(4, Types.INTEGER);
             }
-            pst.setBoolean(5, entity.isActive());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -108,7 +107,6 @@ public class ChiTietChuyenTauDAO {
             } else {
                 pst.setNull(2, Types.INTEGER);
             }
-            pst.setBoolean(3, entity.isActive());
             pst.setString(4, entity.getMaChuyenTau());
             pst.setString(5, entity.getMaToaTau());
             return pst.executeUpdate() > 0;

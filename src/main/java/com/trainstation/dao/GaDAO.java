@@ -63,7 +63,6 @@ public class GaDAO implements GenericDAO<Ga> {
             pst.setString(3, entity.getMoTa());
             pst.setString(4, entity.getTinhTrang());
             pst.setString(5, entity.getDiaChi());
-            pst.setBoolean(6, entity.isActive());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -80,7 +79,6 @@ public class GaDAO implements GenericDAO<Ga> {
             pst.setString(2, entity.getMoTa());
             pst.setString(3, entity.getTinhTrang());
             pst.setString(4, entity.getDiaChi());
-            pst.setBoolean(5, entity.isActive());
             pst.setString(6, entity.getMaGa());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {

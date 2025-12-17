@@ -884,7 +884,7 @@ public class PnlDatVe extends JPanel {
             }
 
             String email = txtCCCD.getText().trim() + "|" + txtDiaChi.getText().trim();
-            KhachHang kh = new KhachHang(maKH, tenKH, email, sdt, true);
+            KhachHang kh = new KhachHang(maKH, tenKH, email, sdt);
 
             if (khachHangDAO.insert(kh)) {
                 JOptionPane.showMessageDialog(dialog, "Thêm khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);

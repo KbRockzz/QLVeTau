@@ -201,132 +201,63 @@ public class PnlDuLieuDaXoa extends JPanel {
      */
     private void taiDuLieuNhanVienDaXoa() {
         modelNhanVien.setRowCount(0);
-        List<NhanVien> danhSach = nhanVienDAO.getAllIncludingDeleted();
-        for (NhanVien nv : danhSach) {
-            if (false) {
-                modelNhanVien.addRow(new Object[]{
-                        nv.getMaNV(),
-                        nv.getTenNV(),
-                        nv.getSoDienThoai(),
-                        nv.getDiaChi(),
-                        nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "",
-                        nv.getMaLoaiNV()
-                });
-            }
-        }
+        // Soft delete removed - no longer showing deleted data
+        // List<NhanVien> danhSach = nhanVienDAO.getAll();
+        // for (NhanVien nv : danhSach) {
+        //     modelNhanVien.addRow(new Object[]{
+        //             nv.getMaNV(),
+        //             nv.getTenNV(),
+        //             nv.getSoDienThoai(),
+        //             nv.getDiaChi(),
+        //             nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "",
+        //             nv.getMaLoaiNV()
+        //     });
+        // }
     }
 
     /**
-     * Tải dữ liệu các tài khoản có isActive = 0 (đã xóa mềm)
+     * Tải dữ liệu các tài khoản đã xóa - chức năng không khả dụng do đã loại bỏ soft delete
      */
     private void taiDuLieuTaiKhoanDaXoa() {
         modelTaiKhoan.setRowCount(0);
-        List<TaiKhoan> danhSach = taiKhoanDAO.getAllIncludingDeleted();
-        for (TaiKhoan tk : danhSach) {
-            if (false) {
-                modelTaiKhoan.addRow(new Object[]{
-                        tk.getMaTK(),
-                        tk.getMaNV(),
-                        tk.getTenTaiKhoan(),
-                        tk.getTrangThai()
-                });
-            }
-        }
+        // Soft delete removed - no longer showing deleted data
     }
 
     /**
-     * Khôi phục nhân viên đã xóa (set isActive = 1)
+     * Khôi phục nhân viên đã xóa - chức năng không khả dụng do đã loại bỏ soft delete
      */
     private void khoiPhucNhanVien() {
-        int row = bangNhanVien.getSelectedRow();
-        if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên cần khôi phục!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        String maNV = (String) modelNhanVien.getValueAt(row, 0);
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Bạn có chắc chắn muốn khôi phục nhân viên " + maNV + "?",
-                "Xác nhận",
-                JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
-
-        boolean ok = nhanVienDAO.restore(maNV);
-        if (ok) {
-            JOptionPane.showMessageDialog(this, "Khôi phục nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            taiDuLieuNhanVienDaXoa();
-        } else {
-            JOptionPane.showMessageDialog(this, "Khôi phục thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
+        JOptionPane.showMessageDialog(this, 
+            "Chức năng khôi phục không khả dụng do đã loại bỏ soft delete.\nDữ liệu đã xóa sẽ bị xóa vĩnh viễn.", 
+            "Thông báo", 
+            JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**
-     * Khôi phục tài khoản đã xóa (set isActive = 1)
+     * Khôi phục tài khoản đã xóa - chức năng không khả dụng do đã loại bỏ soft delete
      */
     private void khoiPhucTaiKhoan() {
-        int row = bangTaiKhoan.getSelectedRow();
-        if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn tài khoản cần khôi phục!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        String maTK = (String) modelTaiKhoan.getValueAt(row, 0);
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Bạn có chắc chắn muốn khôi phục tài khoản " + maTK + "?",
-                "Xác nhận",
-                JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
-
-        boolean ok = taiKhoanDAO.restore(maTK);
-        if (ok) {
-            JOptionPane.showMessageDialog(this, "Khôi phục tài khoản thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            taiDuLieuTaiKhoanDaXoa();
-        } else {
-            JOptionPane.showMessageDialog(this, "Khôi phục thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
+        JOptionPane.showMessageDialog(this, 
+            "Chức năng khôi phục không khả dụng do đã loại bỏ soft delete.\nDữ liệu đã xóa sẽ bị xóa vĩnh viễn.", 
+            "Thông báo", 
+            JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**
-     * Tải dữ liệu các khách hàng có isActive = 0 (đã xóa mềm)
+     * Tải dữ liệu các khách hàng đã xóa - chức năng không khả dụng do đã loại bỏ soft delete
      */
     private void taiDuLieuKhachHangDaXoa() {
         modelKhachHang.setRowCount(0);
-        List<KhachHang> danhSach = khachHangDAO.getAllIncludingDeleted();
-        for (KhachHang kh : danhSach) {
-            if (false) {
-                modelKhachHang.addRow(new Object[]{
-                        kh.getMaKhachHang(),
-                        kh.getTenKhachHang(),
-                        kh.getEmail(),
-                        kh.getSoDienThoai()
-                });
-            }
-        }
+        // Soft delete removed - no longer showing deleted data
     }
 
     /**
-     * Khôi phục khách hàng đã xóa (set isActive = 1)
+     * Khôi phục khách hàng đã xóa - chức năng không khả dụng do đã loại bỏ soft delete
      */
     private void khoiPhucKhachHang() {
-        int row = bangKhachHang.getSelectedRow();
-        if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng cần khôi phục!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        String maKH = (String) modelKhachHang.getValueAt(row, 0);
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Bạn có chắc chắn muốn khôi phục khách hàng " + maKH + "?",
-                "Xác nhận",
-                JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
-
-        boolean ok = khachHangDAO.restore(maKH);
-        if (ok) {
-            JOptionPane.showMessageDialog(this, "Khôi phục khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            taiDuLieuKhachHangDaXoa();
-        } else {
-            JOptionPane.showMessageDialog(this, "Khôi phục thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
+        JOptionPane.showMessageDialog(this, 
+            "Chức năng khôi phục không khả dụng do đã loại bỏ soft delete.\nDữ liệu đã xóa sẽ bị xóa vĩnh viễn.", 
+            "Thông báo", 
+            JOptionPane.INFORMATION_MESSAGE);
     }
 }

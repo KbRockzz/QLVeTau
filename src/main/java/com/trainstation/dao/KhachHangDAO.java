@@ -134,22 +134,6 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
         return list;
     }
 
-    /**
-     * Restore a soft-deleted customer by setting isActive = true
-     */
-    public boolean restore(String id) {
-        String sql = "UPDATE KhachHang SET isActive = 1 WHERE maKhachHang = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            int rowsAffected = pst.executeUpdate();
-            return rowsAffected > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     public KhachHang timTheoSoDienThoai(String soDienThoai) {
         String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE soDienThoai = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();

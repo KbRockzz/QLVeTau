@@ -238,7 +238,6 @@ public class VeDAO implements GenericDAO<Ve> {
             pst.setString(15, v.getLoaiVe());
             pst.setString(16, v.getMaBangGia());
             if (v.getGiaThanhToan() != null) pst.setFloat(17, v.getGiaThanhToan()); else pst.setNull(17, Types.FLOAT);
-            pst.setBoolean(18, v.isActive());
             System.out.println("DEBUG Ve.insert: inserting maVe=" + v.getMaVe() + " maBangGia=" + v.getMaBangGia());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -291,7 +290,6 @@ public class VeDAO implements GenericDAO<Ve> {
             } else {
                 pst.setNull(16, Types.FLOAT);
             }
-            pst.setBoolean(17, v.isActive());
             pst.setString(18, v.getMaVe());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
