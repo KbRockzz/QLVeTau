@@ -144,6 +144,56 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
         }
     }
 
+    /**
+     * Get all deleted employees (isActive = 0)
+     * @return List of soft-deleted employees
+     */
+    public List<NhanVien> getDeletedEmployees() {
+        List<NhanVien> list = new ArrayList<>();
+        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien WHERE isActive = 0";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                LocalDate ngaySinh = null;
+                Date date = rs.getDate("ngaySinh");
+                if (date != null) {
+                    ngaySinh = date.toLocalDate();
+                }
+                NhanVien nv = new NhanVien(
+                        rs.getString("maNV"),
+                        rs.getString("tenNV"),
+                        rs.getString("soDienThoai"),
+                        rs.getString("diaChi"),
+                        ngaySinh,
+                        rs.getString("maLoaiNV"),
+                        rs.getString("trangThai")
+                );
+                list.add(nv);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
+     * Restore a soft-deleted employee (set isActive = 1)
+     * @param id Employee ID to restore
+     * @return true if restore was successful
+     */
+    public boolean restoreEmployee(String id) {
+        String sql = "UPDATE NhanVien SET isActive = 1 WHERE maNV = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, id);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public String getLoaiNV(String maNV) {
         String sql = "SELECT maLoaiNV FROM NhanVien WHERE maNV = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();

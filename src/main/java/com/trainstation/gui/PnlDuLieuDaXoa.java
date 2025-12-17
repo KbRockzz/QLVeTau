@@ -201,18 +201,17 @@ public class PnlDuLieuDaXoa extends JPanel {
      */
     private void taiDuLieuNhanVienDaXoa() {
         modelNhanVien.setRowCount(0);
-        // Soft delete removed - no longer showing deleted data
-        // List<NhanVien> danhSach = nhanVienDAO.getAll();
-        // for (NhanVien nv : danhSach) {
-        //     modelNhanVien.addRow(new Object[]{
-        //             nv.getMaNV(),
-        //             nv.getTenNV(),
-        //             nv.getSoDienThoai(),
-        //             nv.getDiaChi(),
-        //             nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "",
-        //             nv.getMaLoaiNV()
-        //     });
-        // }
+        List<NhanVien> danhSach = nhanVienDAO.getDeletedEmployees();
+        for (NhanVien nv : danhSach) {
+            modelNhanVien.addRow(new Object[]{
+                    nv.getMaNV(),
+                    nv.getTenNV(),
+                    nv.getSoDienThoai(),
+                    nv.getDiaChi(),
+                    nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "",
+                    nv.getMaLoaiNV()
+            });
+        }
     }
 
     /**
@@ -224,13 +223,42 @@ public class PnlDuLieuDaXoa extends JPanel {
     }
 
     /**
-     * Khôi phục nhân viên đã xóa - chức năng không khả dụng do đã loại bỏ soft delete
+     * Khôi phục nhân viên đã xóa (set isActive = 1)
      */
     private void khoiPhucNhanVien() {
-        JOptionPane.showMessageDialog(this, 
-            "Chức năng khôi phục không khả dụng do đã loại bỏ soft delete.\nDữ liệu đã xóa sẽ bị xóa vĩnh viễn.", 
-            "Thông báo", 
-            JOptionPane.INFORMATION_MESSAGE);
+        int row = bangNhanVien.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, 
+                "Vui lòng chọn nhân viên cần khôi phục!", 
+                "Thông báo", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String maNV = (String) modelNhanVien.getValueAt(row, 0);
+        String tenNV = (String) modelNhanVien.getValueAt(row, 1);
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có chắc chắn muốn khôi phục nhân viên:\n" + maNV + " - " + tenNV + "?",
+                "Xác nhận khôi phục",
+                JOptionPane.YES_NO_OPTION);
+        
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        if (nhanVienDAO.restoreEmployee(maNV)) {
+            JOptionPane.showMessageDialog(this, 
+                "Khôi phục nhân viên thành công!", 
+                "Thành công", 
+                JOptionPane.INFORMATION_MESSAGE);
+            taiDuLieuNhanVienDaXoa(); // Reload the table
+        } else {
+            JOptionPane.showMessageDialog(this, 
+                "Khôi phục nhân viên thất bại!", 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
