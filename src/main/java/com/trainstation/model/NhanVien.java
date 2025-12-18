@@ -11,6 +11,7 @@ public class NhanVien implements Serializable {
     private LocalDate ngaySinh;
     private String maLoaiNV;
     private String trangThai;
+    private boolean isActive = true;
 
     public NhanVien() {
     }
@@ -79,6 +80,14 @@ public class NhanVien implements Serializable {
 
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     @Override

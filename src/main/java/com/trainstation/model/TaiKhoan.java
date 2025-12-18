@@ -8,6 +8,7 @@ public class TaiKhoan implements Serializable {
     private String tenTaiKhoan;
     private String matKhau;
     private String trangThai;
+    private boolean isActive = true;
 
     public TaiKhoan() {
     }
@@ -58,6 +59,14 @@ public class TaiKhoan implements Serializable {
 
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     /**
