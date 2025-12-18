@@ -192,8 +192,7 @@ public class PnlBangGia extends JPanel {
             java.util.Date ngayKT = ngayKetThuc.getDate();
             BangGia bg = new com.trainstation.model.BangGia(maBangGia, maChang, loaiGhe, giaCoBan,
                     ngayBD != null ? new java.sql.Timestamp(ngayBD.getTime()).toLocalDateTime() : null,
-                    ngayKT != null ? new java.sql.Timestamp(ngayKT.getTime()).toLocalDateTime() : null,
-                    true);
+                    ngayKT != null ? new java.sql.Timestamp(ngayKT.getTime()).toLocalDateTime() : null);
             if (bangGiaService.themBangGia(bg)) {
                 JOptionPane.showMessageDialog(this, "Thêm bảng giá thành công!");
                 loadData();

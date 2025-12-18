@@ -886,7 +886,7 @@ public class PnlChuyenTau extends JPanel {
                     }
 
                     // 2) insert new record
-                    ChiTietChuyenTau newT = new ChiTietChuyenTau(maChuyen, finalMaToa, insertPos, finalSuc, true);
+                    ChiTietChuyenTau newT = new ChiTietChuyenTau(maChuyen, finalMaToa, insertPos, finalSuc);
                     boolean added = ctctDAO.add(newT);
                     return added ? "OK" : "ERROR";
                 } catch (Exception ex) {
