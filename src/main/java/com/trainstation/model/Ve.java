@@ -21,7 +21,6 @@ public class Ve implements Serializable {
     private String loaiVe;
     private String maBangGia;
     private Float giaThanhToan;
-    private boolean isActive = true;
 
     public Ve() {
     }
@@ -181,15 +180,6 @@ public class Ve implements Serializable {
     public void setMaBangGia(String maBangGia) {
         this.maBangGia = maBangGia;
     }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean isActive) {
-        this.isActive = isActive;
-    }
-
     // Chỉ là ví dụ phần liên quan, chèn vào class Ve hiện tại
 
     private transient com.trainstation.model.ChiTietHoaDon chiTietHoaDon; // transient: không serial hóa / không map DB

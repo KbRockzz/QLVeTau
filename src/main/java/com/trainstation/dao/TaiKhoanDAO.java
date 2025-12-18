@@ -47,21 +47,19 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
     @Override
     public TaiKhoan findById(String id) {
         // Only find active accounts (isActive = 1)
-        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai, isActive FROM TaiKhoan WHERE maTK = ? AND isActive = 1";
+        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai FROM TaiKhoan WHERE maTK = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    TaiKhoan tk = new TaiKhoan(
+                    return new TaiKhoan(
                             rs.getString("maTK"),
                             rs.getString("maNV"),
                             rs.getString("tenTaiKhoan"),
                             rs.getString("matKhau"),
                             rs.getString("trangThai")
                     );
-                    tk.setActive(rs.getBoolean("isActive"));
-                    return tk;
                 }
             }
         } catch (SQLException e) {
@@ -120,39 +118,12 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
     }
 
     /**
-     * Get all accounts including deleted ones (both isActive = 0 and isActive = 1)
-     * @return List of all accounts
-     */
-    public List<TaiKhoan> getAllIncludingDeleted() {
-        List<TaiKhoan> list = new ArrayList<>();
-        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai, isActive FROM TaiKhoan";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
-            while (rs.next()) {
-                TaiKhoan tk = new TaiKhoan(
-                        rs.getString("maTK"),
-                        rs.getString("maNV"),
-                        rs.getString("tenTaiKhoan"),
-                        rs.getString("matKhau"),
-                        rs.getString("trangThai")
-                );
-                tk.setActive(rs.getBoolean("isActive"));
-                list.add(tk);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    /**
      * Get all deleted accounts (isActive = 0)
      * @return List of soft-deleted accounts
      */
     public List<TaiKhoan> getDeletedAccounts() {
         List<TaiKhoan> list = new ArrayList<>();
-        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai, isActive FROM TaiKhoan WHERE isActive = 0";
+        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai FROM TaiKhoan WHERE isActive = 0";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -164,7 +135,6 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
                         rs.getString("matKhau"),
                         rs.getString("trangThai")
                 );
-                t.setActive(rs.getBoolean("isActive"));
                 list.add(t);
             }
         } catch (SQLException e) {

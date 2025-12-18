@@ -113,14 +113,6 @@ public class ChuyenTau implements Serializable {
         this.trangThai = trangThai;
     }
 
-    /**
-     * Check if this ChuyenTau is active (has non-null departure and arrival times)
-     * @return true if both gioDi and gioDen are not null, false otherwise
-     */
-    public boolean isActive() {
-        return gioDi != null && gioDen != null;
-    }
-
     @Override
     public String toString() {
         return "ChuyenTau{" +

@@ -114,31 +114,6 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     }
 
     /**
-     * Get all customers including deleted ones (both isActive = 0 and isActive = 1)
-     * @return List of all customers
-     */
-    public List<KhachHang> getAllIncludingDeleted() {
-        List<KhachHang> list = new ArrayList<>();
-        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
-            while (rs.next()) {
-                KhachHang kh = new KhachHang(
-                        rs.getString("maKhachHang"),
-                        rs.getString("tenKhachHang"),
-                        rs.getString("email"),
-                        rs.getString("soDienThoai")
-                );
-                list.add(kh);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    /**
      * Get all deleted customers (isActive = 0)
      * @return List of soft-deleted customers
      */
