@@ -238,8 +238,8 @@ public class PnlTimKiemNVTK extends JPanel {
 
         SwingWorker<List<NhanVien>, Void> w = new SwingWorker<>() {
             @Override protected List<NhanVien> doInBackground() {
-                // search across all including deleted so user can find by criteria
-                List<NhanVien> all = nhanVienDAO.getAllIncludingDeleted();
+                // search active employees only
+                List<NhanVien> all = nhanVienDAO.getAll();
                 if (all == null) return List.of();
                 return all.stream().filter(nv -> {
                     if (!ma.isEmpty() && (nv.getMaNV() == null || !nv.getMaNV().equalsIgnoreCase(ma))) return false;
@@ -295,7 +295,6 @@ public class PnlTimKiemNVTK extends JPanel {
                     sb.append("Địa chỉ: ").append(nv.getDiaChi()).append("\n");
                     sb.append("Ngày sinh: ").append(nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "").append("\n");
                     sb.append("Mã loại: ").append(nv.getMaLoaiNV()).append("\n");
-                    sb.append("Active: ").append(nv.isActive() ? "Yes" : "No").append("\n");
                     JOptionPane.showMessageDialog(PnlTimKiemNVTK.this, sb.toString(), "Chi tiết nhân viên", JOptionPane.INFORMATION_MESSAGE);
                 } catch (InterruptedException | ExecutionException ex) {
                     ex.printStackTrace();
@@ -348,13 +347,14 @@ public class PnlTimKiemNVTK extends JPanel {
 
         SwingWorker<List<TaiKhoan>, Void> w = new SwingWorker<>() {
             @Override protected List<TaiKhoan> doInBackground() {
-                List<TaiKhoan> all = taiKhoanDAO.getAllIncludingDeleted();
+                // getAll() already filters by isActive=1 in database
+                List<TaiKhoan> all = taiKhoanDAO.getAll();
                 if (all == null) return List.of();
                 return all.stream().filter(tk -> {
                     if (!maTk.isEmpty() && (tk.getMaTK() == null || !tk.getMaTK().equalsIgnoreCase(maTk))) return false;
                     if (!maNv.isEmpty() && (tk.getMaNV() == null || !tk.getMaNV().equalsIgnoreCase(maNv))) return false;
                     if (!ten.isEmpty() && (tk.getTenTaiKhoan() == null || !tk.getTenTaiKhoan().toLowerCase().contains(ten))) return false;
-                    if (onlyActive && !tk.isActive()) return false;
+                    // onlyActive filter is handled by getAll() which queries WHERE isActive=1
                     return true;
                 }).toList();
             }
@@ -400,7 +400,6 @@ public class PnlTimKiemNVTK extends JPanel {
                     sb.append("Mã NV: ").append(tk.getMaNV()).append("\n");
                     sb.append("Tài khoản: ").append(tk.getTenTaiKhoan()).append("\n");
                     sb.append("Trạng thái: ").append(tk.getTrangThai()).append("\n");
-                    sb.append("Active: ").append(tk.isActive() ? "Yes" : "No").append("\n");
                     JOptionPane.showMessageDialog(PnlTimKiemNVTK.this, sb.toString(), "Chi tiết tài khoản", JOptionPane.INFORMATION_MESSAGE);
                 } catch (InterruptedException | ExecutionException ex) {
                     ex.printStackTrace();

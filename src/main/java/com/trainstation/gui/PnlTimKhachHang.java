@@ -161,8 +161,8 @@ public class PnlTimKhachHang extends JPanel {
         SwingWorker<List<KhachHang>, Void> worker = new SwingWorker<>() {
             @Override
             protected List<KhachHang> doInBackground() {
-                // getAllIncludingDeleted so user can search across all records; filter in-memory
-                List<KhachHang> all = khDao.getAllIncludingDeleted();
+                // getAll() already filters by isActive=1 in database
+                List<KhachHang> all = khDao.getAll();
                 if (all == null) return List.of();
                 return all.stream().filter(kh -> {
                     if (!ma.isEmpty() && (kh.getMaKhachHang() == null || !kh.getMaKhachHang().equalsIgnoreCase(ma))) return false;
