@@ -62,19 +62,19 @@ public class PnlThongKe extends JPanel {
         btnDoanhThu.setPreferredSize(new Dimension(200, 40));
         btnDoanhThu.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnDoanhThu.addActionListener(e -> showPanel("doanhThu"));
-        MaterialInitializer.styleButton(btnDoanhThu);
+        styleNavigationButton(btnDoanhThu);
 
         btnVeDoiHoan = new JButton("Thống kê vé hoàn/đổi");
         btnVeDoiHoan.setPreferredSize(new Dimension(200, 40));
         btnVeDoiHoan.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnVeDoiHoan.addActionListener(e -> showPanel("veDoiHoan"));
-        MaterialInitializer.styleButton(btnVeDoiHoan);
+        styleNavigationButton(btnVeDoiHoan);
 
         btnDoPhuGhe = new JButton("Thống kê độ phủ ghế");
         btnDoPhuGhe.setPreferredSize(new Dimension(200, 40));
         btnDoPhuGhe.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnDoPhuGhe.addActionListener(e -> showPanel("doPhuGhe"));
-        MaterialInitializer.styleButton(btnDoPhuGhe);
+        styleNavigationButton(btnDoPhuGhe);
 
         pnlNav.add(btnDoanhThu);
         pnlNav.add(btnVeDoiHoan);
@@ -246,17 +246,59 @@ public class PnlThongKe extends JPanel {
         return panel;
     }
 
+    private void styleNavigationButton(JButton button) {
+        // Basic styling
+        button.setBackground(new Color(10, 115, 215)); // #0A73D7
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Add hover effect that respects selection state
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (button.isEnabled()) {
+                    // Check if this button is selected
+                    Boolean isSelected = (Boolean) button.getClientProperty("selected");
+                    if (isSelected == null || !isSelected) {
+                        button.setBackground(new Color(8, 89, 166)); // Hover color
+                    }
+                }
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (button.isEnabled()) {
+                    // Check if this button is selected
+                    Boolean isSelected = (Boolean) button.getClientProperty("selected");
+                    if (isSelected != null && isSelected) {
+                        button.setBackground(new Color(70, 130, 180)); // Selected color
+                    } else {
+                        button.setBackground(new Color(10, 115, 215)); // Default color
+                    }
+                }
+            }
+        });
+    }
+
     private void showPanel(String panelName) {
         cardLayout.show(pnlMain, panelName);
 
-        btnDoanhThu.setBackground(panelName.equals("doanhThu") ? new Color(70, 130, 180) : null);
-        btnDoanhThu.setForeground(panelName.equals("doanhThu") ? Color.GRAY : Color.BLACK);
-        
-        btnVeDoiHoan.setBackground(panelName.equals("veDoiHoan") ? new Color(70, 130, 180) : null);
-        btnVeDoiHoan.setForeground(panelName.equals("veDoiHoan") ? Color.GRAY : Color.BLACK);
-        
-        btnDoPhuGhe.setBackground(panelName.equals("doPhuGhe") ? new Color(70, 130, 180) : null);
-        btnDoPhuGhe.setForeground(panelName.equals("doPhuGhe") ? Color.GRAY : Color.BLACK);
+        // Update selection state for all buttons
+        updateButtonSelection(btnDoanhThu, panelName.equals("doanhThu"));
+        updateButtonSelection(btnVeDoiHoan, panelName.equals("veDoiHoan"));
+        updateButtonSelection(btnDoPhuGhe, panelName.equals("doPhuGhe"));
+    }
+
+    private void updateButtonSelection(JButton button, boolean selected) {
+        button.putClientProperty("selected", selected);
+        if (selected) {
+            button.setBackground(new Color(70, 130, 180)); // Selected color
+            button.setForeground(Color.WHITE);
+        } else {
+            button.setBackground(new Color(10, 115, 215)); // Default color
+            button.setForeground(Color.WHITE);
+        }
     }
 
     private void loadDefaultData() {
