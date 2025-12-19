@@ -131,4 +131,43 @@ public class ChiTietChuyenTauDAO {
                 rs.getObject("sucChua", Integer.class)
         );
     }
+
+    /**
+     * Đánh lại số thứ tự toa (soThuTuToa) cho 1 chuyến trong DB, luôn từ 1..n
+     * theo thứ tự hiện tại (ORDER BY soThuTuToa, maToaTau).
+     */
+    public void reindexSoThuTuToa(String maChuyenTau) {
+        if (maChuyenTau == null || maChuyenTau.trim().isEmpty()) return;
+
+        String selectSql = "SELECT maToaTau FROM ChiTietChuyenTau " +
+                "WHERE maChuyenTau = ? " +
+                "ORDER BY COALESCE(soThuTuToa, 0), maToaTau";
+
+        String updateSql = "UPDATE ChiTietChuyenTau SET soThuTuToa = ? " +
+                "WHERE maChuyenTau = ? AND maToaTau = ?";
+
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement sel = conn.prepareStatement(selectSql);
+             PreparedStatement upd = conn.prepareStatement(updateSql)) {
+
+            conn.setAutoCommit(false);
+
+            sel.setString(1, maChuyenTau);
+            try (ResultSet rs = sel.executeQuery()) {
+                int idx = 1;
+                while (rs.next()) {
+                    String maToaTau = rs.getString("maToaTau");
+                    upd.setInt(1, idx++);
+                    upd.setString(2, maChuyenTau);
+                    upd.setString(3, maToaTau);
+                    upd.addBatch();
+                }
+            }
+
+            upd.executeBatch();
+            conn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

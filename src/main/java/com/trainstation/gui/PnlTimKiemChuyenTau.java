@@ -4,9 +4,11 @@ import com.trainstation.config.MaterialInitializer;
 import com.trainstation.dao.ChuyenTauDAO;
 import com.trainstation.dao.DauMayDAO;
 import com.trainstation.dao.GaDAO;
+import com.trainstation.dao.ToaTauDAO;
 import com.trainstation.model.ChuyenTau;
 import com.trainstation.model.DauMay;
 import com.trainstation.model.Ga;
+import com.trainstation.model.ToaTau;
 import com.trainstation.util.UIUtils;
 
 import javax.swing.*;
@@ -23,10 +25,11 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Panel tìm kiếm với 3 tab:
- *  - Chuyến tàu: lọc theo ga đi, ga đến, đầu máy, trạng thái, khoảng ngày (gió đi)
+ * Panel tìm kiếm với 4 tab:
+ *  - Chuyến tàu: lọc theo ga đi, ga đến, đầu máy, trạng thái, khoảng ngày (giờ đi)
  *  - Đầu máy: lọc theo mã, loại, trạng thái
  *  - Ga: lọc theo mã, tên, tình trạng
+ *  - Toa tàu: lọc theo mã, loại, trạng thái, năm SX, sức chứa
  *
  * Tất cả tìm kiếm thực hiện bằng cách lấy danh sách từ DAO rồi lọc tại tầng ứng dụng (in-memory).
  * Các truy vấn chạy trong SwingWorker để không block EDT.
@@ -35,6 +38,7 @@ public class PnlTimKiemChuyenTau extends JPanel {
     private final ChuyenTauDAO chuyenTauDAO = ChuyenTauDAO.getInstance();
     private final DauMayDAO dauMayDAO = DauMayDAO.getInstance();
     private final GaDAO gaDAO = GaDAO.getInstance();
+    private final ToaTauDAO toaTauDAO = ToaTauDAO.getInstance();
 
     // Tab components - ChuyenTau
     private final JComboBox<String> cbFilterGaDi = new JComboBox<>();
@@ -47,18 +51,27 @@ public class PnlTimKiemChuyenTau extends JPanel {
     private final JTable tblChuyen;
 
     // Tab components - DauMay
-    private final JTextField txtFilterDauMayMa = new JTextField();
-    private final JTextField txtFilterDauMayLoai = new JTextField();
+    private final JTextField txtFilterDauMayMa = new JTextField(10);
+    private final JTextField txtFilterDauMayLoai = new JTextField(10);
     private final JComboBox<String> cbFilterDauMayTrangThai = new JComboBox<>(new String[]{"", "Sẵn sàng", "Bảo trì", "Tạm dừng", "Dừng hoạt động"});
     private final DefaultTableModel modelDauMay;
     private final JTable tblDauMay;
 
     // Tab components - Ga
-    private final JTextField txtFilterGaMa = new JTextField();
-    private final JTextField txtFilterGaTen = new JTextField();
+    private final JTextField txtFilterGaMa = new JTextField(10);
+    private final JTextField txtFilterGaTen = new JTextField(10);
     private final JComboBox<String> cbFilterGaTinhTrang = new JComboBox<>(new String[]{"", "Hoạt động", "Bảo trì", "Tạm dừng"});
     private final DefaultTableModel modelGa;
     private final JTable tblGa;
+
+    // Tab components - ToaTau
+    private final JTextField txtFilterToaMa = new JTextField(10);
+    private final JTextField txtFilterToaLoai = new JTextField(10);
+    private final JTextField txtFilterToaNamSX = new JTextField(10);
+    private final JTextField txtFilterToaSucChua = new JTextField(10);
+    private final JComboBox<String> cbFilterToaTrangThai = new JComboBox<>(new String[]{"", "Hoạt động", "Bảo trì", "Ngưng sử dụng"});
+    private final DefaultTableModel modelToa;
+    private final JTable tblToa;
 
     public PnlTimKiemChuyenTau() {
         setLayout(new BorderLayout(8, 8));
@@ -200,10 +213,54 @@ public class PnlTimKiemChuyenTau extends JPanel {
         JScrollPane spGa = new JScrollPane(tblGa);
         pnlGa.add(spGa, BorderLayout.CENTER);
 
+        // --- Toa Tàu tab ---
+        JPanel pnlToa = new JPanel(new BorderLayout(8,8));
+        JPanel filterToa = new JPanel(new GridBagLayout());
+        GridBagConstraints gt = new GridBagConstraints();
+        gt.insets = new Insets(6,6,6,6);
+        gt.fill = GridBagConstraints.HORIZONTAL;
+        gt.anchor = GridBagConstraints.WEST;
+
+        // Hàng 0: Mã toa - Loại toa
+        gt.gridx = 0; gt.gridy = 0; filterToa.add(new JLabel("Mã toa:"), gt);
+        gt.gridx = 1; filterToa.add(txtFilterToaMa, gt);
+        gt.gridx = 2; filterToa.add(new JLabel("Loại toa:"), gt);
+        gt.gridx = 3; filterToa.add(txtFilterToaLoai, gt);
+
+        // Hàng 1: Năm SX - Trạng thái
+        gt.gridx = 0; gt.gridy = 1; filterToa.add(new JLabel("Năm SX:"), gt);
+        gt.gridx = 1; filterToa.add(txtFilterToaNamSX, gt);
+        gt.gridx = 2; filterToa.add(new JLabel("Trạng thái:"), gt);
+        gt.gridx = 3; filterToa.add(cbFilterToaTrangThai, gt);
+
+        // Hàng 2: Sức chứa
+        gt.gridx = 0; gt.gridy = 2; filterToa.add(new JLabel("Sức chứa ≥"), gt);
+        gt.gridx = 1; filterToa.add(txtFilterToaSucChua, gt);
+
+        JPanel btnsToa = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JButton btnSearchToa = new JButton("Tìm");
+        JButton btnResetToa = new JButton("Đặt lại");
+        MaterialInitializer.styleButton(btnSearchToa);
+        MaterialInitializer.styleButton(btnResetToa);
+        btnsToa.add(btnSearchToa);
+        btnsToa.add(btnResetToa);
+
+        pnlToa.add(filterToa, BorderLayout.NORTH);
+        pnlToa.add(btnsToa, BorderLayout.SOUTH);
+
+        modelToa = new DefaultTableModel(new String[]{"Mã toa","Loại toa","Năm SX","Trạng thái","Sức chứa"}, 0) {
+            @Override public boolean isCellEditable(int row, int col) { return false; }
+        };
+        tblToa = new JTable(modelToa);
+        tblToa.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane spToa = new JScrollPane(tblToa);
+        pnlToa.add(spToa, BorderLayout.CENTER);
+
         // add tabs
         tabs.addTab("Tìm chuyến", pnlChuyen);
         tabs.addTab("Tìm đầu máy", pnlDauMay);
         tabs.addTab("Tìm ga", pnlGa);
+        tabs.addTab("Tìm toa tàu", pnlToa);
 
         add(tabs, BorderLayout.CENTER);
 
@@ -214,8 +271,8 @@ public class PnlTimKiemChuyenTau extends JPanel {
             cbFilterGaDen.setSelectedItem("");
             cbFilterDauMay.setSelectedItem("");
             cbFilterTrangThai.setSelectedItem("");
-            spDateFrom.setValue(null);
-            spDateTo.setValue(null);
+            spDateFrom.setValue(new Date());
+            spDateTo.setValue(new Date());
             modelChuyen.setRowCount(0);
         });
 
@@ -235,10 +292,26 @@ public class PnlTimKiemChuyenTau extends JPanel {
             modelGa.setRowCount(0);
         });
 
+        btnSearchToa.addActionListener(e -> searchToa());
+        btnResetToa.addActionListener(e -> {
+            txtFilterToaMa.setText("");
+            txtFilterToaLoai.setText("");
+            txtFilterToaNamSX.setText("");
+            txtFilterToaSucChua.setText("");
+            cbFilterToaTrangThai.setSelectedItem("");
+            modelToa.setRowCount(0);
+        });
+
         // initial populate small lists
         loadAllDauMayTable(); // optional show all
         loadAllGaTable();
-        try { UIUtils.adjustTableForScale(tblChuyen, 1.1f); UIUtils.adjustTableForScale(tblDauMay, 1.1f); UIUtils.adjustTableForScale(tblGa, 1.1f); } catch (Throwable ignored) {}
+        loadAllToaTable();
+        try {
+            UIUtils.adjustTableForScale(tblChuyen, 1.1f);
+            UIUtils.adjustTableForScale(tblDauMay, 1.1f);
+            UIUtils.adjustTableForScale(tblGa, 1.1f);
+            UIUtils.adjustTableForScale(tblToa, 1.1f);
+        } catch (Throwable ignored) {}
     }
 
     private void refreshGaFilters() {
@@ -296,10 +369,10 @@ public class PnlTimKiemChuyenTau extends JPanel {
                 LocalDate to = toLocalDateOrNull(toDate);
                 for (ChuyenTau c : list) {
                     if (c == null) continue;
-                    if (gaDi != null && !gaDi.isEmpty() && !gaDi.equalsIgnoreCase(nullSafe(c.getMaGaDi()))) continue;
-                    if (gaDen != null && !gaDen.isEmpty() && !gaDen.equalsIgnoreCase(nullSafe(c.getMaGaDen()))) continue;
-                    if (dauMay != null && !dauMay.isEmpty() && !dauMay.equalsIgnoreCase(nullSafe(c.getMaDauMay()))) continue;
-                    if (trangThai != null && !trangThai.isEmpty()) {
+                    if (!gaDi.isEmpty() && !gaDi.equalsIgnoreCase(nullSafe(c.getMaGaDi()))) continue;
+                    if (!gaDen.isEmpty() && !gaDen.equalsIgnoreCase(nullSafe(c.getMaGaDen()))) continue;
+                    if (!dauMay.isEmpty() && !dauMay.equalsIgnoreCase(nullSafe(c.getMaDauMay()))) continue;
+                    if (!trangThai.isEmpty()) {
                         String t = nullSafe(c.getTrangThai());
                         if (t == null || !t.toLowerCase().contains(trangThai.toLowerCase())) continue;
                     }
@@ -319,9 +392,10 @@ public class PnlTimKiemChuyenTau extends JPanel {
             protected void done() {
                 try {
                     List<ChuyenTau> res = get();
+                    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
                     for (ChuyenTau c : res) {
-                        String gd = c.getGioDi() != null ? c.getGioDi().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
-                        String den = c.getGioDen() != null ? c.getGioDen().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
+                        String gd = c.getGioDi() != null ? c.getGioDi().format(fmt) : "";
+                        String den = c.getGioDen() != null ? c.getGioDen().format(fmt) : "";
                         modelChuyen.addRow(new Object[]{ c.getMaChuyen(), c.getMaDauMay(), c.getMaGaDi(), c.getMaGaDen(), gd, den, c.getTrangThai() });
                     }
                 } catch (InterruptedException | ExecutionException ex) {
@@ -348,9 +422,9 @@ public class PnlTimKiemChuyenTau extends JPanel {
                 List<DauMay> out = new ArrayList<>();
                 for (DauMay d : all) {
                     if (d == null) continue;
-                    if (!ma.isEmpty() && !d.getMaDauMay().toLowerCase().contains(ma.toLowerCase())) continue;
+                    if (!ma.isEmpty() && (d.getMaDauMay() == null || !d.getMaDauMay().toLowerCase().contains(ma.toLowerCase()))) continue;
                     if (!loai.isEmpty() && (d.getLoaiDauMay() == null || !d.getLoaiDauMay().toLowerCase().contains(loai.toLowerCase()))) continue;
-                    if (trangThai != null && !trangThai.isEmpty() && (d.getTrangThai() == null || !d.getTrangThai().equalsIgnoreCase(trangThai))) continue;
+                    if (!trangThai.isEmpty() && (d.getTrangThai() == null || !d.getTrangThai().equalsIgnoreCase(trangThai))) continue;
                     out.add(d);
                 }
                 return out;
@@ -390,7 +464,7 @@ public class PnlTimKiemChuyenTau extends JPanel {
                     if (g == null) continue;
                     if (!ma.isEmpty() && (g.getMaGa() == null || !g.getMaGa().toLowerCase().contains(ma.toLowerCase()))) continue;
                     if (!ten.isEmpty() && (g.getTenGa() == null || !g.getTenGa().toLowerCase().contains(ten.toLowerCase()))) continue;
-                    if (tinhTrang != null && !tinhTrang.isEmpty() && (g.getTinhTrang() == null || !g.getTinhTrang().equalsIgnoreCase(tinhTrang))) continue;
+                    if (!tinhTrang.isEmpty() && (g.getTinhTrang() == null || !g.getTinhTrang().equalsIgnoreCase(tinhTrang))) continue;
                     out.add(g);
                 }
                 return out;
@@ -406,6 +480,69 @@ public class PnlTimKiemChuyenTau extends JPanel {
                 } catch (InterruptedException | ExecutionException ex) {
                     ex.printStackTrace();
                     JOptionPane.showMessageDialog(PnlTimKiemChuyenTau.this, "Lỗi khi tìm ga: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        w.execute();
+    }
+
+    private void searchToa() {
+        final String ma = txtFilterToaMa.getText().trim();
+        final String loai = txtFilterToaLoai.getText().trim();
+        final String namSXStr = txtFilterToaNamSX.getText().trim();
+        final String trangThai = nonEmpty(cbFilterToaTrangThai.getSelectedItem());
+        final String sucChuaStr = txtFilterToaSucChua.getText().trim();
+
+        modelToa.setRowCount(0);
+
+        SwingWorker<List<ToaTau>, Void> w = new SwingWorker<>() {
+            @Override
+            protected List<ToaTau> doInBackground() {
+                List<ToaTau> all = toaTauDAO.getAll();
+                if (all == null) return Collections.emptyList();
+                List<ToaTau> out = new ArrayList<>();
+
+                Integer namSXFilter = null;
+                Integer sucChuaFilter = null;
+                try {
+                    if (!namSXStr.isEmpty()) namSXFilter = Integer.parseInt(namSXStr);
+                } catch (NumberFormatException ignored) {}
+                try {
+                    if (!sucChuaStr.isEmpty()) sucChuaFilter = Integer.parseInt(sucChuaStr);
+                } catch (NumberFormatException ignored) {}
+
+                for (ToaTau t : all) {
+                    if (t == null) continue;
+                    if (!ma.isEmpty() && (t.getMaToa() == null || !t.getMaToa().toLowerCase().contains(ma.toLowerCase()))) continue;
+                    if (!loai.isEmpty() && (t.getLoaiToa() == null || !t.getLoaiToa().toLowerCase().contains(loai.toLowerCase()))) continue;
+                    if (!trangThai.isEmpty() && (t.getTrangThai() == null || !t.getTrangThai().equalsIgnoreCase(trangThai))) continue;
+                    if (namSXFilter != null) {
+                        if (t.getSamSX() == null || !t.getSamSX().equals(namSXFilter)) continue;
+                    }
+                    if (sucChuaFilter != null) {
+                        if (t.getSucChua() == null || t.getSucChua() < sucChuaFilter) continue;
+                    }
+                    out.add(t);
+                }
+                return out;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<ToaTau> res = get();
+                    for (ToaTau t : res) {
+                        modelToa.addRow(new Object[]{
+                                t.getMaToa(),
+                                t.getLoaiToa(),
+                                t.getSamSX(),
+                                t.getTrangThai(),
+                                t.getSucChua()
+                        });
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(PnlTimKiemChuyenTau.this, "Lỗi khi tìm toa tàu: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             }
         };
@@ -442,6 +579,15 @@ public class PnlTimKiemChuyenTau extends JPanel {
         if (list == null) return;
         for (Ga g : list) {
             modelGa.addRow(new Object[]{ g.getMaGa(), g.getTenGa(), g.getMoTa(), g.getTinhTrang(), g.getDiaChi() });
+        }
+    }
+
+    private void loadAllToaTable() {
+        modelToa.setRowCount(0);
+        List<ToaTau> list = toaTauDAO.getAll();
+        if (list == null) return;
+        for (ToaTau t : list) {
+            modelToa.addRow(new Object[]{ t.getMaToa(), t.getLoaiToa(), t.getSamSX(), t.getTrangThai(), t.getSucChua() });
         }
     }
 }

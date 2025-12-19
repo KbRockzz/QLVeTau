@@ -408,6 +408,8 @@ public class PnlChuyenTau extends JPanel {
                         JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã có lỗi khi thêm toa. Xem log.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
+                    ctctDAO.reindexSoThuTuToa(maChuyen);
+
                     JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã thêm toa.", "Kết quả", JOptionPane.INFORMATION_MESSAGE);
                     loadCompositionForChuyen(maChuyen);
                     lastAvailableToa = getAvailableToaForChuyen(maChuyen);
@@ -685,23 +687,7 @@ public class PnlChuyenTau extends JPanel {
             protected Boolean doInBackground() {
                 boolean ok = ctctDAO.delete(maChuyen, maToa);
                 if (!ok) return false;
-
-                // Lấy lại danh sách còn lại
-                List<ChiTietChuyenTau> remaining = ctctDAO.findByChuyenTau(maChuyen);
-                if (remaining == null) return true;
-
-                // Sắp xếp theo soThuTuToa cũ (nếu null thì coi là 0)
-                remaining.sort(Comparator.comparingInt(t -> {
-                    Integer stt = t.getSoThuTuToa();
-                    return stt != null ? stt : 0;
-                }));
-
-                // Đánh lại từ 1..N
-                int idx = 1;
-                for (ChiTietChuyenTau t : remaining) {
-                    t.setSoThuTuToa(idx++);
-                    ctctDAO.update(t);
-                }
+                ctctDAO.reindexSoThuTuToa(maChuyen);
                 return true;
             }
 
@@ -984,6 +970,7 @@ public class PnlChuyenTau extends JPanel {
         btnCompDown.setEnabled(enabled);
         btnCompSaveOrder.setEnabled(enabled);
     }
+
 
     private void clearForm() {
         txtMaChuyen.setText("");
