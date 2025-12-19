@@ -160,16 +160,18 @@ public class ThongKeDAO {
 
         String sql = "SELECT " +
                 "ct.maChuyen, " +
-                "ct.maChuyen as tenChuyen, " +
+                "CONCAT(gdi.tenGa, ' - ', gden.tenGa) as tenChuyen, " +
                 "ct.gioDi, " +
                 "COALESCE(SUM(ctct.sucChua), 0) as tongSoGhe, " +
                 "COALESCE(COUNT(CASE WHEN v.trangThai IN (N'Đã thanh toán', N'Đã đổi') THEN 1 END), 0) as soGheBan " +
                 "FROM ChuyenTau ct " +
+                "LEFT JOIN Ga gdi ON ct.maGaDi = gdi.maGa " +
+                "LEFT JOIN Ga gden ON ct.maGaDen = gden.maGa " +
                 "LEFT JOIN ChiTietChuyenTau ctct ON ct.maChuyen = ctct.maChuyenTau " +
                 "LEFT JOIN Ve v ON ct.maChuyen = v.maChuyen " +
                 "    AND CAST(v.ngayIn AS DATE) BETWEEN ? AND ? " +
                 "WHERE CAST(ct.gioDi AS DATE) BETWEEN ? AND ? " +
-                "GROUP BY ct.maChuyen, ct.gioDi " +
+                "GROUP BY ct.maChuyen, ct.gioDi, gdi.tenGa, gden.tenGa " +
                 "ORDER BY ct.gioDi DESC";
 
         try (Connection conn = ConnectSql.getInstance().getConnection();
