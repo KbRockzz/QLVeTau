@@ -158,30 +158,43 @@ public class ThongKeDAO {
     public List<Map<String, Object>> thongKeDoPhuGhe(LocalDate tuNgay, LocalDate denNgay) {
         List<Map<String, Object>> result = new ArrayList<>();
 
-        int tongSoGhe = getTongSoGhe();
-
-        String sql = "SELECT CAST(v.ngayIn AS DATE) as ngay, COUNT(v.maVe) as soVeBan " +
-                "FROM Ve v " +
-                "WHERE CAST(v.ngayIn AS DATE) BETWEEN ? AND ? " +
-                "AND v.trangThai = N'Đã thanh toán' " +
-                "GROUP BY CAST(v.ngayIn AS DATE) " +
-                "ORDER BY CAST(v.ngayIn AS DATE)";
+        String sql = "SELECT " +
+                "ct.maChuyen, " +
+                "ct.maChuyen as tenChuyen, " +
+                "ct.gioDi, " +
+                "COALESCE(SUM(ctct.sucChua), 0) as tongSoGhe, " +
+                "COALESCE(COUNT(CASE WHEN v.trangThai IN (N'Đã thanh toán', N'Đã đổi') THEN 1 END), 0) as soGheBan " +
+                "FROM ChuyenTau ct " +
+                "LEFT JOIN ChiTietChuyenTau ctct ON ct.maChuyen = ctct.maChuyenTau " +
+                "LEFT JOIN Ve v ON ct.maChuyen = v.maChuyen " +
+                "    AND CAST(v.ngayIn AS DATE) BETWEEN ? AND ? " +
+                "WHERE CAST(ct.gioDi AS DATE) BETWEEN ? AND ? " +
+                "GROUP BY ct.maChuyen, ct.gioDi " +
+                "ORDER BY ct.gioDi DESC";
 
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setDate(1, Date.valueOf(tuNgay));
             pst.setDate(2, Date.valueOf(denNgay));
+            pst.setDate(3, Date.valueOf(tuNgay));
+            pst.setDate(4, Date.valueOf(denNgay));
 
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> row = new HashMap<>();
-                    Date ngay = rs.getDate("ngay");
-                    int soVeBan = rs.getInt("soVeBan");
-                    double tyLePhu = tongSoGhe > 0 ? (soVeBan * 100.0 / tongSoGhe) : 0;
+                    String maChuyen = rs.getString("maChuyen");
+                    String tenChuyen = rs.getString("tenChuyen");
+                    Timestamp gioDi = rs.getTimestamp("gioDi");
+                    int tongSoGhe = rs.getInt("tongSoGhe");
+                    int soGheBan = rs.getInt("soGheBan");
+                    int soGheTrong = tongSoGhe - soGheBan;
+                    double tyLePhu = tongSoGhe > 0 ? (soGheBan * 100.0 / tongSoGhe) : 0;
 
-                    row.put("ngay", ngay.toString());
-                    row.put("soVeBan", soVeBan);
-                    row.put("tongSoGhe", tongSoGhe);
+                    row.put("maChuyen", maChuyen);
+                    row.put("tenChuyen", tenChuyen);
+                    row.put("gioDi", gioDi);
+                    row.put("soGheTrong", soGheTrong);
+                    row.put("soGheBan", soGheBan);
                     row.put("tyLePhu", tyLePhu);
                     result.add(row);
                 }

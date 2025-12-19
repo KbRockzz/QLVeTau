@@ -240,7 +240,7 @@ public class PnlThongKe extends JPanel {
 
         panel.add(pnlFilter, BorderLayout.NORTH);
 
-        String[] columns = {"Ngày", "Tổng số vé bán", "Tổng số ghế có sẵn", "Tỷ lệ phủ (%)"};
+        String[] columns = {"Mã chuyến", "Tên chuyến", "Thời gian khởi hành", "Số ghế trống", "Số ghế bán", "Độ phủ (%)"};
         modelDoPhuGhe = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -249,6 +249,12 @@ public class PnlThongKe extends JPanel {
         };
         tblDoPhuGhe = new JTable(modelDoPhuGhe);
         tblDoPhuGhe.setRowHeight(25);
+        tblDoPhuGhe.getColumnModel().getColumn(0).setPreferredWidth(120);
+        tblDoPhuGhe.getColumnModel().getColumn(1).setPreferredWidth(120);
+        tblDoPhuGhe.getColumnModel().getColumn(2).setPreferredWidth(180);
+        tblDoPhuGhe.getColumnModel().getColumn(3).setPreferredWidth(120);
+        tblDoPhuGhe.getColumnModel().getColumn(4).setPreferredWidth(120);
+        tblDoPhuGhe.getColumnModel().getColumn(5).setPreferredWidth(100);
 
         JScrollPane scrollPane = new JScrollPane(tblDoPhuGhe);
         // Giảm chiều cao bảng để có đủ không gian
@@ -444,6 +450,14 @@ public class PnlThongKe extends JPanel {
         try {
             modelDoPhuGhe.setRowCount(0);
 
+            if (dateDoPhuGheTu.getDate() == null || dateDoPhuGheDen.getDate() == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Vui lòng chọn khoảng thời gian",
+                        "Thông báo",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             LocalDate tuNgay = dateDoPhuGheTu.getDate().toInstant()
                     .atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate denNgay = dateDoPhuGheDen.getDate().toInstant()
@@ -453,22 +467,31 @@ public class PnlThongKe extends JPanel {
 
             double tongTyLe = 0;
             int count = 0;
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
             for (Map<String, Object> row : data) {
+                String maChuyen = (String) row.get("maChuyen");
+                String tenChuyen = (String) row.get("tenChuyen");
+                java.sql.Timestamp gioDi = (java.sql.Timestamp) row.get("gioDi");
+                String thoiGianKhoiHanh = gioDi.toLocalDateTime().format(dateFormatter);
+                int soGheTrong = (Integer) row.get("soGheTrong");
+                int soGheBan = (Integer) row.get("soGheBan");
                 double tyLePhu = (Double) row.get("tyLePhu");
                 tongTyLe += tyLePhu;
                 count++;
 
                 modelDoPhuGhe.addRow(new Object[]{
-                        row.get("ngay"),
-                        row.get("soVeBan"),
-                        row.get("tongSoGhe"),
+                        maChuyen,
+                        tenChuyen,
+                        thoiGianKhoiHanh,
+                        soGheTrong,
+                        soGheBan,
                         percentFormat.format(tyLePhu) + "%"
                 });
             }
 
             double tyLeTrungBinh = count > 0 ? tongTyLe / count : 0;
-            lblTongDoPhuGhe.setText("Tỷ lệ trung bình: " + percentFormat.format(tyLeTrungBinh) + "%");
+            lblTongDoPhuGhe.setText("Độ phủ trung bình: " + percentFormat.format(tyLeTrungBinh) + "%");
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
