@@ -473,12 +473,13 @@ public class DlgDoiVe extends JDialog {
 
             @Override
             protected Void doInBackground() {
+                System.out.println("DEBUG DlgDoiVe: doInBackground start");
                 try {
-                    // gọi service thực hiện đổi vé: giữ nguyên maBangGia, cùng toa
                     veService.thucHienDoiVe(veGoc.getMaVe(), gheChon, lyDo);
                 } catch (Exception ex) {
                     error = ex;
                 }
+                System.out.println("DEBUG DlgDoiVe: doInBackground end");
                 return null;
             }
 

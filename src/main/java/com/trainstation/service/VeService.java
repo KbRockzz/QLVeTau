@@ -30,9 +30,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -516,14 +514,53 @@ public class VeService {
         }
     }
 
+
     public Ve thucHienDoiVe(String maVeCu, String maGheMoi, String lyDo) {
         Connection conn = null;
         try {
             conn = ConnectSql.getInstance().getConnection();
             conn.setAutoCommit(false);
 
-            // 1. Validate vé cũ
-            Ve veCu = veDAO.findById(maVeCu);
+            // 1. Lấy vé cũ trên cùng connection (không dùng veDAO.findById vì nó tự mở connection khác)
+            Ve veCu = null;
+            String sqlSelectVeCu = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, " +
+                    "ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan " +
+                    "FROM Ve WHERE maVe = ? AND isActive = 1";
+            try (PreparedStatement pst = conn.prepareStatement(sqlSelectVeCu)) {
+                pst.setString(1, maVeCu);
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (rs.next()) {
+                        LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
+                        Timestamp ts1 = rs.getTimestamp("ngayIn");
+                        if (ts1 != null) ngayIn = ts1.toLocalDateTime();
+                        Timestamp ts2 = rs.getTimestamp("gioDi");
+                        if (ts2 != null) gioDi = ts2.toLocalDateTime();
+                        Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
+                        if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
+
+                        veCu = new Ve(
+                                rs.getString("maVe"),
+                                rs.getString("maChuyen"),
+                                rs.getString("maLoaiVe"),
+                                rs.getString("maSoGhe"),
+                                rs.getString("maGaDi"),
+                                rs.getString("maGaDen"),
+                                rs.getString("tenGaDi"),
+                                rs.getString("tenGaDen"),
+                                ngayIn,
+                                rs.getString("trangThai"),
+                                gioDi,
+                                gioDenDuKien,
+                                rs.getObject("soToa", Integer.class),
+                                rs.getString("loaiCho"),
+                                rs.getString("loaiVe"),
+                                rs.getString("maBangGia"),
+                                rs.getObject("giaThanhToan", Float.class)
+                        );
+                    }
+                }
+            }
+
             if (veCu == null) {
                 throw new IllegalArgumentException("Không tìm thấy vé cũ");
             }
@@ -543,91 +580,148 @@ public class VeService {
                 }
             }
 
-            // 4. Lấy thông tin ghế cũ và ghế mới
             if (veCu.getMaSoGhe() == null) {
                 throw new IllegalStateException("Vé không có ghế được chỉ định");
             }
 
-            Ghe gheCu = gheDAO.findById(veCu.getMaSoGhe());
+            // 4. Lấy thông tin ghế cũ và ghế mới trên cùng connection
+            Ghe gheCu = null;
+            Ghe gheMoi = null;
+
+            String sqlSelectGhe = "SELECT maGhe, maToa, trangThai FROM Ghe WHERE maGhe = ?";
+
+            try (PreparedStatement pst = conn.prepareStatement(sqlSelectGhe)) {
+                pst.setString(1, veCu.getMaSoGhe());
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (rs.next()) {
+                        gheCu = new Ghe();
+                        gheCu.setMaGhe(rs.getString("maGhe"));
+                        gheCu.setMaToa(rs.getString("maToa"));
+                        gheCu.setTrangThai(rs.getString("trangThai"));
+                    }
+                }
+            }
             if (gheCu == null) {
                 throw new IllegalArgumentException("Không tìm thấy ghế cũ");
             }
 
-            Ghe gheMoi = gheDAO.findById(maGheMoi);
+            try (PreparedStatement pst = conn.prepareStatement(sqlSelectGhe)) {
+                pst.setString(1, maGheMoi);
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (rs.next()) {
+                        gheMoi = new Ghe();
+                        gheMoi.setMaGhe(rs.getString("maGhe"));
+                        gheMoi.setMaToa(rs.getString("maToa"));
+                        gheMoi.setTrangThai(rs.getString("trangThai"));
+                    }
+                }
+            }
             if (gheMoi == null) {
                 throw new IllegalArgumentException("Không tìm thấy ghế mới");
             }
 
-            // 5. VALIDATE QUAN TRỌNG: Ghế mới phải cùng toa với ghế cũ
+            // 5. Ghế mới phải cùng toa với ghế cũ
             if (!gheCu.getMaToa().equals(gheMoi.getMaToa())) {
                 throw new IllegalStateException("Chỉ được đổi ghế trong cùng một toa. Không thể đổi sang toa khác");
             }
 
-            // 6. Validate ghế mới phải trống (check both "Rảnh" and "Trống" for compatibility)
+            // 6. Ghế mới phải trống (Rảnh/Trống)
             String trangThaiGheMoi = gheMoi.getTrangThai();
             if (!"Rảnh".equalsIgnoreCase(trangThaiGheMoi) && !"Trống".equalsIgnoreCase(trangThaiGheMoi)) {
                 throw new IllegalStateException("Ghế đã bị đặt");
             }
 
             // 7. Cập nhật trạng thái ghế cũ -> Rảnh
-            gheCu.setTrangThai("Rảnh");
-            try (PreparedStatement pst = conn.prepareStatement("UPDATE Ghe SET trangThai = ? WHERE maGhe = ?")) {
+            String sqlUpdateGhe = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
+            try (PreparedStatement pst = conn.prepareStatement(sqlUpdateGhe)) {
                 pst.setString(1, "Rảnh");
                 pst.setString(2, gheCu.getMaGhe());
                 pst.executeUpdate();
             }
 
             // 8. Cập nhật trạng thái ghế mới -> Đã đặt
-            gheMoi.setTrangThai("Đã đặt");
-            try (PreparedStatement pst = conn.prepareStatement("UPDATE Ghe SET trangThai = ? WHERE maGhe = ?")) {
+            try (PreparedStatement pst = conn.prepareStatement(sqlUpdateGhe)) {
                 pst.setString(1, "Đã đặt");
                 pst.setString(2, gheMoi.getMaGhe());
                 pst.executeUpdate();
             }
 
-            // 9. Tạo mã vé mới sử dụng UUID để tránh xung đột
+            // 9. Tạo mã vé mới
             String maVeMoi = "VE_" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
 
-            // 10. Tạo vé mới (copy từ vé cũ, chỉ thay maSoGhe)
+            // 10. Tạo đối tượng Ve mới (trong bộ nhớ)
             Ve veMoi = new Ve(
                     maVeMoi,
-                    veCu.getMaChuyen(),      // KHÔNG ĐỔI
-                    veCu.getMaLoaiVe(),      // KHÔNG ĐỔI
-                    maGheMoi,                // ĐỔI ghế mới
-                    veCu.getMaGaDi(),        // KHÔNG ĐỔI
-                    veCu.getMaGaDen(),       // KHÔNG ĐỔI
-                    veCu.getTenGaDi(),       // KHÔNG ĐỔI
-                    veCu.getTenGaDen(),      // KHÔNG ĐỔI
-                    LocalDateTime.now(),     // ngayIn mới
-                    veCu.getTrangThai(),     // giữ nguyên trạng thái (Đã đặt hoặc Đã thanh toán)
-                    veCu.getGioDi(),         // KHÔNG ĐỔI
-                    veCu.getGioDenDuKien(),  // KHÔNG ĐỔI
-                    veCu.getSoToa(),         // KHÔNG ĐỔI (cùng toa)
-                    veCu.getLoaiCho(),       // KHÔNG ĐỔI
-                    veCu.getLoaiVe(),        // KHÔNG ĐỔI
-                    veCu.getMaBangGia(),                    // KHONG DOI
-                    veCu.getGiaThanhToan()   // KHÔNG ĐỔI
+                    veCu.getMaChuyen(),
+                    veCu.getMaLoaiVe(),
+                    maGheMoi,
+                    veCu.getMaGaDi(),
+                    veCu.getMaGaDen(),
+                    veCu.getTenGaDi(),
+                    veCu.getTenGaDen(),
+                    LocalDateTime.now(),
+                    veCu.getTrangThai(),
+                    veCu.getGioDi(),
+                    veCu.getGioDenDuKien(),
+                    veCu.getSoToa(),
+                    veCu.getLoaiCho(),
+                    veCu.getLoaiVe(),
+                    veCu.getMaBangGia(),
+                    veCu.getGiaThanhToan()
             );
 
-            // 11. Insert vé mới
-            if (!veDAO.insert(veMoi)) {
-                throw new SQLException("Không thể tạo vé mới");
+            // 11. Insert vé mới bằng conn hiện tại (không dùng veDAO.insert để tránh mở connection mới)
+            String sqlInsertVe = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, " +
+                    "ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement pst = conn.prepareStatement(sqlInsertVe)) {
+                pst.setString(1, veMoi.getMaVe());
+                pst.setString(2, veMoi.getMaChuyen());
+                pst.setString(3, veMoi.getMaLoaiVe());
+                pst.setString(4, veMoi.getMaSoGhe());
+                pst.setString(5, veMoi.getMaGaDi());
+                pst.setString(6, veMoi.getMaGaDen());
+                pst.setString(7, veMoi.getTenGaDi());
+                pst.setString(8, veMoi.getTenGaDen());
+                pst.setTimestamp(9, Timestamp.valueOf(veMoi.getNgayIn()));
+                pst.setString(10, veMoi.getTrangThai());
+                if (veMoi.getGioDi() != null) pst.setTimestamp(11, Timestamp.valueOf(veMoi.getGioDi()));
+                else pst.setNull(11, Types.TIMESTAMP);
+                if (veMoi.getGioDenDuKien() != null) pst.setTimestamp(12, Timestamp.valueOf(veMoi.getGioDenDuKien()));
+                else pst.setNull(12, Types.TIMESTAMP);
+                if (veMoi.getSoToa() != null) pst.setInt(13, veMoi.getSoToa());
+                else pst.setNull(13, Types.INTEGER);
+                pst.setString(14, veMoi.getLoaiCho());
+                pst.setString(15, veMoi.getLoaiVe());
+                if (veMoi.getMaBangGia() != null && !veMoi.getMaBangGia().trim().isEmpty())
+                    pst.setString(16, veMoi.getMaBangGia());
+                else
+                    pst.setNull(16, Types.VARCHAR);
+                if (veMoi.getGiaThanhToan() != null)
+                    pst.setFloat(17, veMoi.getGiaThanhToan());
+                else
+                    pst.setNull(17, Types.FLOAT);
+                pst.setBoolean(18, true);
+
+                System.out.println("DEBUG VeService.thucHienDoiVe: inserting maVeMoi=" + veMoi.getMaVe() +
+                        " maBangGia=" + veMoi.getMaBangGia());
+                pst.executeUpdate();
             }
 
-            // 12. Cập nhật vé cũ -> trangThai = "Đã đổi"
-            veCu.setTrangThai("Đã đổi");
-            if (!veDAO.update(veCu)) {
-                throw new SQLException("Không thể cập nhật vé cũ");
+            // 12. Cập nhật vé cũ -> Đã đổi (cũng trên conn)
+            String sqlUpdateVeCu = "UPDATE Ve SET trangThai = ? WHERE maVe = ?";
+            try (PreparedStatement pst = conn.prepareStatement(sqlUpdateVeCu)) {
+                pst.setString(1, "Đã đổi");
+                pst.setString(2, veCu.getMaVe());
+                pst.executeUpdate();
             }
 
-            // 13. Ghi audit trail vào ChiTietHoaDon
-            // Tìm hóa đơn chứa vé cũ
+            // 13. Cập nhật ChiTietHoaDon trên cùng connection (dùng overload có conn nếu có)
             ChiTietHoaDon chiTietCu = chiTietHoaDonDAO.findById(maVeCu);
             if (chiTietCu != null) {
                 String moTaCu = "Đã đổi sang " + maVeMoi;
                 chiTietHoaDonDAO.updateMoTa(chiTietCu.getMaHoaDon(), maVeCu, moTaCu, conn);
 
-                // Tạo chi tiết hóa đơn cho vé mới
                 ChiTietHoaDon chiTietMoi = new ChiTietHoaDon();
                 chiTietMoi.setMaHoaDon(chiTietCu.getMaHoaDon());
                 chiTietMoi.setMaVe(maVeMoi);
@@ -649,20 +743,12 @@ public class VeService {
 
         } catch (SQLException e) {
             if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             }
             throw new RuntimeException("Lỗi khi đổi vé: " + e.getMessage(), e);
         } catch (Exception e) {
             if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             }
             throw e;
         } finally {
