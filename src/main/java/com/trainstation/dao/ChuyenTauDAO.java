@@ -42,7 +42,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
     @Override
     public List<ChuyenTau> getAll() {
         List<ChuyenTau> list = new ArrayList<>();
-        String sql = "SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau";
+        String sql = "SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -110,7 +110,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     @Override
     public boolean insert(ChuyenTau ct) {
-        String sql = "INSERT INTO ChuyenTau (maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ChuyenTau (maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, ct.getMaChuyen());
@@ -194,8 +194,9 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
      */
     public List<ChuyenTau> timKiemChuyenTau(String maGaDi, String maGaDen, LocalDate ngayDi, LocalTime gioDi) {
         List<ChuyenTau> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau");
+        StringBuilder sql = new StringBuilder("SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE 1=1");
 
+        // Điều kiện tìm kiếm được thêm tùy thuộc vào dữ liệu đầu vào
         if (maGaDi != null && !maGaDi.trim().isEmpty()) {
             sql.append(" AND maGaDi = ?");
         }
@@ -213,6 +214,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
              PreparedStatement pst = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
 
+            // Truyền giá trị vào câu lệnh SQL
             if (maGaDi != null && !maGaDi.trim().isEmpty()) {
                 pst.setString(paramIndex++, maGaDi);
             }
@@ -223,6 +225,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
                 pst.setDate(paramIndex++, Date.valueOf(ngayDi));
             }
             if (gioDi != null) {
+                // Tạo giá trị datetime nếu chỉ có giờ đi hoặc phải dựa vào ngày hiện tại
                 LocalDateTime searchDateTime = LocalDateTime.of(ngayDi != null ? ngayDi : LocalDate.now(), gioDi);
                 pst.setTimestamp(paramIndex++, Timestamp.valueOf(searchDateTime));
             }

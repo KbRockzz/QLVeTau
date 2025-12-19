@@ -71,7 +71,7 @@ public class ChiTietChuyenTauDAO {
     }
 
     public boolean add(ChiTietChuyenTau entity) {
-        String sql = "INSERT INTO ChiTietChuyenTau (maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ChiTietChuyenTau (maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entity.getMaChuyenTau());
@@ -95,26 +95,38 @@ public class ChiTietChuyenTauDAO {
 
     public boolean update(ChiTietChuyenTau entity) {
         String sql = "UPDATE ChiTietChuyenTau SET soThuTuToa = ?, sucChua = ? WHERE maChuyenTau = ? AND maToaTau = ?";
+
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
+
+            // 1. soThuTuToa
             if (entity.getSoThuTuToa() != null) {
                 pst.setInt(1, entity.getSoThuTuToa());
             } else {
                 pst.setNull(1, Types.INTEGER);
             }
+
+            // 2. sucChua
             if (entity.getSucChua() != null) {
                 pst.setInt(2, entity.getSucChua());
             } else {
                 pst.setNull(2, Types.INTEGER);
             }
-            pst.setString(4, entity.getMaChuyenTau());
-            pst.setString(5, entity.getMaToaTau());
+
+            // 3. maChuyenTau
+            pst.setString(3, entity.getMaChuyenTau());
+
+            // 4. maToaTau
+            pst.setString(4, entity.getMaToaTau());
+
             return pst.executeUpdate() > 0;
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
+
 
     public boolean delete(String maChuyenTau, String maToaTau) {
         String sql = "DELETE FROM ChiTietChuyenTau WHERE maChuyenTau = ? AND maToaTau = ?";

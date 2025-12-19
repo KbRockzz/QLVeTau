@@ -31,7 +31,7 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
     @Override
     public List<BangGia> getAll() {
         List<BangGia> list = new ArrayList<>();
-        String sql = "SELECT maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc FROM BangGia";
+        String sql = "SELECT maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc FROM BangGia WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {

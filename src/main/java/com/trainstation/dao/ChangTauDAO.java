@@ -23,7 +23,7 @@ public class ChangTauDAO implements GenericDAO<ChangTau> {
     @Override
     public List<ChangTau> getAll() {
         List<ChangTau> list = new ArrayList<>();
-        String sql = "SELECT maChang, soKMToiThieu, soKMToiDa, moTa, giaTien FROM ChangTau";
+        String sql = "SELECT maChang, soKMToiThieu, soKMToiDa, moTa, giaTien FROM ChangTau WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
