@@ -165,17 +165,19 @@ public class ThongKeDAO {
                 "COALESCE((SELECT SUM(sucChua) FROM ChiTietChuyenTau WHERE maChuyenTau = ct.maChuyen), 0) as tongSoGhe, " +
                 "COALESCE((SELECT COUNT(*) FROM Ve WHERE maChuyen = ct.maChuyen " +
                 "   AND trangThai IN (N'Đã thanh toán', N'Đã đổi') " +
-                "   AND CAST(ngayIn AS DATE) BETWEEN ? AND ?), 0) as soGheBan " +
+                "   AND CAST(ngayIn AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)), 0) as soGheBan " +
                 "FROM ChuyenTau ct " +
                 "LEFT JOIN Ga gdi ON ct.maGaDi = gdi.maGa " +
                 "LEFT JOIN Ga gden ON ct.maGaDen = gden.maGa " +
-                "WHERE CAST(ct.gioDi AS DATE) BETWEEN ? AND ? " +
+                "WHERE CAST(ct.gioDi AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE) " +
                 "ORDER BY ct.gioDi DESC";
 
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
+            // Parameters for soGheBan subquery (Ve.ngayIn date range)
             pst.setDate(1, Date.valueOf(tuNgay));
             pst.setDate(2, Date.valueOf(denNgay));
+            // Parameters for main query WHERE clause (ChuyenTau.gioDi date range)
             pst.setDate(3, Date.valueOf(tuNgay));
             pst.setDate(4, Date.valueOf(denNgay));
 
