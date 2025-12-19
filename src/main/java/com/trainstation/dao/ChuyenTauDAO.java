@@ -2,6 +2,7 @@ package com.trainstation.dao;
 
 import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.model.ChuyenTau;
+import com.trainstation.model.Ve;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -27,10 +28,12 @@ import java.util.Set;
  */
 public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
     private static ChuyenTauDAO instance;
+    private static VeDAO veDAO = VeDAO.getInstance();
 
     private ChuyenTauDAO() {
         // Không giữ Connection làm trường
     }
+
 
     public static synchronized ChuyenTauDAO getInstance() {
         if (instance == null) {
@@ -144,7 +147,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
             }
             pst.setString(8, ct.getMaChang());
             pst.setString(9, ct.getTrangThai());
-            pst.setString(11, ct.getMaChuyen());
+            pst.setString(10, ct.getMaChuyen());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -260,17 +263,16 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
     }
 
     /**
-     * Đếm số vé cho chuyến trên một ngày cụ thể.
-     * Giả định bảng Ve có cột maChuyen và gioDi (timestamp).
+     * Đếm số vé của một chuyến (không phân biệt ngày).
+     * Giả định bảng Ve có cột maChuyen.
      */
-    public int countTicketsForChuyenOnDate(String maChuyen, LocalDate date) {
-        List<ChuyenTau> list = new ArrayList<>();
-        list = getAll();
-        return (int) list.stream()
-                .filter(ct -> ct.getMaChuyen().equals(maChuyen)
-                        && ct.getGioDi() != null
-                        && ct.getGioDi().toLocalDate().equals(date))
-                .count();
+    public int countTicketsForChuyenOnDate(String maChuyen) {
+        List<Ve> list = veDAO.getAll();
+        return list.stream()
+                .filter(v -> v.getMaChuyen().equals(maChuyen))
+                .mapToInt(v -> 1)
+                .sum();
+
     }
 
     /**

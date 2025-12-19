@@ -830,11 +830,11 @@ public class PnlChuyenTau extends JPanel {
                         LocalDateTime runTime = c.getGioDi();
                         if (runTime != null) include = runTime.toLocalDate().equals(date);
                         else {
-                            int cnt = chuyenTauDAO.countTicketsForChuyenOnDate(c.getMaChuyen(), date);
+                            int cnt = chuyenTauDAO.countTicketsForChuyenOnDate(c.getMaChuyen());
                             include = cnt > 0;
                         }
                         if (!include) continue;
-                        int count = chuyenTauDAO.countTicketsForChuyenOnDate(c.getMaChuyen(), date);
+                        int count = chuyenTauDAO.countTicketsForChuyenOnDate(c.getMaChuyen());
                         String runTimeStr = runTime != null ? runTime.format(DT_FMT) : "";
                         String status = c.getTrangThai() != null ? c.getTrangThai() : "";
                         String tenGaDi = layTenGa(c.getMaGaDi());
@@ -948,7 +948,7 @@ public class PnlChuyenTau extends JPanel {
                     // ticket count for selected date
                     int ticketsToday = 0;
                     try {
-                        ticketsToday = chuyenTauDAO.countTicketsForChuyenOnDate(ct.getMaChuyen(), getSelectedDate());
+                        ticketsToday = chuyenTauDAO.countTicketsForChuyenOnDate(ct.getMaChuyen());
                     } catch (Exception ignored) {}
 
                     // set info label
