@@ -304,7 +304,7 @@ public class PnlTimVe extends JPanel {
                 Ve v = veDAO.findById(maVe);
                 if (v == null) return false;
                 v.setTrangThai("Đã hủy");
-                // isActive is handled at database level by the DAO
+                v.setActive(false);
                 return veDAO.update(v);
             }
             @Override
