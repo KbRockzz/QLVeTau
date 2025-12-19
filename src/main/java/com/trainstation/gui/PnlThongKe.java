@@ -281,6 +281,14 @@ public class PnlThongKe extends JPanel {
         try {
             modelDoanhThu.setRowCount(0);
 
+            if (dateDoanhThuTu.getDate() == null || dateDoanhThuDen.getDate() == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Vui lòng chọn khoảng thời gian",
+                        "Thông báo",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             LocalDate tuNgay = dateDoanhThuTu.getDate().toInstant()
                     .atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate denNgay = dateDoanhThuDen.getDate().toInstant()
