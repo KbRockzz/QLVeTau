@@ -453,63 +453,60 @@ public class DlgDoiVe extends JDialog {
         }
         pnlSeatMap.repaint();
     }
-    
+
     private void xacNhanDoiVe() {
-        // Validate ghế đã chọn
-        if (gheChon == null) {
+        if (gheChon == null || gheChon.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                "Vui lòng chọn ghế mới!",
-                "Lỗi",
-                JOptionPane.ERROR_MESSAGE);
+                    "Vui lòng chọn ghế mới trước khi xác nhận.",
+                    "Thông báo",
+                    JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        
-        // Validate lý do
+
         String lyDo = txtLyDo.getText().trim();
-        if (lyDo.isEmpty()) {
-            int confirm = JOptionPane.showConfirmDialog(this,
-                "Bạn chưa nhập lý do đổi vé. Có muốn tiếp tục?",
-                "Xác nhận",
-                JOptionPane.YES_NO_OPTION);
-            if (confirm != JOptionPane.YES_OPTION) {
-                return;
+
+        // Disable nút để tránh bấm nhiều lần
+        setEnabledButtons(false);
+
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            private Exception error;
+
+            @Override
+            protected Void doInBackground() {
+                try {
+                    // gọi service thực hiện đổi vé: giữ nguyên maBangGia, cùng toa
+                    veService.thucHienDoiVe(veGoc.getMaVe(), gheChon, lyDo);
+                } catch (Exception ex) {
+                    error = ex;
+                }
+                return null;
             }
-        }
-        
-        // Confirm
-        int confirm = JOptionPane.showConfirmDialog(this,
-            "Bạn có chắc muốn đổi vé từ ghế " + veGoc.getMaSoGhe() + " sang ghế " + gheChon + "?",
-            "Xác nhận đổi vé",
-            JOptionPane.YES_NO_OPTION);
-            
-        if (confirm != JOptionPane.YES_OPTION) {
-            return;
-        }
-        
-        // Thực hiện đổi vé
-        try {
-            Ve veMoi = veService.thucHienDoiVe(veGoc.getMaVe(), gheChon, lyDo);
-            
-            JOptionPane.showMessageDialog(this,
-                "Đổi vé thành công!\nMã vé mới: " + veMoi.getMaVe(),
-                "Thành công",
-                JOptionPane.INFORMATION_MESSAGE);
-            
-            thanhCong = true;
-            dispose();
-            
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            JOptionPane.showMessageDialog(this,
-                "Lỗi: " + e.getMessage(),
-                "Lỗi",
-                JOptionPane.ERROR_MESSAGE);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                "Lỗi không xác định: " + e.getMessage(),
-                "Lỗi",
-                JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
+
+            @Override
+            protected void done() {
+                setEnabledButtons(true);
+                if (error != null) {
+                    error.printStackTrace();
+                    JOptionPane.showMessageDialog(DlgDoiVe.this,
+                            "Lỗi khi đổi vé: " + error.getMessage(),
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE);
+                } else {
+                    thanhCong = true;
+                    JOptionPane.showMessageDialog(DlgDoiVe.this,
+                            "Đổi vé thành công!",
+                            "Thành công",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    dispose();
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void setEnabledButtons(boolean enabled) {
+        // Tìm 2 nút trong bottomPanel và bật/tắt
+        // Hoặc lưu field btnXacNhan / btnHuy trong class và setEnabled(enabled)
     }
     
     public boolean isThanhCong() {

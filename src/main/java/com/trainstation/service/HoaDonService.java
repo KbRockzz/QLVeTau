@@ -306,6 +306,9 @@ public class HoaDonService {
                 for (Ve ve : dsVe) {
                     // compute price result (may return applied maBangGia)
                     TinhGiaService.KetQuaGia kq = tinhGia.tinhGiaChoVe(ve);
+                    if (kq != null) {
+                        ve.setGiaThanhToan(kq.giaDaKM);
+                    }
 
                     // insert Ve if not exists, persisting maBangGia only
                     pstCheckVe.setString(1, ve.getMaVe());
@@ -458,6 +461,10 @@ public class HoaDonService {
             // 3) Ensure Ve exists (insert nếu chưa) and persist maBangGia using tinhGia
             if (!veExistsOnConnection(ve.getMaVe(), connection)) {
                 TinhGiaService.KetQuaGia kq = tinhGia.tinhGiaChoVe(ve);
+                if (kq != null) {
+                    ve.setGiaThanhToan(kq.giaDaKM);
+                }
+
 
                 String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement pst = connection.prepareStatement(insertVeSql)) {
@@ -505,6 +512,9 @@ public class HoaDonService {
             // 4) Tính giá để tạo ChiTietHoaDon snapshot
             if (loaiVe != null) ve.setMaLoaiVe(loaiVe.getMaLoaiVe());
             TinhGiaService.KetQuaGia kq = tinhGia.tinhGiaChoVe(ve);
+            if (kq != null) {
+                ve.setGiaThanhToan(kq.giaDaKM);
+            }
 
             // 5) Insert ChiTietHoaDon (nếu chưa có)
             if (chiTietHoaDonDAO.exists(hoaDon.getMaHoaDon(), ve.getMaVe(), connection) || cthdExistsOnConnection(hoaDon.getMaHoaDon(), ve.getMaVe(), connection)) {

@@ -152,39 +152,42 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public boolean insert(Ve v) {
-        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, " +
+                "ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         Connection conn = null;
         PreparedStatement pst = null;
         try {
             conn = ConnectSql.getInstance().getConnection();
-            // Tìm maChang từ maChuyen
-            String maChang = null;
-            try {
-                ChuyenTauDAO ctDAO = ChuyenTauDAO.getInstance();
-                ChuyenTau ct = ctDAO.findById(v.getMaChuyen());
-                if (ct != null) {
-                    // Giả sử ChuyenTau có phương thức getMaChang()
-                    maChang = ct.getMaChang();
+
+            // --- 1. Nếu VE CHƯA có maBangGia -> tự tìm bảng giá phù hợp ---
+            if (v.getMaBangGia() == null || v.getMaBangGia().trim().isEmpty()) {
+                String maChang = null;
+                try {
+                    ChuyenTauDAO ctDAO = ChuyenTauDAO.getInstance();
+                    ChuyenTau ct = ctDAO.findById(v.getMaChuyen());
+                    if (ct != null) {
+                        maChang = ct.getMaChang();   // giả sử ChuyenTau có field maChang
+                    }
+                } catch (Exception ignored) {
+                    // Nếu không lấy được maChang thì bỏ qua, để maBangGia = null
                 }
-            } catch (Exception ignored) {
-                // Nếu không tìm được hoặc ChuyenTau thiếu trường, tiếp tục với maChang = null
-            }
 
-            // Tìm Bảng Giá áp dụng tại thời điểm đặt vé (ngay hiện tại)
-            BangGiaDAO bgDAO = BangGiaDAO.getInstance();
-            LocalDateTime now = LocalDateTime.now();
-            BangGia applicable = null;
-            if (maChang != null && v.getLoaiCho() != null) {
-                applicable = bgDAO.findApplicable(maChang, v.getLoaiCho(), now);
+                if (maChang != null && v.getLoaiCho() != null) {
+                    BangGiaDAO bgDAO = BangGiaDAO.getInstance();
+                    LocalDateTime now = LocalDateTime.now();
+                    BangGia applicable = bgDAO.findApplicable(maChang, v.getLoaiCho(), now);
+                    if (applicable != null) {
+                        v.setMaBangGia(applicable.getMaBangGia());
+                    } else {
+                        v.setMaBangGia(null); // không có bảng giá phù hợp
+                    }
+                }
             }
+            // Nếu maBangGia đã được set từ trước (ví dụ đổi vé) thì KHÔNG đụng tới nữa.
 
-            if (applicable != null) {
-                v.setMaBangGia(applicable.getMaBangGia());
-            } else {
-                // Không tìm thấy bảng giá phù hợp -> maBangGia để null (hoặc xử lý theo yêu cầu)
-                v.setMaBangGia(null);
-            }
-
+            // --- 2. Thực hiện insert ---
             pst = conn.prepareStatement(sql);
             pst.setString(1, v.getMaVe());
             pst.setString(2, v.getMaChuyen());
@@ -194,17 +197,55 @@ public class VeDAO implements GenericDAO<Ve> {
             pst.setString(6, v.getMaGaDen());
             pst.setString(7, v.getTenGaDi());
             pst.setString(8, v.getTenGaDen());
-            if (v.getNgayIn() != null) pst.setTimestamp(9, Timestamp.valueOf(v.getNgayIn())); else pst.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+
+            // ngayIn: nếu null thì lấy thời điểm hiện tại
+            if (v.getNgayIn() != null) {
+                pst.setTimestamp(9, Timestamp.valueOf(v.getNgayIn()));
+            } else {
+                pst.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+            }
+
             pst.setString(10, v.getTrangThai());
-            if (v.getGioDi() != null) pst.setTimestamp(11, Timestamp.valueOf(v.getGioDi())); else pst.setNull(11, Types.TIMESTAMP);
-            if (v.getGioDenDuKien() != null) pst.setTimestamp(12, Timestamp.valueOf(v.getGioDenDuKien())); else pst.setNull(12, Types.TIMESTAMP);
-            if (v.getSoToa() != null) pst.setInt(13, v.getSoToa()); else pst.setNull(13, Types.INTEGER);
+
+            if (v.getGioDi() != null) {
+                pst.setTimestamp(11, Timestamp.valueOf(v.getGioDi()));
+            } else {
+                pst.setNull(11, Types.TIMESTAMP);
+            }
+
+            if (v.getGioDenDuKien() != null) {
+                pst.setTimestamp(12, Timestamp.valueOf(v.getGioDenDuKien()));
+            } else {
+                pst.setNull(12, Types.TIMESTAMP);
+            }
+
+            if (v.getSoToa() != null) {
+                pst.setInt(13, v.getSoToa());
+            } else {
+                pst.setNull(13, Types.INTEGER);
+            }
+
             pst.setString(14, v.getLoaiCho());
             pst.setString(15, v.getLoaiVe());
-            pst.setString(16, v.getMaBangGia());
-            if (v.getGiaThanhToan() != null) pst.setFloat(17, v.getGiaThanhToan()); else pst.setNull(17, Types.FLOAT);
-            System.out.println("DEBUG Ve.insert: inserting maVe=" + v.getMaVe() + " maBangGia=" + v.getMaBangGia());
+
+            if (v.getMaBangGia() != null && !v.getMaBangGia().trim().isEmpty()) {
+                pst.setString(16, v.getMaBangGia());
+            } else {
+                pst.setNull(16, Types.VARCHAR);
+            }
+
+            if (v.getGiaThanhToan() != null) {
+                pst.setFloat(17, v.getGiaThanhToan());
+            } else {
+                pst.setNull(17, Types.FLOAT);
+            }
+
+            pst.setBoolean(18, true); // isActive
+
+            System.out.println("DEBUG Ve.insert: inserting maVe=" + v.getMaVe() +
+                    " maBangGia=" + v.getMaBangGia());
             return pst.executeUpdate() > 0;
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

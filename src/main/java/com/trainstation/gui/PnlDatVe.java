@@ -1070,6 +1070,7 @@ public class PnlDatVe extends JPanel {
             ve.setTenGaDi(layTenGa(chuyenDuocChon.getMaGaDi()));
             ve.setTenGaDen(layTenGa(chuyenDuocChon.getMaGaDen()));
             ve.setGioDi(chuyenDuocChon.getGioDi());
+            ve.setGioDenDuKien(chuyenDuocChon.getGioDen());
             ve.setSoToa(Integer.parseInt(toaDuocChon.getMaToa().replaceAll("\\D+", "0"))); // Extract number from maToa
             ve.setLoaiCho(toaDuocChon.getLoaiToa());
             ve.setLoaiVe(loaiVe.getTenLoai());

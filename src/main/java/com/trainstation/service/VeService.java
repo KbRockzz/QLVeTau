@@ -605,7 +605,7 @@ public class VeService {
                     veCu.getSoToa(),         // KHÔNG ĐỔI (cùng toa)
                     veCu.getLoaiCho(),       // KHÔNG ĐỔI
                     veCu.getLoaiVe(),        // KHÔNG ĐỔI
-                    null,                    // maBangGia - để VeDAO.insert() tự tìm bảng giá phù hợp
+                    veCu.getMaBangGia(),                    // KHONG DOI
                     veCu.getGiaThanhToan()   // KHÔNG ĐỔI
             );
 
