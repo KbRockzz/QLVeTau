@@ -33,6 +33,7 @@ public class PnlDatVe extends JPanel {
     private KhachHangDAO khachHangDAO;
     private LoaiVeDAO loaiVeDAO;
     private GaDAO gaDAO;
+    private ChiTietChuyenTauDAO ctct;
 
     private static final boolean ALLOW_SAME_DAY = true;
     private static final int MIN_ADVANCE_MINUTES = 60; // minimum
@@ -60,6 +61,7 @@ public class PnlDatVe extends JPanel {
     private ChuyenTau chuyenDuocChon;
     private ToaTau toaDuocChon;
     private Ghe gheDuocChon;
+
 
     // New
     private HoaDon hoaDonMo;
@@ -96,6 +98,7 @@ public class PnlDatVe extends JPanel {
         this.khachHangDAO = KhachHangDAO.getInstance();
         this.loaiVeDAO = LoaiVeDAO.getInstance();
         this.gaDAO = GaDAO.getInstance();
+        this.ctct = ChiTietChuyenTauDAO.getInstance();
         initComponents();
     }
 
@@ -851,10 +854,8 @@ public class PnlDatVe extends JPanel {
         JTextField txtSDT = new JTextField(20);
         txtSDT.setPreferredSize(new Dimension(250, 32));
         txtSDT.setText(soDienThoai); // Pre-fill with searched phone
-        JTextField txtCCCD = new JTextField(20);
-        txtCCCD.setPreferredSize(new Dimension(250, 32));
-        JTextField txtDiaChi = new JTextField(20);
-        txtDiaChi.setPreferredSize(new Dimension(250, 32));
+        JTextField txtEmail = new JTextField(20);
+        txtEmail.setPreferredSize(new Dimension(250, 32));
 
         // Labels (column 0) - no horizontal expansion
         gbc.gridx = 0; gbc.gridy = 0;
@@ -881,17 +882,11 @@ public class PnlDatVe extends JPanel {
 
         gbc.gridx = 0; gbc.gridy = 3;
         gbc.weightx = 0.0;
-        pnlForm.add(new JLabel("CCCD:"), gbc);
+        pnlForm.add(new JLabel("Email:"), gbc);
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        pnlForm.add(txtCCCD, gbc);
+        pnlForm.add(txtEmail, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4;
-        gbc.weightx = 0.0;
-        pnlForm.add(new JLabel("Địa chỉ:"), gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 1.0;
-        pnlForm.add(txtDiaChi, gbc);
 
         dialog.add(pnlForm, BorderLayout.CENTER);
 
@@ -902,6 +897,7 @@ public class PnlDatVe extends JPanel {
             String maKH = txtMaKH.getText().trim();
             String tenKH = txtTenKH.getText().trim();
             String sdt = txtSDT.getText().trim();
+            String email = txtEmail.getText().trim();
 
             if (maKH.isEmpty() || tenKH.isEmpty() || sdt.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Vui lòng nhập đầy đủ thông tin bắt buộc (Mã KH, Họ tên, SĐT)!",
@@ -914,7 +910,6 @@ public class PnlDatVe extends JPanel {
                 return;
             }
 
-            String email = txtCCCD.getText().trim() + "|" + txtDiaChi.getText().trim();
             KhachHang kh = new KhachHang(maKH, tenKH, email, sdt);
 
             if (khachHangDAO.insert(kh)) {
@@ -1071,7 +1066,8 @@ public class PnlDatVe extends JPanel {
             ve.setTenGaDen(layTenGa(chuyenDuocChon.getMaGaDen()));
             ve.setGioDi(chuyenDuocChon.getGioDi());
             ve.setGioDenDuKien(chuyenDuocChon.getGioDen());
-            ve.setSoToa(Integer.parseInt(toaDuocChon.getMaToa().replaceAll("\\D+", "0"))); // Extract number from maToa
+            ChiTietChuyenTau ct = ctct.findById(chuyenDuocChon.getMaChuyen(),toaDuocChon.getMaToa());
+            ve.setSoToa(ct.getSoThuTuToa());
             ve.setLoaiCho(toaDuocChon.getLoaiToa());
             ve.setLoaiVe(loaiVe.getTenLoai());
 

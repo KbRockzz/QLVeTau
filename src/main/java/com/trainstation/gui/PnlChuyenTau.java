@@ -2,19 +2,8 @@ package com.trainstation.gui;
 
 import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.config.MaterialInitializer;
-import com.trainstation.dao.ChiTietChuyenTauDAO;
-import com.trainstation.dao.ChuyenTauDAO;
-import com.trainstation.dao.DauMayDAO;
-import com.trainstation.dao.GaDAO;
-import com.trainstation.dao.NhanVienDAO;
-import com.trainstation.dao.ChangTauDAO;
-import com.trainstation.dao.VeDAO;
-import com.trainstation.model.ChiTietChuyenTau;
-import com.trainstation.model.ChuyenTau;
-import com.trainstation.model.Ga;
-import com.trainstation.model.DauMay;
-import com.trainstation.model.NhanVien;
-import com.trainstation.model.ChangTau;
+import com.trainstation.dao.*;
+import com.trainstation.model.*;
 import com.trainstation.util.UIUtils;
 
 import javax.swing.*;
@@ -84,6 +73,7 @@ public class PnlChuyenTau extends JPanel {
     private List<String> lastAvailableToa = null; // cache danh sách toa khả dụng cho chuyến đang chọn
 
     private ScheduledExecutorService scheduler;
+    private ToaTauDAO toaTauDAO = ToaTauDAO.getInstance();
 
     public PnlChuyenTau() {
         setLayout(new BorderLayout(8, 8));
@@ -285,6 +275,7 @@ public class PnlChuyenTau extends JPanel {
         loadData();
     }
 
+
     private void showAddToaDialog() {
         String maChuyen = getSelectedMaChuyenFromTable();
         if (maChuyen == null) {
@@ -298,26 +289,87 @@ public class PnlChuyenTau extends JPanel {
             return;
         }
 
+        // --- XÁC ĐỊNH LOẠI CHẶNG TỪ maChang / soKm ---
+        ChangTau chang = null;
+        try {
+            String maChang = chuy.getMaChang();
+            if (maChang != null && !maChang.trim().isEmpty()) {
+                chang = changTauDAO.findById(maChang);
+            }
+        } catch (Exception ignored) {}
+
+        boolean isShortOrMedium = false; // true = chặng ngắn hoặc trung, false = chặng dài
+        Integer soKm = chuy.getSoKm();
+        if (soKm != null) {
+            // <200km = ngắn, 200–600 = trung, >600 = dài
+            if (soKm < 200 || soKm <= 600) {
+                isShortOrMedium = true;
+            }
+        } else if (chang != null) {
+            Integer maxKm = chang.getSoKMToiDa();
+            if (maxKm != null && maxKm <= 600) {
+                isShortOrMedium = true;
+            }
+        }
+
         JComboBox<String> comboMaToa = new JComboBox<>();
         comboMaToa.setEditable(true);
 
-        // Dùng danh sách toa khả dụng (khóa mềm)
+        // --- LẤY DANH SÁCH TOA KHẢ DỤNG THEO THỜI GIAN ---
         List<String> available = lastAvailableToa != null ? lastAvailableToa : getAvailableToaForChuyen(maChuyen);
         if (available == null) available = Collections.emptyList();
 
+        // Nếu không có danh sách “toa đang rảnh theo thời gian” -> fallback sang TẤT CẢ toa đang active
         if (available.isEmpty()) {
-            // fallback: show known toa
-            List<ChiTietChuyenTau> all = ctctDAO.getAll();
-            LinkedHashSet<String> set = new LinkedHashSet<>();
-            if (all != null) {
-                for (ChiTietChuyenTau t : all) {
-                    if (t != null && t.getMaToaTau() != null) set.add(t.getMaToaTau());
+            try {
+                List<ToaTau> allToa = toaTauDAO.getAll(); // lấy trực tiếp từ bảng ToaTau
+                List<String> tmp = new ArrayList<>();
+                if (allToa != null) {
+                    for (ToaTau t : allToa) {
+                        if (t != null && t.getMaToa() != null) {
+                            tmp.add(t.getMaToa());
+                        }
+                    }
                 }
+                available = tmp;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                available = Collections.emptyList();
             }
-            for (String s : set) comboMaToa.addItem(s);
-        } else {
-            for (String s : available) comboMaToa.addItem(s);
         }
+
+        // --- LỌC THEO LOẠI CHẶNG / LOẠI TOA ---
+        List<String> filtered = new ArrayList<>();
+        for (String maToa : available) {
+            if (maToa == null) continue;
+            ToaTau toa = toaTauDAO.findById(maToa);
+            if (toa == null) continue;
+
+            String loaiToa = toa.getLoaiToa();
+            if (loaiToa == null) loaiToa = "";
+
+            // Trong DB: loaiToa IN ('TOANGOI', 'TOANAM')
+            // Chặng ngắn & trung: KHÔNG cho TOANAM
+            if (isShortOrMedium && "TOANAM".equalsIgnoreCase(loaiToa)) {
+                continue; // bỏ toa nằm
+            }
+
+            filtered.add(maToa);
+        }
+
+        if (filtered.isEmpty()) {
+            String msg;
+            if (isShortOrMedium) {
+                msg = "Chặng này là chặng ngắn/trung.\n" +
+                        "Không có toa ghế (TOANGOI) khả dụng trong khung giờ này hoặc trong danh sách toa.";
+            } else {
+                msg = "Không có toa khả dụng trong khung giờ này hoặc trong danh sách toa.";
+            }
+            JOptionPane.showMessageDialog(this, msg, "Không có toa phù hợp", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        for (String s : filtered) comboMaToa.addItem(s);
 
         JTextField fldSucChua = new JTextField(6);
 
@@ -333,7 +385,8 @@ public class PnlChuyenTau extends JPanel {
         gbc.gridx = 0; gbc.gridy = 1; p.add(new JLabel("Sức chứa (số):"), gbc);
         gbc.gridx = 1; p.add(fldSucChua, gbc);
 
-        int rc = JOptionPane.showConfirmDialog(this, p, "Thêm Toa vào chuyến " + maChuyen, JOptionPane.OK_CANCEL_OPTION);
+        int rc = JOptionPane.showConfirmDialog(this, p, "Thêm Toa vào chuyến " + maChuyen,
+                JOptionPane.OK_CANCEL_OPTION);
         if (rc != JOptionPane.OK_OPTION) return;
 
         Object selToa = comboMaToa.getSelectedItem();
@@ -343,7 +396,23 @@ public class PnlChuyenTau extends JPanel {
             return;
         }
 
-        // Kiểm tra lại toa còn khả dụng không (khóa mềm)
+        // Kiểm tra lại loại toa (trường hợp người dùng gõ tay)
+        ToaTau toaChon = toaTauDAO.findById(maToa);
+        if (toaChon == null) {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy thông tin toa: " + maToa, "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        String loaiToaChon = toaChon.getLoaiToa() != null ? toaChon.getLoaiToa().trim() : "";
+        if (isShortOrMedium && "TOANAM".equalsIgnoreCase(loaiToaChon)) {
+            JOptionPane.showMessageDialog(this,
+                    "Chặng này là chặng ngắn/trung nên không được thêm toa nằm (TOANAM).\n" +
+                            "Vui lòng chọn toa ghế (TOANGOI).",
+                    "Không hợp lệ",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Kiểm tra lại toa còn khả dụng theo thời gian
         List<String> currentAvailable = getAvailableToaForChuyen(maChuyen);
         if (currentAvailable != null && !currentAvailable.isEmpty() && !currentAvailable.contains(maToa)) {
             JOptionPane.showMessageDialog(this,
@@ -372,27 +441,14 @@ public class PnlChuyenTau extends JPanel {
             @Override
             protected String doInBackground() {
                 try {
-                    // 1) Lấy danh sách chi tiết hiện tại của chuyến
-                    List<ChiTietChuyenTau> current = ctctDAO.findByChuyenTau(maChuyen);
-
-                    int maxStt = 0;
-                    if (current != null) {
-                        for (ChiTietChuyenTau t : current) {
-                            if (t == null) continue;
-                            Integer stt = t.getSoThuTuToa();
-                            if (stt != null && stt > maxStt) {
-                                maxStt = stt;
-                            }
-                        }
-                    }
-
-                    // 2) Tự động gán soThuTuToa = max + 1
-                    int insertPos = maxStt + 1;
-
-                    // 3) Tạo bản ghi mới và lưu DB
-                    ChiTietChuyenTau newT = new ChiTietChuyenTau(maChuyen, finalMaToa, insertPos, finalSuc);
+                    // Thêm bản ghi mới với soThuTuToa = 0 (hoặc null)
+                    ChiTietChuyenTau newT = new ChiTietChuyenTau(maChuyen, finalMaToa, 0, finalSuc);
                     boolean added = ctctDAO.add(newT);
-                    return added ? "OK" : "ERROR";
+                    if (!added) return "ERROR";
+
+                    // Sau khi thêm, reindex lại 1..n trong DB
+                    ctctDAO.reindexSoThuTuToa(maChuyen);
+                    return "OK";
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     return "ERROR";
@@ -405,17 +461,25 @@ public class PnlChuyenTau extends JPanel {
                 try {
                     String result = get();
                     if (!"OK".equals(result)) {
-                        JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã có lỗi khi thêm toa. Xem log.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(PnlChuyenTau.this,
+                                "Đã có lỗi khi thêm toa. Xem log.",
+                                "Lỗi", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    ctctDAO.reindexSoThuTuToa(maChuyen);
+                    JOptionPane.showMessageDialog(PnlChuyenTau.this,
+                            "Đã thêm toa.",
+                            "Kết quả", JOptionPane.INFORMATION_MESSAGE);
 
-                    JOptionPane.showMessageDialog(PnlChuyenTau.this, "Đã thêm toa.", "Kết quả", JOptionPane.INFORMATION_MESSAGE);
+                    // Load lại từ DB để số thứ tự luôn chuẩn
                     loadCompositionForChuyen(maChuyen);
+
+                    // Cập nhật cache toa khả dụng
                     lastAvailableToa = getAvailableToaForChuyen(maChuyen);
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    JOptionPane.showMessageDialog(PnlChuyenTau.this, "Lỗi khi xử lý kết quả.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(PnlChuyenTau.this,
+                            "Lỗi khi xử lý kết quả.",
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             }
         };
@@ -570,25 +634,27 @@ public class PnlChuyenTau extends JPanel {
         if (target == null) return result;
 
         LocalDateTime start = target.getGioDi();
-        LocalDateTime end = target.getGioDen();
+        LocalDateTime end   = target.getGioDen();
 
-        // Load all assignments and build helper structures in-memory
-        List<ChiTietChuyenTau> allAssignments = ctctDAO.getAll();
-        if (allAssignments == null) allAssignments = Collections.emptyList();
+        // --- 1. Lấy TẤT CẢ toa từ bảng ToaTau ---
+        List<ToaTau> allToaEntities = toaTauDAO.getAll(); // đã filter isActive trong DAO
+        if (allToaEntities == null) allToaEntities = Collections.emptyList();
 
-        // Collect all known toa codes (preserve insertion order)
-        LinkedHashSet<String> allToas = new LinkedHashSet<>();
-        for (ChiTietChuyenTau a : allAssignments) {
-            if (a != null && a.getMaToaTau() != null) allToas.add(a.getMaToaTau());
-        }
-
-        // If target has no time window, return all known toas (application-level fallback)
+        // Nếu chuyến chưa có khung thời gian -> tất cả toa đều coi là khả dụng
         if (start == null || end == null) {
-            result.addAll(allToas);
+            for (ToaTau t : allToaEntities) {
+                if (t != null && t.getMaToa() != null) {
+                    result.add(t.getMaToa());
+                }
+            }
             return result;
         }
 
-        // Build map: maChuyen -> set(maToa)
+        // --- 2. Load tất cả gán toa cho các chuyến khác ---
+        List<ChiTietChuyenTau> allAssignments = ctctDAO.getAll();
+        if (allAssignments == null) allAssignments = Collections.emptyList();
+
+        // Map: maChuyen -> set(maToa) đang dùng
         Map<String, Set<String>> chuyenToToas = new HashMap<>();
         for (ChiTietChuyenTau a : allAssignments) {
             if (a == null) continue;
@@ -598,38 +664,42 @@ public class PnlChuyenTau extends JPanel {
             chuyenToToas.computeIfAbsent(mc, k -> new HashSet<>()).add(mt);
         }
 
-        // Load all chuyens (in-memory) to check time windows
+        // --- 3. Load tất cả chuyến để kiểm tra khung giờ ---
         List<ChuyenTau> allChuyens = chuyenTauDAO.getAll();
         if (allChuyens == null) allChuyens = Collections.emptyList();
 
-        // Helper overlap check: returns true if [start,end) overlaps [oStart,oEnd)
-        // Using same semantics as SQL: overlap iff NOT (oEnd <= start OR oStart >= end)
+        // Helper overlap: [start,end) với [oStart,oEnd)
         BiPredicate<LocalDateTime, LocalDateTime> overlapsWithTarget = (oStart, oEnd) -> {
             if (oStart == null || oEnd == null) return false;
-            // oEnd <= start OR oStart >= end  => no overlap
+            // oEnd <= start OR oStart >= end  => không overlap
             if (oEnd.isBefore(start) || oEnd.isEqual(start)) return false;
             if (oStart.isAfter(end) || oStart.isEqual(end)) return false;
-            return true; // otherwise overlap
+            return true;
         };
 
-        // For each known toa, check if any other chuyến (not target) uses it and overlaps
-        for (String toa : allToas) {
+        // --- 4. Với MỖI toa trong ToaTau, kiểm tra có bị “bận” bởi chuyến khác không ---
+        for (ToaTau toa : allToaEntities) {
+            if (toa == null || toa.getMaToa() == null) continue;
+            String maToa = toa.getMaToa();
             boolean available = true;
-            // iterate over allChuyens and see if chuy uses this toa
+
             for (ChuyenTau other : allChuyens) {
                 if (other == null) continue;
                 String otherMa = other.getMaChuyen();
-                if (maChuyen.equals(otherMa)) continue; // skip target itself
+                if (maChuyen.equals(otherMa)) continue; // bỏ qua chính mình
+
                 Set<String> otherToas = chuyenToToas.get(otherMa);
-                if (otherToas == null || !otherToas.contains(toa)) continue; // this other chuyến doesn't use the toa
-                // only consider active chuyens with both times set
-                //if (!other.isActive()) continue;
-                if (other.getGioDi() == null || other.getGioDen() == null) continue;
+                if (otherToas == null || !otherToas.contains(maToa)) continue; // chuyến kia không dùng toa này
+
                 LocalDateTime oStart = other.getGioDi();
-                LocalDateTime oEnd = other.getGioDen();
-                if (overlapsWithTarget.test(oStart, oEnd)) { available = false; break; }
+                LocalDateTime oEnd   = other.getGioDen();
+                if (overlapsWithTarget.test(oStart, oEnd)) {
+                    available = false;
+                    break;
+                }
             }
-            if (available) result.add(toa);
+
+            if (available) result.add(maToa);
         }
 
         return result;
@@ -654,7 +724,9 @@ public class PnlChuyenTau extends JPanel {
                 }
                 return null;
             }
-            @Override protected void process(List<Object[]> chunks) { for (Object[] r : chunks) compositionModel.addRow(r); }
+            @Override protected void process(List<Object[]> chunks) {
+                for (Object[] r : chunks) compositionModel.addRow(r);
+            }
             @Override protected void done() {
                 btnCompRefresh.setEnabled(true);
             }
