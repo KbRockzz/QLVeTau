@@ -8,11 +8,17 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.text.DecimalFormat;
 
 public class PnlThongKe extends JPanel {
+    // Navigation button color constants
+    private static final Color NAV_BUTTON_DEFAULT = new Color(10, 115, 215);  // #0A73D7
+    private static final Color NAV_BUTTON_HOVER = new Color(8, 89, 166);      // #0859A6
+    private static final Color NAV_BUTTON_SELECTED = new Color(70, 130, 180); // #4682B4
+    
     private ThongKeService thongKeService;
 
     private JButton btnDoanhThu, btnVeDoiHoan, btnDoPhuGhe;
@@ -25,6 +31,7 @@ public class PnlThongKe extends JPanel {
     private JTable tblDoanhThu;
     private DefaultTableModel modelDoanhThu;
     private JLabel lblTongDoanhThu;
+    private JLabel lblThongKeLoaiVe;
 
     private JDateChooser dateVeDoiHoanTu, dateVeDoiHoanDen;
     private JButton btnThongKeVeDoiHoan;
@@ -61,19 +68,19 @@ public class PnlThongKe extends JPanel {
         btnDoanhThu.setPreferredSize(new Dimension(200, 40));
         btnDoanhThu.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnDoanhThu.addActionListener(e -> showPanel("doanhThu"));
-        MaterialInitializer.styleButton(btnDoanhThu);
+        styleNavigationButton(btnDoanhThu);
 
         btnVeDoiHoan = new JButton("Thống kê vé hoàn/đổi");
         btnVeDoiHoan.setPreferredSize(new Dimension(200, 40));
         btnVeDoiHoan.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnVeDoiHoan.addActionListener(e -> showPanel("veDoiHoan"));
-        MaterialInitializer.styleButton(btnVeDoiHoan);
+        styleNavigationButton(btnVeDoiHoan);
 
         btnDoPhuGhe = new JButton("Thống kê độ phủ ghế");
         btnDoPhuGhe.setPreferredSize(new Dimension(200, 40));
         btnDoPhuGhe.setFont(MaterialInitializer.createFont(Font.BOLD, 14));
         btnDoPhuGhe.addActionListener(e -> showPanel("doPhuGhe"));
-        MaterialInitializer.styleButton(btnDoPhuGhe);
+        styleNavigationButton(btnDoPhuGhe);
 
         pnlNav.add(btnDoanhThu);
         pnlNav.add(btnVeDoiHoan);
@@ -116,7 +123,7 @@ public class PnlThongKe extends JPanel {
 
         panel.add(pnlFilter, BorderLayout.NORTH);
 
-        String[] columns = {"Ngày bán", "Tổng doanh thu (VNĐ)"};
+        String[] columns = {"Mã hóa đơn", "Thời gian", "Số vé", "Tổng tiền (VNĐ)"};
         modelDoanhThu = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -125,19 +132,35 @@ public class PnlThongKe extends JPanel {
         };
         tblDoanhThu = new JTable(modelDoanhThu);
         tblDoanhThu.setRowHeight(25);
-        tblDoanhThu.getColumnModel().getColumn(0).setPreferredWidth(200);
-        tblDoanhThu.getColumnModel().getColumn(1).setPreferredWidth(300);
+        tblDoanhThu.getColumnModel().getColumn(0).setPreferredWidth(150);
+        tblDoanhThu.getColumnModel().getColumn(1).setPreferredWidth(200);
+        tblDoanhThu.getColumnModel().getColumn(2).setPreferredWidth(100);
+        tblDoanhThu.getColumnModel().getColumn(3).setPreferredWidth(150);
 
         JScrollPane scrollPane = new JScrollPane(tblDoanhThu);
         // Giảm chiều cao bảng để có đủ không gian
         MaterialInitializer.setTableScrollPaneSize(scrollPane, 40);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        JPanel pnlSummary = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
+        JPanel pnlSummary = new JPanel();
+        pnlSummary.setLayout(new BoxLayout(pnlSummary, BoxLayout.Y_AXIS));
+        pnlSummary.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        
+        // Ticket type summary
+        lblThongKeLoaiVe = new JLabel("Loại vé: ");
+        lblThongKeLoaiVe.setFont(new Font("Arial", Font.PLAIN, 14));
+        lblThongKeLoaiVe.setForeground(new Color(0, 0, 139));
+        JPanel pnlLoaiVe = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        pnlLoaiVe.add(lblThongKeLoaiVe);
+        pnlSummary.add(pnlLoaiVe);
+        
+        // Total revenue
         lblTongDoanhThu = new JLabel("Tổng cộng: 0 VNĐ");
         lblTongDoanhThu.setFont(new Font("Arial", Font.BOLD, 16));
         lblTongDoanhThu.setForeground(new Color(0, 128, 0));
-        pnlSummary.add(lblTongDoanhThu);
+        JPanel pnlTong = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 5));
+        pnlTong.add(lblTongDoanhThu);
+        pnlSummary.add(pnlTong);
 
         panel.add(pnlSummary, BorderLayout.SOUTH);
 
@@ -217,7 +240,7 @@ public class PnlThongKe extends JPanel {
 
         panel.add(pnlFilter, BorderLayout.NORTH);
 
-        String[] columns = {"Ngày", "Tổng số vé bán", "Tổng số ghế có sẵn", "Tỷ lệ phủ (%)"};
+        String[] columns = {"Mã chuyến", "Tên chuyến", "Thời gian khởi hành", "Số ghế trống", "Số ghế bán", "Độ phủ (%)"};
         modelDoPhuGhe = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -226,6 +249,12 @@ public class PnlThongKe extends JPanel {
         };
         tblDoPhuGhe = new JTable(modelDoPhuGhe);
         tblDoPhuGhe.setRowHeight(25);
+        tblDoPhuGhe.getColumnModel().getColumn(0).setPreferredWidth(120);
+        tblDoPhuGhe.getColumnModel().getColumn(1).setPreferredWidth(120);
+        tblDoPhuGhe.getColumnModel().getColumn(2).setPreferredWidth(180);
+        tblDoPhuGhe.getColumnModel().getColumn(3).setPreferredWidth(120);
+        tblDoPhuGhe.getColumnModel().getColumn(4).setPreferredWidth(120);
+        tblDoPhuGhe.getColumnModel().getColumn(5).setPreferredWidth(100);
 
         JScrollPane scrollPane = new JScrollPane(tblDoPhuGhe);
         // Giảm chiều cao bảng để có đủ không gian
@@ -243,17 +272,59 @@ public class PnlThongKe extends JPanel {
         return panel;
     }
 
+    private void styleNavigationButton(JButton button) {
+        // Basic styling
+        button.setBackground(NAV_BUTTON_DEFAULT);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Add hover effect that respects selection state
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (button.isEnabled()) {
+                    // Check if this button is selected
+                    Boolean isSelected = (Boolean) button.getClientProperty("selected");
+                    if (isSelected == null || !isSelected) {
+                        button.setBackground(NAV_BUTTON_HOVER);
+                    }
+                }
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (button.isEnabled()) {
+                    // Check if this button is selected
+                    Boolean isSelected = (Boolean) button.getClientProperty("selected");
+                    if (isSelected != null && isSelected) {
+                        button.setBackground(NAV_BUTTON_SELECTED);
+                    } else {
+                        button.setBackground(NAV_BUTTON_DEFAULT);
+                    }
+                }
+            }
+        });
+    }
+
     private void showPanel(String panelName) {
         cardLayout.show(pnlMain, panelName);
 
-        btnDoanhThu.setBackground(panelName.equals("doanhThu") ? new Color(70, 130, 180) : null);
-        btnDoanhThu.setForeground(panelName.equals("doanhThu") ? Color.GRAY : Color.BLACK);
-        
-        btnVeDoiHoan.setBackground(panelName.equals("veDoiHoan") ? new Color(70, 130, 180) : null);
-        btnVeDoiHoan.setForeground(panelName.equals("veDoiHoan") ? Color.GRAY : Color.BLACK);
-        
-        btnDoPhuGhe.setBackground(panelName.equals("doPhuGhe") ? new Color(70, 130, 180) : null);
-        btnDoPhuGhe.setForeground(panelName.equals("doPhuGhe") ? Color.GRAY : Color.BLACK);
+        // Update selection state for all buttons
+        updateButtonSelection(btnDoanhThu, panelName.equals("doanhThu"));
+        updateButtonSelection(btnVeDoiHoan, panelName.equals("veDoiHoan"));
+        updateButtonSelection(btnDoPhuGhe, panelName.equals("doPhuGhe"));
+    }
+
+    private void updateButtonSelection(JButton button, boolean selected) {
+        button.putClientProperty("selected", selected);
+        if (selected) {
+            button.setBackground(NAV_BUTTON_SELECTED);
+            button.setForeground(Color.WHITE);
+        } else {
+            button.setBackground(NAV_BUTTON_DEFAULT);
+            button.setForeground(Color.WHITE);
+        }
     }
 
     private void loadDefaultData() {
@@ -278,25 +349,63 @@ public class PnlThongKe extends JPanel {
         try {
             modelDoanhThu.setRowCount(0);
 
+            if (dateDoanhThuTu.getDate() == null || dateDoanhThuDen.getDate() == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Vui lòng chọn khoảng thời gian",
+                        "Thông báo",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             LocalDate tuNgay = dateDoanhThuTu.getDate().toInstant()
                     .atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate denNgay = dateDoanhThuDen.getDate().toInstant()
                     .atZone(ZoneId.systemDefault()).toLocalDate();
 
-            Map<String, Double> data = thongKeService.thongKeDoanhThu(tuNgay, denNgay);
+            List<Map<String, Object>> data = thongKeService.thongKeDoanhThuTheoHoaDon(tuNgay, denNgay);
 
             double tongDoanhThu = 0;
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-            List<String> sortedKeys = new ArrayList<>(data.keySet());
-            Collections.sort(sortedKeys);
+            for (Map<String, Object> row : data) {
+                String maHoaDon = (String) row.get("maHoaDon");
+                java.sql.Timestamp ngayLap = (java.sql.Timestamp) row.get("ngayLap");
+                String thoiGian = ngayLap.toLocalDateTime().format(dateFormatter);
+                int soVe = (Integer) row.get("soVe");
+                double tongTien = (Double) row.get("tongTien");
+                tongDoanhThu += tongTien;
 
-            for (String ngay : sortedKeys) {
-                double doanhThu = data.get(ngay);
-                tongDoanhThu += doanhThu;
-                modelDoanhThu.addRow(new Object[]{ngay, currencyFormat.format(doanhThu)});
+                modelDoanhThu.addRow(new Object[]{
+                    maHoaDon, 
+                    thoiGian, 
+                    soVe, 
+                    currencyFormat.format(tongTien)
+                });
             }
 
             lblTongDoanhThu.setText("Tổng cộng: " + currencyFormat.format(tongDoanhThu) + " VNĐ");
+
+            // Load and display ticket type summary
+            List<Map<String, Object>> loaiVeData = thongKeService.thongKeLoaiVeTheoDoanhThu(tuNgay, denNgay);
+            StringBuilder loaiVeText = new StringBuilder("Loại vé: ");
+            
+            if (loaiVeData.isEmpty()) {
+                loaiVeText.append("Không có dữ liệu");
+            } else {
+                for (int i = 0; i < loaiVeData.size(); i++) {
+                    Map<String, Object> loaiVe = loaiVeData.get(i);
+                    String tenLoai = (String) loaiVe.get("tenLoai");
+                    int soLuong = (Integer) loaiVe.get("soLuong");
+                    
+                    loaiVeText.append(tenLoai).append(": ").append(soLuong).append(" vé");
+                    
+                    if (i < loaiVeData.size() - 1) {
+                        loaiVeText.append(" | ");
+                    }
+                }
+            }
+            
+            lblThongKeLoaiVe.setText(loaiVeText.toString());
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
@@ -341,6 +450,14 @@ public class PnlThongKe extends JPanel {
         try {
             modelDoPhuGhe.setRowCount(0);
 
+            if (dateDoPhuGheTu.getDate() == null || dateDoPhuGheDen.getDate() == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Vui lòng chọn khoảng thời gian",
+                        "Thông báo",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             LocalDate tuNgay = dateDoPhuGheTu.getDate().toInstant()
                     .atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate denNgay = dateDoPhuGheDen.getDate().toInstant()
@@ -350,22 +467,31 @@ public class PnlThongKe extends JPanel {
 
             double tongTyLe = 0;
             int count = 0;
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
             for (Map<String, Object> row : data) {
+                String maChuyen = (String) row.get("maChuyen");
+                String tenChuyen = (String) row.get("tenChuyen");
+                java.sql.Timestamp gioDi = (java.sql.Timestamp) row.get("gioDi");
+                String thoiGianKhoiHanh = gioDi.toLocalDateTime().format(dateFormatter);
+                int soGheTrong = (Integer) row.get("soGheTrong");
+                int soGheBan = (Integer) row.get("soGheBan");
                 double tyLePhu = (Double) row.get("tyLePhu");
                 tongTyLe += tyLePhu;
                 count++;
 
                 modelDoPhuGhe.addRow(new Object[]{
-                        row.get("ngay"),
-                        row.get("soVeBan"),
-                        row.get("tongSoGhe"),
+                        maChuyen,
+                        tenChuyen,
+                        thoiGianKhoiHanh,
+                        soGheTrong,
+                        soGheBan,
                         percentFormat.format(tyLePhu) + "%"
                 });
             }
 
             double tyLeTrungBinh = count > 0 ? tongTyLe / count : 0;
-            lblTongDoPhuGhe.setText("Tỷ lệ trung bình: " + percentFormat.format(tyLeTrungBinh) + "%");
+            lblTongDoPhuGhe.setText("Độ phủ trung bình: " + percentFormat.format(tyLeTrungBinh) + "%");
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,

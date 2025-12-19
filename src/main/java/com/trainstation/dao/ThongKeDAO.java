@@ -54,6 +54,69 @@ public class ThongKeDAO {
         return result;
     }
 
+    public List<Map<String, Object>> thongKeDoanhThuTheoHoaDon(LocalDate tuNgay, LocalDate denNgay) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        String sql = "SELECT hd.maHoaDon, hd.ngayLap, COUNT(ct.maVe) as soVe, SUM(ct.giaDaKM) as tongTien " +
+                "FROM HoaDon hd " +
+                "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
+                "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
+                "AND hd.trangThai = N'Hoàn tất' " +
+                "GROUP BY hd.maHoaDon, hd.ngayLap " +
+                "ORDER BY hd.ngayLap DESC";
+
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setDate(1, Date.valueOf(tuNgay));
+            pst.setDate(2, Date.valueOf(denNgay));
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("maHoaDon", rs.getString("maHoaDon"));
+                    row.put("ngayLap", rs.getTimestamp("ngayLap"));
+                    row.put("soVe", rs.getInt("soVe"));
+                    row.put("tongTien", rs.getDouble("tongTien"));
+                    result.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public List<Map<String, Object>> thongKeLoaiVeTheoDoanhThu(LocalDate tuNgay, LocalDate denNgay) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        String sql = "SELECT lv.tenLoai, COUNT(ct.maVe) as soLuong " +
+                "FROM HoaDon hd " +
+                "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
+                "JOIN LoaiVe lv ON ct.maLoaiVe = lv.maLoaiVe " +
+                "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
+                "AND hd.trangThai = N'Hoàn tất' " +
+                "GROUP BY lv.tenLoai " +
+                "ORDER BY soLuong DESC";
+
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setDate(1, Date.valueOf(tuNgay));
+            pst.setDate(2, Date.valueOf(denNgay));
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("tenLoai", rs.getString("tenLoai"));
+                    row.put("soLuong", rs.getInt("soLuong"));
+                    result.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public List<Map<String, Object>> thongKeVeDoiHoan(LocalDate tuNgay, LocalDate denNgay) {
         List<Map<String, Object>> result = new ArrayList<>();
         String sql = "SELECT v.maVe, ct.maHoaDon, v.ngayIn, " +
@@ -95,30 +158,45 @@ public class ThongKeDAO {
     public List<Map<String, Object>> thongKeDoPhuGhe(LocalDate tuNgay, LocalDate denNgay) {
         List<Map<String, Object>> result = new ArrayList<>();
 
-        int tongSoGhe = getTongSoGhe();
-
-        String sql = "SELECT CAST(v.ngayIn AS DATE) as ngay, COUNT(v.maVe) as soVeBan " +
-                "FROM Ve v " +
-                "WHERE CAST(v.ngayIn AS DATE) BETWEEN ? AND ? " +
-                "AND v.trangThai = N'Đã thanh toán' " +
-                "GROUP BY CAST(v.ngayIn AS DATE) " +
-                "ORDER BY CAST(v.ngayIn AS DATE)";
+        String sql = "SELECT " +
+                "ct.maChuyen, " +
+                "CONCAT(gdi.tenGa, ' - ', gden.tenGa) as tenChuyen, " +
+                "ct.gioDi, " +
+                "COALESCE((SELECT SUM(sucChua) FROM ChiTietChuyenTau WHERE maChuyenTau = ct.maChuyen), 0) as tongSoGhe, " +
+                "COALESCE((SELECT COUNT(*) FROM Ve WHERE maChuyen = ct.maChuyen " +
+                "   AND trangThai IN (N'Đã thanh toán', N'Đã đổi') " +
+                "   AND CAST(ngayIn AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)), 0) as soGheBan " +
+                "FROM ChuyenTau ct " +
+                "LEFT JOIN Ga gdi ON ct.maGaDi = gdi.maGa " +
+                "LEFT JOIN Ga gden ON ct.maGaDen = gden.maGa " +
+                "WHERE CAST(ct.gioDi AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE) " +
+                "ORDER BY ct.gioDi DESC";
 
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
+            // Parameters for soGheBan subquery (Ve.ngayIn date range)
             pst.setDate(1, Date.valueOf(tuNgay));
             pst.setDate(2, Date.valueOf(denNgay));
+            // Parameters for main query WHERE clause (ChuyenTau.gioDi date range)
+            pst.setDate(3, Date.valueOf(tuNgay));
+            pst.setDate(4, Date.valueOf(denNgay));
 
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> row = new HashMap<>();
-                    Date ngay = rs.getDate("ngay");
-                    int soVeBan = rs.getInt("soVeBan");
-                    double tyLePhu = tongSoGhe > 0 ? (soVeBan * 100.0 / tongSoGhe) : 0;
+                    String maChuyen = rs.getString("maChuyen");
+                    String tenChuyen = rs.getString("tenChuyen");
+                    Timestamp gioDi = rs.getTimestamp("gioDi");
+                    int tongSoGhe = rs.getInt("tongSoGhe");
+                    int soGheBan = rs.getInt("soGheBan");
+                    int soGheTrong = tongSoGhe - soGheBan;
+                    double tyLePhu = tongSoGhe > 0 ? (soGheBan * 100.0 / tongSoGhe) : 0;
 
-                    row.put("ngay", ngay.toString());
-                    row.put("soVeBan", soVeBan);
-                    row.put("tongSoGhe", tongSoGhe);
+                    row.put("maChuyen", maChuyen);
+                    row.put("tenChuyen", tenChuyen);
+                    row.put("gioDi", gioDi);
+                    row.put("soGheTrong", soGheTrong);
+                    row.put("soGheBan", soGheBan);
                     row.put("tyLePhu", tyLePhu);
                     result.add(row);
                 }
