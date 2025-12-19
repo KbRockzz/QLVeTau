@@ -71,7 +71,7 @@ public class FrmChinh extends JFrame {
         // Invoice
         addPage("hoadon", taoPanelVoiBo(new PnlQuanLyVe(taiKhoanHienTai)));
         addPage("timhoadon", taoPanelVoiBo(new PnlTimHoaDon()));
-        addPage("baocaodoanhthu", taoPanelVoiBo(new PnlBaoCaoDoanhThu()));
+        addPage("thongke", taoPanelVoiBo(new PnlThongKe()));
 
         // Employee / account pages (manager only)
         if (taiKhoanHienTai.isManager()) {
