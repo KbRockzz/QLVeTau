@@ -72,7 +72,7 @@ public class PnlDatVe extends JPanel {
     private static final Color COLOR_AVAILABLE = new Color(76, 175, 80);      // Material Green 500
     private static final Color COLOR_AVAILABLE_HOVER = new Color(102, 187, 106); // Material Green 400
     private static final Color COLOR_SELECTED = new Color(33, 150, 243);      // Material Blue 500
-    private static final Color COLOR_BOOKED = new Color(244, 67, 54);         // Material Red 500
+    private static final Color COLOR_BOOKED = Color.RED;         // Material Red 500
     
     // Outline/border colors (darker shades for borders)
     private static final Color COLOR_SELECTED_BORDER = new Color(21, 101, 192);    // Darker blue
@@ -596,67 +596,97 @@ public class PnlDatVe extends JPanel {
     }
 
     /**
+     * Ghế được coi là đã đặt nếu trạng thái khác các trạng thái trống (Rảnh/Trống/RANH).
+     */
+    private boolean isBookedSeat(String trangThai) {
+        if (trangThai == null) return false;
+        return !isAvailableSeat(trangThai);
+    }
+
+    /**
      * Tạo nút ghế với thiết kế hiện đại theo Material Design (matching DlgDoiVe)
      */
     private JButton taoNutGhe(Ghe ghe) {
-        JButton btnGhe = new JButton(ghe.getMaGhe());
-        
+        JButton btnGhe = new SeatButton(ghe.getMaGhe());
         // Modern styling with rounded corners
         btnGhe.setPreferredSize(new Dimension(85, 45));
         btnGhe.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnGhe.setFocusPainted(false);
         btnGhe.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnGhe.setOpaque(true);
-        btnGhe.setContentAreaFilled(true);
-        
-        // Rounded border with FlatLaf properties for modern look
-        btnGhe.putClientProperty("JButton.buttonType", "roundRect");
-        btnGhe.putClientProperty("JComponent.roundRect", ROUND_RECT_ARC);
-        
-        // Check if seat is held in current session
-        if (heldVeMap.containsKey(ghe.getMaGhe())) {
-            // Display as 'Held' (blue)
-            styleSeatButton(btnGhe, COLOR_SELECTED, Color.WHITE, false, 
-                createTooltip(ICON_HELD, ghe.getMaGhe(), "Đang giữ (chưa thanh toán)"));
-            // Outline for held seats
+
+
+        final String maGhe = ghe.getMaGhe();
+        final String trangThai = ghe.getTrangThai();
+
+        // 1. Ưu tiên: nếu ghế đã đặt trong DB -> luôn đỏ, không cho chọn
+        if (isBookedSeat(trangThai) && !heldVeMap.containsKey(maGhe)) {
+            styleSeatButton(
+                    btnGhe,
+                    COLOR_BOOKED,
+                    Color.WHITE,
+                    false,
+                    createTooltip(ICON_BOOKED, maGhe,
+                            trangThai != null ? trangThai : "Đã đặt")
+            );
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_SELECTED_BORDER, 2),
-                BorderFactory.createEmptyBorder(3, 8, 3, 8)
+                    BorderFactory.createLineBorder(COLOR_BOOKED_BORDER, 1),
+                    BorderFactory.createEmptyBorder(4, 9, 4, 9)
+            ));
+            btnGhe.putClientProperty("FlatLaf.style", "shadowColor: rgba(0,0,0,64); shadowWidth: 3");
+            return btnGhe;
+        }
+
+        // 2. Ghế đang giữ trong hóa đơn hiện tại (session)
+        if (heldVeMap.containsKey(maGhe)) {
+            styleSeatButton(
+                    btnGhe,
+                    COLOR_SELECTED,
+                    Color.WHITE,
+                    false, // không cho click lại
+                    createTooltip(ICON_HELD, maGhe, "Đang giữ (chưa thanh toán)")
+            );
+            btnGhe.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(COLOR_SELECTED_BORDER, 2),
+                    BorderFactory.createEmptyBorder(3, 8, 3, 8)
             ));
             btnGhe.putClientProperty("FlatLaf.style", "shadowColor: rgba(33,150,243,89); shadowWidth: 4");
             return btnGhe;
         }
-        
-        // Màu sắc theo trạng thái
-        if (isAvailableSeat(ghe.getTrangThai())) {
-            // Ghế trống - màu xanh với outline, shadow và hover effect
-            final String maGhe = ghe.getMaGhe();
-            
-            styleSeatButton(btnGhe, COLOR_AVAILABLE, Color.WHITE, true, 
-                createTooltip(ICON_AVAILABLE, ghe.getMaGhe(), "Trống"));
-            // Subtle outline and shadow for available seats
+
+        // 3. Còn lại: ghế trống -> xanh lá, click được
+        if (isAvailableSeat(trangThai)) {
+            styleSeatButton(
+                    btnGhe,
+                    COLOR_AVAILABLE,
+                    Color.WHITE,
+                    true,
+                    createTooltip(ICON_AVAILABLE, maGhe, "Trống")
+            );
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_AVAILABLE_BORDER, 1),
-                BorderFactory.createEmptyBorder(4, 9, 4, 9)
+                    BorderFactory.createLineBorder(COLOR_AVAILABLE_BORDER, 1),
+                    BorderFactory.createEmptyBorder(4, 9, 4, 9)
             ));
             btnGhe.putClientProperty("FlatLaf.style", "shadowColor: rgba(0,0,0,64); shadowWidth: 3");
-            
-            // Add modern hover effect
+
             btnGhe.addMouseListener(createHoverListener(btnGhe, maGhe));
-            
             btnGhe.addActionListener(e -> chonGhe(ghe));
         } else {
-            // Ghế đã đặt - màu đỏ với outline và shadow
-            styleSeatButton(btnGhe, COLOR_BOOKED, Color.WHITE, false, 
-                createTooltip(ICON_BOOKED, ghe.getMaGhe(), "Đã đặt"));
-            // Outline for booked seats
+            // Trạng thái lạ nhưng không trong nhóm trống -> xử lý như "đã đặt"
+            styleSeatButton(
+                    btnGhe,
+                    COLOR_BOOKED,
+                    Color.WHITE,
+                    false,
+                    createTooltip(ICON_BOOKED, maGhe,
+                            trangThai != null ? trangThai : "Không khả dụng")
+            );
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BOOKED_BORDER, 1),
-                BorderFactory.createEmptyBorder(4, 9, 4, 9)
+                    BorderFactory.createLineBorder(COLOR_BOOKED_BORDER, 1),
+                    BorderFactory.createEmptyBorder(4, 9, 4, 9)
             ));
             btnGhe.putClientProperty("FlatLaf.style", "shadowColor: rgba(0,0,0,64); shadowWidth: 3");
         }
-        
+
         return btnGhe;
     }
     
@@ -685,16 +715,10 @@ public class PnlDatVe extends JPanel {
      * Áp dụng styling hiện đại cho nút ghế
      */
     private void styleSeatButton(JButton btn, Color bgColor, Color fgColor, boolean enabled, String tooltip) {
-        btn.setBackground(bgColor);
+        btn.setBackground(bgColor);   // giờ sẽ thực sự tô đầy
         btn.setForeground(fgColor);
         btn.setEnabled(enabled);
         btn.setToolTipText(tooltip);
-        
-        // FlatLaf properties to preserve colors when disabled
-        if (!enabled) {
-            btn.putClientProperty("Button.disabledBackground", bgColor);
-            btn.putClientProperty("Button.disabledText", fgColor);
-        }
     }
     
     /**
@@ -1187,6 +1211,72 @@ public class PnlDatVe extends JPanel {
             if (toaDuocChon != null) hienThiSoDoGhe(toaDuocChon.getMaToa());
         } else {
             JOptionPane.showMessageDialog(this, "Thanh toán thất bại. Vui lòng thử lại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    /**
+     * Custom button để màu nền luôn theo getBackground()
+     */
+    /**
+     * Custom button để màu nền luôn theo getBackground()
+     */
+    /**
+     * Custom button để màu nền luôn theo getBackground() và tự vẽ chữ.
+     */
+    private static class SeatButton extends JButton {
+        public SeatButton(String text) {
+            super(text);
+            setFocusPainted(false);
+            setBorderPainted(false);
+            setContentAreaFilled(false); // không cho L&F vẽ nền
+            setOpaque(false);
+            setHorizontalAlignment(SwingConstants.CENTER);
+            setVerticalAlignment(SwingConstants.CENTER);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // 1) Tô nền
+            Color bg = getBackground() != null ? getBackground() : getParent().getBackground();
+            g2.setColor(bg);
+            g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+
+            // 2) Vẽ chữ
+            String text = getText();
+            if (text != null && !text.isEmpty()) {
+                FontMetrics fm = g2.getFontMetrics(getFont());
+                int textWidth = fm.stringWidth(text);
+                int textHeight = fm.getAscent();
+
+                int x = (getWidth() - textWidth) / 2;
+                int y = (getHeight() + textHeight) / 2 - 2; // canh giữa dọc nhẹ
+
+                g2.setColor(getForeground() != null ? getForeground() : Color.BLACK);
+                g2.setFont(getFont());
+                g2.drawString(text, x, y);
+            }
+
+            g2.dispose();
+            // KHÔNG gọi super.paintComponent nữa (tránh vẽ đè nền/text)
+        }
+
+        @Override
+        protected void paintBorder(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Border dùng màu riêng (không phụ thuộc foreground để chữ trắng vẫn thấy border)
+            Color borderColor = Color.DARK_GRAY;
+            if (!isEnabled()) {
+                // cho ghế đã đặt / đã giữ dùng border nổi bật hơn nếu muốn
+                borderColor = new Color(120, 120, 120);
+            }
+            g2.setColor(borderColor);
+            g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+
+            g2.dispose();
         }
     }
 }
