@@ -23,7 +23,7 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
     @Override
     public List<ChiTietHoaDon> getAll() {
         List<ChiTietHoaDon> list = new ArrayList<>();
-        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon";
+        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {

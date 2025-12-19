@@ -391,7 +391,7 @@ public class PnlDatVe extends JPanel {
     }
 
     private void timChuyenTau() {
-        // Tìm kiếm chuyến tàu dựa trên tiêu chí
+        // Lấy dữ liệu từ giao diện tìm kiếm
         String tenGaDi = (String) cmbGaDi.getSelectedItem();
         String maGaDi = null;
         if (tenGaDi != null && !tenGaDi.trim().isEmpty()) {
@@ -419,18 +419,19 @@ public class PnlDatVe extends JPanel {
                     .toLocalTime();
         }
 
-        // Ràng buộc thời gian đặt vé
+        // Kiểm tra điều kiện hợp lệ nếu có cả ngày và giờ đi
         if (ngayDi != null && gioDi != null) {
             LocalDateTime selectedDT = LocalDateTime.of(ngayDi, gioDi);
             if (!isBookingAllowedForDateTime(selectedDT)) {
-                // message already shown in isBookingAllowedForDateTime
+                // Đã hiển thị thông báo nếu không hợp lệ
                 return;
             }
         }
 
+        // Gửi yêu cầu tìm kiếm, không bắt buộc tham số nào
         List<ChuyenTau> ketQua = chuyenTauDAO.timKiemChuyenTau(maGaDi, maGaDen, ngayDi, gioDi);
 
-        //
+        // Hiển thị kết quả tìm kiếm lên bảng
         modelBangChuyenTau.setRowCount(0);
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -439,12 +440,12 @@ public class PnlDatVe extends JPanel {
             String ngayDiStr = ct.getGioDi() != null ? ct.getGioDi().format(dateFormatter) : "";
             String gioDiStr = ct.getGioDi() != null ? ct.getGioDi().format(timeFormatter) : "";
             String gioDenStr = ct.getGioDen() != null ? ct.getGioDen().format(timeFormatter) : "";
-            
-            // Display station names instead of codes
+
+            // Hiển thị tên ga thay vì mã ga
             String tenGaDiDisplay = layTenGa(ct.getMaGaDi());
             String tenGaDenDisplay = layTenGa(ct.getMaGaDen());
 
-            modelBangChuyenTau.addRow(new Object[]{
+            modelBangChuyenTau.addRow(new Object[] {
                     ct.getMaChuyen(),
                     ct.getMaDauMay(),
                     tenGaDiDisplay,
@@ -455,6 +456,7 @@ public class PnlDatVe extends JPanel {
             });
         }
 
+        // Nếu không tìm thấy chuyến tàu, hiển thị thông báo
         if (ketQua.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Không tìm thấy chuyến tàu phù hợp!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
         }

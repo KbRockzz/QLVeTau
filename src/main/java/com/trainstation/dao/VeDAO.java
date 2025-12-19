@@ -187,7 +187,7 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public boolean insert(Ve v) {
-        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement pst = null;
         try {
@@ -290,7 +290,7 @@ public class VeDAO implements GenericDAO<Ve> {
             } else {
                 pst.setNull(16, Types.FLOAT);
             }
-            pst.setString(18, v.getMaVe());
+            pst.setString(17, v.getMaVe());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

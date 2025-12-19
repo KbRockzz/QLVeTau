@@ -23,7 +23,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
     @Override
     public List<DauMay> getAll() {
         List<DauMay> list = new ArrayList<>();
-        String sql = "SELECT maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai FROM DauMay";
+        String sql = "SELECT maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai FROM DauMay WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -50,7 +50,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
 
     @Override
     public boolean insert(DauMay entity) {
-        String sql = "INSERT INTO DauMay (maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai) VALUES (?, ?, ?, ?, ?, ?, 1)";
+        String sql = "INSERT INTO DauMay (maDauMay, loaiDauMay, tenDauMay, namSX, lanBaoTriGanNhat, trangThai) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entity.getMaDauMay());
