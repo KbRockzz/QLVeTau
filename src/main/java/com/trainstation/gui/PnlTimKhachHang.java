@@ -162,7 +162,8 @@ public class PnlTimKhachHang extends JPanel {
             @Override
             protected List<KhachHang> doInBackground() {
                 // getAllIncludingDeleted so user can search across all records; filter in-memory
-                List<KhachHang> all = khDao.getAllIncludingDeleted();
+                //List<KhachHang> all = khDao.getAllIncludingDeleted();
+                List<KhachHang> all = khDao.getAll();
                 if (all == null) return List.of();
                 return all.stream().filter(kh -> {
                     if (!ma.isEmpty() && (kh.getMaKhachHang() == null || !kh.getMaKhachHang().equalsIgnoreCase(ma))) return false;

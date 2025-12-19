@@ -303,9 +303,9 @@ public class PnlTimVe extends JPanel {
             protected Boolean doInBackground() {
                 Ve v = veDAO.findById(maVe);
                 if (v == null) return false;
-                v.setTrangThai("Đã hủy");
-                v.setActive(false);
-                return veDAO.update(v);
+                //v.setActive(false);
+                //return veDAO.update(v);
+                return veDAO.delete(v.getMaVe());
             }
             @Override
             protected void done() {
