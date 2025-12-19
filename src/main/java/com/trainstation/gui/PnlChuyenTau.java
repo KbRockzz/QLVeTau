@@ -497,7 +497,7 @@ public class PnlChuyenTau extends JPanel {
                 Set<String> otherToas = chuyenToToas.get(otherMa);
                 if (otherToas == null || !otherToas.contains(toa)) continue; // this other chuyến doesn't use the toa
                 // only consider active chuyens with both times set
-                if (!other.isActive()) continue;
+                if (other.getGioDi() == null || other.getGioDen() == null) continue;
                 LocalDateTime oStart = other.getGioDi();
                 LocalDateTime oEnd = other.getGioDen();
                 if (overlapsWithTarget.test(oStart, oEnd)) { available = false; break; }
