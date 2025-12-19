@@ -162,16 +162,14 @@ public class ThongKeDAO {
                 "ct.maChuyen, " +
                 "CONCAT(gdi.tenGa, ' - ', gden.tenGa) as tenChuyen, " +
                 "ct.gioDi, " +
-                "COALESCE(SUM(ctct.sucChua), 0) as tongSoGhe, " +
-                "COALESCE(COUNT(CASE WHEN v.trangThai IN (N'Đã thanh toán', N'Đã đổi') THEN 1 END), 0) as soGheBan " +
+                "COALESCE((SELECT SUM(sucChua) FROM ChiTietChuyenTau WHERE maChuyenTau = ct.maChuyen), 0) as tongSoGhe, " +
+                "COALESCE((SELECT COUNT(*) FROM Ve WHERE maChuyen = ct.maChuyen " +
+                "   AND trangThai IN (N'Đã thanh toán', N'Đã đổi') " +
+                "   AND CAST(ngayIn AS DATE) BETWEEN ? AND ?), 0) as soGheBan " +
                 "FROM ChuyenTau ct " +
                 "LEFT JOIN Ga gdi ON ct.maGaDi = gdi.maGa " +
                 "LEFT JOIN Ga gden ON ct.maGaDen = gden.maGa " +
-                "LEFT JOIN ChiTietChuyenTau ctct ON ct.maChuyen = ctct.maChuyenTau " +
-                "LEFT JOIN Ve v ON ct.maChuyen = v.maChuyen " +
-                "    AND CAST(v.ngayIn AS DATE) BETWEEN ? AND ? " +
                 "WHERE CAST(ct.gioDi AS DATE) BETWEEN ? AND ? " +
-                "GROUP BY ct.maChuyen, ct.gioDi, gdi.tenGa, gden.tenGa " +
                 "ORDER BY ct.gioDi DESC";
 
         try (Connection conn = ConnectSql.getInstance().getConnection();
