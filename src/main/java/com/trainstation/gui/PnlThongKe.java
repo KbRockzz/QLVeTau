@@ -14,6 +14,11 @@ import java.util.List;
 import java.text.DecimalFormat;
 
 public class PnlThongKe extends JPanel {
+    // Navigation button color constants
+    private static final Color NAV_BUTTON_DEFAULT = new Color(10, 115, 215);  // #0A73D7
+    private static final Color NAV_BUTTON_HOVER = new Color(8, 89, 166);      // #0859A6
+    private static final Color NAV_BUTTON_SELECTED = new Color(70, 130, 180); // #4682B4
+    
     private ThongKeService thongKeService;
 
     private JButton btnDoanhThu, btnVeDoiHoan, btnDoPhuGhe;
@@ -248,7 +253,7 @@ public class PnlThongKe extends JPanel {
 
     private void styleNavigationButton(JButton button) {
         // Basic styling
-        button.setBackground(new Color(10, 115, 215)); // #0A73D7
+        button.setBackground(NAV_BUTTON_DEFAULT);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -261,7 +266,7 @@ public class PnlThongKe extends JPanel {
                     // Check if this button is selected
                     Boolean isSelected = (Boolean) button.getClientProperty("selected");
                     if (isSelected == null || !isSelected) {
-                        button.setBackground(new Color(8, 89, 166)); // Hover color
+                        button.setBackground(NAV_BUTTON_HOVER);
                     }
                 }
             }
@@ -272,9 +277,9 @@ public class PnlThongKe extends JPanel {
                     // Check if this button is selected
                     Boolean isSelected = (Boolean) button.getClientProperty("selected");
                     if (isSelected != null && isSelected) {
-                        button.setBackground(new Color(70, 130, 180)); // Selected color
+                        button.setBackground(NAV_BUTTON_SELECTED);
                     } else {
-                        button.setBackground(new Color(10, 115, 215)); // Default color
+                        button.setBackground(NAV_BUTTON_DEFAULT);
                     }
                 }
             }
@@ -293,10 +298,10 @@ public class PnlThongKe extends JPanel {
     private void updateButtonSelection(JButton button, boolean selected) {
         button.putClientProperty("selected", selected);
         if (selected) {
-            button.setBackground(new Color(70, 130, 180)); // Selected color
+            button.setBackground(NAV_BUTTON_SELECTED);
             button.setForeground(Color.WHITE);
         } else {
-            button.setBackground(new Color(10, 115, 215)); // Default color
+            button.setBackground(NAV_BUTTON_DEFAULT);
             button.setForeground(Color.WHITE);
         }
     }
