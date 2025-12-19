@@ -54,6 +54,38 @@ public class ThongKeDAO {
         return result;
     }
 
+    public List<Map<String, Object>> thongKeDoanhThuTheoHoaDon(LocalDate tuNgay, LocalDate denNgay) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        String sql = "SELECT hd.maHoaDon, hd.ngayLap, COUNT(ct.maVe) as soVe, SUM(ct.giaDaKM) as tongTien " +
+                "FROM HoaDon hd " +
+                "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
+                "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
+                "AND hd.trangThai = N'Hoàn tất' " +
+                "GROUP BY hd.maHoaDon, hd.ngayLap " +
+                "ORDER BY hd.ngayLap DESC";
+
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setDate(1, Date.valueOf(tuNgay));
+            pst.setDate(2, Date.valueOf(denNgay));
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("maHoaDon", rs.getString("maHoaDon"));
+                    row.put("ngayLap", rs.getTimestamp("ngayLap"));
+                    row.put("soVe", rs.getInt("soVe"));
+                    row.put("tongTien", rs.getDouble("tongTien"));
+                    result.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public List<Map<String, Object>> thongKeVeDoiHoan(LocalDate tuNgay, LocalDate denNgay) {
         List<Map<String, Object>> result = new ArrayList<>();
         String sql = "SELECT v.maVe, ct.maHoaDon, v.ngayIn, " +

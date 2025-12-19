@@ -8,6 +8,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.text.DecimalFormat;
@@ -116,7 +117,7 @@ public class PnlThongKe extends JPanel {
 
         panel.add(pnlFilter, BorderLayout.NORTH);
 
-        String[] columns = {"Ngày bán", "Tổng doanh thu (VNĐ)"};
+        String[] columns = {"Mã hóa đơn", "Thời gian", "Số vé", "Tổng tiền (VNĐ)"};
         modelDoanhThu = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -125,8 +126,10 @@ public class PnlThongKe extends JPanel {
         };
         tblDoanhThu = new JTable(modelDoanhThu);
         tblDoanhThu.setRowHeight(25);
-        tblDoanhThu.getColumnModel().getColumn(0).setPreferredWidth(200);
-        tblDoanhThu.getColumnModel().getColumn(1).setPreferredWidth(300);
+        tblDoanhThu.getColumnModel().getColumn(0).setPreferredWidth(150);
+        tblDoanhThu.getColumnModel().getColumn(1).setPreferredWidth(200);
+        tblDoanhThu.getColumnModel().getColumn(2).setPreferredWidth(100);
+        tblDoanhThu.getColumnModel().getColumn(3).setPreferredWidth(150);
 
         JScrollPane scrollPane = new JScrollPane(tblDoanhThu);
         // Giảm chiều cao bảng để có đủ không gian
@@ -283,17 +286,25 @@ public class PnlThongKe extends JPanel {
             LocalDate denNgay = dateDoanhThuDen.getDate().toInstant()
                     .atZone(ZoneId.systemDefault()).toLocalDate();
 
-            Map<String, Double> data = thongKeService.thongKeDoanhThu(tuNgay, denNgay);
+            List<Map<String, Object>> data = thongKeService.thongKeDoanhThuTheoHoaDon(tuNgay, denNgay);
 
             double tongDoanhThu = 0;
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-            List<String> sortedKeys = new ArrayList<>(data.keySet());
-            Collections.sort(sortedKeys);
+            for (Map<String, Object> row : data) {
+                String maHoaDon = (String) row.get("maHoaDon");
+                java.sql.Timestamp ngayLap = (java.sql.Timestamp) row.get("ngayLap");
+                String thoiGian = ngayLap.toLocalDateTime().format(dateFormatter);
+                int soVe = (Integer) row.get("soVe");
+                double tongTien = (Double) row.get("tongTien");
+                tongDoanhThu += tongTien;
 
-            for (String ngay : sortedKeys) {
-                double doanhThu = data.get(ngay);
-                tongDoanhThu += doanhThu;
-                modelDoanhThu.addRow(new Object[]{ngay, currencyFormat.format(doanhThu)});
+                modelDoanhThu.addRow(new Object[]{
+                    maHoaDon, 
+                    thoiGian, 
+                    soVe, 
+                    currencyFormat.format(tongTien)
+                });
             }
 
             lblTongDoanhThu.setText("Tổng cộng: " + currencyFormat.format(tongDoanhThu) + " VNĐ");

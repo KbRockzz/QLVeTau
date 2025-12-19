@@ -143,6 +143,10 @@ public class ThongKeService {
         return thongKeDAO.thongKeDoanhThu(tuNgay, denNgay);
     }
 
+    public List<Map<String, Object>> thongKeDoanhThuTheoHoaDon(LocalDate tuNgay, LocalDate denNgay) {
+        return thongKeDAO.thongKeDoanhThuTheoHoaDon(tuNgay, denNgay);
+    }
+
     public List<Map<String, Object>> thongKeVeDoiHoan(LocalDate tuNgay, LocalDate denNgay) {
         return thongKeDAO.thongKeVeDoiHoan(tuNgay, denNgay);
     }
