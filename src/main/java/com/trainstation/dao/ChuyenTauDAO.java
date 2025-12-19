@@ -76,36 +76,12 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     @Override
     public ChuyenTau findById(String id) {
-        String sql = "SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE maChuyen = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    LocalDateTime gioDi = null, gioDen = null;
-                    Timestamp ts1 = rs.getTimestamp("gioDi");
-                    if (ts1 != null) gioDi = ts1.toLocalDateTime();
-                    Timestamp ts2 = rs.getTimestamp("gioDen");
-                    if (ts2 != null) gioDen = ts2.toLocalDateTime();
-
-                    return new ChuyenTau(
-                            rs.getString("maChuyen"),
-                            rs.getString("maDauMay"),
-                            rs.getString("maNV"),
-                            rs.getString("maGaDi"),
-                            rs.getString("maGaDen"),
-                            gioDi,
-                            gioDen,
-                            rs.getObject("soKm", Integer.class),
-                            rs.getString("maChang"),
-                            rs.getString("trangThai")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<ChuyenTau> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(ct -> ct.getMaChuyen().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -144,7 +120,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     @Override
     public boolean update(ChuyenTau ct) {
-        String sql = "UPDATE ChuyenTau SET maDauMay = ?, maNV = ?, maGaDi = ?, maGaDen = ?, gioDi = ?, gioDen = ?, soKm = ?, maChang = ?, trangThai = ? WHERE maChuyen = ?";
+        String sql = "UPDATE ChuyenTau SET maDauMay = ?, maNV = ?, maGaDi = ?, maGaDen = ?, gioDi = ?, gioDen = ?, soKm = ?, maChang = ?, trangThai = ? WHERE maChuyen = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, ct.getMaDauMay());
@@ -261,16 +237,13 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
 
     public List<String> getDistinctStations() {
         Set<String> stations = new HashSet<>();
-        String sql = "SELECT DISTINCT maGaDi FROM ChuyenTau UNION SELECT DISTINCT maGaDen FROM ChuyenTau ORDER BY 1";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
-            while (rs.next()) {
-                stations.add(rs.getString(1));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        List<ChuyenTau> list = new ArrayList<>();
+        list = getAll();
+        list.stream()
+                .forEach(ct -> {
+                    stations.add(ct.getMaGaDi());
+                    stations.add(ct.getMaGaDen());
+                });
         return new ArrayList<>(stations);
     }
 
@@ -278,7 +251,7 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
      * Cập nhật trường trangThai cho chuyến trong Connection đã có (dùng cho transaction).
      */
     public void capNhatTrangThai(Connection conn, String maChuyen, String tThai) throws SQLException {
-        String sql = "UPDATE ChuyenTau SET trangThai = ? WHERE maChuyen = ?";
+        String sql = "UPDATE ChuyenTau SET trangThai = ? WHERE maChuyen = ? AND isActive = 1";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, tThai);
             pst.setString(2, maChuyen);
@@ -291,18 +264,13 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
      * Giả định bảng Ve có cột maChuyen và gioDi (timestamp).
      */
     public int countTicketsForChuyenOnDate(String maChuyen, LocalDate date) {
-        String sql = "SELECT COUNT(*) FROM Ve WHERE maChuyen = ? AND CAST(gioDi AS DATE) = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, maChuyen);
-            pst.setDate(2, Date.valueOf(date));
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
+        List<ChuyenTau> list = new ArrayList<>();
+        list = getAll();
+        return (int) list.stream()
+                .filter(ct -> ct.getMaChuyen().equals(maChuyen)
+                        && ct.getGioDi() != null
+                        && ct.getGioDi().toLocalDate().equals(date))
+                .count();
     }
 
     /**
@@ -323,63 +291,6 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
             e.printStackTrace();
             // trường hợp lỗi trả false
             return false;
-        }
-    }
-
-    /**
-     * Xử lý "arrive" (đến nơi) cho chuyến vào ngày date:
-     * - Cập nhật trạng thái chuyến (trangThai = 'Đã đến')
-     * - Giải phóng ghế (cập nhật vé) theo chính sách:
-     *     + nếu freePaid == false: chỉ giải phóng vé chưa thanh toán (giả sử daThanhToan = 0)
-     *     + nếu freePaid == true: giải phóng tất cả vé của chuyến trong ngày
-     *
-     * Trả về số vé đã được thay đổi (số hàng Ve cập nhật).
-     *
-     * LƯU Ý RẤT QUAN TRỌNG: mình giả định bảng Vé có cột:
-     *    - maVe (PK)
-     *    - maChuyen
-     *    - gioDi (timestamp)
-     *    - daThanhToan (tinyint(1) hoặc int 0/1)
-     *    - tinhTrang (varchar) -- sẽ cập nhật sang 'Hủy' để giải phóng ghế
-     *
-     * Nếu schema Vé khác, bạn cần chỉnh lại các tên cột và logic WHERE/SET.
-     */
-    public int arriveChuyenOnDate(String maChuyen, LocalDate date, boolean freePaid, String source) {
-        String newStatus = "Đã đến";
-        // cập nhật trạng thái chuyến + cập nhật vé trong transaction
-        String updateVeSqlAll = "UPDATE Ve SET tinhTrang = ? WHERE maChuyen = ? AND CAST(gioDi AS DATE) = ? AND tinhTrang != ?";
-        String updateVeSqlUnpaid = "UPDATE Ve SET tinhTrang = ? WHERE maChuyen = ? AND CAST(gioDi AS DATE) = ? AND daThanhToan = 0 AND tinhTrang != ?";
-
-        int updatedCount = 0;
-        try (Connection conn = ConnectSql.getInstance().getConnection()) {
-            conn.setAutoCommit(false);
-            // 1) cập nhật trạng thái chuyến
-            capNhatTrangThai(conn, maChuyen, newStatus);
-
-            // 2) cập nhật vé: đánh dấu tinhTrang = 'Hủy' để giải phóng ghế
-            String cancelStatus = "Hủy";
-
-            try (PreparedStatement pst = conn.prepareStatement(freePaid ? updateVeSqlAll : updateVeSqlUnpaid)) {
-                pst.setString(1, cancelStatus);
-                pst.setString(2, maChuyen);
-                pst.setDate(3, Date.valueOf(date));
-                pst.setString(4, cancelStatus); // tránh cập nhật lại những vé đã 'Hủy'
-                updatedCount = pst.executeUpdate();
-            }
-
-            conn.commit();
-            return updatedCount;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // nếu lỗi, rollback cố gắng thực hiện (try-catch)
-            try {
-                // attempt rollback
-                Connection conn = ConnectSql.getInstance().getConnection();
-                if (conn != null && !conn.getAutoCommit()) conn.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            return 0;
         }
     }
 }

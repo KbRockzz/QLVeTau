@@ -55,39 +55,18 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public NhanVien findById(String id) {
-        // Only find active employees (isActive = 1)
-        String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien WHERE maNV = ? AND isActive = 1";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    LocalDate ngaySinh = null;
-                    Date date = rs.getDate("ngaySinh");
-                    if (date != null) {
-                        ngaySinh = date.toLocalDate();
-                    }
-                    return new NhanVien(
-                            rs.getString("maNV"),
-                            rs.getString("tenNV"),
-                            rs.getString("soDienThoai"),
-                            rs.getString("diaChi"),
-                            ngaySinh,
-                            rs.getString("maLoaiNV"),
-                            rs.getString("trangThai")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<NhanVien> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(nv -> nv.getMaNV().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public boolean insert(NhanVien nv) {
         // Set isActive = 1 by default for new employees
-        String sql = "INSERT INTO NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, 1)";
+        String sql = "INSERT INTO NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, nv.getMaNV());
@@ -110,7 +89,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public boolean update(NhanVien nv) {
-        String sql = "UPDATE NhanVien SET tenNV = ?, soDienThoai = ?, diaChi = ?, ngaySinh = ?, maLoaiNV = ?, trangThai = ? WHERE maNV = ?";
+        String sql = "UPDATE NhanVien SET tenNV = ?, soDienThoai = ?, diaChi = ?, ngaySinh = ?, maLoaiNV = ?, trangThai = ? WHERE maNV = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, nv.getTenNV());
@@ -196,18 +175,12 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
     }
 
     public String getLoaiNV(String maNV) {
-        String sql = "SELECT maLoaiNV FROM NhanVien WHERE maNV = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, maNV);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("maLoaiNV");
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<NhanVien> list = new ArrayList<>();
+        list = getAll();
+        NhanVien nv = list.stream()
+                .filter(n -> n.getMaNV().equals(maNV))
+                .findFirst()
+                .orElse(null);
+        return nv.getMaLoaiNV();
     }
 }

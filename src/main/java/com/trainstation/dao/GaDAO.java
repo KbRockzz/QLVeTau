@@ -39,26 +39,18 @@ public class GaDAO implements GenericDAO<Ga> {
 
     @Override
     public Ga findById(String id) {
-        // Only find active stations (isActive = 1)
-        String sql = "SELECT maGa, tenGa, moTa, tinhTrang, diaChi FROM Ga WHERE maGa = ? AND isActive = 1";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToEntity(rs);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<Ga> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(ga -> ga.getMaGa().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public boolean insert(Ga entity) {
         // Set isActive = 1 by default for new stations
-        String sql = "INSERT INTO Ga (maGa, tenGa, moTa, tinhTrang, diaChi, isActive) VALUES (?, ?, ?, ?, ?, 1)";
+        String sql = "INSERT INTO Ga (maGa, tenGa, moTa, tinhTrang, diaChi) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entity.getMaGa());
@@ -75,7 +67,7 @@ public class GaDAO implements GenericDAO<Ga> {
 
     @Override
     public boolean update(Ga entity) {
-        String sql = "UPDATE Ga SET tenGa = ?, moTa = ?, tinhTrang = ?, diaChi = ? WHERE maGa = ?";
+        String sql = "UPDATE Ga SET tenGa = ?, moTa = ?, tinhTrang = ?, diaChi = ? WHERE maGa = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entity.getTenGa());

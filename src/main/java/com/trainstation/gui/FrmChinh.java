@@ -58,6 +58,7 @@ public class FrmChinh extends JFrame {
 
         // Stations / trains
         addPage("daumay", taoPanelVoiBo(new PnlDauMay()));      // Đầu máy
+        addPage("toatau", taoPanelVoiBo(new PnlToaTau()));      // Toa tàu
         addPage("ga", taoPanelVoiBo(new PnlGa()));         // Ga
         addPage("chuyentau", taoPanelVoiBo(new PnlChuyenTau())); // Chuyến tàu
         addPage("timkiemct", taoPanelVoiBo(new PnlTimKiemChuyenTau())); // Tìm kiếm ct

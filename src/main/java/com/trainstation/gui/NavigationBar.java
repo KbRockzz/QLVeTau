@@ -40,6 +40,7 @@ public class NavigationBar extends JPanel {
         JPopupMenu tripMenu = new JPopupMenu();
         tripMenu.add(createMenuItem("Chuyến tàu", "chuyentau"));
         tripMenu.add(createMenuItem("Đầu máy", "daumay"));
+        tripMenu.add(createMenuItem("Toa tàu", "toatau"));
         tripMenu.add(createMenuItem("Ga tàu","ga"));
         tripMenu.addSeparator();
         tripMenu.add(createMenuItem("Tìm kiếm", "timkiemct"));

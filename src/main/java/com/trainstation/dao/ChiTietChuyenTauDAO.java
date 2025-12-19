@@ -37,37 +37,19 @@ public class ChiTietChuyenTauDAO {
 
     public List<ChiTietChuyenTau> findByChuyenTau(String maChuyenTau) {
         List<ChiTietChuyenTau> list = new ArrayList<>();
-        String sql = "SELECT maChuyenTau, maToaTau, soThuTuToa, sucChua FROM ChiTietChuyenTau WHERE maChuyenTau = ? ORDER BY soThuTuToa";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, maChuyenTau);
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    ChiTietChuyenTau ct = mapResultSetToEntity(rs);
-                    list.add(ct);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
+        list = getAll();
+        return list.stream()
+                .filter(ct -> ct.getMaChuyenTau().equals(maChuyenTau))
+                .toList();
     }
 
     public ChiTietChuyenTau findById(String maChuyenTau, String maToaTau) {
-        String sql = "SELECT maChuyenTau, maToaTau, soThuTuToa, sucChua FROM ChiTietChuyenTau WHERE maChuyenTau = ? AND maToaTau = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, maChuyenTau);
-            pst.setString(2, maToaTau);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToEntity(rs);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<ChiTietChuyenTau> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(ct -> ct.getMaChuyenTau().equals(maChuyenTau) && ct.getMaToaTau().equals(maToaTau))
+                .findFirst()
+                .orElse(null);
     }
 
     public boolean add(ChiTietChuyenTau entity) {

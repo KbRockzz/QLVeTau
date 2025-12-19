@@ -23,7 +23,7 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
     @Override
     public List<ToaTau> getAll() {
         List<ToaTau> list = new ArrayList<>();
-        String sql = "SELECT maToa, loaiToa, samSX, trangThai, sucChua FROM ToaTau";
+        String sql = "SELECT maToa, loaiToa, samSX, trangThai, sucChua FROM ToaTau WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -45,30 +45,17 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
 
     @Override
     public ToaTau findById(String id) {
-        String sql = "SELECT maToa, loaiToa, samSX, trangThai, sucChua FROM ToaTau WHERE maToa = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return new ToaTau(
-                            rs.getString("maToa"),
-                            rs.getString("loaiToa"),
-                            rs.getObject("samSX", Integer.class),
-                            rs.getString("trangThai"),
-                            rs.getObject("sucChua", Integer.class)
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<ToaTau> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(t -> t.getMaToa().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public boolean insert(ToaTau t) {
-        String sql = "INSERT INTO ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, t.getMaToa());
@@ -102,7 +89,7 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM ToaTau WHERE maToa = ?";
+        String sql = "UPDATE ToaTau SET isActive = 0 WHERE maToa = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);

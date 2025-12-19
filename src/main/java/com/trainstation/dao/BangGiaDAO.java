@@ -60,32 +60,12 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
 
     @Override
     public BangGia findById(String id) {
-        String sql = "SELECT maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc FROM BangGia WHERE maBangGia = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    LocalDateTime ngayBatDau = null, ngayKetThuc = null;
-                    Timestamp ts1 = rs.getTimestamp("ngayBatDau");
-                    if (ts1 != null) ngayBatDau = ts1.toLocalDateTime();
-                    Timestamp ts2 = rs.getTimestamp("ngayKetThuc");
-                    if (ts2 != null) ngayKetThuc = ts2.toLocalDateTime();
-
-                    return new BangGia(
-                            rs.getString("maBangGia"),
-                            rs.getString("maChang"),
-                            rs.getString("loaiGhe"),
-                            rs.getFloat("giaCoBan"),
-                            ngayBatDau,
-                            ngayKetThuc
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<BangGia> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(bg -> bg.getMaBangGia().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -126,7 +106,7 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM BangGia WHERE maBangGia = ?";
+        String sql = "UPDATE BangGia SET isActive = 0 WHERE maBangGia = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);

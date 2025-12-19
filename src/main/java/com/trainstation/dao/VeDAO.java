@@ -99,7 +99,7 @@ public class VeDAO implements GenericDAO<Ve> {
     @Override
     public List<Ve> getAll() {
         List<Ve> list = new ArrayList<>();
-        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan FROM Ve";
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan FROM Ve WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -142,47 +142,12 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public Ve findById(String id) {
-        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan FROM Ve WHERE maVe = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
-                    Timestamp ts1 = rs.getTimestamp("ngayIn");
-                    if (ts1 != null) ngayIn = ts1.toLocalDateTime();
-                    Timestamp ts2 = rs.getTimestamp("gioDi");
-                    if (ts2 != null) gioDi = ts2.toLocalDateTime();
-                    Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
-                    if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
-
-                    Ve result = new Ve(
-                            rs.getString("maVe"),
-                            rs.getString("maChuyen"),
-                            rs.getString("maLoaiVe"),
-                            rs.getString("maSoGhe"),
-                            rs.getString("maGaDi"),
-                            rs.getString("maGaDen"),
-                            rs.getString("tenGaDi"),
-                            rs.getString("tenGaDen"),
-                            ngayIn,
-                            rs.getString("trangThai"),
-                            gioDi,
-                            gioDenDuKien,
-                            rs.getObject("soToa", Integer.class),
-                            rs.getString("loaiCho"),
-                            rs.getString("loaiVe"),
-                            rs.getString("maBangGia"),
-                            rs.getObject("giaThanhToan", Float.class)
-                    );
-                    ensureStationNames(result);
-                    return result;
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<Ve> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(v -> v.getMaVe().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -300,7 +265,7 @@ public class VeDAO implements GenericDAO<Ve> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM Ve WHERE maVe = ?";
+        String sql = "UPDATE Ve SET isActive = 0 WHERE maVe = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -317,50 +282,10 @@ public class VeDAO implements GenericDAO<Ve> {
      */
     public List<Ve> getByKhachHang(String maKH) {
         List<Ve> list = new ArrayList<>();
-        String sql = "SELECT v.maVe, v.maChuyen, v.maLoaiVe, v.maSoGhe, v.maGaDi, v.maGaDen, v.tenGaDi, v.tenGaDen, v.ngayIn, v.trangThai, v.gioDi, v.gioDenDuKien, v.soToa, v.loaiCho, v.loaiVe, v.maBangGia, v.giaThanhToan, v.isActive " +
-                "FROM Ve v " +
-                "INNER JOIN HoaDon hd ON v.maVe = hd.maVe " +
-                "WHERE hd.maKH = ? AND v.isActive = 1";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, maKH);
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
-                    Timestamp ts1 = rs.getTimestamp("ngayIn");
-                    if (ts1 != null) ngayIn = ts1.toLocalDateTime();
-                    Timestamp ts2 = rs.getTimestamp("gioDi");
-                    if (ts2 != null) gioDi = ts2.toLocalDateTime();
-                    Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
-                    if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
-
-                    Ve v = new Ve(
-                            rs.getString("maVe"),
-                            rs.getString("maChuyen"),
-                            rs.getString("maLoaiVe"),
-                            rs.getString("maSoGhe"),
-                            rs.getString("maGaDi"),
-                            rs.getString("maGaDen"),
-                            rs.getString("tenGaDi"),
-                            rs.getString("tenGaDen"),
-                            ngayIn,
-                            rs.getString("trangThai"),
-                            gioDi,
-                            gioDenDuKien,
-                            rs.getObject("soToa", Integer.class),
-                            rs.getString("loaiCho"),
-                            rs.getString("loaiVe"),
-                            rs.getString("maBangGia"),
-                            rs.getObject("giaThanhToan", Float.class)
-                    );
-                    ensureStationNames(v);
-                    list.add(v);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
+        list = getAll();
+        return list.stream()
+                .filter(v -> v.getMaVe().equals(maKH))
+                .toList();
     }
     public List<Ve> getByChuyen(Connection conn, String maChuyen) throws SQLException {
         List<Ve> list = new ArrayList<>();
@@ -454,21 +379,5 @@ public class VeDAO implements GenericDAO<Ve> {
         return 0;
     }
 
-    public int countByChuyenAndDate(String maChuyen, LocalDate date) {
-        try (Connection conn = ConnectSql.getInstance().getConnection()) {
-            return countByChuyenAndDate(conn, maChuyen, date);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-    public List<Ve> getByChuyenAndDate(String maChuyen, java.time.LocalDate date) {
-        try (java.sql.Connection conn = com.trainstation.MySQL.ConnectSql.getInstance().getConnection()) {
-            return getByChuyenAndDate(conn, maChuyen, date);
-        } catch (java.sql.SQLException e) {
-            e.printStackTrace();
-            return new java.util.ArrayList<>();
-        }
-    }
 
 }

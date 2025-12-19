@@ -10,7 +10,6 @@ public class LoaiGheDAO implements GenericDAO<LoaiGhe> {
     private static LoaiGheDAO instance;
 
     private LoaiGheDAO() {
-        // Không giữ Connection làm trường
     }
 
     public static synchronized LoaiGheDAO getInstance() {
@@ -23,7 +22,7 @@ public class LoaiGheDAO implements GenericDAO<LoaiGhe> {
     @Override
     public List<LoaiGhe> getAll() {
         List<LoaiGhe> list = new ArrayList<>();
-        String sql = "SELECT maLoai, tenLoai, moTa FROM LoaiGhe";
+        String sql = "SELECT maLoai, tenLoai, moTa FROM LoaiGhe WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -43,23 +42,12 @@ public class LoaiGheDAO implements GenericDAO<LoaiGhe> {
 
     @Override
     public LoaiGhe findById(String id) {
-        String sql = "SELECT maLoai, tenLoai, moTa FROM LoaiGhe WHERE maLoai = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return new LoaiGhe(
-                            rs.getString("maLoai"),
-                            rs.getString("tenLoai"),
-                            rs.getString("moTa")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<LoaiGhe> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(lg -> lg.getMaLoai().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -79,7 +67,7 @@ public class LoaiGheDAO implements GenericDAO<LoaiGhe> {
 
     @Override
     public boolean update(LoaiGhe lg) {
-        String sql = "UPDATE LoaiGhe SET tenLoai = ?, moTa = ? WHERE maLoai = ?";
+        String sql = "UPDATE LoaiGhe SET tenLoai = ?, moTa = ? WHERE maLoai = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, lg.getTenLoai());
@@ -94,7 +82,7 @@ public class LoaiGheDAO implements GenericDAO<LoaiGhe> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM LoaiGhe WHERE maLoai = ?";
+        String sql = "UPDATE LoaiGhe SET isActive = 0 WHERE maLoai = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);

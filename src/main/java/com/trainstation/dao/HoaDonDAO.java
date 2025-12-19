@@ -24,7 +24,7 @@ public class HoaDonDAO implements GenericDAO<HoaDon> {
     @Override
     public List<HoaDon> getAll() {
         List<HoaDon> list = new ArrayList<>();
-        String sql = "SELECT maHoaDon, maNV, maKH, tenKH, soDienThoai, ngayLap, phuongThucThanhToan, trangThai FROM HoaDon";
+        String sql = "SELECT maHoaDon, maNV, maKH, tenKH, soDienThoai, ngayLap, phuongThucThanhToan, trangThai FROM HoaDon WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
@@ -51,58 +51,19 @@ public class HoaDonDAO implements GenericDAO<HoaDon> {
 
     @Override
     public HoaDon findById(String id) {
-        String sql = "SELECT maHoaDon, maNV, maKH, tenKH, soDienThoai, ngayLap, phuongThucThanhToan, trangThai FROM HoaDon WHERE maHoaDon = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    Timestamp ts = rs.getTimestamp("ngayLap");
-                    LocalDateTime ngayLap = ts != null ? ts.toLocalDateTime() : null;
-                    return new HoaDon(
-                            rs.getString("maHoaDon"),
-                            rs.getString("maNV"),
-                            rs.getString("maKH"),
-                            rs.getString("tenKH"),
-                            rs.getString("soDienThoai"),
-                            ngayLap,
-                            rs.getString("phuongThucThanhToan"),
-                            rs.getString("trangThai")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<HoaDon> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(hd -> hd.getMaHoaDon().equals(id))
+                .findFirst()
+                .orElse(null);
     }
     public List<HoaDon> findByKhachHang(String maKH) {
         List<HoaDon> list = new ArrayList<>();
-        String sql = "SELECT maHoaDon, maNV, maKH, tenKH, soDienThoai, ngayLap, phuongThucThanhToan, trangThai FROM HoaDon WHERE maKH = ? ORDER BY ngayLap DESC";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, maKH);
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    Timestamp ts = rs.getTimestamp("ngayLap");
-                    java.time.LocalDateTime ngayLap = ts != null ? ts.toLocalDateTime() : null;
-                    HoaDon hd = new HoaDon(
-                            rs.getString("maHoaDon"),
-                            rs.getString("maNV"),
-                            rs.getString("maKH"),
-                            rs.getString("tenKH"),
-                            rs.getString("soDienThoai"),
-                            ngayLap,
-                            rs.getString("phuongThucThanhToan"),
-                            rs.getString("trangThai")
-                    );
-                    list.add(hd);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
+        list = getAll();
+        return list.stream()
+                .filter(hd -> hd.getMaKH().equals(maKH))
+                .toList();
     }
     @Override
     public boolean insert(HoaDon hd) {
@@ -143,7 +104,7 @@ public class HoaDonDAO implements GenericDAO<HoaDon> {
 
     @Override
     public boolean update(HoaDon hd) {
-        String sql = "UPDATE HoaDon SET maNV = ?, maKH = ?, tenKH = ?, soDienThoai = ?, ngayLap = ?, phuongThucThanhToan = ?, trangThai = ? WHERE maHoaDon = ?";
+        String sql = "UPDATE HoaDon SET maNV = ?, maKH = ?, tenKH = ?, soDienThoai = ?, ngayLap = ?, phuongThucThanhToan = ?, trangThai = ? WHERE maHoaDon = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, hd.getMaNV());
@@ -164,7 +125,7 @@ public class HoaDonDAO implements GenericDAO<HoaDon> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM HoaDon WHERE maHoaDon = ?";
+        String sql = "UPDATE HoaDon SET isActive = 0 WHERE maHoaDon = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);

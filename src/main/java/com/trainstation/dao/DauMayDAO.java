@@ -76,7 +76,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
 
     @Override
     public boolean update(DauMay entity) {
-        String sql = "UPDATE DauMay SET loaiDauMay = ?, tenDauMay = ?, namSX = ?, lanBaoTriGanNhat = ?, trangThai = ? WHERE maDauMay = ?";
+        String sql = "UPDATE DauMay SET loaiDauMay = ?, tenDauMay = ?, namSX = ?, lanBaoTriGanNhat = ?, trangThai = ? WHERE maDauMay = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entity.getLoaiDauMay());
@@ -102,7 +102,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM DauMay WHERE maDauMay = ?";
+        String sql = "UPDATE DauMay SET isActive = 0 WHERE maDauMay = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -134,7 +134,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
      * Dừng hoạt động đầu máy
      */
     public boolean dungHoatDongDauMay(String maDauMay) {
-        String sql = "UPDATE DauMay SET trangThai = N'Dừng hoạt động' WHERE maDauMay = ?";
+        String sql = "UPDATE DauMay SET trangThai = N'Dừng hoạt động' WHERE maDauMay = ? and isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maDauMay);

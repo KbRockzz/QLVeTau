@@ -46,32 +46,18 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
 
     @Override
     public TaiKhoan findById(String id) {
-        // Only find active accounts (isActive = 1)
-        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai FROM TaiKhoan WHERE maTK = ? AND isActive = 1";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return new TaiKhoan(
-                            rs.getString("maTK"),
-                            rs.getString("maNV"),
-                            rs.getString("tenTaiKhoan"),
-                            rs.getString("matKhau"),
-                            rs.getString("trangThai")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<TaiKhoan> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(t -> t.getMaTK().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public boolean insert(TaiKhoan t) {
         // Set isActive = 1 by default for new accounts
-        String sql = "INSERT INTO TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai, isActive) VALUES (?, ?, ?, ?, ?, 1)";
+        String sql = "INSERT INTO TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, t.getMaTK());
@@ -88,7 +74,7 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
 
     @Override
     public boolean update(TaiKhoan t) {
-        String sql = "UPDATE TaiKhoan SET maNV = ?, tenTaiKhoan = ?, matKhau = ?, trangThai = ? WHERE maTK = ?";
+        String sql = "UPDATE TaiKhoan SET maNV = ?, tenTaiKhoan = ?, matKhau = ?, trangThai = ? WHERE maTK = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, t.getMaNV());

@@ -45,25 +45,12 @@ public class ChangTauDAO implements GenericDAO<ChangTau> {
 
     @Override
     public ChangTau findById(String id) {
-        String sql = "SELECT maChang, soKMToiThieu, soKMToiDa, moTa, giaTien FROM ChangTau WHERE maChang = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return new ChangTau(
-                            rs.getString("maChang"),
-                            rs.getObject("soKMToiThieu", Integer.class),
-                            rs.getObject("soKMToiDa", Integer.class),
-                            rs.getString("moTa"),
-                            rs.getObject("giaTien", Float.class)
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<ChangTau> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(ct -> ct.getMaChang().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -102,7 +89,7 @@ public class ChangTauDAO implements GenericDAO<ChangTau> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM ChangTau WHERE maChang = ?";
+        String sql = "UPDATE ChangTau SET isActive = 0 WHERE maChang = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);

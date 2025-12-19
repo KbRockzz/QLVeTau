@@ -2,6 +2,7 @@ package com.trainstation.dao;
 
 import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.model.ChiTietHoaDon;
+import com.trainstation.model.HoaDon;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -45,27 +46,12 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
 
     @Override
     public ChiTietHoaDon findById(String id) {
-        // composite PK (maHoaDon, maVe) - this method not applicable; keep simple lookup by maVe
-        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon WHERE maVe = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    ChiTietHoaDon ct = new ChiTietHoaDon();
-                    ct.setMaHoaDon(rs.getString("maHoaDon"));
-                    ct.setMaVe(rs.getString("maVe"));
-                    ct.setMaLoaiVe(rs.getString("maLoaiVe"));
-                    ct.setGiaGoc(rs.getFloat("giaGoc"));
-                    ct.setGiaDaKM(rs.getFloat("giaDaKM"));
-                    ct.setMoTa(rs.getString("moTa"));
-                    return ct;
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<ChiTietHoaDon> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(ct -> ct.getMaVe().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -102,7 +88,7 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
 
     @Override
     public boolean update(ChiTietHoaDon ct) {
-        String sql = "UPDATE ChiTietHoaDon SET maLoaiVe = ?, giaGoc = ?, giaDaKM = ?, moTa = ? WHERE maHoaDon = ? AND maVe = ?";
+        String sql = "UPDATE ChiTietHoaDon SET maLoaiVe = ?, giaGoc = ?, giaDaKM = ?, moTa = ? WHERE maHoaDon = ? AND maVe = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, ct.getMaLoaiVe());
@@ -120,7 +106,7 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM ChiTietHoaDon WHERE maVe = ?";
+        String sql = "UPDATE ChiTietHoaDon SET isActive = 0 WHERE maVe = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, id);
@@ -133,23 +119,15 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
 
     // New: exists check
     public boolean exists(String maHoaDon, String maVe) {
-        String sql = "SELECT 1 FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, maHoaDon);
-            pst.setString(2, maVe);
-            try (ResultSet rs = pst.executeQuery()) {
-                return rs.next();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
+        List<ChiTietHoaDon> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .anyMatch(ct -> ct.getMaHoaDon().equals(maHoaDon) && ct.getMaVe().equals(maVe));
     }
 
     // exists using provided connection (transactional)
     public boolean exists(String maHoaDon, String maVe, Connection conn) throws SQLException {
-        String sql = "SELECT 1 FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ?";
+        String sql = "SELECT 1 FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ? AND isActive = 1";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maHoaDon);
             pst.setString(2, maVe);
@@ -161,50 +139,18 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
 
     public List<ChiTietHoaDon> findByHoaDon(String maHoaDon) {
         List<ChiTietHoaDon> list = new ArrayList<>();
-        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon WHERE maHoaDon = ? ORDER BY maVe";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, maHoaDon);
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    ChiTietHoaDon ct = new ChiTietHoaDon();
-                    ct.setMaHoaDon(rs.getString("maHoaDon"));
-                    ct.setMaVe(rs.getString("maVe"));
-                    ct.setMaLoaiVe(rs.getString("maLoaiVe"));
-                    ct.setGiaGoc(rs.getFloat("giaGoc"));
-                    ct.setGiaDaKM(rs.getFloat("giaDaKM"));
-                    ct.setMoTa(rs.getString("moTa"));
-                    list.add(ct);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
+        list = getAll();
+        return list.stream()
+                .filter(ct -> ct.getMaHoaDon().equals(maHoaDon))
+                .toList();
     }
 
-    /**
-     * Update moTa field for audit trail (ticket exchange tracking)
-     */
-    public boolean updateMoTa(String maHoaDon, String maVe, String moTa) {
-        String sql = "UPDATE ChiTietHoaDon SET moTa = ? WHERE maHoaDon = ? AND maVe = ?";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, moTa);
-            pst.setString(2, maHoaDon);
-            pst.setString(3, maVe);
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     /**
      * Update moTa field using provided connection (for transactional operations)
      */
     public boolean updateMoTa(String maHoaDon, String maVe, String moTa, Connection conn) throws SQLException {
-        String sql = "UPDATE ChiTietHoaDon SET moTa = ? WHERE maHoaDon = ? AND maVe = ?";
+        String sql = "UPDATE ChiTietHoaDon SET moTa = ? WHERE maHoaDon = ? AND maVe = ? AND isActive = 1";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, moTa);
             pst.setString(2, maHoaDon);

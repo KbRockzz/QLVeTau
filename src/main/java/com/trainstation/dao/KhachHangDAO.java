@@ -10,7 +10,6 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     private static KhachHangDAO instance;
 
     private KhachHangDAO() {
-        // Không giữ Connection làm trường
     }
 
     public static synchronized KhachHangDAO getInstance() {
@@ -45,31 +44,18 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
 
     @Override
     public KhachHang findById(String id) {
-        // Only find active customers (isActive = 1)
-        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE maKhachHang = ? AND isActive = 1";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return new KhachHang(
-                            rs.getString("maKhachHang"),
-                            rs.getString("tenKhachHang"),
-                            rs.getString("email"),
-                            rs.getString("soDienThoai")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<KhachHang> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(kh -> kh.getMaKhachHang().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public boolean insert(KhachHang kh) {
         // Set isActive = 1 by default for new customers
-        String sql = "INSERT INTO KhachHang (maKhachHang, tenKhachHang, email, soDienThoai, isActive) VALUES (?, ?, ?, ?, 1)";
+        String sql = "INSERT INTO KhachHang (maKhachHang, tenKhachHang, email, soDienThoai) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, kh.getMaKhachHang());
@@ -85,7 +71,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
 
     @Override
     public boolean update(KhachHang kh) {
-        String sql = "UPDATE KhachHang SET tenKhachHang = ?, email = ?, soDienThoai = ? WHERE maKhachHang = ?";
+        String sql = "UPDATE KhachHang SET tenKhachHang = ?, email = ?, soDienThoai = ? WHERE maKhachHang = ? AND isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, kh.getTenKhachHang());
@@ -156,24 +142,11 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     }
 
     public KhachHang timTheoSoDienThoai(String soDienThoai) {
-        // Only find active customers (isActive = 1)
-        String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE soDienThoai = ? AND isActive = 1";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, soDienThoai);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return new KhachHang(
-                            rs.getString("maKhachHang"),
-                            rs.getString("tenKhachHang"),
-                            rs.getString("email"),
-                            rs.getString("soDienThoai")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<KhachHang> list = new ArrayList<>();
+        list = getAll();
+        return list.stream()
+                .filter(kh -> kh.getSoDienThoai().equals(soDienThoai))
+                .findFirst()
+                .orElse(null);
     }
 }
