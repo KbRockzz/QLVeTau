@@ -86,6 +86,37 @@ public class ThongKeDAO {
         return result;
     }
 
+    public List<Map<String, Object>> thongKeLoaiVeTheoDoanhThu(LocalDate tuNgay, LocalDate denNgay) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        String sql = "SELECT lv.tenLoai, COUNT(ct.maVe) as soLuong " +
+                "FROM HoaDon hd " +
+                "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
+                "JOIN LoaiVe lv ON ct.maLoaiVe = lv.maLoaiVe " +
+                "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
+                "AND hd.trangThai = N'Hoàn tất' " +
+                "GROUP BY lv.tenLoai " +
+                "ORDER BY soLuong DESC";
+
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setDate(1, Date.valueOf(tuNgay));
+            pst.setDate(2, Date.valueOf(denNgay));
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("tenLoai", rs.getString("tenLoai"));
+                    row.put("soLuong", rs.getInt("soLuong"));
+                    result.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public List<Map<String, Object>> thongKeVeDoiHoan(LocalDate tuNgay, LocalDate denNgay) {
         List<Map<String, Object>> result = new ArrayList<>();
         String sql = "SELECT v.maVe, ct.maHoaDon, v.ngayIn, " +

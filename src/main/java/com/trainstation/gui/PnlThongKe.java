@@ -31,6 +31,7 @@ public class PnlThongKe extends JPanel {
     private JTable tblDoanhThu;
     private DefaultTableModel modelDoanhThu;
     private JLabel lblTongDoanhThu;
+    private JLabel lblThongKeLoaiVe;
 
     private JDateChooser dateVeDoiHoanTu, dateVeDoiHoanDen;
     private JButton btnThongKeVeDoiHoan;
@@ -141,11 +142,25 @@ public class PnlThongKe extends JPanel {
         MaterialInitializer.setTableScrollPaneSize(scrollPane, 40);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        JPanel pnlSummary = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
+        JPanel pnlSummary = new JPanel();
+        pnlSummary.setLayout(new BoxLayout(pnlSummary, BoxLayout.Y_AXIS));
+        pnlSummary.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        
+        // Ticket type summary
+        lblThongKeLoaiVe = new JLabel("Loại vé: ");
+        lblThongKeLoaiVe.setFont(new Font("Arial", Font.PLAIN, 14));
+        lblThongKeLoaiVe.setForeground(new Color(0, 0, 139));
+        JPanel pnlLoaiVe = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        pnlLoaiVe.add(lblThongKeLoaiVe);
+        pnlSummary.add(pnlLoaiVe);
+        
+        // Total revenue
         lblTongDoanhThu = new JLabel("Tổng cộng: 0 VNĐ");
         lblTongDoanhThu.setFont(new Font("Arial", Font.BOLD, 16));
         lblTongDoanhThu.setForeground(new Color(0, 128, 0));
-        pnlSummary.add(lblTongDoanhThu);
+        JPanel pnlTong = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 5));
+        pnlTong.add(lblTongDoanhThu);
+        pnlSummary.add(pnlTong);
 
         panel.add(pnlSummary, BorderLayout.SOUTH);
 
@@ -363,6 +378,28 @@ public class PnlThongKe extends JPanel {
             }
 
             lblTongDoanhThu.setText("Tổng cộng: " + currencyFormat.format(tongDoanhThu) + " VNĐ");
+
+            // Load and display ticket type summary
+            List<Map<String, Object>> loaiVeData = thongKeService.thongKeLoaiVeTheoDoanhThu(tuNgay, denNgay);
+            StringBuilder loaiVeText = new StringBuilder("Loại vé: ");
+            
+            if (loaiVeData.isEmpty()) {
+                loaiVeText.append("Không có dữ liệu");
+            } else {
+                for (int i = 0; i < loaiVeData.size(); i++) {
+                    Map<String, Object> loaiVe = loaiVeData.get(i);
+                    String tenLoai = (String) loaiVe.get("tenLoai");
+                    int soLuong = (Integer) loaiVe.get("soLuong");
+                    
+                    loaiVeText.append(tenLoai).append(": ").append(soLuong).append(" vé");
+                    
+                    if (i < loaiVeData.size() - 1) {
+                        loaiVeText.append(" | ");
+                    }
+                }
+            }
+            
+            lblThongKeLoaiVe.setText(loaiVeText.toString());
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,

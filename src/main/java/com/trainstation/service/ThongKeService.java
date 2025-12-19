@@ -147,6 +147,10 @@ public class ThongKeService {
         return thongKeDAO.thongKeDoanhThuTheoHoaDon(tuNgay, denNgay);
     }
 
+    public List<Map<String, Object>> thongKeLoaiVeTheoDoanhThu(LocalDate tuNgay, LocalDate denNgay) {
+        return thongKeDAO.thongKeLoaiVeTheoDoanhThu(tuNgay, denNgay);
+    }
+
     public List<Map<String, Object>> thongKeVeDoiHoan(LocalDate tuNgay, LocalDate denNgay) {
         return thongKeDAO.thongKeVeDoiHoan(tuNgay, denNgay);
     }
