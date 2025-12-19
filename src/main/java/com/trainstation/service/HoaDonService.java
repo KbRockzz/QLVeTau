@@ -9,6 +9,7 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.trainstation.MySQL.ConnectSql;
@@ -23,6 +24,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Service xử lý nghiệp vụ liên quan đến Hóa đơn
@@ -84,6 +89,24 @@ public class HoaDonService {
     public String xuatHoaDonPDF(String maHoaDon) throws Exception {
         HoaDon hoaDon = hoaDonDAO.findById(maHoaDon);
         if (hoaDon == null) throw new IllegalArgumentException("Không tìm thấy hóa đơn");
+
+        // Lấy thông tin chi tiết hóa đơn và tổng tiền
+        List<ChiTietHoaDon> chiTiet = chiTietHoaDonDAO.getAll().stream()
+                .filter(ct -> ct.getMaHoaDon().equals(maHoaDon))
+                .toList();
+        float tongTien = 0;
+        for (ChiTietHoaDon ct : chiTiet) tongTien += ct.getGiaDaKM();
+
+        // Tạo mã QR thanh toán qua VietQR
+        String qrPath = "invoices/VietQR_" + maHoaDon + ".png";
+        VietQRService.fetchVietQR(
+                "970423",                       // Mã ngân hàng
+                "48608112005",               // Số tài khoản thụ hưởng
+                "LY THI THUY",             // Tên tài khoản thụ hưởng
+                tongTien,                   // Số tiền cần thanh toán
+                "Thanh toan hoa don " + maHoaDon, // Nội dung thanh toán
+                qrPath                      // Đường dẫn file QR Code
+        );
 
         KhachHang khachHang = khachHangDAO.findById(hoaDon.getMaKH());
         NhanVien nhanVien = NhanVienDAO.getInstance().findById(hoaDon.getMaNV());
@@ -148,7 +171,6 @@ public class HoaDonService {
             table.addHeaderCell(new Cell().add(new Paragraph("Giá vé").setFont(font).setBold()));
 
             int stt = 1;
-            float tongTien = 0;
             NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -161,8 +183,6 @@ public class HoaDonService {
                 table.addCell(new Cell().add(new Paragraph(ve != null ? ve.getTenGaDen() : "N/A").setFont(font)));
                 table.addCell(new Cell().add(new Paragraph(ve != null && ve.getGioDi() != null ? ve.getGioDi().format(dateFormatter) : "N/A").setFont(font)));
                 table.addCell(new Cell().add(new Paragraph(currencyFormat.format(ct.getGiaDaKM()) + " VNĐ").setFont(font)));
-
-                tongTien += ct.getGiaDaKM();
             }
 
             document.add(table);
@@ -172,9 +192,21 @@ public class HoaDonService {
                     .setFont(font).setFontSize(11).setBold().setTextAlignment(TextAlignment.RIGHT);
             document.add(totalParagraph);
 
+            // Thêm QR Code vào PDF
+            document.add(new Paragraph("\n"));
+            document.add(new Paragraph("Quét mã QR để thanh toán").setFont(font).setFontSize(11).setTextAlignment(TextAlignment.CENTER));
+
+            com.itextpdf.layout.element.Image qrImage = new com.itextpdf.layout.element.Image(
+                    com.itextpdf.io.image.ImageDataFactory.create(qrPath));
+            qrImage.setWidth(200);
+            qrImage.setHeight(200);
+            qrImage.setHorizontalAlignment(HorizontalAlignment.CENTER);
+            document.add(qrImage);
+
+
             String trangThai = hoaDon.getTrangThai() != null ? hoaDon.getTrangThai() : "Hoàn tất";
             Paragraph statusParagraph = new Paragraph("Trạng thái: " + trangThai + " - Cảm ơn quý khách đã sử dụng dịch vụ!")
-                    .setFont(font).setFontSize(11).setTextAlignment(TextAlignment.RIGHT);
+                    .setFont(font).setFontSize(11).setTextAlignment(TextAlignment.CENTER);
             document.add(statusParagraph);
 
         } finally {
@@ -183,6 +215,7 @@ public class HoaDonService {
 
         return fileName;
     }
+
 
     // Helper methods reused from original implementation
     private boolean veExistsOnConnection(String maVe, Connection conn) throws SQLException {
@@ -253,10 +286,10 @@ public class HoaDonService {
             // Prepared statements
             String checkVeSql = "SELECT 1 FROM Ve WHERE maVe = ?";
             // INSERT Ve: do model Ve không có donGia, chỉ thêm maBangGia
-            String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             String updateVePriceSql = "UPDATE Ve SET maBangGia = ? WHERE maVe = ?";
             String checkCTHD = "SELECT 1 FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ?";
-            String insertCTHDsql = "INSERT INTO ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String insertCTHDsql = "INSERT INTO ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa, isActive) VALUES (?, ?, ?, ?, ?, ?, ?)";
             String updateCTHDsql = "UPDATE ChiTietHoaDon SET maLoaiVe = ?, giaGoc = ?, giaDaKM = ?, moTa = ? WHERE maHoaDon = ? AND maVe = ?";
             String updateVeSql = "UPDATE Ve SET trangThai = ? WHERE maVe = ?";
             String updateGheSql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
@@ -426,7 +459,7 @@ public class HoaDonService {
             if (!veExistsOnConnection(ve.getMaVe(), connection)) {
                 TinhGiaService.KetQuaGia kq = tinhGia.tinhGiaChoVe(ve);
 
-                String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement pst = connection.prepareStatement(insertVeSql)) {
                     pst.setString(1, ve.getMaVe());
                     pst.setString(2, ve.getMaChuyen());
