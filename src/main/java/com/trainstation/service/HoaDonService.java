@@ -82,7 +82,14 @@ public class HoaDonService {
                 .toList();
 
         float tongTien = 0;
-        for (ChiTietHoaDon ct : chiTietList) tongTien += ct.getGiaDaKM();
+        for (ChiTietHoaDon ct : chiTietList) {
+            // Exclude tickets with "Đã đổi" status from total calculation
+            Ve ve = veDAO.findById(ct.getMaVe());
+            if (ve != null && "Đã đổi".equals(ve.getTrangThai())) {
+                continue;
+            }
+            tongTien += ct.getGiaDaKM();
+        }
         return tongTien;
     }
 
@@ -90,12 +97,19 @@ public class HoaDonService {
         HoaDon hoaDon = hoaDonDAO.findById(maHoaDon);
         if (hoaDon == null) throw new IllegalArgumentException("Không tìm thấy hóa đơn");
 
-        // Lấy thông tin chi tiết hóa đơn và tổng tiền
+        // Lấy thông tin chi tiết hóa đơn và tổng tiền (exclude "Đã đổi" tickets)
         List<ChiTietHoaDon> chiTiet = chiTietHoaDonDAO.getAll().stream()
                 .filter(ct -> ct.getMaHoaDon().equals(maHoaDon))
                 .toList();
         float tongTien = 0;
-        for (ChiTietHoaDon ct : chiTiet) tongTien += ct.getGiaDaKM();
+        for (ChiTietHoaDon ct : chiTiet) {
+            // Exclude tickets with "Đã đổi" status from total calculation
+            Ve ve = veDAO.findById(ct.getMaVe());
+            if (ve != null && "Đã đổi".equals(ve.getTrangThai())) {
+                continue;
+            }
+            tongTien += ct.getGiaDaKM();
+        }
 
         // Tạo mã QR thanh toán qua VietQR
         String qrPath = "invoices/VietQR_" + maHoaDon + ".png";
@@ -176,6 +190,11 @@ public class HoaDonService {
 
             for (ChiTietHoaDon ct : chiTietList) {
                 Ve ve = veDAO.findById(ct.getMaVe());
+                
+                // Skip tickets with "Đã đổi" status - they should not appear in the invoice
+                if (ve != null && "Đã đổi".equals(ve.getTrangThai())) {
+                    continue;
+                }
 
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(stt++)).setFont(font)).setTextAlignment(TextAlignment.CENTER));
                 table.addCell(new Cell().add(new Paragraph(ct.getMaVe()).setFont(font)).setTextAlignment(TextAlignment.CENTER));
