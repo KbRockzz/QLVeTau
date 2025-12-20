@@ -151,10 +151,10 @@ public class PnlTaiKhoan extends JPanel {
     private void hienThiThongTinTaiKhoan() {
         int r = bangTaiKhoan.getSelectedRow();
         if (r < 0) return;
-        txtMaTK.setText((String) modelBang.getValueAt(r, 0));
         txtMaTK.setEditable(false); // Lock mã tài khoản when selecting
-        txtMaNV.setText((String) modelBang.getValueAt(r, 1));
+        txtMaTK.setText((String) modelBang.getValueAt(r, 0));
         txtMaNV.setEditable(false); // Lock mã nhân viên when selecting
+        txtMaNV.setText((String) modelBang.getValueAt(r, 1));
         txtTenTK.setText((String) modelBang.getValueAt(r, 2));
         txtMatKhau.setText("");
         cmbTrangThai.setSelectedItem(modelBang.getValueAt(r, 3));

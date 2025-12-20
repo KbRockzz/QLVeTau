@@ -187,8 +187,8 @@ public class PnlDauMay extends JPanel {
     private void hienThiThongTinDauMay() {
         int selectedRow = bangDauMay.getSelectedRow();
         if (selectedRow != -1) {
-            txtMaDauMay.setText(modelBang.getValueAt(selectedRow, 0).toString());
             txtMaDauMay.setEditable(false); // Lock mã đầu máy when selecting
+            txtMaDauMay.setText(modelBang.getValueAt(selectedRow, 0).toString());
             txtLoaiDauMay.setText(modelBang.getValueAt(selectedRow, 1).toString());
             txtTenDauMay.setText(modelBang.getValueAt(selectedRow, 2).toString());
             txtNamSX.setText(modelBang.getValueAt(selectedRow, 3).toString());

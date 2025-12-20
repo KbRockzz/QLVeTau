@@ -173,8 +173,8 @@ public class PnlNhanVien extends JPanel {
         int row = bangNhanVien.getSelectedRow();
         if (row < 0) return;
 
-        txtMaNV.setText((String) modelBang.getValueAt(row, 0));
         txtMaNV.setEditable(false); // Lock mã nhân viên when selecting
+        txtMaNV.setText((String) modelBang.getValueAt(row, 0));
         txtTenNV.setText((String) modelBang.getValueAt(row, 1));
         txtSDT.setText((String) modelBang.getValueAt(row, 2));
         txtDiaChi.setText((String) modelBang.getValueAt(row, 3));
