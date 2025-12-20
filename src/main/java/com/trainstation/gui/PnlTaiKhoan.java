@@ -73,13 +73,6 @@ public class PnlTaiKhoan extends JPanel {
         gbc.gridx = 3; gbc.weightx = 0.5; cmbTrangThai = new JComboBox<>(new String[]{"Hoạt động", "Khóa"}); pnlForm.add(cmbTrangThai, gbc);
 
         JPanel pnlButton = MaterialInitializer.createButtonPanel();
-        btnXoaRong = new JButton("Xóa rỗng"); 
-        btnXoaRong.addActionListener(e -> {
-            xoaRongForm();
-            taiDuLieuTaiKhoan();
-        });
-        MaterialInitializer.styleButton(btnXoaRong);
-        pnlButton.add(btnXoaRong);
         
         btnThem = new JButton("Thêm"); 
         btnThem.addActionListener(e -> themTaiKhoan()); 
@@ -100,6 +93,14 @@ public class PnlTaiKhoan extends JPanel {
         btnXoa.addActionListener(e -> xoaTaiKhoan()); 
         MaterialInitializer.styleButton(btnXoa);
         pnlButton.add(btnXoa);
+
+        btnXoaRong = new JButton("Làm mới");
+        btnXoaRong.addActionListener(e -> {
+            xoaRongForm();
+            taiDuLieuTaiKhoan();
+        });
+        MaterialInitializer.styleButton(btnXoaRong);
+        pnlButton.add(btnXoaRong);
 
         JPanel pnlDuoi = new JPanel(new BorderLayout());
         pnlDuoi.add(pnlForm, BorderLayout.CENTER);

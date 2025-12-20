@@ -123,14 +123,6 @@ public class PnlNhanVien extends JPanel {
         // Buttons - Material styled
         JPanel pnlButton = MaterialInitializer.createButtonPanel();
 
-        btnXoaRong = new JButton("Xóa rỗng");
-        btnXoaRong.addActionListener(e -> {
-            xoaRongForm();
-            taiDuLieuNhanVien();
-        });
-        MaterialInitializer.styleButton(btnXoaRong);
-        pnlButton.add(btnXoaRong);
-
         btnThem = new JButton("Thêm");
         btnThem.addActionListener(e -> themNhanVien());
         MaterialInitializer.styleButton(btnThem);
@@ -145,6 +137,14 @@ public class PnlNhanVien extends JPanel {
         btnXoa.addActionListener(e -> xoaNhanVien());
         MaterialInitializer.styleButton(btnXoa);
         pnlButton.add(btnXoa);
+
+        btnXoaRong = new JButton("Làm mới");
+        btnXoaRong.addActionListener(e -> {
+            xoaRongForm();
+            taiDuLieuNhanVien();
+        });
+        MaterialInitializer.styleButton(btnXoaRong);
+        pnlButton.add(btnXoaRong);
 
         JPanel pnlDuoi = new JPanel(new BorderLayout());
         pnlDuoi.add(pnlForm, BorderLayout.CENTER);
