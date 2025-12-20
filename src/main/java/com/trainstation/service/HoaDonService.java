@@ -304,10 +304,18 @@ public class HoaDonService {
                  PreparedStatement pstUpdateGhe = connection.prepareStatement(updateGheSql)) {
 
                 for (Ve ve : dsVe) {
+                    // Debug log before processing
+                    System.out.println("DEBUG HoaDonService.checkout: Processing ve=" + ve.getMaVe() + 
+                        " gioDenDuKien=" + ve.getGioDenDuKien() + 
+                        " giaThanhToan=" + ve.getGiaThanhToan());
+                    
                     // compute price result (may return applied maBangGia)
                     TinhGiaService.KetQuaGia kq = tinhGia.tinhGiaChoVe(ve);
                     if (kq != null) {
                         ve.setGiaThanhToan(kq.giaDaKM);
+                        System.out.println("DEBUG HoaDonService.checkout: Set giaThanhToan=" + kq.giaDaKM + " for ve=" + ve.getMaVe());
+                    } else {
+                        System.out.println("DEBUG HoaDonService.checkout: WARNING - TinhGiaService returned null for ve=" + ve.getMaVe());
                     }
 
                     // insert Ve if not exists, persisting maBangGia only
@@ -321,6 +329,10 @@ public class HoaDonService {
                     }
 
                     if (!existsVe) {
+                        System.out.println("DEBUG HoaDonService.checkout: Inserting ve=" + ve.getMaVe() + 
+                            " gioDenDuKien=" + ve.getGioDenDuKien() + 
+                            " giaThanhToan=" + ve.getGiaThanhToan());
+                        
                         pstInsertVe.setString(1, ve.getMaVe());
                         pstInsertVe.setString(2, ve.getMaChuyen());
                         pstInsertVe.setString(3, ve.getMaLoaiVe());
@@ -345,6 +357,7 @@ public class HoaDonService {
                         pstInsertVe.setBoolean(18, true);
 
                         pstInsertVe.executeUpdate();
+                        System.out.println("DEBUG HoaDonService.checkout: Successfully inserted ve=" + ve.getMaVe());
                     } else {
                         // update only maBangGia on existing Ve row
                         if (maBangGiaToPersist == null) pstUpdateVePrice.setNull(1, Types.VARCHAR); else pstUpdateVePrice.setString(1, maBangGiaToPersist);

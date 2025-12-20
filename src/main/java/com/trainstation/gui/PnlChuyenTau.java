@@ -34,6 +34,11 @@ import java.util.function.BiPredicate;
  */
 public class PnlChuyenTau extends JPanel {
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    
+    // Route type constants
+    private static final String CH_NGAN = "CH_NGAN";
+    private static final String CH_TRUNG = "CH_TRUNG";
+    private static final String CH_DAI = "CH_DAI";
 
     // DAOs
     private final ChuyenTauDAO chuyenTauDAO = ChuyenTauDAO.getInstance();
@@ -1081,7 +1086,8 @@ public class PnlChuyenTau extends JPanel {
         ct.setMaNV(nvSel != null ? nvSel.toString().trim() : null);
 
         Object changSel = cbMaChang.getSelectedItem();
-        ct.setMaChang(changSel != null ? changSel.toString().trim() : null);
+        String maChang = changSel != null ? changSel.toString().trim() : null;
+        ct.setMaChang(maChang);
 
         Object gaDiSel = cbGaDi.getSelectedItem();
         ct.setMaGaDi(gaDiSel != null ? gaDiSel.toString().trim() : null);
@@ -1097,7 +1103,34 @@ public class PnlChuyenTau extends JPanel {
         Object statusSel = cbTrangThai.getSelectedItem();
         ct.setTrangThai(statusSel != null ? statusSel.toString().trim() : null);
 
+        // Set default soKM based on maChang only if soKM is not already set
+        if (ct.getSoKm() == null) {
+            ct.setSoKm(getDefaultSoKm(maChang));
+        }
+
         return ct;
+    }
+
+    /**
+     * Get default soKM value based on maChang (route type).
+     * Returns 150 for short routes (CH_NGAN), 400 for medium routes (CH_TRUNG),
+     * and 1500 for long routes (CH_DAI).
+     */
+    private Integer getDefaultSoKm(String maChang) {
+        if (maChang == null) {
+            return null;
+        }
+        
+        switch (maChang) {
+            case CH_NGAN:
+                return 150;
+            case CH_TRUNG:
+                return 400;
+            case CH_DAI:
+                return 1500;
+            default:
+                return null;
+        }
     }
 
     private String getSelectedMaChuyenFromTable() {
