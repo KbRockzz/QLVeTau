@@ -30,10 +30,13 @@ public class ThongKeDAO {
         String sql = "SELECT CAST(hd.ngayLap AS DATE) as ngay, SUM(ct.giaDaKM) as tongDoanhThu " +
                 "FROM HoaDon hd " +
                 "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
+                "JOIN Ve v ON ct.maVe = v.maVe " +
                 "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
                 "AND hd.trangThai = N'Hoàn tất' " +
                 "AND hd.isActive = 1 " +
                 "AND ct.isActive = 1 " +
+                "AND v.isActive = 1 " +
+                "AND v.trangThai != N'Đã đổi' " +
                 "GROUP BY CAST(hd.ngayLap AS DATE) " +
                 "ORDER BY CAST(hd.ngayLap AS DATE)";
 
@@ -61,10 +64,13 @@ public class ThongKeDAO {
         String sql = "SELECT hd.maHoaDon, hd.ngayLap, COUNT(ct.maVe) as soVe, SUM(ct.giaDaKM) as tongTien " +
                 "FROM HoaDon hd " +
                 "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
+                "JOIN Ve v ON ct.maVe = v.maVe " +
                 "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
                 "AND hd.trangThai = N'Hoàn tất' " +
                 "AND hd.isActive = 1 " +
                 "AND ct.isActive = 1 " +
+                "AND v.isActive = 1 " +
+                "AND v.trangThai != N'Đã đổi' " +
                 "GROUP BY hd.maHoaDon, hd.ngayLap " +
                 "ORDER BY hd.ngayLap DESC";
 
@@ -95,11 +101,14 @@ public class ThongKeDAO {
         String sql = "SELECT lv.tenLoai, COUNT(ct.maVe) as soLuong " +
                 "FROM HoaDon hd " +
                 "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
+                "JOIN Ve v ON ct.maVe = v.maVe " +
                 "JOIN LoaiVe lv ON ct.maLoaiVe = lv.maLoaiVe " +
                 "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
                 "AND hd.trangThai = N'Hoàn tất' " +
                 "AND hd.isActive = 1 " +
                 "AND ct.isActive = 1 " +
+                "AND v.isActive = 1 " +
+                "AND v.trangThai != N'Đã đổi' " +
                 "AND lv.isActive = 1 " +
                 "GROUP BY lv.tenLoai " +
                 "ORDER BY soLuong DESC";
