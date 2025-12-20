@@ -204,8 +204,8 @@ public class PnlDauMay extends JPanel {
     }
 
     private void xoaForm() {
-        txtMaDauMay.setText("");
         txtMaDauMay.setEditable(true); // Unlock mã đầu máy when refreshing
+        txtMaDauMay.setText("");
         txtLoaiDauMay.setText("");
         txtTenDauMay.setText("");
         txtNamSX.setText("");

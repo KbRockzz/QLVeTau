@@ -190,8 +190,8 @@ public class PnlNhanVien extends JPanel {
     }
 
     private void xoaRongForm() {
-        txtMaNV.setText(nhanVienService.taoMaNhanVien());
         txtMaNV.setEditable(true); // Unlock mã nhân viên when refreshing
+        txtMaNV.setText(nhanVienService.taoMaNhanVien());
         txtTenNV.setText("");
         txtSDT.setText("");
         txtDiaChi.setText("");

@@ -161,10 +161,10 @@ public class PnlTaiKhoan extends JPanel {
     }
 
     private void xoaRongForm() {
-        txtMaTK.setText(taiKhoanService.taoMaTaiKhoan());
         txtMaTK.setEditable(true); // Unlock mã tài khoản when refreshing
-        txtMaNV.setText("");
+        txtMaTK.setText(taiKhoanService.taoMaTaiKhoan());
         txtMaNV.setEditable(true); // Unlock mã nhân viên when refreshing
+        txtMaNV.setText("");
         txtTenTK.setText("");
         txtMatKhau.setText("");
         cmbTrangThai.setSelectedIndex(0);
