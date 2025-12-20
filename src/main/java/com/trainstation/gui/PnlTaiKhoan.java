@@ -57,10 +57,10 @@ public class PnlTaiKhoan extends JPanel {
 
         // Cột 1
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.0; pnlForm.add(new JLabel("Mã TK:"), gbc);
-        gbc.gridx = 1; gbc.weightx = 0.5; txtMaTK = new JTextField(20); txtMaTK.setEditable(false); pnlForm.add(txtMaTK, gbc);
+        gbc.gridx = 1; gbc.weightx = 0.5; txtMaTK = new JTextField(20); txtMaTK.setEditable(true); pnlForm.add(txtMaTK, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.0; pnlForm.add(new JLabel("Mã NV:"), gbc);
-        gbc.gridx = 1; gbc.weightx = 0.5; txtMaNV = new JTextField(20); pnlForm.add(txtMaNV, gbc);
+        gbc.gridx = 1; gbc.weightx = 0.5; txtMaNV = new JTextField(20); txtMaNV.setEditable(true); pnlForm.add(txtMaNV, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0; pnlForm.add(new JLabel("Tên tài khoản:"), gbc);
         gbc.gridx = 1; gbc.weightx = 0.5; txtTenTK = new JTextField(20); pnlForm.add(txtTenTK, gbc);
@@ -152,7 +152,9 @@ public class PnlTaiKhoan extends JPanel {
         int r = bangTaiKhoan.getSelectedRow();
         if (r < 0) return;
         txtMaTK.setText((String) modelBang.getValueAt(r, 0));
+        txtMaTK.setEditable(false); // Lock mã tài khoản when selecting
         txtMaNV.setText((String) modelBang.getValueAt(r, 1));
+        txtMaNV.setEditable(false); // Lock mã nhân viên when selecting
         txtTenTK.setText((String) modelBang.getValueAt(r, 2));
         txtMatKhau.setText("");
         cmbTrangThai.setSelectedItem(modelBang.getValueAt(r, 3));
@@ -160,7 +162,9 @@ public class PnlTaiKhoan extends JPanel {
 
     private void xoaRongForm() {
         txtMaTK.setText(taiKhoanService.taoMaTaiKhoan());
+        txtMaTK.setEditable(true); // Unlock mã tài khoản when refreshing
         txtMaNV.setText("");
+        txtMaNV.setEditable(true); // Unlock mã nhân viên when refreshing
         txtTenTK.setText("");
         txtMatKhau.setText("");
         cmbTrangThai.setSelectedIndex(0);
