@@ -34,6 +34,11 @@ import java.util.function.BiPredicate;
  */
 public class PnlChuyenTau extends JPanel {
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    
+    // Route type constants
+    private static final String CH_NGAN = "CH_NGAN";
+    private static final String CH_TRUNG = "CH_TRUNG";
+    private static final String CH_DAI = "CH_DAI";
 
     // DAOs
     private final ChuyenTauDAO chuyenTauDAO = ChuyenTauDAO.getInstance();
@@ -1098,8 +1103,10 @@ public class PnlChuyenTau extends JPanel {
         Object statusSel = cbTrangThai.getSelectedItem();
         ct.setTrangThai(statusSel != null ? statusSel.toString().trim() : null);
 
-        // Set default soKM based on maChang if not already set
-        ct.setSoKm(getDefaultSoKm(maChang));
+        // Set default soKM based on maChang only if soKM is not already set
+        if (ct.getSoKm() == null) {
+            ct.setSoKm(getDefaultSoKm(maChang));
+        }
 
         return ct;
     }
@@ -1115,11 +1122,11 @@ public class PnlChuyenTau extends JPanel {
         }
         
         switch (maChang) {
-            case "CH_NGAN":
+            case CH_NGAN:
                 return 150;
-            case "CH_TRUNG":
+            case CH_TRUNG:
                 return 400;
-            case "CH_DAI":
+            case CH_DAI:
                 return 1500;
             default:
                 return null;
