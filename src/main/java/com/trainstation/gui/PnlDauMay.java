@@ -187,6 +187,7 @@ public class PnlDauMay extends JPanel {
     private void hienThiThongTinDauMay() {
         int selectedRow = bangDauMay.getSelectedRow();
         if (selectedRow != -1) {
+            txtMaDauMay.setEditable(false); // Lock mã đầu máy when selecting
             txtMaDauMay.setText(modelBang.getValueAt(selectedRow, 0).toString());
             txtLoaiDauMay.setText(modelBang.getValueAt(selectedRow, 1).toString());
             txtTenDauMay.setText(modelBang.getValueAt(selectedRow, 2).toString());
@@ -203,6 +204,7 @@ public class PnlDauMay extends JPanel {
     }
 
     private void xoaForm() {
+        txtMaDauMay.setEditable(true); // Unlock mã đầu máy when refreshing
         txtMaDauMay.setText("");
         txtLoaiDauMay.setText("");
         txtTenDauMay.setText("");

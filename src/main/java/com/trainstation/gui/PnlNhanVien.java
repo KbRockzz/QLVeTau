@@ -72,7 +72,7 @@ public class PnlNhanVien extends JPanel {
         gbc.gridx = 1;
         gbc.weightx = 0.5; // TextField mở rộng
         txtMaNV = new JTextField(20);
-        txtMaNV.setEditable(false);
+        txtMaNV.setEditable(true); // Allow editing by default
         pnlForm.add(txtMaNV, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
@@ -173,6 +173,7 @@ public class PnlNhanVien extends JPanel {
         int row = bangNhanVien.getSelectedRow();
         if (row < 0) return;
 
+        txtMaNV.setEditable(false); // Lock mã nhân viên when selecting
         txtMaNV.setText((String) modelBang.getValueAt(row, 0));
         txtTenNV.setText((String) modelBang.getValueAt(row, 1));
         txtSDT.setText((String) modelBang.getValueAt(row, 2));
@@ -189,6 +190,7 @@ public class PnlNhanVien extends JPanel {
     }
 
     private void xoaRongForm() {
+        txtMaNV.setEditable(true); // Unlock mã nhân viên when refreshing
         txtMaNV.setText(nhanVienService.taoMaNhanVien());
         txtTenNV.setText("");
         txtSDT.setText("");
