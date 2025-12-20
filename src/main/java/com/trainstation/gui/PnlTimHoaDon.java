@@ -5,9 +5,11 @@ import com.trainstation.config.MaterialInitializer;
 import com.trainstation.dao.ChiTietHoaDonDAO;
 import com.trainstation.dao.HoaDonDAO;
 import com.trainstation.dao.KhachHangDAO;
+import com.trainstation.dao.VeDAO;
 import com.trainstation.model.ChiTietHoaDon;
 import com.trainstation.model.HoaDon;
 import com.trainstation.model.KhachHang;
+import com.trainstation.model.Ve;
 import com.trainstation.service.HoaDonService;
 import com.trainstation.util.UIUtils;
 
@@ -45,6 +47,7 @@ public class PnlTimHoaDon extends JPanel {
     private final HoaDonDAO hoaDonDAO = HoaDonDAO.getInstance();
     private final ChiTietHoaDonDAO chiTietHoaDonDAO = ChiTietHoaDonDAO.getInstance();
     private final KhachHangDAO khachHangDAO = KhachHangDAO.getInstance();
+    private final VeDAO veDAO = VeDAO.getInstance();
     private final HoaDonService hoaDonService = HoaDonService.getInstance();
 
     // Filters
@@ -217,9 +220,16 @@ public class PnlTimHoaDon extends JPanel {
                     for (HoaDon hd : res) {
                         List<ChiTietHoaDon> items = chiTietHoaDonDAO.findByHoaDon(hd.getMaHoaDon());
                         float total = 0f;
+                        int ticketCount = 0;
                         if (items != null) {
                             for (ChiTietHoaDon ct : items) {
+                                // Exclude tickets with "Đã đổi" status from total and count
+                                Ve ve = veDAO.findById(ct.getMaVe());
+                                if (ve != null && "Đã đổi".equals(ve.getTrangThai())) {
+                                    continue;
+                                }
                                 if (ct.getGiaDaKM() != null) total += ct.getGiaDaKM();
+                                ticketCount++;
                             }
                         }
                         KhachHang kh = khachHangDAO.findById(hd.getMaKH());
@@ -230,7 +240,7 @@ public class PnlTimHoaDon extends JPanel {
                                 hd.getNgayLap() != null ? hd.getNgayLap().format(DT_FMT) : "",
                                 hd.getPhuongThucThanhToan() != null ? hd.getPhuongThucThanhToan() : "",
                                 hd.getTrangThai() != null ? hd.getTrangThai() : "",
-                                items != null ? items.size() : 0,
+                                ticketCount,
                                 String.format("%.0f", total)
                         });
                     }

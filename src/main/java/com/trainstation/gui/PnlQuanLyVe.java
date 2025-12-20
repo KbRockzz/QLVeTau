@@ -284,6 +284,12 @@ public class PnlQuanLyVe extends JPanel {
                         // try to get related Ve for extra info
                         Ve ve = null;
                         try { ve = veService.timVeTheoMa(ct.getMaVe()); } catch (Exception ignored) {}
+                        
+                        // Skip tickets with "Đã đổi" status - they should not be included in total
+                        if (ve != null && "Đã đổi".equals(ve.getTrangThai())) {
+                            continue;
+                        }
+                        
                         String maChuyen = ve != null ? ve.getMaChuyen() : "";
                         String maGhe = ve != null ? ve.getMaSoGhe() : "";
                         Float giaGoc = ct.getGiaGoc();
