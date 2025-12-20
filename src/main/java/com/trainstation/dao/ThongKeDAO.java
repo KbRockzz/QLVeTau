@@ -32,6 +32,8 @@ public class ThongKeDAO {
                 "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
                 "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
                 "AND hd.trangThai = N'Hoàn tất' " +
+                "AND hd.isActive = 1 " +
+                "AND ct.isActive = 1 " +
                 "GROUP BY CAST(hd.ngayLap AS DATE) " +
                 "ORDER BY CAST(hd.ngayLap AS DATE)";
 
@@ -61,6 +63,8 @@ public class ThongKeDAO {
                 "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
                 "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
                 "AND hd.trangThai = N'Hoàn tất' " +
+                "AND hd.isActive = 1 " +
+                "AND ct.isActive = 1 " +
                 "GROUP BY hd.maHoaDon, hd.ngayLap " +
                 "ORDER BY hd.ngayLap DESC";
 
@@ -94,6 +98,9 @@ public class ThongKeDAO {
                 "JOIN LoaiVe lv ON ct.maLoaiVe = lv.maLoaiVe " +
                 "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
                 "AND hd.trangThai = N'Hoàn tất' " +
+                "AND hd.isActive = 1 " +
+                "AND ct.isActive = 1 " +
+                "AND lv.isActive = 1 " +
                 "GROUP BY lv.tenLoai " +
                 "ORDER BY soLuong DESC";
 
@@ -130,6 +137,8 @@ public class ThongKeDAO {
                 "JOIN ChiTietHoaDon ct ON v.maVe = ct.maVe " +
                 "WHERE CAST(v.ngayIn AS DATE) BETWEEN ? AND ? " +
                 "AND (v.trangThai = N'Đã hoàn' OR v.trangThai = N'Đã đổi') " +
+                "AND v.isActive = 1 " +
+                "AND ct.isActive = 1 " +
                 "ORDER BY v.ngayIn DESC";
 
         try (Connection conn = ConnectSql.getInstance().getConnection();
@@ -162,14 +171,18 @@ public class ThongKeDAO {
                 "ct.maChuyen, " +
                 "CONCAT(gdi.tenGa, ' - ', gden.tenGa) as tenChuyen, " +
                 "ct.gioDi, " +
-                "COALESCE((SELECT SUM(sucChua) FROM ChiTietChuyenTau WHERE maChuyenTau = ct.maChuyen), 0) as tongSoGhe, " +
+                "COALESCE((SELECT SUM(sucChua) FROM ChiTietChuyenTau WHERE maChuyenTau = ct.maChuyen AND isActive = 1), 0) as tongSoGhe, " +
                 "COALESCE((SELECT COUNT(*) FROM Ve WHERE maChuyen = ct.maChuyen " +
                 "   AND trangThai IN (N'Đã thanh toán', N'Đã đổi') " +
+                "   AND isActive = 1 " +
                 "   AND CAST(ngayIn AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)), 0) as soGheBan " +
                 "FROM ChuyenTau ct " +
                 "LEFT JOIN Ga gdi ON ct.maGaDi = gdi.maGa " +
                 "LEFT JOIN Ga gden ON ct.maGaDen = gden.maGa " +
                 "WHERE CAST(ct.gioDi AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE) " +
+                "AND ct.isActive = 1 " +
+                "AND gdi.isActive = 1 " +
+                "AND gden.isActive = 1 " +
                 "ORDER BY ct.gioDi DESC";
 
         try (Connection conn = ConnectSql.getInstance().getConnection();
