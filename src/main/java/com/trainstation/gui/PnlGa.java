@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  */
 public class PnlGa extends JPanel {
     // Regex
-    private static final Pattern PATTERN_MA_GA = Pattern.compile("^GA\\d{3}$");
+    private static final Pattern PATTERN_MA_GA = Pattern.compile("^GA_[\\w\\d]+");
     private static final Pattern PATTERN_TEN_GA = Pattern.compile("^[\\p{L}0-9\\s\\-]{1,100}$");
     private static final Pattern PATTERN_MO_TA = Pattern.compile("^.{0,200}$");
     private static final Pattern PATTERN_DIA_CHI = Pattern.compile("^.{0,200}$");
@@ -286,7 +286,7 @@ public class PnlGa extends JPanel {
         // Kiểm tra Mã ga
         if (!PATTERN_MA_GA.matcher(maGa).matches()) {
             JOptionPane.showMessageDialog(this,
-                "Mã ga không hợp lệ (VD: GA001)",
+                "Mã ga phải bắt đầu bằng 'GA_' (ví dụ: GA_001, GA_HANOI).",
                 "Lỗi",
                 JOptionPane.ERROR_MESSAGE);
             return false;

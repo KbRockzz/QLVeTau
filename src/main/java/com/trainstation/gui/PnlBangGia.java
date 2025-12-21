@@ -23,11 +23,15 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Panel quản lý Bảng giá vé tàu
  */
 public class PnlBangGia extends JPanel {
+
+    // Regex pattern for validation
+    private static final Pattern PATTERN_MA_BANGGIA = Pattern.compile("^BG[\\w\\d]+");
 
     private final BangGiaService bangGiaService;
     private final BangGiaDAO bangGiaDAO = BangGiaDAO.getInstance();
@@ -200,6 +204,12 @@ public class PnlBangGia extends JPanel {
             String maBangGia = txtMaBangGia.getText().trim();
             if (maBangGia.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Mã bảng giá không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Validate maBangGia starts with BG
+            if (!PATTERN_MA_BANGGIA.matcher(maBangGia).matches()) {
+                JOptionPane.showMessageDialog(this, "Mã bảng giá phải bắt đầu bằng 'BG' (ví dụ: BG001, BG_2024).", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
