@@ -112,16 +112,12 @@ java -jar target/QLVeTau-1.0.0.jar
 ### 3.1. Màn hình đăng nhập
 
 Khi khởi động ứng dụng, màn hình đăng nhập sẽ hiển thị với 2 trường:
-- 👤 **Tên đăng nhập**
-- 🔒 **Mật khẩu**
+- **Tên đăng nhập**
+- **Mật khẩu**
 
 ### 3.2. Tài khoản mặc định
 
-Hệ thống cung cấp tài khoản quản trị viên sẵn có:
-
-| Tên đăng nhập | Mật khẩu | Vai trò | Mô tả |
-|--------------|----------|---------|-------|
-| `admin` | `admin123` | ADMIN | Quản trị viên - đầy đủ quyền |
+Hệ thống không cung cấp tài khoản quản trị viên sẵn có.
 
 ### 3.3. Quy trình đăng nhập
 
@@ -171,7 +167,7 @@ Menu dropdown với:
 - **Khách hàng**: Quản lý danh sách khách hàng
 - **Tìm kiếm khách hàng**: Tìm kiếm theo số điện thoại
 
-#### 👤 Nhân viên (Chỉ ADMIN)
+#### 👤 Nhân viên (Chỉ Quản lý)
 Menu dropdown với:
 - **Nhân viên**: Quản lý danh sách nhân viên
 - **Tài khoản**: Quản lý tài khoản đăng nhập
@@ -183,7 +179,7 @@ Menu dropdown với:
 - **Tìm kiếm hóa đơn**: Tra cứu hóa đơn
 - **Thống kê**: Xem báo cáo doanh thu (chỉ ADMIN)
 
-#### 🗑️ Dữ liệu đã xóa (Chỉ ADMIN)
+#### 🗑️ Dữ liệu đã xóa (Chỉ Quản lý)
 - Khôi phục dữ liệu đã xóa
 
 #### 🚪 Đăng xuất
