@@ -55,7 +55,6 @@ public class VeService {
     private final ChiTietHoaDonDAO chiTietHoaDonDAO;
     private final HoaDonDAO hoaDonDAO;
     
-    // Thời gian tối thiểu trước khi tàu chạy (phút)
     private static final int MINIMUM_MINUTES_BEFORE_DEPARTURE = 30;
 
 
@@ -360,7 +359,6 @@ public class VeService {
         Document document = new Document(pdf, PageSize.A5);
 
         try {
-            // Font Tiếng Việt
             PdfFont font = PdfFontFactory.createFont("fonts/Tinos-Regular.ttf", PdfEncodings.IDENTITY_H,
                     PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
             document.setFont(font);
@@ -369,7 +367,6 @@ public class VeService {
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
             NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
 
-            // Header
             Paragraph header = new Paragraph("CÔNG TY CỔ PHẦN VẬN TẢI ĐƯỜNG SẮT SÀI GÒN")
                     .setFont(font)
                     .setFontSize(14)
@@ -377,7 +374,6 @@ public class VeService {
                     .setTextAlignment(TextAlignment.CENTER);
             document.add(header);
 
-            // Subtitle
             Paragraph subHeader = new Paragraph("THẺ LÊN TÀU HỎA / BOARDING PASS")
                     .setFont(font)
                     .setFontSize(12)
@@ -385,7 +381,6 @@ public class VeService {
                     .setTextAlignment(TextAlignment.CENTER);
             document.add(subHeader);
 
-            // Mã vạch QR Code
             Paragraph qrTitle = new Paragraph("MÃ QUÉT")
                     .setFont(font)
                     .setFontSize(13)
@@ -393,11 +388,9 @@ public class VeService {
                     .setTextAlignment(TextAlignment.CENTER);
             document.add(qrTitle);
 
-            // Tạo mã vạch QR Code từ `maVe`
             String qrCodePath = "tickets/QrCode_" + ve.getMaVe() + ".png";
             generateQRCodeImage(ve.getMaVe(), 100, 100, qrCodePath);
 
-            // Thêm mã vạch QR Code vào PDF
             com.itextpdf.layout.element.Image qrImage = new com.itextpdf.layout.element.Image(
                     com.itextpdf.io.image.ImageDataFactory.create(qrCodePath));
             qrImage.setHorizontalAlignment(HorizontalAlignment.CENTER);
@@ -410,7 +403,6 @@ public class VeService {
 
             document.add(new Paragraph("\n"));
 
-            // Bảng ga đi ga đến
             Table gaTable = new Table(UnitValue.createPercentArray(new float[]{1, 1})).useAllAvailableWidth();
 
             gaTable.addCell(new Cell()
@@ -430,52 +422,43 @@ public class VeService {
             document.add(gaTable);
             document.add(new Paragraph("\n"));
 
-            // Bảng thông tin chi tiết
             Table infoTable = new Table(UnitValue.createPercentArray(new float[]{2, 3})).useAllAvailableWidth();
 
-            // Mã chuyến tàu
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Tàu/Train:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getMaChuyen() != null ? ve.getMaChuyen() : "N/A").setFont(font)));
 
-            // Ngày đi
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Ngày đi/Date:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getGioDi() != null ? ve.getGioDi().format(dateFormatter) : "N/A").setFont(font)));
 
-            // Giờ đi
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Giờ đi/Time:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getGioDi() != null ? ve.getGioDi().format(timeFormatter) : "N/A").setFont(font)));
 
-            // Toa
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Toa/Coach:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getSoToa() != null ? String.valueOf(ve.getSoToa()) : "N/A").setFont(font)));
 
-            // Ghế
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Chỗ/Seat:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getMaSoGhe() != null ? ve.getMaSoGhe() : "N/A").setFont(font)));
 
-            // Loại ghế
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Loại chỗ/Class:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getLoaiCho() != null ? ve.getLoaiCho() : "N/A").setFont(font)));
 
-            // Loại vé
             infoTable.addCell(new Cell()
                     .add(new Paragraph("Loại vé/Type:").setFont(font).setBold()));
             infoTable.addCell(new Cell()
                     .add(new Paragraph(ve.getLoaiVe() != null ? ve.getLoaiVe() : "N/A").setFont(font)));
 
-            // Giá cơ bản
             String priceStr = "N/A";
             try {
                 float priceToShow = ve.getDisplayPrice();
@@ -490,7 +473,6 @@ public class VeService {
 
             document.add(infoTable);
 
-            // Footer
             document.add(new Paragraph("\nCảm ơn quý khách đã sử dụng dịch vụ!")
                     .setFont(font)
                     .setItalic()

@@ -42,7 +42,6 @@ public class TinhGiaService {
         public final float giaGoc;
         public final float giaDaKM;
         public final String ghiChu;
-        // maBangGia thực tế được áp dụng (có thể null)
         public final String maBangGia;
 
         public KetQuaGia(float giaGoc, float giaDaKM, String ghiChu, String maBangGia) {
@@ -64,10 +63,9 @@ public class TinhGiaService {
      */
     public KetQuaGia tinhGiaChoVe(Ve ve) {
         try {
-            // 1) Xác định thời điểm tham chiếu
             LocalDateTime refDate = (ve.getNgayIn() != null) ? ve.getNgayIn() : LocalDateTime.now();
 
-            // 2) Tìm BangGia: ưu tiên theo maBangGia trong Ve
+            // Tìm bảng giá
             BangGia bangGia = null;
             String appliedMaBangGia = null;
             if (ve.getMaBangGia() != null && !ve.getMaBangGia().trim().isEmpty()) {
@@ -75,7 +73,7 @@ public class TinhGiaService {
                 if (bangGia != null) appliedMaBangGia = bangGia.getMaBangGia();
             }
 
-            // 3) Nếu không có maBangGia hoặc không tìm thấy record, tìm theo maChang + loaiGheKey
+            // Nếu không tìm thấy, tìm theo chặng và loại ghế
             if (bangGia == null) {
                 String maChang = null;
                 try {
@@ -84,25 +82,22 @@ public class TinhGiaService {
                     if (ct != null && ct.getMaChang() != null && !ct.getMaChang().trim().isEmpty()) {
                         maChang = ct.getMaChang();
                     } else {
-                        // fallback: dùng maChuyen
                         maChang = ve.getMaChuyen();
                     }
                 } catch (Throwable ignored) {
                 }
 
-                // loaiGheKey: ưu tiên lấy từ ve.getLoaiCho() (là kiểu ghế/toa), nếu null fallback sang ve.getLoaiVe()
                 String loaiGheKey = null;
                 if (ve.getLoaiCho() != null && !ve.getLoaiCho().trim().isEmpty()) loaiGheKey = ve.getLoaiCho().trim();
                 if ((loaiGheKey == null || loaiGheKey.isEmpty()) && ve.getLoaiVe() != null) loaiGheKey = ve.getLoaiVe().trim();
 
-                // cuối cùng, nếu vẫn null, không gọi findApplicable (kết quả sẽ là null -> fallback sau)
                 if (maChang != null && loaiGheKey != null) {
                     bangGia = bangGiaDAO.findApplicable(maChang, loaiGheKey, refDate);
                     if (bangGia != null) appliedMaBangGia = bangGia.getMaBangGia();
                 }
             }
 
-            // 4) Fallback: nếu vẫn null, lấy first record nếu có
+            // Fallback: lấy bảng giá đầu tiên
             if (bangGia == null) {
                 List<BangGia> all = bangGiaDAO.getAll();
                 if (!all.isEmpty()) {
@@ -113,20 +108,19 @@ public class TinhGiaService {
 
             float giaCoBan = (bangGia != null) ? bangGia.getGiaCoBan() : 0f;
 
-            // 5) Tìm heSoLoaiVe từ LoaiVe
+            // Tìm hệ số loại vé
             float heSoGia = 1.0f;
             try {
                 if (ve.getMaLoaiVe() != null && !ve.getMaLoaiVe().trim().isEmpty()) {
                     LoaiVe lv = loaiVeDAO.findById(ve.getMaLoaiVe());
                     if (lv != null && lv.getHeSoGia() != null) heSoGia = lv.getHeSoGia().floatValue();
                 } else {
-                    // fallback: nếu danh sách LoaiVe không rỗng, lấy phần tử đầu (không bắt buộc)
                     Optional<LoaiVe> possible = loaiVeDAO.getAll().stream().findFirst();
                     if (possible.isPresent() && possible.get().getHeSoGia() != null) heSoGia = possible.get().getHeSoGia().floatValue();
                 }
-            } catch (Throwable ignored) { /* fallback heSoGia = 1.0f */ }
+            } catch (Throwable ignored) { }
 
-            // 6) Tính kết quả và làm tròn
+            // Tính kết quả
             float giaGoc = lamTronGia(giaCoBan);
             float giaDaKM = lamTronGia(giaCoBan * heSoGia);
 

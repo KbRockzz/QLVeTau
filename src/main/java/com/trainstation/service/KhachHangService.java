@@ -63,7 +63,6 @@ public class KhachHangService {
                         maxId = id;
                     }
                 } catch (NumberFormatException e) {
-                    // Bỏ qua các mã không hợp lệ
                 }
             }
         }

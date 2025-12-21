@@ -41,7 +41,6 @@ public class ChuyenTauService {
         chuyenTauDAO = ChuyenTauDAO.getInstance();
         veDAO = VeDAO.getInstance();
         dauMayDAO = DauMayDAO.getInstance();
-        // log đơn giản vào file logs/chuyen_actions.log
         File logsDir = new File("logs");
         if (!logsDir.exists()) logsDir.mkdirs();
         actionLogFile = new File(logsDir, "chuyen_actions.log");
@@ -89,29 +88,22 @@ public class ChuyenTauService {
             if (ct == null) throw new SQLException("Không tìm thấy chuyến: " + maChuyen);
             String maDauMay = ct.getMaDauMay();
 
-            // Kiểm tra trạng thái chuyến tàu
             ChuyenTau Ctau = chuyenTauDAO.findById(maChuyen);
             if (Ctau != null) {
                 String cur = Ctau.getTrangThai() == null ? "" : Ctau.getTrangThai().trim();
-                // chỉ cho start nếu ctàu đang "Sẵn sàng"
                 if (!cur.isEmpty() || !cur.equalsIgnoreCase("Sẵn sàng")){
                     throw new SQLException("Tàu " + maDauMay + " hiện không sẵn sàng: " + cur);
                 }
             }
-            // Kiểm tra ràng buộc giờ khởi hành với LocalDate
             if (ct.getGioDi() != null) {
                 if (!ct.getGioDi().toLocalDate().equals(date)) {
-                    // Nếu ngày không khớp, báo lỗi
                     throw new SQLException("Ngày khởi hành không khớp: chuyến " + maChuyen +
                             " khởi hành ngày " + ct.getGioDi().toLocalDate() +
                             ", không phải ngày " + date);
                 }
             }
 
-            // update chuyen tau status
-//            tauDAO.capNhatTrangThai(conn, maTau, "Đang chạy");
             chuyenTauDAO.capNhatTrangThai(conn, maChuyen, "Đang chạy");
-            //
             conn.commit();
             writeActionLog(String.format("START|%s|%s|%s|OK", maChuyen, date.toString(), user));
         } catch (SQLException ex) {
@@ -139,25 +131,20 @@ public class ChuyenTauService {
             prevAuto = conn.getAutoCommit();
             conn.setAutoCommit(false);
 
-            // Load chuyến
             ChuyenTau ct = chuyenTauDAO.findById(maChuyen);
             if (ct == null) throw new SQLException("Không tìm thấy chuyến: " + maChuyen);
 
-            // Check chuyến date match
             if (ct.getGioDi() != null) {
                 if (!ct.getGioDi().toLocalDate().equals(date)) {
-                    // Nếu ngày không khớp, báo lỗi
 
                 }
             }
 
-            // Kiểm tra trạng thái chuyến tàu
             String curStatus = ct.getTrangThai() == null ? "" : ct.getTrangThai().trim();
             if (!"Đang chạy".equalsIgnoreCase(curStatus)) {
                 throw new SQLException("Chuyến " + maChuyen + " hiện không ở trạng thái 'Đang chạy' (hiện: " + curStatus + ")");
             }
 
-            // Load danh sách vé cho chuyến + date
             List<Ve> danhSachVe = veDAO.getByChuyenAndDate(conn, maChuyen, date);
             if (danhSachVe == null) danhSachVe = java.util.Collections.emptyList();
 
@@ -170,7 +157,6 @@ public class ChuyenTauService {
                     if (v == null) continue;
                     String trangThaiVe = v.getTrangThai() == null ? "" : v.getTrangThai().trim();
 
-                    // Nếu không freePaidSeats, bỏ qua vé đã thanh toán
                     if (!freePaidSeats && "Đã thanh toán".equalsIgnoreCase(trangThaiVe)) {
                         continue;
                     }
@@ -189,7 +175,6 @@ public class ChuyenTauService {
                     updatedSeats++;
                 }
 
-                //
                 try {
                     int[] resGhe = pstGhe.executeBatch();
                     int[] resVe = pstVe.executeBatch();
@@ -198,7 +183,6 @@ public class ChuyenTauService {
                 }
             }
 
-            // Update chuyến status to Hoàn tất
             chuyenTauDAO.capNhatTrangThai(conn, maChuyen, "Hoàn tất");
 
             conn.commit();

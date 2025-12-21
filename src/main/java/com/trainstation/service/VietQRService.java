@@ -41,7 +41,6 @@ public class VietQRService {
         if (accountNumber == null || accountNumber.isBlank()) throw new IllegalArgumentException("accountNumber rỗng");
         if (savePath == null || savePath.isBlank()) throw new IllegalArgumentException("savePath rỗng");
 
-        // Tránh lỗi số thực cho tiền
         long amt = Math.round(amount);
 
         // Encode chuẩn UTF-8 (hỗ trợ tiếng Việt, ký tự &, +, ?, ...)
@@ -68,7 +67,6 @@ public class VietQRService {
 
             File file = new File(savePath);
 
-            // Tự tạo folder nếu chưa tồn tại
             File parent = file.getParentFile();
             if (parent != null && !parent.exists()) {
                 boolean ok = parent.mkdirs();
@@ -77,7 +75,6 @@ public class VietQRService {
 
             try (InputStream in = response.body().byteStream();
                  OutputStream out = new FileOutputStream(file)) {
-                // Java 9+ (bạn dùng Java 21 OK)
                 in.transferTo(out);
             }
 
