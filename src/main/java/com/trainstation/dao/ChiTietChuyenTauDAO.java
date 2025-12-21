@@ -81,24 +81,19 @@ public class ChiTietChuyenTauDAO {
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
 
-            // 1. soThuTuToa
             if (entity.getSoThuTuToa() != null) {
                 pst.setInt(1, entity.getSoThuTuToa());
             } else {
                 pst.setNull(1, Types.INTEGER);
             }
 
-            // 2. sucChua
             if (entity.getSucChua() != null) {
                 pst.setInt(2, entity.getSucChua());
             } else {
                 pst.setNull(2, Types.INTEGER);
             }
 
-            // 3. maChuyenTau
             pst.setString(3, entity.getMaChuyenTau());
-
-            // 4. maToaTau
             pst.setString(4, entity.getMaToaTau());
 
             return pst.executeUpdate() > 0;

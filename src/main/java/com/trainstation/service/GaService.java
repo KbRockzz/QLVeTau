@@ -42,7 +42,6 @@ public class GaService {
                         maxId = id;
                     }
                 } catch (NumberFormatException e) {
-                    // Ignore invalid IDs
                 }
             }
         }

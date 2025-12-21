@@ -22,7 +22,6 @@ public class GheDAO {
 
     public List<Ghe> getByToa(String maToa) {
         List<Ghe> list = new ArrayList<>();
-        // Đã thêm cột loaiGhe vào SELECT (tên cột có thể là 'loaiGhe' hoặc 'maLoaiGhe' tuỳ schema)
         String sql = "SELECT maGhe, maToa, trangThai, loaiGhe FROM Ghe WHERE maToa = ? ORDER BY maGhe";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -33,11 +32,9 @@ public class GheDAO {
                     g.setMaGhe(rs.getString("maGhe"));
                     g.setMaToa(rs.getString("maToa"));
                     g.setTrangThai(rs.getString("trangThai"));
-                    // set loại ghế nếu có trong DB
                     try {
                         g.setLoaiGhe(rs.getString("loaiGhe"));
                     } catch (Throwable ignored) {
-                        // nếu model không có setter/field, bỏ qua (mà nên bổ sung model)
                     }
                     list.add(g);
                 }

@@ -53,7 +53,6 @@ public class TaiKhoanService {
                         maxId = id;
                     }
                 } catch (NumberFormatException e) {
-                    // Ignore invalid IDs
                 }
             }
         }

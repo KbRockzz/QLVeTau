@@ -83,7 +83,7 @@ public class HoaDonService {
 
         float tongTien = 0;
         for (ChiTietHoaDon ct : chiTietList) {
-            // Exclude tickets with "Đã đổi" status from total calculation
+            // Không tính vé đã đổi
             Ve ve = veDAO.findById(ct.getMaVe());
             if (ve != null && "Đã đổi".equals(ve.getTrangThai())) {
                 continue;
@@ -97,13 +97,12 @@ public class HoaDonService {
         HoaDon hoaDon = hoaDonDAO.findById(maHoaDon);
         if (hoaDon == null) throw new IllegalArgumentException("Không tìm thấy hóa đơn");
 
-        // Lấy thông tin chi tiết hóa đơn và tổng tiền (exclude "Đã đổi" tickets)
         List<ChiTietHoaDon> chiTiet = chiTietHoaDonDAO.getAll().stream()
                 .filter(ct -> ct.getMaHoaDon().equals(maHoaDon))
                 .toList();
         float tongTien = 0;
         for (ChiTietHoaDon ct : chiTiet) {
-            // Exclude tickets with "Đã đổi" status from total calculation
+            // Không tính vé đã đổi
             Ve ve = veDAO.findById(ct.getMaVe());
             if (ve != null && "Đã đổi".equals(ve.getTrangThai())) {
                 continue;
@@ -111,15 +110,15 @@ public class HoaDonService {
             tongTien += ct.getGiaDaKM();
         }
 
-        // Tạo mã QR thanh toán qua VietQR
+        // Tạo mã QR thanh toán
         String qrPath = "invoices/VietQR_" + maHoaDon + ".png";
         VietQRService.fetchVietQR(
-                "970423",                       // Mã ngân hàng
-                "48608112005",               // Số tài khoản thụ hưởng
-                "LY THI THUY",             // Tên tài khoản thụ hưởng
-                tongTien,                   // Số tiền cần thanh toán
-                "Thanh toan hoa don " + maHoaDon, // Nội dung thanh toán
-                qrPath                      // Đường dẫn file QR Code
+                "970423",
+                "48608112005",
+                "LY THI THUY",
+                tongTien,
+                "Thanh toan hoa don " + maHoaDon,
+                qrPath
         );
 
         KhachHang khachHang = khachHangDAO.findById(hoaDon.getMaKH());
@@ -153,7 +152,6 @@ public class HoaDonService {
 
             document.add(new Paragraph("Mã hóa đơn: " + hoaDon.getMaHoaDon()).setFont(font).setFontSize(11));
             
-            // Customer information - use denormalized fields from HoaDon first, fallback to KhachHang table
             String tenKH = hoaDon.getTenKH() != null ? hoaDon.getTenKH() : 
                            (khachHang != null ? khachHang.getTenKhachHang() : "N/A");
             String sdtKH = hoaDon.getSoDienThoai() != null ? hoaDon.getSoDienThoai() : 
@@ -161,7 +159,6 @@ public class HoaDonService {
             document.add(new Paragraph("Khách hàng: " + tenKH).setFont(font).setFontSize(11));
             document.add(new Paragraph("Số điện thoại: " + sdtKH).setFont(font).setFontSize(11));
             
-            // Employee information
             document.add(new Paragraph("Nhân viên: " + (nhanVien != null ? nhanVien.getTenNV() : "N/A"))
                     .setFont(font).setFontSize(11));
 
@@ -191,7 +188,7 @@ public class HoaDonService {
             for (ChiTietHoaDon ct : chiTietList) {
                 Ve ve = veDAO.findById(ct.getMaVe());
                 
-                // Skip tickets with "Đã đổi" status - they should not appear in the invoice
+                // Bỏ qua vé đã đổi
                 if (ve != null && "Đã đổi".equals(ve.getTrangThai())) {
                     continue;
                 }
@@ -211,7 +208,6 @@ public class HoaDonService {
                     .setFont(font).setFontSize(11).setBold().setTextAlignment(TextAlignment.RIGHT);
             document.add(totalParagraph);
 
-            // Thêm QR Code vào PDF
             document.add(new Paragraph("\n"));
             document.add(new Paragraph("Quét mã QR để thanh toán").setFont(font).setFontSize(11).setTextAlignment(TextAlignment.CENTER));
 
@@ -236,7 +232,6 @@ public class HoaDonService {
     }
 
 
-    // Helper methods reused from original implementation
     private boolean veExistsOnConnection(String maVe, Connection conn) throws SQLException {
         String sql = "SELECT 1 FROM Ve WHERE maVe = ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {

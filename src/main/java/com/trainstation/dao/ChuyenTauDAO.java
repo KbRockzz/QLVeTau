@@ -31,7 +31,6 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
     private static VeDAO veDAO = VeDAO.getInstance();
 
     private ChuyenTauDAO() {
-        // Không giữ Connection làm trường
     }
 
 
@@ -175,7 +174,6 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
         List<ChuyenTau> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE 1=1");
 
-        // Điều kiện tìm kiếm được thêm tùy thuộc vào dữ liệu đầu vào
         if (maGaDi != null && !maGaDi.trim().isEmpty()) {
             sql.append(" AND maGaDi = ?");
         }
@@ -193,7 +191,6 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
              PreparedStatement pst = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
 
-            // Truyền giá trị vào câu lệnh SQL
             if (maGaDi != null && !maGaDi.trim().isEmpty()) {
                 pst.setString(paramIndex++, maGaDi);
             }
@@ -204,7 +201,6 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
                 pst.setDate(paramIndex++, Date.valueOf(ngayDi));
             }
             if (gioDi != null) {
-                // Tạo giá trị datetime nếu chỉ có giờ đi hoặc phải dựa vào ngày hiện tại
                 LocalDateTime searchDateTime = LocalDateTime.of(ngayDi != null ? ngayDi : LocalDate.now(), gioDi);
                 pst.setTimestamp(paramIndex++, Timestamp.valueOf(searchDateTime));
             }
@@ -279,11 +275,10 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
      * Đánh dấu chuyến là "Đã khởi hành" cho ngày cụ thể.
      * Trả về true nếu cập nhật thành công.
      *
-     * Lưu ý: phương thức này chỉ cập nhật trường trangThai ở bảng ChuyenTau.
+     * Lưu ý: chỉ cập nhật trường trangThai
      */
     public boolean startChuyenOnDate(String maChuyen, LocalDate date, String source) {
         String newStatus = "Đã khởi hành";
-        // Nếu muốn lưu log source, cần bảng log riêng; hiện chỉ cập nhật trạng thái.
         try (Connection conn = ConnectSql.getInstance().getConnection()) {
             conn.setAutoCommit(false);
             capNhatTrangThai(conn, maChuyen, newStatus);
@@ -291,7 +286,6 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
-            // trường hợp lỗi trả false
             return false;
         }
     }

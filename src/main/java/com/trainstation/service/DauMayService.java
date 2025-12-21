@@ -44,7 +44,6 @@ public class DauMayService {
                         maxId = id;
                     }
                 } catch (NumberFormatException e) {
-                    // Ignore invalid IDs
                 }
             }
         }

@@ -85,7 +85,7 @@ public class HoaDonDAO implements GenericDAO<HoaDon> {
             return false;
         }
     }
-    // New: insert using provided Connection
+    // Thêm hóa đơn (dùng connection có sẵn)
     public boolean insert(HoaDon hd, Connection conn) throws SQLException {
         String sql = "INSERT INTO HoaDon (maHoaDon, maNV, maKH, tenKH, soDienThoai, ngayLap, phuongThucThanhToan, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {

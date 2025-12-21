@@ -72,7 +72,7 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
         }
     }
 
-    // New: insert using existing Connection (for transactional checkout)
+    // Thêm chi tiết hóa đơn (dùng connection có sẵn)
     public boolean insert(ChiTietHoaDon ct, Connection conn) throws SQLException {
         String sql = "INSERT INTO ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -117,7 +117,7 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
         }
     }
 
-    // New: exists check
+    // Kiểm tra chi tiết hóa đơn đã tồn tại
     public boolean exists(String maHoaDon, String maVe) {
         List<ChiTietHoaDon> list = new ArrayList<>();
         list = getAll();
@@ -125,7 +125,7 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
                 .anyMatch(ct -> ct.getMaHoaDon().equals(maHoaDon) && ct.getMaVe().equals(maVe));
     }
 
-    // exists using provided connection (transactional)
+    // Kiểm tra chi tiết hóa đơn đã tồn tại (dùng connection có sẵn)
     public boolean exists(String maHoaDon, String maVe, Connection conn) throws SQLException {
         String sql = "SELECT 1 FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ? AND isActive = 1";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {

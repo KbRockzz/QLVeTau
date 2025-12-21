@@ -72,7 +72,6 @@ public class NhanVienService {
                         maxId = id;
                     }
                 } catch (NumberFormatException e) {
-                    // Ignore invalid IDs
                 }
             }
         }

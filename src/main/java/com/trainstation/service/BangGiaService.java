@@ -50,7 +50,6 @@ public class BangGiaService {
                         maxId = id;
                     }
                 } catch (NumberFormatException e) {
-                    // Ignore invalid IDs
                 }
             }
         }
