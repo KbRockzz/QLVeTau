@@ -25,7 +25,7 @@ public class NavigationBar extends JPanel {
         // Material Professional Light - Primary Blue
         setBackground(new Color(25, 118, 210)); // #1976D2
         setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
-        setPreferredSize(new Dimension(0, 56)); // Fixed height for navigation bar
+        setPreferredSize(new Dimension(0, 56));
 
         // Left panel with navigation buttons
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
@@ -35,7 +35,7 @@ public class NavigationBar extends JPanel {
         JButton homeBtn = createNavButton("Trang chủ", "home");
         leftPanel.add(homeBtn);
 
-        // --- Quản lý chuyến tàu (menu with children) ---
+        // --- Quản lý chuyến tàu ---
         JButton tripManagementBtn = createNavButton("Chuyến tàu", null);
         JPopupMenu tripMenu = new JPopupMenu();
         tripMenu.add(createMenuItem("Chuyến tàu", "chuyentau"));
@@ -48,7 +48,7 @@ public class NavigationBar extends JPanel {
         leftPanel.add(tripManagementBtn);
 
         // --- Quản lý vé ---
-        JButton ticketManagementBtn = createNavButton("Quản lý vé", null);
+        JButton ticketManagementBtn = createNavButton("Vé", null);
         JPopupMenu ticketManagementMenu = new JPopupMenu();
         ticketManagementMenu.add(createMenuItem("Bảng giá", "banggia"));
         ticketManagementMenu.addSeparator();
@@ -68,7 +68,7 @@ public class NavigationBar extends JPanel {
         customerManagementBtn.addActionListener(e -> customerMenu.show(customerManagementBtn, 0, customerManagementBtn.getHeight()));
         leftPanel.add(customerManagementBtn);
 
-        // --- Quản lý nhân viên (visible if manager) ---
+        // --- Quản lý nhân viên (chi quan ly thay) ---
         if (currentAccount.isManager()) {
             JButton staffManagementBtn = createNavButton("Nhân viên", null);
             JPopupMenu staffMenu = new JPopupMenu();
@@ -90,7 +90,7 @@ public class NavigationBar extends JPanel {
         invoiceManagementBtn.addActionListener(e -> invoiceMenu.show(invoiceManagementBtn, 0, invoiceManagementBtn.getHeight()));
         leftPanel.add(invoiceManagementBtn);
 
-        // --- Quản lý dữ liệu đã xóa (visible if manager) ---
+        // --- Quản lý dữ liệu đã xóa (chi quan ly thay) ---
         if (currentAccount.isManager()) {
             JButton deletedDataBtn = createNavButton("Dữ liệu đã xóa", "deleteddata");
             leftPanel.add(deletedDataBtn);
@@ -138,7 +138,7 @@ public class NavigationBar extends JPanel {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // Increase width to prevent text truncation, adjust based on text length
-        int buttonWidth = Math.max(80, text.length() * 12 + 10);
+        int buttonWidth = Math.max(100, text.length() * 12 + 10);
         button.setPreferredSize(new Dimension(buttonWidth, 40));
         button.setMargin(new Insets(5, 15, 5, 15));
 

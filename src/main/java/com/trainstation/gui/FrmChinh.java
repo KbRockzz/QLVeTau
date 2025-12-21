@@ -23,30 +23,28 @@ public class FrmChinh extends JFrame {
         setTitle("QLVeTau - Hệ thống quản lý vé tàu");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Prefer maximizing the window so all child panels use available space
+        // maximize man hinh
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        // Also set size to screen bounds to be safe
+        // set size bang man hinh
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         setSize(screen);
         setLocationRelativeTo(null);
 
         setLayout(new BorderLayout());
 
-        // Navigation bar at the top
+        // Navigation bar
         thanhDieuHuong = new NavigationBar(taiKhoanHienTai, this);
         add(thanhDieuHuong, BorderLayout.NORTH);
 
-        // Content panel with CardLayout for switching between panels
+        // CardLayout
         cardLayout = new CardLayout();
         pnlNoiDung = new JPanel(cardLayout);
 
-        // Register pages (map menu ids to panels). Reuse existing panels when available,
-        // otherwise use placeholders so navigation won't fail.
         // Home
         addPage("home", new PnlTrangChu(taiKhoanHienTai, this));
 
-        // Ticket related (reuse existing PnlDatVe/PnlHoanVe/PnlDoiVe/PnlQuanLyVe)
+        // Ticket
         addPage("bookticket", taoPanelVoiBo(new PnlDatVe(taiKhoanHienTai)));
         addPage("refundticket", taoPanelVoiBo(new PnlHoanVe(taiKhoanHienTai)));
         addPage("changeticket", taoPanelVoiBo(new PnlDoiVe(taiKhoanHienTai)));
@@ -64,9 +62,6 @@ public class FrmChinh extends JFrame {
         addPage("timkiemct", taoPanelVoiBo(new PnlTimKiemChuyenTau())); // Tìm kiếm ct
 
         // Ticket-related auxiliary pages
-
-//        addPage("banggia", taoPanelVoiBo(createPlaceholderPanel("Bảng giá"))); // placeholder
-
         addPage("banggia", taoPanelVoiBo(new PnlBangGia())); // Bảng giá
         // Invoice
         addPage("hoadon", taoPanelVoiBo(new PnlQuanLyVe(taiKhoanHienTai)));
@@ -79,9 +74,7 @@ public class FrmChinh extends JFrame {
             addPage("timkiemnv-tk", taoPanelVoiBo(new PnlTimKiemNVTK()));
             addPage("taikhoan", taoPanelVoiBo(new PnlTaiKhoan()));
 
-            // Deleted-data management (manager only). Reuse generic deleted-data panel if specific ones don't exist.
-
-            // Backwards-compatible keys
+            // Deleted-data management (manager only).
             addPage("deleteddata", taoPanelVoiBo(new PnlDuLieuDaXoa()));
         } else {
             // For non-managers, ensure deleted pages are not registered
@@ -107,20 +100,12 @@ public class FrmChinh extends JFrame {
         });
     }
 
-    /**
-     * Wrap a panel to ensure consistent layout
-     */
     private JPanel taoPanelVoiBo(JPanel panel) {
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.add(panel, BorderLayout.CENTER);
         return wrapper;
     }
 
-    /**
-     * Add a page to the card layout if not already added.
-     * @param id key used for navigation
-     * @param panel panel (already wrapped) to register
-     */
     private void addPage(String id, JPanel panel) {
         if (id == null || id.isBlank() || registeredPages.contains(id)) return;
         pnlNoiDung.add(panel, id);

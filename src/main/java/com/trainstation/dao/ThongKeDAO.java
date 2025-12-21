@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * DAO class for statistical queries
- */
 public class ThongKeDAO {
     private static ThongKeDAO instance;
 
@@ -196,10 +193,10 @@ public class ThongKeDAO {
 
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
-            // Parameters for soGheBan subquery (Ve.ngayIn date range)
+            // Thoi gian truy van Ve
             pst.setDate(1, Date.valueOf(tuNgay));
             pst.setDate(2, Date.valueOf(denNgay));
-            // Parameters for main query WHERE clause (ChuyenTau.gioDi date range)
+            // Thoi gian truy van chuyen tau
             pst.setDate(3, Date.valueOf(tuNgay));
             pst.setDate(4, Date.valueOf(denNgay));
 
