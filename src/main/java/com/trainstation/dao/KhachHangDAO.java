@@ -22,7 +22,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     @Override
     public List<KhachHang> getAll() {
         List<KhachHang> list = new ArrayList<>();
-        // Only get active customers (isActive = 1)
+        // Chỉ lấy khách hàng đang hoạt động
         String sql = "SELECT maKhachHang, tenKhachHang, email, soDienThoai FROM KhachHang WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
@@ -54,7 +54,6 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
 
     @Override
     public boolean insert(KhachHang kh) {
-        // Set isActive = 1 by default for new customers
         String sql = "INSERT INTO KhachHang (maKhachHang, tenKhachHang, email, soDienThoai) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -87,7 +86,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
 
     @Override
     public boolean delete(String id) {
-        // Soft delete: set isActive = 0
+        // Xóa mềm: đặt isActive = 0
         String sql = "UPDATE KhachHang SET isActive = 0 WHERE maKhachHang = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -100,8 +99,7 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
     }
 
     /**
-     * Get all deleted customers (isActive = 0)
-     * @return List of soft-deleted customers
+     * Lấy khách hàng đã xóa
      */
     public List<KhachHang> getDeletedCustomers() {
         List<KhachHang> list = new ArrayList<>();

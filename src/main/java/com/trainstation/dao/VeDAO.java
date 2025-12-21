@@ -18,7 +18,7 @@ public class VeDAO implements GenericDAO<Ve> {
     private final GaDAO gaDAO;
 
     private VeDAO() {
-        // Không giữ Connection làm trường — lấy connection mỗi lần cần
+        // Lấy connection mỗi khi cần
         this.gaDAO = GaDAO.getInstance();
     }
 
@@ -30,14 +30,13 @@ public class VeDAO implements GenericDAO<Ve> {
     }
 
     /**
-     * Helper method to ensure station names are properly populated.
-     * If tenGa is null or appears to be a code, lookup from GaDAO.
-     * Codes typically start with "GA_" or are very short, or match the maGa value.
+     * Đảm bảo tên ga được điền đầy đủ.
+     * Nếu tên ga null hoặc là mã ga thì tìm từ GaDAO.
      */
     private void ensureStationNames(Ve ve) {
         if (ve == null) return;
         
-        // Check and fix tenGaDi
+        // Kiểm tra và sửa tên ga đi
         String tenGaDi = ve.getTenGaDi();
         String maGaDi = ve.getMaGaDi();
         boolean needsLookupDi = false;
@@ -45,13 +44,10 @@ public class VeDAO implements GenericDAO<Ve> {
         if (tenGaDi == null || tenGaDi.trim().isEmpty()) {
             needsLookupDi = true;
         } else if (tenGaDi.startsWith("GA_") || tenGaDi.startsWith("ga_")) {
-            // Looks like a station code (e.g., GA_SG, GA_HN)
             needsLookupDi = true;
         } else if (maGaDi != null && tenGaDi.equals(maGaDi)) {
-            // tenGaDi contains the code instead of the name
             needsLookupDi = true;
         } else if (tenGaDi.length() <= 3) {
-            // Very short, likely a code (e.g., SG, HN)
             needsLookupDi = true;
         }
         
@@ -62,11 +58,11 @@ public class VeDAO implements GenericDAO<Ve> {
                     ve.setTenGaDi(ga.getTenGa());
                 }
             } catch (Exception e) {
-                // Keep existing value if lookup fails
+                // Giữ nguyên giá trị nếu tìm thất bại
             }
         }
         
-        // Check and fix tenGaDen
+        // Kiểm tra và sửa tên ga đến
         String tenGaDen = ve.getTenGaDen();
         String maGaDen = ve.getMaGaDen();
         boolean needsLookupDen = false;
@@ -74,13 +70,10 @@ public class VeDAO implements GenericDAO<Ve> {
         if (tenGaDen == null || tenGaDen.trim().isEmpty()) {
             needsLookupDen = true;
         } else if (tenGaDen.startsWith("GA_") || tenGaDen.startsWith("ga_")) {
-            // Looks like a station code (e.g., GA_SG, GA_HN)
             needsLookupDen = true;
         } else if (maGaDen != null && tenGaDen.equals(maGaDen)) {
-            // tenGaDen contains the code instead of the name
             needsLookupDen = true;
         } else if (tenGaDen.length() <= 3) {
-            // Very short, likely a code (e.g., SG, HN)
             needsLookupDen = true;
         }
         
@@ -91,7 +84,7 @@ public class VeDAO implements GenericDAO<Ve> {
                     ve.setTenGaDen(ga.getTenGa());
                 }
             } catch (Exception e) {
-                // Keep existing value if lookup fails
+                // Giữ nguyên giá trị nếu tìm thất bại
             }
         }
     }
@@ -161,17 +154,16 @@ public class VeDAO implements GenericDAO<Ve> {
         try {
             conn = ConnectSql.getInstance().getConnection();
 
-            // --- 1. Nếu VE CHƯA có maBangGia -> tự tìm bảng giá phù hợp ---
+            // Tìm bảng giá nếu vé chưa có maBangGia
             if (v.getMaBangGia() == null || v.getMaBangGia().trim().isEmpty()) {
                 String maChang = null;
                 try {
                     ChuyenTauDAO ctDAO = ChuyenTauDAO.getInstance();
                     ChuyenTau ct = ctDAO.findById(v.getMaChuyen());
                     if (ct != null) {
-                        maChang = ct.getMaChang();   // giả sử ChuyenTau có field maChang
+                        maChang = ct.getMaChang();
                     }
                 } catch (Exception ignored) {
-                    // Nếu không lấy được maChang thì bỏ qua, để maBangGia = null
                 }
 
                 if (maChang != null && v.getLoaiCho() != null) {
@@ -181,13 +173,12 @@ public class VeDAO implements GenericDAO<Ve> {
                     if (applicable != null) {
                         v.setMaBangGia(applicable.getMaBangGia());
                     } else {
-                        v.setMaBangGia(null); // không có bảng giá phù hợp
+                        v.setMaBangGia(null);
                     }
                 }
             }
-            // Nếu maBangGia đã được set từ trước (ví dụ đổi vé) thì KHÔNG đụng tới nữa.
 
-            // --- 2. Thực hiện insert ---
+            // Thực hiện insert
             pst = conn.prepareStatement(sql);
             pst.setString(1, v.getMaVe());
             pst.setString(2, v.getMaChuyen());
@@ -198,7 +189,7 @@ public class VeDAO implements GenericDAO<Ve> {
             pst.setString(7, v.getTenGaDi());
             pst.setString(8, v.getTenGaDen());
 
-            // ngayIn: nếu null thì lấy thời điểm hiện tại
+            // Nếu ngayIn null thì lấy thời điểm hiện tại
             if (v.getNgayIn() != null) {
                 pst.setTimestamp(9, Timestamp.valueOf(v.getNgayIn()));
             } else {
@@ -240,7 +231,7 @@ public class VeDAO implements GenericDAO<Ve> {
                 pst.setNull(17, Types.FLOAT);
             }
 
-            pst.setBoolean(18, true); // isActive
+            pst.setBoolean(18, true);
 
             System.out.println("DEBUG Ve.insert: inserting maVe=" + v.getMaVe() +
                     " maBangGia=" + v.getMaBangGia());
@@ -318,8 +309,7 @@ public class VeDAO implements GenericDAO<Ve> {
     }
 
     /**
-     * Lấy danh sách vé theo mã khách hàng
-     * Dùng cho đổi vé (phát triển trong tương lai)
+     * Lấy vé theo khách hàng
      */
     public List<Ve> getByKhachHang(String maKH) {
         List<Ve> list = new ArrayList<>();
@@ -394,7 +384,6 @@ public class VeDAO implements GenericDAO<Ve> {
                     v.setTrangThai(rs.getString("trangThai"));
                     Timestamp ts = rs.getTimestamp("gioDi");
                     if (ts != null) v.setGioDi(ts.toLocalDateTime());
-                    // set thêm các field khác nếu cần (maKH, maLoaiVe, maBangGia, donGia, ngayIn, ...)
                     list.add(v);
                 }
             }

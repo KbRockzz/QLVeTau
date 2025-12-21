@@ -11,7 +11,6 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
     private static NhanVienDAO instance;
 
     private NhanVienDAO() {
-        // Không giữ Connection làm trường
     }
 
     public static synchronized NhanVienDAO getInstance() {
@@ -24,7 +23,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
     @Override
     public List<NhanVien> getAll() {
         List<NhanVien> list = new ArrayList<>();
-        // Only get active employees (isActive = 1)
+        // Chỉ lấy nhân viên đang hoạt động
         String sql = "SELECT maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai FROM NhanVien WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
@@ -65,7 +64,6 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public boolean insert(NhanVien nv) {
-        // Set isActive = 1 by default for new employees
         String sql = "INSERT INTO NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -112,7 +110,7 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
 
     @Override
     public boolean delete(String id) {
-        // Soft delete: set isActive = 0
+        // Xóa mềm: đặt isActive = 0
         String sql = "UPDATE NhanVien SET isActive = 0 WHERE maNV = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {

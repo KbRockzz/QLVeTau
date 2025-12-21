@@ -10,7 +10,6 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
     private static TaiKhoanDAO instance;
 
     private TaiKhoanDAO() {
-        // Không giữ Connection làm trường
     }
 
     public static synchronized TaiKhoanDAO getInstance() {
@@ -23,7 +22,7 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
     @Override
     public List<TaiKhoan> getAll() {
         List<TaiKhoan> list = new ArrayList<>();
-        // Only get active accounts (isActive = 1)
+        // Chỉ lấy tài khoản đang hoạt động
         String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai FROM TaiKhoan WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
@@ -56,7 +55,6 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
 
     @Override
     public boolean insert(TaiKhoan t) {
-        // Set isActive = 1 by default for new accounts
         String sql = "INSERT INTO TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -91,7 +89,7 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
 
     @Override
     public boolean delete(String id) {
-        // Soft delete: set isActive = 0
+        // Xóa mềm: đặt isActive = 0
         String sql = "UPDATE TaiKhoan SET isActive = 0 WHERE maTK = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -104,8 +102,7 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
     }
 
     /**
-     * Get all deleted accounts (isActive = 0)
-     * @return List of soft-deleted accounts
+     * Lấy tài khoản đã xóa
      */
     public List<TaiKhoan> getDeletedAccounts() {
         List<TaiKhoan> list = new ArrayList<>();

@@ -22,7 +22,7 @@ public class GaDAO implements GenericDAO<Ga> {
     @Override
     public List<Ga> getAll() {
         List<Ga> list = new ArrayList<>();
-        // Only get active stations (isActive = 1)
+        // Chỉ lấy các ga đang hoạt động
         String sql = "SELECT maGa, tenGa, moTa, tinhTrang, diaChi FROM Ga WHERE isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
@@ -49,7 +49,6 @@ public class GaDAO implements GenericDAO<Ga> {
 
     @Override
     public boolean insert(Ga entity) {
-        // Set isActive = 1 by default for new stations
         String sql = "INSERT INTO Ga (maGa, tenGa, moTa, tinhTrang, diaChi) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -84,7 +83,7 @@ public class GaDAO implements GenericDAO<Ga> {
 
     @Override
     public boolean delete(String id) {
-        // Soft delete: set isActive = 0
+        // Xóa mềm: đặt isActive = 0
         String sql = "UPDATE Ga SET isActive = 0 WHERE maGa = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -97,8 +96,7 @@ public class GaDAO implements GenericDAO<Ga> {
     }
 
     /**
-     * Get all deleted stations (isActive = 0)
-     * @return List of soft-deleted stations
+     * Lấy các ga đã xóa
      */
     public List<Ga> getDeletedStations() {
         List<Ga> list = new ArrayList<>();
@@ -117,9 +115,7 @@ public class GaDAO implements GenericDAO<Ga> {
     }
 
     /**
-     * Restore a soft-deleted station (set isActive = 1)
-     * @param id Station ID to restore
-     * @return true if restore was successful
+     * Khôi phục ga đã xóa
      */
     public boolean restoreStation(String id) {
         String sql = "UPDATE Ga SET isActive = 1 WHERE maGa = ?";

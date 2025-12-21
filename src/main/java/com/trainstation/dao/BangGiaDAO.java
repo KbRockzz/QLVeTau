@@ -1,5 +1,3 @@
-// Thay thế toàn bộ file com/trainstation/dao/BangGiaDAO.java hoặc ít nhất thay method findApplicable bằng nội dung sau:
-
 package com.trainstation.dao;
 
 import com.trainstation.MySQL.ConnectSql;
@@ -118,7 +116,6 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
     }
     public BangGia findApplicable(String maChang, String loaiGhe, LocalDateTime refDate) {
         if (maChang == null || loaiGhe == null || refDate == null) return null;
-        // NOTE: Use SQL Server compatible TOP 1 instead of MySQL LIMIT
         String sql = "SELECT TOP 1 maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc " +
                 "FROM BangGia " +
                 "WHERE maChang = ? AND loaiGhe = ? AND ngayBatDau <= ? AND ngayKetThuc >= ? " +

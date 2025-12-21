@@ -10,7 +10,6 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
     private static ToaTauDAO instance;
 
     private ToaTauDAO() {
-        // Không giữ Connection làm trường
     }
 
     public static synchronized ToaTauDAO getInstance() {
@@ -100,17 +99,12 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
         }
     }
 
-    // Note: ToaTau no longer has maTau FK in new schema
-    // This method kept for compatibility but returns all ToaTau
     public List<ToaTau> getByTau(String maTau) {
-        // Since ToaTau no longer has maTau column, return all active ToaTau
         return getAll();
     }
 
     /**
-     * Get coaches (ToaTau) for a specific train trip (ChuyenTau) using ChiTietChuyenTau relationship
-     * @param maChuyenTau Train trip ID
-     * @return List of coaches associated with the train trip, ordered by soThuTuToa
+     * Lấy toa tàu theo chuyến tàu
      */
     public List<ToaTau> getByChuyenTau(String maChuyenTau) {
         List<ToaTau> result = new ArrayList<>();
@@ -119,8 +113,6 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
             return result;
         }
         
-        // Use a JOIN query to fetch all coaches in one database round-trip
-        // Note: ChiTietChuyenTau.maToaTau references ToaTau.maToa (legacy naming convention)
         String sql = "SELECT t.maToa, t.loaiToa, t.samSX, t.trangThai, t.sucChua, t.isActive " +
                      "FROM ToaTau t " +
                      "INNER JOIN ChiTietChuyenTau ct ON t.maToa = ct.maToaTau " +
