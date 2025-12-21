@@ -560,6 +560,8 @@ BEGIN TRY
     IF NOT EXISTS (SELECT 1 FROM dbo.LoaiNV WHERE maLoai = 'LNV03')
         INSERT INTO dbo.LoaiNV (maLoai, tenLoai, moTa) VALUES ('LNV03', N'Admin hệ thống', N'Quản trị cấu hình');
 
+	UPDATE dbo.LoaiNV SET isActive = 0 WHERE maLoai = 'LNV03'
+
     ----------------------------------------------------------------
     -- 2) People and accounts: KhachHang, NhanVien, TaiKhoan
     ----------------------------------------------------------------
@@ -572,60 +574,53 @@ BEGIN TRY
     IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV06') INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV) VALUES ('NV06', N'Lê Thị Hạnh', '0918234567', N'12 Võ Thị Sáu, Q3', '1986-09-14', 'LNV01');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV07')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV07', N'Nguyễn Văn Hải', '0908111222', N'25 Lê Lợi, Q1', '1988-03-21', 'LNV01', 'Đang hoạt động');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV07', N'Nguyễn Văn Hải', '0908111222', N'25 Lê Lợi, Q1', '1988-03-21', 'LNV01');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV08')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV08', N'Phạm Thị Thu', '0912333444', N'78 Hai Bà Trưng, Q3', '1992-11-02', 'LNV01', 'Đang hoạt động');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV08', N'Phạm Thị Thu', '0912333444', N'78 Hai Bà Trưng, Q3', '1992-11-02', 'LNV01');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV09')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV09', N'Hoàng Gia Huy', '0935445566', N'10 Nguyễn Huệ, Q1', '1987-07-18', 'LNV02', 'Đang hoạt động');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV09', N'Hoàng Gia Huy', '0935445566', N'10 Nguyễn Huệ, Q1', '1987-07-18', 'LNV02');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV10')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV10', N'Đặng Thị Kim Ngân', '0946556677', N'5 Cách Mạng Tháng 8, Q10', '1991-02-27', 'LNV02', 'Đang hoạt động');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV10', N'Đặng Thị Kim Ngân', '0946556677', N'5 Cách Mạng Tháng 8, Q10', '1991-02-27', 'LNV02');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV11')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV11', N'Võ Thành Tâm', '0909778899', N'22 Điện Biên Phủ, Q3', '1984-12-09', 'LNV03', 'Đã khóa');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV11', N'Võ Thành Tâm', '0909778899', N'22 Điện Biên Phủ, Q3', '1984-12-09', 'LNV03');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV12')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV12', N'Trương Mỹ Duyên', '0917888999', N'90 Lý Tự Trọng, Q1', '1993-08-15', 'LNV01', 'Đã khóa');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV12', N'Trương Mỹ Duyên', '0917888999', N'90 Lý Tự Trọng, Q1', '1993-08-15', 'LNV01');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV13')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV13', N'Lý Minh Nhật', '0905667788', N'40 Trần Hưng Đạo, Q5', '1989-06-04', 'LNV02', 'Đã khóa');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV13', N'Lý Minh Nhật', '0905667788', N'40 Trần Hưng Đạo, Q5', '1989-06-04', 'LNV02');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV14')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV14', N'Huỳnh Thanh Vy', '0935667788', N'18 Võ Văn Tần, Q3', '1994-10-22', 'LNV02', 'Đang hoạt động');
-
-	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV15')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV15', N'Bùi Ngọc Khánh', '0977333555', N'77 Nguyễn Trãi, Q5', '1985-04-30', 'LNV03', 'Đang hoạt động');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV14', N'Huỳnh Thanh Vy', '0935667788', N'18 Võ Văn Tần, Q3', '1994-10-22', 'LNV02');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV16')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV16', N'Tô Anh Phú', '0905443322', N'12 Nguyễn Thiện Thuật, Q3', '1990-01-19', 'LNV01', 'Đang hoạt động');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV16', N'Tô Anh Phú', '0905443322', N'12 Nguyễn Thiện Thuật, Q3', '1990-01-19', 'LNV01');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV17')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV17', N'Nguyễn Trà My', '0913555666', N'66 Phạm Ngũ Lão, Q1', '1996-09-10', 'LNV01', 'Đang hoạt động');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV17', N'Nguyễn Trà My', '0913555666', N'66 Phạm Ngũ Lão, Q1', '1996-09-10', 'LNV01');
 
-	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV18')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV18', N'Đỗ Minh Khang', '0923667788', N'9 Hoàng Văn Thụ, Q10', '1983-03-05', 'LNV03', 'Đang hoạt động');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV19')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV19', N'Đinh Tấn Lộc', '0988111222', N'55 Nguyễn Kiệm, Phú Nhuận', '1992-12-11', 'LNV02', 'Đang hoạt động');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV19', N'Đinh Tấn Lộc', '0988111222', N'55 Nguyễn Kiệm, Phú Nhuận', '1992-12-11', 'LNV02');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.NhanVien WHERE maNV = 'NV20')
-	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai)
-	VALUES ('NV20', N'Lê Hải Vy', '0966778899', N'33 Quang Trung, Gò Vấp', '1995-07-08', 'LNV01', 'Đang hoạt động');
+	INSERT INTO dbo.NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV)
+	VALUES ('NV20', N'Lê Hải Vy', '0966778899', N'33 Quang Trung, Gò Vấp', '1995-07-08', 'LNV01');
 
 
     IF NOT EXISTS (SELECT 1 FROM dbo.TaiKhoan WHERE maTK = 'TK01') INSERT INTO dbo.TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai) VALUES ('TK01', 'NV01', 'thuyly', '123456', N'Hoạt động');
@@ -663,10 +658,6 @@ BEGIN TRY
 	INSERT INTO dbo.TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai)
 	VALUES ('TK14', 'NV14', 'vyhuynh', '123456', N'Hoạt động');
 
-	IF NOT EXISTS (SELECT 1 FROM dbo.TaiKhoan WHERE maTK = 'TK15')
-	INSERT INTO dbo.TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai)
-	VALUES ('TK15', 'NV15', 'khanhbui', '123456', N'Hoạt động');
-
 	IF NOT EXISTS (SELECT 1 FROM dbo.TaiKhoan WHERE maTK = 'TK16')
 	INSERT INTO dbo.TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai)
 	VALUES ('TK16', 'NV16', 'phuto', '123456', N'Hoạt động');
@@ -675,9 +666,6 @@ BEGIN TRY
 	INSERT INTO dbo.TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai)
 	VALUES ('TK17', 'NV17', 'mynguyen', '123456', N'Hoạt động');
 
-	IF NOT EXISTS (SELECT 1 FROM dbo.TaiKhoan WHERE maTK = 'TK18')
-	INSERT INTO dbo.TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai)
-	VALUES ('TK18', 'NV18', 'khangdo', '123456', N'Hoạt động');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.TaiKhoan WHERE maTK = 'TK19')
 	INSERT INTO dbo.TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai)
@@ -728,9 +716,9 @@ BEGIN TRY
     IF NOT EXISTS (SELECT 1 FROM dbo.ToaTau WHERE maToa = 'TOA002')
         INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES ('TOA002', 'TOANGOI', 2016, N'Hoạt động', 24);
     IF NOT EXISTS (SELECT 1 FROM dbo.ToaTau WHERE maToa = 'TOA003')
-        INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES ('TOA003', 'TOANAM', 2015, N'Hoạt động', 20);
+        INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES ('TOA003', 'TOANGOI', 2015, N'Hoạt động', 20);
     IF NOT EXISTS (SELECT 1 FROM dbo.ToaTau WHERE maToa = 'TOA004')
-        INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES ('TOA004', 'TOANAM', 2016, N'Hoạt động', 20);
+        INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES ('TOA004', 'TOANGOI', 2016, N'Hoạt động', 20);
 	
 	IF NOT EXISTS (SELECT 1 FROM dbo.ToaTau WHERE maToa = 'TOA005')
 		INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua)
@@ -756,6 +744,26 @@ BEGIN TRY
 		INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua)
 		VALUES ('TOA010', 'TOANAM', 2019, N'Hoạt động', 20);
 
+	IF NOT EXISTS (SELECT 1 FROM dbo.ToaTau WHERE maToa = 'TOA011')
+        INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES ('TOA0011', 'TOANGOI', 2015, N'Hoạt động', 24);
+    IF NOT EXISTS (SELECT 1 FROM dbo.ToaTau WHERE maToa = 'TOA012')
+        INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES ('TOA0012', 'TOANGOI', 2016, N'Hoạt động', 24);
+    IF NOT EXISTS (SELECT 1 FROM dbo.ToaTau WHERE maToa = 'TOA013')
+        INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES ('TOA0013', 'TOANGOI', 2015, N'Hoạt động', 20);
+    IF NOT EXISTS (SELECT 1 FROM dbo.ToaTau WHERE maToa = 'TOA014')
+        INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua) VALUES ('TOA0014', 'TOANGOI', 2016, N'Hoạt động', 20);
+	
+	IF NOT EXISTS (SELECT 1 FROM dbo.ToaTau WHERE maToa = 'TOA015')
+		INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua)
+		VALUES ('TOA015', 'TOANGOI', 2017, N'Hoạt động', 24);
+
+	IF NOT EXISTS (SELECT 1 FROM dbo.ToaTau WHERE maToa = 'TOA016')
+		INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua)
+		VALUES ('TOA016', 'TOANGOI', 2018, N'Hoạt động', 24);
+
+	IF NOT EXISTS (SELECT 1 FROM dbo.ToaTau WHERE maToa = 'TOA017')
+		INSERT INTO dbo.ToaTau (maToa, loaiToa, samSX, trangThai, sucChua)
+		VALUES ('TOA017', 'TOANGOI', 2019, N'Hoạt động', 24);
 
 
     ----------------------------------------------------------------
@@ -785,10 +793,6 @@ BEGIN TRY
 		INSERT INTO dbo.ChuyenTau(maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang)
 		VALUES ('CT20251223B', 'DM002', 'NV06', 'GA_NT', 'GA_SG',
 				'2025-12-23 15:00', '2025-12-23 21:00', 400, 'CH_TRUNG');
-	IF NOT EXISTS (SELECT 1 FROM dbo.ChuyenTau WHERE maChuyen = 'CT3_20251223A')
-		INSERT INTO dbo.ChuyenTau(maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang)
-		VALUES ('CT3_20251223A', 'DM003', 'NV07', 'GA_SG', 'GA_NT',
-				'2025-12-23 08:00', '2025-12-23 14:00', 400, 'CH_TRUNG');
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.ChuyenTau WHERE maChuyen = 'CT3_20251223B')
 		INSERT INTO dbo.ChuyenTau(maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang)
@@ -949,6 +953,9 @@ BEGIN TRY
 	INSERT INTO dbo.ChuyenTau(maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang) VALUES
 	('CT7_20251227', 'DM007', 'NV11', 'GA_HN', 'GA_NT',
 	 '2025-12-27 19:00', '2025-12-28 01:00', 1300, 'CH_DAI');
+
+	 UPDATE ChuyenTau SET trangThai = N'Chưa khởi hành'
+	 UPDATE ChuyenTau SET trangThai = N'Đã đến' WHERE maChuyen in ('CT001', 'CT002', 'CT006')
     ----------------------------------------------------------------
     -- 6) Now map ToaTau -> ChuyenTau (ChiTietChuyenTau). These rows must match existing ToaTau and ChuyenTau.
     ----------------------------------------------------------------
@@ -962,34 +969,24 @@ BEGIN TRY
         INSERT INTO dbo.ChiTietChuyenTau (maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT006', 'TOA003', 1, 24);
 
 
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT20251223A','TOA001',1,24);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT20251223A','TOA005',2,24);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT20251223A','TOA003',3,20);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT20251223A','TOA007',4,24);
+	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT20251223A','TOA005',1,24);
+	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT20251223A','TOA003',2,20);
 
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT20251223B','TOA002',1,24);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT20251223B','TOA006',2,24);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT20251223B','TOA004',3,20);
+	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT20251223B','TOA004',1,20);
 
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT3_20251223A','TOA007',1,24);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT3_20251223A','TOA009',2,20);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT3_20251223A','TOA005',3,24);
-
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT3_20251223B','TOA008',1,20);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT3_20251223B','TOA003',2,20);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT3_20251223B','TOA001',3,24);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT3_20251223B','TOA006',4,24);
-
+	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT3_20251223B','TOA003',1,20);
+	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT3_20251223B','TOA005',2,20);
+	
 	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT5_20251223','TOA002',1,24);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT5_20251223','TOA004',2,20);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT5_20251223','TOA005',3,24);
+	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT5_20251223','TOA007',2,20);
 
 	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT6_20251223','TOA007',1,24);
 	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT6_20251223','TOA008',2,20);
 	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT6_20251223','TOA009',3,20);
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT6_20251223','TOA001',4,24);
+	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT6_20251223','TOA002',4,24);
+	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT6_20251223','TOA001',5,24);
 
-	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT7_20251223','TOA003',1,20);
+	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT7_20251223','TOA001',1,20);
 	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT7_20251223','TOA006',2,24);
 	INSERT INTO ChiTietChuyenTau(maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES ('CT7_20251223','TOA010',3,20);
 
@@ -1162,53 +1159,11 @@ BEGIN TRY
     ----------------------------------------------------------------
     -- 8) Insert sample Ve rows (tickets). Ensure referenced Ghe exist.
     ----------------------------------------------------------------
-    -- Remove specific demo ve IDs if present (safe for reruns)
-    IF EXISTS (SELECT 1 FROM dbo.Ve WHERE maVe IN ('VE001','VE002','VE003','VE004','VE005','VE006'))
-    BEGIN
-        DELETE FROM dbo.Ve WHERE maVe IN ('VE001','VE002','VE003','VE004','VE005','VE006');
-    END
 
-    -- Insert tickets for CT006 (uses TOA001 seats generated above)
-    IF NOT EXISTS (SELECT 1 FROM dbo.Ve WHERE maVe = 'VE001')
-        INSERT INTO dbo.Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gioDi, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan)
-        VALUES ('VE001', 'CT006', 'LV01', 'G_TOA001_01', '2025-01-05 08:00', N'Đã thanh toán', '2025-01-10 08:00', 1, N'Ghế ngồi', N'Người lớn', 'BG01', 100000);
-
-    IF NOT EXISTS (SELECT 1 FROM dbo.Ve WHERE maVe = 'VE002')
-        INSERT INTO dbo.Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gioDi, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan)
-        VALUES ('VE002', 'CT006', 'LV02', 'G_TOA001_02', '2025-01-05 08:05', N'Đã thanh toán', '2025-01-10 08:00', 1, N'Ghế ngồi', N'Trẻ em', 'BG01', 50000);
-
-    IF NOT EXISTS (SELECT 1 FROM dbo.Ve WHERE maVe = 'VE003')
-        INSERT INTO dbo.Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gioDi, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan)
-        VALUES ('VE003', 'CT006', 'LV03', 'G_TOA001_03', '2025-01-05 08:10', N'Đã thanh toán', '2025-01-10 08:00', 1, N'Ghế ngồi', N'Cao tuổi', 'BG01', 300000);
-
-    IF NOT EXISTS (SELECT 1 FROM dbo.Ve WHERE maVe = 'VE004')
-        INSERT INTO dbo.Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gioDi, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan)
-        VALUES ('VE004', 'CT006', 'LV04', 'G_TOA001_04', '2025-01-05 08:15', N'Đã thanh toán', '2025-01-10 08:00', 1, N'Ghế ngồi', N'Khuyết tật', 'BG01', 300000);
-
-    IF NOT EXISTS (SELECT 1 FROM dbo.Ve WHERE maVe = 'VE005')
-        INSERT INTO dbo.Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gioDi, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan)
-        VALUES ('VE005', 'CT006', 'LV01', 'G_TOA001_05', '2025-01-05 08:20', N'Đã thanh toán', '2025-01-10 08:00', 1, N'Ghế ngồi', N'Người lớn', 'BG01', 100000);
-
-    IF NOT EXISTS (SELECT 1 FROM dbo.Ve WHERE maVe = 'VE006')
-        INSERT INTO dbo.Ve (maVe, maChuyen, maLoaiVe, maSoGhe, ngayIn, trangThai, gioDi, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan)
-        VALUES ('VE006', 'CT006', 'LV02', 'G_TOA001_06', '2025-01-05 08:25', N'Đã thanh toán', '2025-01-10 08:00', 1, N'Ghế ngồi', N'Trẻ em', 'BG01', 50000);
 
     ----------------------------------------------------------------
     -- 9) HoaDon and ChiTietHoaDon (invoices linked to tickets)
     ----------------------------------------------------------------
-    IF NOT EXISTS (SELECT 1 FROM dbo.HoaDon WHERE maHoaDon = 'HD001')
-        INSERT INTO dbo.HoaDon (maHoaDon, maNV, maKH, tenKH, soDienThoai, ngayLap, phuongThucThanhToan, trangThai)
-        VALUES ('HD001','NV05','KH001', N'Nguyễn Văn An', '0901234567', '2025-01-05 08:10', N'Tiền mặt', N'Hoàn tất');
-
-    IF NOT EXISTS (SELECT 1 FROM dbo.HoaDon WHERE maHoaDon = 'HD002')
-        INSERT INTO dbo.HoaDon (maHoaDon, maNV, maKH, tenKH, soDienThoai, ngayLap, phuongThucThanhToan, trangThai)
-        VALUES ('HD002','NV06','KH002', N'Trần Thị Bích', '0912345678', '2025-01-05 08:15', N'Tiền mặt', N'Hoàn tất');
-
-    IF NOT EXISTS (SELECT 1 FROM dbo.ChiTietHoaDon WHERE maHoaDon='HD001' AND maVe='VE001')
-        INSERT INTO dbo.ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa) VALUES ('HD001','VE001','LV01',100000,100000,N'Người lớn');
-
-    IF NOT EXISTS (SELECT 1 FROM dbo.ChiTietHoaDon WHERE maHoaDon='HD002' AND maVe='VE002')
-        INSERT INTO dbo.ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa) VALUES ('HD002','VE002','LV02',100000,50000,N'Trẻ em');
 
     ----------------------------------------------------------------
     -- Finalize
