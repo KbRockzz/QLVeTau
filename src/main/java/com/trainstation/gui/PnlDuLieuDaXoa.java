@@ -25,22 +25,18 @@ public class PnlDuLieuDaXoa extends JPanel {
     private KhachHangDAO khachHangDAO;
     private GaDAO gaDAO;
     
-    // Employee tab components
     private JTable bangNhanVien;
     private DefaultTableModel modelNhanVien;
     private JButton btnKhoiPhucNV, btnLamMoiNV, btnXoaRongNV;
 
-    // Account tab components
     private JTable bangTaiKhoan;
     private DefaultTableModel modelTaiKhoan;
     private JButton btnKhoiPhucTK, btnLamMoiTK, btnXoaRongTK;
 
-    // Customer tab components
     private JTable bangKhachHang;
     private DefaultTableModel modelKhachHang;
     private JButton btnKhoiPhucKH, btnLamMoiKH, btnXoaRongKH;
 
-    // Station tab components
     private JTable bangGa;
     private DefaultTableModel modelGa;
     private JButton btnKhoiPhucGa, btnLamMoiGa, btnXoaRongGa;
@@ -65,22 +61,17 @@ public class PnlDuLieuDaXoa extends JPanel {
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 20));
         add(lblTieuDe, BorderLayout.NORTH);
 
-        // Create tabbed pane
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        // Employee tab
         JPanel employeePanel = createEmployeePanel();
         tabbedPane.addTab("Nhân viên", employeePanel);
 
-        // Account tab
         JPanel accountPanel = createAccountPanel();
         tabbedPane.addTab("Tài khoản", accountPanel);
 
-        // Customer tab
         JPanel customerPanel = createCustomerPanel();
         tabbedPane.addTab("Khách hàng", customerPanel);
         
-        // Station tab
         JPanel stationPanel = createStationPanel();
         tabbedPane.addTab("Ga", stationPanel);
         
@@ -274,7 +265,7 @@ public class PnlDuLieuDaXoa extends JPanel {
                 "Khôi phục nhân viên thành công!", 
                 "Thành công", 
                 JOptionPane.INFORMATION_MESSAGE);
-            taiDuLieuNhanVienDaXoa(); // Reload the table
+            taiDuLieuNhanVienDaXoa();
         } else {
             JOptionPane.showMessageDialog(this, 
                 "Khôi phục nhân viên thất bại!", 
@@ -368,7 +359,7 @@ public class PnlDuLieuDaXoa extends JPanel {
                 "Khôi phục khách hàng thành công!", 
                 "Thành công", 
                 JOptionPane.INFORMATION_MESSAGE);
-            taiDuLieuKhachHangDaXoa(); // Reload the table
+            taiDuLieuKhachHangDaXoa();
         } else {
             JOptionPane.showMessageDialog(this, 
                 "Khôi phục khách hàng thất bại!", 
@@ -383,7 +374,7 @@ public class PnlDuLieuDaXoa extends JPanel {
     private JPanel createStationPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
-        // Table
+        
         String[] columns = {"Mã ga", "Tên ga", "Mô tả", "Tình trạng", "Địa chỉ"};
         modelGa = new DefaultTableModel(columns, 0) {
             @Override
@@ -398,7 +389,6 @@ public class PnlDuLieuDaXoa extends JPanel {
         MaterialInitializer.setTableScrollPaneSize(scrollPane, 45);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        // Buttons
         JPanel pnlButton = MaterialInitializer.createButtonPanel();
 
         btnKhoiPhucGa = new JButton("Khôi phục");

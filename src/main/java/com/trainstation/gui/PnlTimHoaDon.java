@@ -50,7 +50,7 @@ public class PnlTimHoaDon extends JPanel {
     private final VeDAO veDAO = VeDAO.getInstance();
     private final HoaDonService hoaDonService = HoaDonService.getInstance();
 
-    // Filters
+    
     private final JTextField txtMaHoaDon = new JTextField();
     private final JTextField txtMaKH = new JTextField();
     private final JTextField txtTenKH = new JTextField();
@@ -59,14 +59,14 @@ public class PnlTimHoaDon extends JPanel {
     private final JComboBox<String> cboPhuongThuc = new JComboBox<>(new String[] {"", "Tiền mặt", "Chuyển khoản"});
     private final JComboBox<String> cboTrangThai = new JComboBox<>(new String[] {"", "Chờ xác nhận", "Hoàn tất", "Hủy"});
 
-    // Result table
+    
     private final DefaultTableModel model = new DefaultTableModel(
             new String[]{"Mã hóa đơn", "Mã KH", "Tên KH", "Ngày lập", "PT thanh toán", "Trạng thái", "Số vé", "Tổng tiền"}, 0) {
         @Override public boolean isCellEditable(int row, int column) { return false; }
     };
     private final JTable table = new JTable(model);
 
-    // Buttons
+    
     private final JButton btnSearch = new JButton("Tìm");
     private final JButton btnReset = new JButton("Đặt lại");
     private final JButton btnView = new JButton("Xem chi tiết");
@@ -163,14 +163,14 @@ public class PnlTimHoaDon extends JPanel {
             }
         });
 
-        // double click to view
+        
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 if (evt.getClickCount() == 2) viewSelectedHoaDon();
             }
         });
 
-        // initial disabled actions
+        
         btnView.setEnabled(false);
         btnExport.setEnabled(false);
     }

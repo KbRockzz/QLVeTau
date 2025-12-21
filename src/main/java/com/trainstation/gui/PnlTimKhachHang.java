@@ -22,19 +22,19 @@ import java.util.concurrent.ExecutionException;
 public class PnlTimKhachHang extends JPanel {
     private final KhachHangDAO khDao = KhachHangDAO.getInstance();
 
-    // Filters
+    
     private final JTextField txtFilterMa = new JTextField(20);
     private final JTextField txtFilterTen = new JTextField(20);
     private final JTextField txtFilterSdt = new JTextField(20);
 
-    // Table (no "Trạng thái" column)
+    
     private final DefaultTableModel model = new DefaultTableModel(
             new String[]{"Mã KH", "Tên", "Email", "SĐT"}, 0) {
         @Override public boolean isCellEditable(int row, int col) { return false; }
     };
     private final JTable table = new JTable(model);
 
-    // Buttons
+    
     private final JButton btnSearch = new JButton("Tìm");
     private final JButton btnReset = new JButton("Đặt lại");
     private final JButton btnView = new JButton("Xem");
@@ -63,25 +63,25 @@ public class PnlTimKhachHang extends JPanel {
 
         int row = 0;
 
-// cột đệm trái
+
         c.gridx = 0; c.gridy = row; c.weightx = 1.0;
         pnl.add(Box.createHorizontalStrut(0), c);
 
-// label
+
         c.gridx = 1; c.weightx = 0;
         pnl.add(new JLabel("Mã khách hàng:"), c);
 
-// input
+
         c.gridx = 2;
         pnl.add(txtFilterMa, c);
 
-// cột đệm phải
+
         c.gridx = 3; c.weightx = 1.0;
         pnl.add(Box.createHorizontalStrut(0), c);
 
         row++;
 
-// ===== dòng 2 =====
+
         c.gridx = 0; c.gridy = row; c.weightx = 1.0;
         pnl.add(Box.createHorizontalStrut(0), c);
 
@@ -96,7 +96,7 @@ public class PnlTimKhachHang extends JPanel {
 
         row++;
 
-// ===== dòng 3 =====
+
         c.gridx = 0; c.gridy = row; c.weightx = 1.0;
         pnl.add(Box.createHorizontalStrut(0), c);
 
@@ -161,7 +161,7 @@ public class PnlTimKhachHang extends JPanel {
         SwingWorker<List<KhachHang>, Void> worker = new SwingWorker<>() {
             @Override
             protected List<KhachHang> doInBackground() {
-                // getAllIncludingDeleted so user can search across all records; filter in-memory
+                
                 //List<KhachHang> all = khDao.getAllIncludingDeleted();
                 List<KhachHang> all = khDao.getAll();
                 if (all == null) return List.of();
