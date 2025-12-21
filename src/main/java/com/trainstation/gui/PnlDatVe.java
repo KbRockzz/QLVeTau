@@ -70,24 +70,20 @@ public class PnlDatVe extends JPanel {
 
     private final Map<String, Ve> heldVeMap = new HashMap<>();
     
-    // Modern color palette for seat states - Material Design inspired (matching DlgDoiVe)
-    private static final Color COLOR_AVAILABLE = new Color(76, 175, 80);      // Material Green 500
-    private static final Color COLOR_AVAILABLE_HOVER = new Color(102, 187, 106); // Material Green 400
-    private static final Color COLOR_SELECTED = new Color(33, 150, 243);      // Material Blue 500
-    private static final Color COLOR_BOOKED = Color.RED;         // Material Red 500
+    private static final Color COLOR_AVAILABLE = new Color(76, 175, 80);
+    private static final Color COLOR_AVAILABLE_HOVER = new Color(102, 187, 106);
+    private static final Color COLOR_SELECTED = new Color(33, 150, 243);
+    private static final Color COLOR_BOOKED = Color.RED;
     
-    // Outline/border colors (darker shades for borders)
-    private static final Color COLOR_SELECTED_BORDER = new Color(21, 101, 192);    // Darker blue
-    private static final Color COLOR_AVAILABLE_BORDER = new Color(56, 142, 60);    // Darker green
-    private static final Color COLOR_BOOKED_BORDER = new Color(198, 40, 40);       // Darker red
+    private static final Color COLOR_SELECTED_BORDER = new Color(21, 101, 192);
+    private static final Color COLOR_AVAILABLE_BORDER = new Color(56, 142, 60);
+    private static final Color COLOR_BOOKED_BORDER = new Color(198, 40, 40);
     
-    // Visual indicators (emoji icons)
     private static final String ICON_AVAILABLE = "✓";
     private static final String ICON_BOOKED = "✕";
     private static final String ICON_HELD = "⌛";
     
-    // Modern design constants
-    private static final String ROUND_RECT_ARC = "6,6,6,6"; // 6px radius for rounded corners
+    private static final String ROUND_RECT_ARC = "6,6,6,6";
 
     public PnlDatVe(TaiKhoan taiKhoan) {
         this.taiKhoanHienTai = taiKhoan;
@@ -611,7 +607,7 @@ public class PnlDatVe extends JPanel {
      */
     private JButton taoNutGhe(Ghe ghe) {
         JButton btnGhe = new SeatButton(ghe.getMaGhe());
-        // Modern styling with rounded corners
+        
         btnGhe.setPreferredSize(new Dimension(85, 45));
         btnGhe.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnGhe.setFocusPainted(false);

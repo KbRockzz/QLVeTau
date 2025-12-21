@@ -29,7 +29,7 @@ public class PnlQuanLyVe extends JPanel {
     private DefaultTableModel modelBangHoaDon;
     private JButton btnXuatHoaDon;
     private JButton btnTaiLai;
-    private JButton btnXemChiTiet; // NEW: xem chi tiết hóa đơn
+    private JButton btnXemChiTiet;
 
     public PnlQuanLyVe(TaiKhoan taiKhoan) {
         this.taiKhoanHienTai = taiKhoan;
@@ -46,12 +46,10 @@ public class PnlQuanLyVe extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Title
         JLabel lblTieuDe = new JLabel("XUẤT HÓA ĐƠN", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
         add(lblTieuDe, BorderLayout.NORTH);
 
-        // Invoice table
         String[] tenCot = {"Mã hóa đơn", "Mã KH", "Tên KH", "Ngày lập", "PT thanh toán", "Trạng thái", "Số vé"};
         modelBangHoaDon = new DefaultTableModel(tenCot, 0) {
             @Override
@@ -62,11 +60,9 @@ public class PnlQuanLyVe extends JPanel {
         bangHoaDon = new JTable(modelBangHoaDon);
         JScrollPane scrollPane = new JScrollPane(bangHoaDon);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Danh sách hóa đơn"));
-        // Giảm chiều cao bảng để có đủ không gian
         MaterialInitializer.setTableScrollPaneSize(scrollPane, 45);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Button panel - Material styled
         JPanel pnlButton = MaterialInitializer.createButtonPanel();
 
         btnXuatHoaDon = new JButton("Xuất hóa đơn");
@@ -74,7 +70,6 @@ public class PnlQuanLyVe extends JPanel {
         MaterialInitializer.styleButton(btnXuatHoaDon);
         pnlButton.add(btnXuatHoaDon);
 
-        // NEW: xem chi tiết
         btnXemChiTiet = new JButton("Xem chi tiết");
         btnXemChiTiet.addActionListener(e -> xemChiTietHoaDon());
         MaterialInitializer.styleButton(btnXemChiTiet);
@@ -125,15 +120,15 @@ public class PnlQuanLyVe extends JPanel {
             return;
         }
 
-        // If invoice is not confirmed yet, show confirmation dialog
+        
         if ("Chờ xác nhận".equals(trangThai)) {
             xacNhanXuatHoaDon(hoaDon);
         } else {
-            // Already confirmed, just export PDF
+            
             try {
                 String fileName = hoaDonService.xuatHoaDonPDF(maHoaDon);
 
-                // Also print all tickets in this invoice
+                
                 List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.findByHoaDon(maHoaDon);
                 for (ChiTietHoaDon ct : chiTietList) {
                     Ve ve = veService.timVeTheoMa(ct.getMaVe());
@@ -156,7 +151,7 @@ public class PnlQuanLyVe extends JPanel {
     private void xacNhanXuatHoaDon(HoaDon hoaDon) {
         KhachHang kh = khachHangDAO.findById(hoaDon.getMaKH());
 
-        // Create confirmation dialog
+        
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Xác nhận xuất hóa đơn", true);
         dialog.setLayout(new BorderLayout(10, 10));
         dialog.setSize(450, 250);
@@ -168,7 +163,7 @@ public class PnlQuanLyVe extends JPanel {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Message
+        
         String message = String.format(
                 "Xác nhận xuất hóa đơn %s cho khách hàng %s.\nVui lòng chọn phương thức thanh toán:",
                 hoaDon.getMaHoaDon(),
@@ -183,7 +178,7 @@ public class PnlQuanLyVe extends JPanel {
         txtMessage.setLineWrap(true);
         pnlNoiDung.add(txtMessage, gbc);
 
-        // Payment method selection
+        
         gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1;
         pnlNoiDung.add(new JLabel("Phương thức thanh toán:"), gbc);
 
@@ -193,21 +188,21 @@ public class PnlQuanLyVe extends JPanel {
 
         dialog.add(pnlNoiDung, BorderLayout.CENTER);
 
-        // Buttons
+        
         JPanel pnlButton = new JPanel(new FlowLayout());
         JButton btnXacNhan = new JButton("Xác nhận");
         btnXacNhan.addActionListener(e -> {
             try {
-                // Update invoice
+                
                 hoaDon.setTrangThai("Hoàn tất");
                 hoaDon.setNgayLap(LocalDateTime.now());
                 hoaDon.setPhuongThucThanhToan((String) cboPhuongThuc.getSelectedItem());
                 hoaDonDAO.update(hoaDon);
 
-                // Export invoice PDF
+                
                 String fileName = hoaDonService.xuatHoaDonPDF(hoaDon.getMaHoaDon());
 
-                // Print all tickets
+                
                 List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.findByHoaDon(hoaDon.getMaHoaDon());
                 for (ChiTietHoaDon ct : chiTietList) {
                     Ve ve = veService.timVeTheoMa(ct.getMaVe());
@@ -240,7 +235,7 @@ public class PnlQuanLyVe extends JPanel {
         dialog.setVisible(true);
     }
 
-    // ---------------------- NEW: Xem chi tiết hóa đơn ----------------------
+    
 
     private void xemChiTietHoaDon() {
         int row = bangHoaDon.getSelectedRow();
@@ -267,7 +262,7 @@ public class PnlQuanLyVe extends JPanel {
                         return;
                     }
 
-                    // Build dialog with table
+                    
                     JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(PnlQuanLyVe.this), "Chi tiết hóa đơn: " + maHoaDon, true);
                     dialog.setLayout(new BorderLayout(8,8));
                     dialog.setSize(700, 400);
@@ -281,11 +276,11 @@ public class PnlQuanLyVe extends JPanel {
 
                     float total = 0f;
                     for (ChiTietHoaDon ct : items) {
-                        // try to get related Ve for extra info
+                        
                         Ve ve = null;
                         try { ve = veService.timVeTheoMa(ct.getMaVe()); } catch (Exception ignored) {}
                         
-                        // Skip tickets with "Đã đổi" status - they should not be included in total
+                        
                         if (ve != null && "Đã đổi".equals(ve.getTrangThai())) {
                             continue;
                         }
@@ -309,7 +304,7 @@ public class PnlQuanLyVe extends JPanel {
                     JScrollPane sp = new JScrollPane(tbl);
                     dialog.add(sp, BorderLayout.CENTER);
 
-                    // Bottom summary + actions
+                    
                     JPanel bottom = new JPanel(new BorderLayout(8,8));
                     JLabel lblTotal = new JLabel("Tổng tiền (đã KM): " + String.format("%.0f", total));
                     lblTotal.setFont(lblTotal.getFont().deriveFont(Font.BOLD, 14f));

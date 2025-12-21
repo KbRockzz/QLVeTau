@@ -333,9 +333,9 @@ public class PnlTimHoaDon extends JPanel {
                             @Override protected Void doInBackground() {
                                 for (ChiTietHoaDon ct : items) {
                                     try {
-                                        // try to print by calling HoaDonService or VeService if available
-                                        // HoaDonService may provide printing of tickets; fallback: do nothing
-                                        // Here we call HoaDonService.xuatHoaDonPDF only for invoice; ticket printing is left to VeService if available
+                                        
+                                        
+                                        
                                     } catch (Exception ex) { ex.printStackTrace(); }
                                 }
                                 return null;

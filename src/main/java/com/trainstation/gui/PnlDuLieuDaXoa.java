@@ -304,7 +304,7 @@ public class PnlDuLieuDaXoa extends JPanel {
                 "Khôi phục tài khoản thành công!", 
                 "Thành công", 
                 JOptionPane.INFORMATION_MESSAGE);
-            taiDuLieuTaiKhoanDaXoa(); // Reload the table
+            taiDuLieuTaiKhoanDaXoa();
         } else {
             JOptionPane.showMessageDialog(this, 
                 "Khôi phục tài khoản thất bại!", 
@@ -457,7 +457,7 @@ public class PnlDuLieuDaXoa extends JPanel {
                 "Khôi phục ga thành công!", 
                 "Thành công", 
                 JOptionPane.INFORMATION_MESSAGE);
-            taiDuLieuGaDaXoa(); // Reload the table
+            taiDuLieuGaDaXoa();
         } else {
             JOptionPane.showMessageDialog(this, 
                 "Khôi phục ga thất bại!", 

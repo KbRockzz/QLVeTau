@@ -22,20 +22,16 @@ public class NavigationBar extends JPanel {
 
     private void initComponents() {
         setLayout(new BorderLayout());
-        // Material Professional Light - Primary Blue
-        setBackground(new Color(25, 118, 210)); // #1976D2
+        setBackground(new Color(25, 118, 210));
         setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
-        setPreferredSize(new Dimension(0, 56)); // Fixed height for navigation bar
+        setPreferredSize(new Dimension(0, 56));
 
-        // Left panel with navigation buttons
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         leftPanel.setOpaque(false);
 
-        // Home button
         JButton homeBtn = createNavButton("Trang chủ", "home");
         leftPanel.add(homeBtn);
 
-        // --- Quản lý chuyến tàu (menu with children) ---
         JButton tripManagementBtn = createNavButton("Chuyến tàu", null);
         JPopupMenu tripMenu = new JPopupMenu();
         tripMenu.add(createMenuItem("Chuyến tàu", "chuyentau"));
@@ -47,7 +43,6 @@ public class NavigationBar extends JPanel {
         tripManagementBtn.addActionListener(e -> tripMenu.show(tripManagementBtn, 0, tripManagementBtn.getHeight()));
         leftPanel.add(tripManagementBtn);
 
-        // --- Quản lý vé ---
         JButton ticketManagementBtn = createNavButton("Quản lý vé", null);
         JPopupMenu ticketManagementMenu = new JPopupMenu();
         ticketManagementMenu.add(createMenuItem("Bảng giá", "banggia"));
@@ -59,7 +54,6 @@ public class NavigationBar extends JPanel {
         ticketManagementBtn.addActionListener(e -> ticketManagementMenu.show(ticketManagementBtn, 0, ticketManagementBtn.getHeight()));
         leftPanel.add(ticketManagementBtn);
 
-        // --- Quản lý khách hàng ---
         JButton customerManagementBtn = createNavButton("Khách hàng", null);
         JPopupMenu customerMenu = new JPopupMenu();
         customerMenu.add(createMenuItem("Khách hàng", "khachhang"));
@@ -68,7 +62,6 @@ public class NavigationBar extends JPanel {
         customerManagementBtn.addActionListener(e -> customerMenu.show(customerManagementBtn, 0, customerManagementBtn.getHeight()));
         leftPanel.add(customerManagementBtn);
 
-        // --- Quản lý nhân viên (visible if manager) ---
         if (currentAccount.isManager()) {
             JButton staffManagementBtn = createNavButton("Nhân viên", null);
             JPopupMenu staffMenu = new JPopupMenu();
@@ -80,7 +73,6 @@ public class NavigationBar extends JPanel {
             leftPanel.add(staffManagementBtn);
         }
 
-        // --- Quản lý hóa đơn ---
         JButton invoiceManagementBtn = createNavButton("Hóa đơn", null);
         JPopupMenu invoiceMenu = new JPopupMenu();
         invoiceMenu.add(createMenuItem("Hóa đơn", "hoadon"));
@@ -90,19 +82,16 @@ public class NavigationBar extends JPanel {
         invoiceManagementBtn.addActionListener(e -> invoiceMenu.show(invoiceManagementBtn, 0, invoiceManagementBtn.getHeight()));
         leftPanel.add(invoiceManagementBtn);
 
-        // --- Quản lý dữ liệu đã xóa (visible if manager) ---
         if (currentAccount.isManager()) {
             JButton deletedDataBtn = createNavButton("Dữ liệu đã xóa", "deleteddata");
             leftPanel.add(deletedDataBtn);
         }
 
-        // Logout button
         JButton logoutBtn = createNavButton("Đăng xuất", "logout");
         leftPanel.add(logoutBtn);
 
         add(leftPanel, BorderLayout.WEST);
 
-        // Right panel with employee name
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         rightPanel.setOpaque(false);
         JLabel userLabel = new JLabel(getEmployeeName());
@@ -127,9 +116,8 @@ public class NavigationBar extends JPanel {
 
     private JButton createNavButton(String text, String action) {
         JButton button = new JButton(text);
-        // Material Professional Light - White background, blue text
-        button.setForeground(new Color(10, 115, 215)); // #0A73D7 - blue text
-        button.setBackground(Color.WHITE); // White background
+        button.setForeground(new Color(10, 115, 215));
+        button.setBackground(Color.WHITE);
         button.setBorderPainted(false);
         button.setFocusPainted(false);
         button.setContentAreaFilled(true);
@@ -137,20 +125,18 @@ public class NavigationBar extends JPanel {
         button.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Increase width to prevent text truncation, adjust based on text length
         int buttonWidth = Math.max(80, text.length() * 12 + 10);
         button.setPreferredSize(new Dimension(buttonWidth, 40));
         button.setMargin(new Insets(5, 15, 5, 15));
 
-        // Material hover effect - white background normally, blue background on hover
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(10, 115, 215)); // #0A73D7 - blue hover
-                button.setForeground(Color.WHITE); // White text on hover
+                button.setBackground(new Color(10, 115, 215));
+                button.setForeground(Color.WHITE);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(Color.WHITE); // Back to white
-                button.setForeground(new Color(10, 115, 215)); // Back to blue text
+                button.setBackground(Color.WHITE);
+                button.setForeground(new Color(10, 115, 215));
             }
         });
 
