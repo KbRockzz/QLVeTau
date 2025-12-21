@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 public class PnlBangGia extends JPanel {
 
     // Regex pattern for validation
-    private static final Pattern PATTERN_MA_BANGGIA = Pattern.compile("^BG[\\w\\d]+");
+    private static final Pattern PATTERN_MA_BANGGIA = Pattern.compile("^BG\\w+");
 
     private final BangGiaService bangGiaService;
     private final BangGiaDAO bangGiaDAO = BangGiaDAO.getInstance();

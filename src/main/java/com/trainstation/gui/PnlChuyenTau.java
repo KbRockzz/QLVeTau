@@ -37,7 +37,7 @@ public class PnlChuyenTau extends JPanel {
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     
     // Regex pattern for validation
-    private static final Pattern PATTERN_MA_CHUYEN = Pattern.compile("^CT[\\w\\d]+");
+    private static final Pattern PATTERN_MA_CHUYEN = Pattern.compile("^CT\\w+");
     
     // Route type constants
     private static final String CH_NGAN = "CH_NGAN";

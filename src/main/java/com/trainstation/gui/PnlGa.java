@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  */
 public class PnlGa extends JPanel {
     // Regex
-    private static final Pattern PATTERN_MA_GA = Pattern.compile("^GA_[\\w\\d]+");
+    private static final Pattern PATTERN_MA_GA = Pattern.compile("^GA_\\w+");
     private static final Pattern PATTERN_TEN_GA = Pattern.compile("^[\\p{L}0-9\\s\\-]{1,100}$");
     private static final Pattern PATTERN_MO_TA = Pattern.compile("^.{0,200}$");
     private static final Pattern PATTERN_DIA_CHI = Pattern.compile("^.{0,200}$");

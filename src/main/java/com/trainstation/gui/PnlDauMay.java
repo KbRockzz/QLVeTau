@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  */
 public class PnlDauMay extends JPanel {
     // Regex
-    private static final Pattern PATTERN_MA_DAUMAY = Pattern.compile("^DM[\\w\\d]+");
+    private static final Pattern PATTERN_MA_DAUMAY = Pattern.compile("^DM\\w+");
     private static final Pattern PATTERN_TEN_DAUMAY = Pattern.compile("^[\\p{L}0-9\\s\\-]{1,100}$");
 
     private DauMayService dauMayService;
