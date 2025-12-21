@@ -272,7 +272,7 @@ public class HoaDonService {
             hoaDon.setNgayLap(LocalDateTime.now());
             hoaDon.setTrangThai("Hoàn tất");
 
-            // Insert or update HoaDon on same connection
+            // Thêm hoặc cập nhật hóa đơn
             boolean existsHd = false;
             try (PreparedStatement pstCheckHd = connection.prepareStatement("SELECT 1 FROM HoaDon WHERE maHoaDon = ?")) {
                 pstCheckHd.setString(1, hoaDon.getMaHoaDon());
@@ -297,9 +297,7 @@ public class HoaDonService {
                 }
             }
 
-            // Prepared statements
             String checkVeSql = "SELECT 1 FROM Ve WHERE maVe = ?";
-            // INSERT Ve: do model Ve không có donGia, chỉ thêm maBangGia
             String insertVeSql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             String updateVePriceSql = "UPDATE Ve SET maBangGia = ? WHERE maVe = ?";
             String checkCTHD = "SELECT 1 FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ?";
@@ -318,12 +316,11 @@ public class HoaDonService {
                  PreparedStatement pstUpdateGhe = connection.prepareStatement(updateGheSql)) {
 
                 for (Ve ve : dsVe) {
-                    // Debug log before processing
                     System.out.println("DEBUG HoaDonService.checkout: Processing ve=" + ve.getMaVe() + 
                         " gioDenDuKien=" + ve.getGioDenDuKien() + 
                         " giaThanhToan=" + ve.getGiaThanhToan());
                     
-                    // compute price result (may return applied maBangGia)
+                    // Tính giá
                     TinhGiaService.KetQuaGia kq = tinhGia.tinhGiaChoVe(ve);
                     if (kq != null) {
                         ve.setGiaThanhToan(kq.giaDaKM);
@@ -332,7 +329,7 @@ public class HoaDonService {
                         System.out.println("DEBUG HoaDonService.checkout: WARNING - TinhGiaService returned null for ve=" + ve.getMaVe());
                     }
 
-                    // insert Ve if not exists, persisting maBangGia only
+                    // Thêm vé nếu chưa tồn tại
                     pstCheckVe.setString(1, ve.getMaVe());
                     boolean existsVe;
                     try (ResultSet rs = pstCheckVe.executeQuery()) { existsVe = rs.next(); }
@@ -373,18 +370,18 @@ public class HoaDonService {
                         pstInsertVe.executeUpdate();
                         System.out.println("DEBUG HoaDonService.checkout: Successfully inserted ve=" + ve.getMaVe());
                     } else {
-                        // update only maBangGia on existing Ve row
+                        // Cập nhật maBangGia
                         if (maBangGiaToPersist == null) pstUpdateVePrice.setNull(1, Types.VARCHAR); else pstUpdateVePrice.setString(1, maBangGiaToPersist);
                         pstUpdateVePrice.setString(2, ve.getMaVe());
                         pstUpdateVePrice.executeUpdate();
                     }
 
-                    // Ensure Ve object carries persisted maBangGia for downstream usage
+                    // Đảm bảo vé có maBangGia
                     if ((ve.getMaBangGia() == null || ve.getMaBangGia().trim().isEmpty()) && maBangGiaToPersist != null) {
                         ve.setMaBangGia(maBangGiaToPersist);
                     }
 
-                    // Insert or update ChiTietHoaDon snapshot (giaGoc, giaDaKM come from kq)
+                    // Thêm hoặc cập nhật chi tiết hóa đơn
                     pstCheckCT.setString(1, hoaDon.getMaHoaDon());
                     pstCheckCT.setString(2, ve.getMaVe());
                     boolean existsCT;
@@ -409,12 +406,12 @@ public class HoaDonService {
                         pstInsertCT.executeUpdate();
                     }
 
-                    // Update Ve.trangThai = 'Đã thanh toán'
+                    // Cập nhật trạng thái vé
                     pstUpdateVe.setString(1, "Đã thanh toán");
                     pstUpdateVe.setString(2, ve.getMaVe());
                     pstUpdateVe.executeUpdate();
 
-                    // Update Ghe.trangThai = 'Đã đặt' (nếu có)
+                    // Cập nhật trạng thái ghế
                     if (ve.getMaSoGhe() != null) {
                         pstUpdateGhe.setString(1, "Đã đặt");
                         pstUpdateGhe.setString(2, ve.getMaSoGhe());
@@ -457,7 +454,7 @@ public class HoaDonService {
             originalAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
 
-            // 1) Kiểm tra trạng thái ghế trên cùng connection
+            // Kiểm tra trạng thái ghế
             String selectGheSql = "SELECT trangThai FROM Ghe WHERE maGhe = ?";
             try (PreparedStatement pstGhe = connection.prepareStatement(selectGheSql)) {
                 pstGhe.setString(1, ve.getMaSoGhe());
@@ -475,7 +472,7 @@ public class HoaDonService {
                 }
             }
 
-            // 2) Ensure HoaDon exists on this connection
+            // Đảm bảo hóa đơn tồn tại
             boolean existsHd;
             try (PreparedStatement pstCheckHd = connection.prepareStatement("SELECT 1 FROM HoaDon WHERE maHoaDon = ?")) {
                 pstCheckHd.setString(1, hoaDon.getMaHoaDon());
@@ -485,7 +482,7 @@ public class HoaDonService {
             }
             if (!existsHd) hoaDonDAO.insert(hoaDon, connection);
 
-            // 3) Ensure Ve exists (insert nếu chưa) and persist maBangGia using tinhGia
+            // Đảm bảo vé tồn tại và có maBangGia
             if (!veExistsOnConnection(ve.getMaVe(), connection)) {
                 TinhGiaService.KetQuaGia kq = tinhGia.tinhGiaChoVe(ve);
                 if (kq != null) {
@@ -524,7 +521,7 @@ public class HoaDonService {
                     pst.executeUpdate();
                 }
             } else {
-                // If exists, update its maBangGia only
+                // Cập nhật maBangGia
                 TinhGiaService.KetQuaGia kq = tinhGia.tinhGiaChoVe(ve);
                 String updatePriceSql = "UPDATE Ve SET maBangGia = ? WHERE maVe = ?";
                 try (PreparedStatement pst = connection.prepareStatement(updatePriceSql)) {
@@ -536,14 +533,14 @@ public class HoaDonService {
                 }
             }
 
-            // 4) Tính giá để tạo ChiTietHoaDon snapshot
+            // Tính giá cho chi tiết hóa đơn
             if (loaiVe != null) ve.setMaLoaiVe(loaiVe.getMaLoaiVe());
             TinhGiaService.KetQuaGia kq = tinhGia.tinhGiaChoVe(ve);
             if (kq != null) {
                 ve.setGiaThanhToan(kq.giaDaKM);
             }
 
-            // 5) Insert ChiTietHoaDon (nếu chưa có)
+            // Thêm chi tiết hóa đơn
             if (chiTietHoaDonDAO.exists(hoaDon.getMaHoaDon(), ve.getMaVe(), connection) || cthdExistsOnConnection(hoaDon.getMaHoaDon(), ve.getMaVe(), connection)) {
                 connection.rollback();
                 return false;
@@ -558,7 +555,7 @@ public class HoaDonService {
                 chiTietHoaDonDAO.insert(cthd, connection);
             }
 
-            // 6) Mark seat as reserved in DB
+            // Cập nhật trạng thái ghế
             try (PreparedStatement pstUpdGhe = connection.prepareStatement("UPDATE Ghe SET trangThai = ? WHERE maGhe = ?")) {
                 pstUpdGhe.setString(1, "Đã giữ");
                 pstUpdGhe.setString(2, ve.getMaSoGhe());
