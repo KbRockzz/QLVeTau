@@ -34,7 +34,6 @@ public class MaterialInitializer {
                 System.err.println("Warning: ProfessionalLight.json theme not found, using default theme");
             }
 
-            // Cấu hình font mặc định - Roboto with proper fallback
             Font defaultFont = getDefaultFont();
             UIManager.put("defaultFont", defaultFont);
 
@@ -42,10 +41,8 @@ public class MaterialInitializer {
             System.setProperty("awt.useSystemAAFontSettings", "on");
             System.setProperty("swing.aatext", "true");
 
-            // Cấu hình button styling cho JOptionPane
             configureOptionPaneButtons();
 
-            // Cập nhật UI cho tất cả components
             FlatLaf.updateUI();
             
             System.out.println("Material Professional Light theme initialized successfully");
@@ -64,7 +61,6 @@ public class MaterialInitializer {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         String[] availableFonts = ge.getAvailableFontFamilyNames();
         
-        // Tìm font đầu tiên có sẵn trong danh sách ưu tiên
         for (String fontName : preferredFonts) {
             for (String availableFont : availableFonts) {
                 if (availableFont.equals(fontName)) {
@@ -73,7 +69,6 @@ public class MaterialInitializer {
             }
         }
         
-        // Fallback to default logical font
         return new Font("SansSerif", Font.PLAIN, 14);
     }
 
@@ -101,15 +96,12 @@ public class MaterialInitializer {
      * Đảm bảo các nút OK, Cancel, Yes, No có màu sắc thống nhất
      */
     private static void configureOptionPaneButtons() {
-        // Màu nền và chữ cho các nút trong OptionPane - chỉ áp dụng cho OptionPane
-        Color buttonBackground = new Color(10, 115, 215); // #0A73D7
+        Color buttonBackground = new Color(10, 115, 215);
         Color buttonForeground = Color.WHITE;
         
-        // Cấu hình UIManager CHỈ cho các nút trong JOptionPane (không ảnh hưởng global)
         UIManager.put("OptionPane.buttonFont", createFont(Font.PLAIN, 14));
         UIManager.put("OptionPane.buttonMinimumWidth", 100);
         
-        // Hook vào tất cả dialog được tạo để style buttons
         installDialogButtonStyler();
     }
 
@@ -117,11 +109,9 @@ public class MaterialInitializer {
      * Cài đặt listener để tự động style buttons ONLY trong JOptionPane dialogs
      */
     private static void installDialogButtonStyler() {
-        // Tạo listener để theo dõi khi window mới được tạo
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             if (event.getSource() instanceof Window) {
                 Window window = (Window) event.getSource();
-                // Chỉ style buttons trong JOptionPane dialogs, không style main frames
                 if (isOptionPaneDialog(window)) {
                     styleDialogButtons(window);
                 }
@@ -138,7 +128,6 @@ public class MaterialInitializer {
         }
         
         JDialog dialog = (JDialog) window;
-        // Kiểm tra xem dialog có chứa JOptionPane component không
         return containsOptionPane(dialog.getContentPane());
     }
     
@@ -172,8 +161,6 @@ public class MaterialInitializer {
         for (Component comp : container.getComponents()) {
             if (comp instanceof JButton) {
                 JButton button = (JButton) comp;
-                // Style tất cả buttons trong JOptionPane dialogs
-                // (đã được filter bởi isOptionPaneDialog nên an toàn)
                 styleButton(button);
             } else if (comp instanceof Container) {
                 styleDialogButtons((Container) comp);
@@ -193,40 +180,33 @@ public class MaterialInitializer {
     public static void styleButton(JButton button) {
         if (button == null) return;
         
-        // Check if button is already styled (has our custom property)
         if (button.getClientProperty("materialStyled") != null) {
-            return; // Already styled, skip
+            return;
         }
         
-        // Font
         button.setFont(createFont(Font.PLAIN, 14));
         
-        // Kích thước động dựa trên text, giống Navigation Bar
         String text = button.getText();
         int buttonWidth = Math.max(100, text.length() * 10 + 30);
         button.setPreferredSize(new Dimension(buttonWidth, 36));
         button.setMargin(new Insets(5, 12, 5, 12));
         
-        // Cursor
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
-        // Màu nền và chữ theo yêu cầu
-        button.setBackground(new Color(10, 115, 215)); // #0A73D7
+        button.setBackground(new Color(10, 115, 215));
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         
-        // Đảm bảo nút luôn hiển thị
         button.setVisible(true);
         button.setEnabled(true);
         
-        // Thêm hiệu ứng hover
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             private Color originalColor = button.getBackground();
             
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (button.isEnabled()) {
-                    button.setBackground(new Color(8, 89, 166)); // #0859A6 hover
+                    button.setBackground(new Color(8, 89, 166));
                 }
             }
             
@@ -238,7 +218,6 @@ public class MaterialInitializer {
             }
         });
         
-        // Mark button as styled
         button.putClientProperty("materialStyled", Boolean.TRUE);
     }
 
@@ -248,7 +227,7 @@ public class MaterialInitializer {
      */
     public static JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
-        panel.setPreferredSize(new Dimension(0, 60)); // Chiều cao cố định 60px
+        panel.setPreferredSize(new Dimension(0, 60));
         panel.setMinimumSize(new Dimension(0, 60));
         panel.setVisible(true);
         return panel;

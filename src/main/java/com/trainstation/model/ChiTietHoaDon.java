@@ -74,8 +74,8 @@ public class ChiTietHoaDon implements Serializable {
     }
 
     public void tinhVaGanGiaDaKM(float giaCoBan, float heSo) {
-        this.giaGoc = lamTronGia(giaCoBan); // lưu gia co ban (rounded)
-        this.giaDaKM = lamTronGia(giaCoBan * heSo); // gia sau he so (rounded)
+        this.giaGoc = lamTronGia(giaCoBan);
+        this.giaDaKM = lamTronGia(giaCoBan * heSo);
     }
 
 

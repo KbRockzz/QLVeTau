@@ -180,9 +180,7 @@ public class Ve implements Serializable {
     public void setMaBangGia(String maBangGia) {
         this.maBangGia = maBangGia;
     }
-    // Chỉ là ví dụ phần liên quan, chèn vào class Ve hiện tại
-
-    private transient com.trainstation.model.ChiTietHoaDon chiTietHoaDon; // transient: không serial hóa / không map DB
+    private transient com.trainstation.model.ChiTietHoaDon chiTietHoaDon;
 
     public com.trainstation.model.ChiTietHoaDon getChiTietHoaDon() {
         return chiTietHoaDon;
@@ -200,7 +198,6 @@ public class Ve implements Serializable {
         if (chiTietHoaDon != null && chiTietHoaDon.getGiaDaKM() > 0) {
             return chiTietHoaDon.getGiaDaKM();
         }
-        // fallback: tính tạm nếu bạn có PricingService sẵn
         try {
             return com.trainstation.service.TinhGiaService.getInstance().tinhGiaChoVe(this).giaDaKM;
         } catch (Exception ex) {
