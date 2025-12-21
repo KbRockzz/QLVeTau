@@ -1174,6 +1174,13 @@ public class PnlChuyenTau extends JPanel {
     private void updateChuyen() {
         String ma = txtMaChuyen.getText().trim();
         if (ma.isEmpty()) { JOptionPane.showMessageDialog(this, "Vui lòng chọn hoặc nhập mã chuyến.", "Thông báo", JOptionPane.INFORMATION_MESSAGE); return; }
+        
+        // Validate maChuyen starts with CT
+        if (!PATTERN_MA_CHUYEN.matcher(ma).matches()) {
+            JOptionPane.showMessageDialog(this, "Mã chuyến phải bắt đầu bằng 'CT' (ví dụ: CT001, CT_HN_SG).", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
         ChuyenTau ct = buildChuyenFromForm();
 
         btnUpdate.setEnabled(false);

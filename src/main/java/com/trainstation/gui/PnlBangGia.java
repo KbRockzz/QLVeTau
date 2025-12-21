@@ -250,6 +250,12 @@ public class PnlBangGia extends JPanel {
                 return;
             }
 
+            // Validate maBangGia starts with BG
+            if (!PATTERN_MA_BANGGIA.matcher(maBangGia).matches()) {
+                JOptionPane.showMessageDialog(this, "Mã bảng giá phải bắt đầu bằng 'BG' (ví dụ: BG001, BG_2024).", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             BangGia bg = buildBangGiaFromForm();
             if (bg == null) return;
 
