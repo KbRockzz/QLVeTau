@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  */
 public class PnlDauMay extends JPanel {
     // Regex
-    private static final Pattern PATTERN_MA_DAUMAY = Pattern.compile("^DM\\d{3}$");
+    private static final Pattern PATTERN_MA_DAUMAY = Pattern.compile("^DM\\w+");
     private static final Pattern PATTERN_TEN_DAUMAY = Pattern.compile("^[\\p{L}0-9\\s\\-]{1,100}$");
 
     private DauMayService dauMayService;
@@ -340,7 +340,7 @@ public class PnlDauMay extends JPanel {
         // Kiểm tra Mã đầu máy
         if (!PnlDauMay.PATTERN_MA_DAUMAY.matcher(maDauMay).matches()) {
             JOptionPane.showMessageDialog(this,
-                    "Mã đầu máy không hợp lệ (VD: T001)",
+                    "Mã đầu máy phải bắt đầu bằng 'DM' (ví dụ: DM001, DM_DIESEL).",
                     "Lỗi",
                     JOptionPane.ERROR_MESSAGE);
             return false;
