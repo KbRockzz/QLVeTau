@@ -15,14 +15,12 @@ import java.sql.SQLException;
 public class ConnectSql {
     private static ConnectSql instance;
 
-    // SQL Server connection parameters
     private static final String SERVER = "localhost";
     private static final String PORT = "1433";
     private static final String DATABASE = "QLTauHoa";
     private static final String USERNAME = "sa";
     private static final String PASSWORD = "sapassword";
 
-    // Connection string for SQL Server
     private static final String CONNECTION_URL =
             "jdbc:sqlserver://" + SERVER + ":" + PORT +
                     ";databaseName=" + DATABASE +
@@ -30,7 +28,6 @@ public class ConnectSql {
 
     private ConnectSql() {
         try {
-            // Load SQL Server JDBC driver once
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
             System.err.println("Không tìm thấy SQL Server JDBC Driver!");
@@ -57,7 +54,6 @@ public class ConnectSql {
      */
     public Connection getConnection() {
         try {
-            // Always return a fresh connection (or from pool in future)
             return DriverManager.getConnection(CONNECTION_URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
             System.err.println("Lỗi khi lấy kết nối!");

@@ -55,7 +55,7 @@ public class PnlTaiKhoan extends JPanel {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Cột 1
+
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.0; pnlForm.add(new JLabel("Mã TK:"), gbc);
         gbc.gridx = 1; gbc.weightx = 0.5; txtMaTK = new JTextField(20); txtMaTK.setEditable(true); pnlForm.add(txtMaTK, gbc);
 
@@ -65,7 +65,7 @@ public class PnlTaiKhoan extends JPanel {
         gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0; pnlForm.add(new JLabel("Tên tài khoản:"), gbc);
         gbc.gridx = 1; gbc.weightx = 0.5; txtTenTK = new JTextField(20); pnlForm.add(txtTenTK, gbc);
 
-        // Cột 2
+
         gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0.0; pnlForm.add(new JLabel("Mật khẩu:"), gbc);
         gbc.gridx = 3; gbc.weightx = 0.5; txtMatKhau = new JPasswordField(20); pnlForm.add(txtMatKhau, gbc);
 

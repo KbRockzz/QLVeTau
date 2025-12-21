@@ -196,10 +196,8 @@ public class ThongKeDAO {
 
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
-            // Parameters for soGheBan subquery (Ve.ngayIn date range)
             pst.setDate(1, Date.valueOf(tuNgay));
             pst.setDate(2, Date.valueOf(denNgay));
-            // Parameters for main query WHERE clause (ChuyenTau.gioDi date range)
             pst.setDate(3, Date.valueOf(tuNgay));
             pst.setDate(4, Date.valueOf(denNgay));
 

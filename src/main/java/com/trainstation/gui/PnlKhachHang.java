@@ -30,26 +30,16 @@ public class PnlKhachHang extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Tiêu đề
+
         JLabel lblTieuDe = new JLabel("QUẢN LÝ KHÁCH HÀNG", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
 
 //        // panel tìm kiếm
-//        JPanel pnlTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//        pnlTimKiem.add(new JLabel("Tìm theo SĐT:"));
-//        txtTimKiem = new JTextField(20);
-//        pnlTimKiem.add(txtTimKiem);
 //        btnTimKiem = new JButton("Tìm kiếm");
-//        btnTimKiem.addActionListener(e -> timKiemTheoSoDienThoai());
 
-//        pnlTimKiem.add(btnTimKiem);
 //
-//        JPanel pnlTren = new JPanel(new BorderLayout());
-//        pnlTren.add(lblTieuDe, BorderLayout.NORTH);
-//        pnlTren.add(pnlTimKiem, BorderLayout.SOUTH);
-//        add(pnlTren, BorderLayout.NORTH);
 
-        // Table
+
         String[] tenCot = {"Mã KH", "Tên khách hàng", "Email", "Số điện thoại"};
         modelBang = new DefaultTableModel(tenCot, 0);
         bangKhachHang = new JTable(modelBang);
@@ -58,13 +48,13 @@ public class PnlKhachHang extends JPanel {
         MaterialInitializer.setTableScrollPaneSize(scrollPane, 35);
         add(scrollPane, BorderLayout.CENTER);
 
-        // panel form - 2 cột song song giống Quản lý Nhân viên
+
         JPanel pnlForm = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Cột 1
+
         gbc.gridx = 0; gbc.gridy = 0;
         gbc.weightx = 0.0; // Label không mở rộng
         pnlForm.add(new JLabel("Mã KH:"), gbc);
@@ -81,7 +71,7 @@ public class PnlKhachHang extends JPanel {
         txtTenKH = new JTextField(20);
         pnlForm.add(txtTenKH, gbc);
 
-        // Cột 2
+
         gbc.gridx = 2; gbc.gridy = 0;
         gbc.weightx = 0.0;
         pnlForm.add(new JLabel("Email:"), gbc);
@@ -128,7 +118,7 @@ public class PnlKhachHang extends JPanel {
         pnlDuoi.setPreferredSize(new Dimension(0, 220)); // Đảm bảo có đủ không gian
         add(pnlDuoi, BorderLayout.SOUTH);
 
-        // Chọn bảng để hiện thông tin trên mấy cái txt
+
         bangKhachHang.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && bangKhachHang.getSelectedRow() != -1) {
                 int row = bangKhachHang.getSelectedRow();

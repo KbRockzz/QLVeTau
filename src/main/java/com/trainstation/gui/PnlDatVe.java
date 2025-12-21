@@ -39,12 +39,12 @@ public class PnlDatVe extends JPanel {
     private static final int MIN_ADVANCE_MINUTES = 60; // minimum
     private static final int MAX_DAYS_AHEAD = 90; // maximum
 
-    // Customer
+
     private JTextField txtSoDienThoai;
     private JButton btnTimKhachHang;
     private KhachHang khachHangDuocChon;
 
-    // Train
+
     private JComboBox<String> cmbGaDi;
     private JComboBox<String> cmbGaDen;
     private Map<String, String> mapTenGaToMaGa = new HashMap<>(); // Maps station name to code
@@ -63,7 +63,7 @@ public class PnlDatVe extends JPanel {
     private Ghe gheDuocChon;
 
 
-    // New
+
     private HoaDon hoaDonMo;
     private final List<Ve> danhSachVeTrongHoaDon = new ArrayList<>();
     private JButton btnThanhToan; // nút xác nhận thanh toán (finalize)
@@ -102,15 +102,15 @@ public class PnlDatVe extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Top panel
+
         JPanel pnlTop = new JPanel(new BorderLayout(5, 5));
 
-        // Title
+
         JLabel lblTieuDe = new JLabel("ĐẶT VÉ TÀU", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 24));
         pnlTop.add(lblTieuDe, BorderLayout.NORTH);
 
-        // Customer search panel
+
         JPanel pnlTimKhachHang = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         pnlTimKhachHang.setBorder(BorderFactory.createTitledBorder("Thông tin khách hàng"));
 
@@ -123,14 +123,14 @@ public class PnlDatVe extends JPanel {
         MaterialInitializer.styleButton(btnTimKhachHang);
         pnlTimKhachHang.add(btnTimKhachHang);
 
-        // Ticket
+
         pnlTimKhachHang.add(Box.createHorizontalStrut(20));
         pnlTimKhachHang.add(new JLabel("Loại vé:"));
         cboLoaiVe = new JComboBox<>();
         cboLoaiVe.setPreferredSize(new Dimension(150, 32));
         pnlTimKhachHang.add(cboLoaiVe);
 
-        // Add payment button
+
         btnThanhToan = new JButton("Xác nhận thanh toán");
         btnThanhToan.setToolTipText("Thanh toán cho hóa đơn đang mở (nếu có vé được thêm)");
         btnThanhToan.addActionListener(e -> xacNhanThanhToan());
@@ -140,7 +140,7 @@ public class PnlDatVe extends JPanel {
 
         pnlTop.add(pnlTimKhachHang, BorderLayout.CENTER);
 
-        // Train search
+
         JPanel pnlTimChuyenTau = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         pnlTimChuyenTau.setBorder(BorderFactory.createTitledBorder("Tìm chuyến tàu"));
 

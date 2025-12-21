@@ -43,7 +43,7 @@ public class VietQRService {
 
         long amt = Math.round(amount);
 
-        // Encode chuẩn UTF-8 (hỗ trợ tiếng Việt, ký tự &, +, ?, ...)
+        
         String addInfoEnc = URLEncoder.encode(content == null ? "" : content, StandardCharsets.UTF_8);
         String accNameEnc = URLEncoder.encode(accountName == null ? "" : accountName, StandardCharsets.UTF_8);
 

@@ -34,7 +34,7 @@ public class PnlTimVe extends JPanel {
     private final ChuyenTauDAO chuyenTauDAO = ChuyenTauDAO.getInstance();
     private final GaDAO gaDAO = GaDAO.getInstance();
 
-    // Filter controls
+
     private final JTextField txtMaVe = new JTextField();
     private final JTextField txtMaChuyen = new JTextField();
     private final JTextField txtMaGhe = new JTextField();
@@ -46,14 +46,14 @@ public class PnlTimVe extends JPanel {
     private final JCheckBox chkUseFrom = new JCheckBox("Có từ");
     private final JCheckBox chkUseTo = new JCheckBox("Có đến");
 
-    // Table
+
     private final DefaultTableModel model = new DefaultTableModel(
             new String[]{"Mã vé","Mã chuyến","Mã ghế","Ga đi","Ga đến","Ngày in","Trạng thái","Mã bảng giá","Giá"}, 0) {
         @Override public boolean isCellEditable(int r, int c) { return false; }
     };
     private final JTable table = new JTable(model);
 
-    // Buttons
+
     private final JButton btnSearch = new JButton("Tìm");
     private final JButton btnReset = new JButton("Đặt lại");
     private final JButton btnView = new JButton("Xem chi tiết");
@@ -63,7 +63,7 @@ public class PnlTimVe extends JPanel {
         setLayout(new BorderLayout(8,8));
         setBorder(BorderFactory.createEmptyBorder(12,12,12,12));
 
-        // initialize date spinners with non-null Date instances
+
         spFromDate = new JSpinner(new SpinnerDateModel(new Date(), null, null, Calendar.DAY_OF_MONTH));
         spFromDate.setEditor(new JSpinner.DateEditor(spFromDate, "dd/MM/yyyy"));
         spToDate = new JSpinner(new SpinnerDateModel(new Date(), null, null, Calendar.DAY_OF_MONTH));
@@ -133,7 +133,7 @@ public class PnlTimVe extends JPanel {
         sp.setBorder(BorderFactory.createTitledBorder("Kết quả tìm vé"));
         add(sp, BorderLayout.CENTER);
 
-        // double click to view
+
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 if (evt.getClickCount() == 2) viewSelectedTicket();
@@ -200,7 +200,7 @@ public class PnlTimVe extends JPanel {
                     if (!maGhe.isEmpty() && (v.getMaSoGhe() == null || !v.getMaSoGhe().equalsIgnoreCase(maGhe))) continue;
                     if (!trangThai.isEmpty() && (v.getTrangThai() == null || !v.getTrangThai().toLowerCase().contains(trangThai.toLowerCase()))) continue;
 
-                    // ga filters: cb contains "code - name" or empty
+
                     if (!gaDiSel.isEmpty()) {
                         String code = extractCodeFromCombo(gaDiSel);
                         if (v.getMaGaDi() == null || !v.getMaGaDi().equalsIgnoreCase(code)) continue;
@@ -303,8 +303,8 @@ public class PnlTimVe extends JPanel {
             protected Boolean doInBackground() {
                 Ve v = veDAO.findById(maVe);
                 if (v == null) return false;
-                //v.setActive(false);
-                //return veDAO.update(v);
+
+
                 return veDAO.delete(v.getMaVe());
             }
             @Override
@@ -326,7 +326,7 @@ public class PnlTimVe extends JPanel {
         w.execute();
     }
 
-    // helpers
+
     private static String nonEmpty(Object o) {
         return o == null ? "" : o.toString().trim();
     }
@@ -337,7 +337,7 @@ public class PnlTimVe extends JPanel {
     }
 
     private static String extractCodeFromCombo(String comboItem) {
-        // expected formats: "" or "GA001 - Station name"
+
         if (comboItem == null) return "";
         int idx = comboItem.indexOf(" - ");
         if (idx > 0) return comboItem.substring(0, idx).trim();

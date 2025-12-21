@@ -178,7 +178,6 @@ public class NavigationBar extends JPanel {
     }
 
     private String getEmployeeName() {
-        // Get employee name from NhanVienDAO using employeeId
         if (currentAccount.getMaNV() != null) {
             var employee = com.trainstation.dao.NhanVienDAO.getInstance()
                     .findById(currentAccount.getMaNV());

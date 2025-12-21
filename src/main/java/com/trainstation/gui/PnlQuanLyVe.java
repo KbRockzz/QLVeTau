@@ -321,7 +321,7 @@ public class PnlQuanLyVe extends JPanel {
 
                     dialog.add(bottom, BorderLayout.SOUTH);
 
-                    // print tickets action: iterate and call veService.inVePDF
+                    
                     btnInVe.addActionListener(ae -> {
                         btnInVe.setEnabled(false);
                         SwingWorker<Void, Void> wk = new SwingWorker<>() {

@@ -262,7 +262,7 @@ public class PnlTimHoaDon extends JPanel {
             return;
         }
         String ma = (String) model.getValueAt(r, 0);
-        // Reuse logic similar to PnlQuanLyVe: load chi tiết and show dialog
+        
         SwingWorker<List<ChiTietHoaDon>, Void> w = new SwingWorker<>() {
             @Override protected List<ChiTietHoaDon> doInBackground() { return chiTietHoaDonDAO.findByHoaDon(ma); }
             @Override protected void done() {
