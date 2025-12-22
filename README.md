@@ -186,6 +186,8 @@ mvn clean compile
 mvn clean package
 ```
 
+**Lưu ý**: Nếu bạn không muốn cài đặt Maven, bạn có thể tải file JAR đã build sẵn từ [GitHub Actions](https://github.com/KbRockzz/QLVeTau/actions/workflows/build-jar.yml). Chọn workflow run mới nhất và tải artifact `qlvetau-jar`.
+
 3. Chạy ứng dụng:
 ```bash
 java -jar target/QLVeTau-1.0.0.jar
