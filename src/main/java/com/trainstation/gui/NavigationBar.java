@@ -32,21 +32,27 @@ public class NavigationBar extends JPanel {
         JButton homeBtn = createNavButton("Trang chủ", "home");
         leftPanel.add(homeBtn);
 
-        JButton tripManagementBtn = createNavButton("Chuyến tàu", null);
-        JPopupMenu tripMenu = new JPopupMenu();
-        tripMenu.add(createMenuItem("Chuyến tàu", "chuyentau"));
-        tripMenu.add(createMenuItem("Đầu máy", "daumay"));
-        tripMenu.add(createMenuItem("Toa tàu", "toatau"));
-        tripMenu.add(createMenuItem("Ga tàu","ga"));
-        tripMenu.addSeparator();
-        tripMenu.add(createMenuItem("Tìm kiếm", "timkiemct"));
-        tripManagementBtn.addActionListener(e -> tripMenu.show(tripManagementBtn, 0, tripManagementBtn.getHeight()));
-        leftPanel.add(tripManagementBtn);
+        // Chuyến tàu - Chỉ quản lý
+        if (currentAccount.isManager()) {
+            JButton tripManagementBtn = createNavButton("Chuyến tàu", null);
+            JPopupMenu tripMenu = new JPopupMenu();
+            tripMenu.add(createMenuItem("Chuyến tàu", "chuyentau"));
+            tripMenu.add(createMenuItem("Đầu máy", "daumay"));
+            tripMenu.add(createMenuItem("Toa tàu", "toatau"));
+            tripMenu.add(createMenuItem("Ga tàu","ga"));
+            tripMenu.addSeparator();
+            tripMenu.add(createMenuItem("Tìm kiếm", "timkiemct"));
+            tripManagementBtn.addActionListener(e -> tripMenu.show(tripManagementBtn, 0, tripManagementBtn.getHeight()));
+            leftPanel.add(tripManagementBtn);
+        }
 
         JButton ticketManagementBtn = createNavButton("Quản lý vé", null);
         JPopupMenu ticketManagementMenu = new JPopupMenu();
-        ticketManagementMenu.add(createMenuItem("Bảng giá", "banggia"));
-        ticketManagementMenu.addSeparator();
+        // Bảng giá - Chỉ quản lý
+        if (currentAccount.isManager()) {
+            ticketManagementMenu.add(createMenuItem("Bảng giá", "banggia"));
+            ticketManagementMenu.addSeparator();
+        }
         ticketManagementMenu.add(createMenuItem("Đặt vé","bookticket"));
         ticketManagementMenu.add(createMenuItem("Tìm vé", "searchticket"));
         ticketManagementMenu.add(createMenuItem("Đổi vé", "changeticket"));

@@ -56,18 +56,20 @@ public class FrmChinh extends JFrame {
         addPage("khachhang", taoPanelVoiBo(new PnlKhachHang()));
         addPage("searchcustomer", taoPanelVoiBo(new PnlTimKhachHang()));
 
-        // Stations / trains
-        addPage("daumay", taoPanelVoiBo(new PnlDauMay()));      // Đầu máy
-        addPage("toatau", taoPanelVoiBo(new PnlToaTau()));      // Toa tàu
-        addPage("ga", taoPanelVoiBo(new PnlGa()));         // Ga
-        addPage("chuyentau", taoPanelVoiBo(new PnlChuyenTau())); // Chuyến tàu
-        addPage("timkiemct", taoPanelVoiBo(new PnlTimKiemChuyenTau())); // Tìm kiếm ct
+        // Stations / trains (manager only)
+        if (taiKhoanHienTai.isManager()) {
+            addPage("daumay", taoPanelVoiBo(new PnlDauMay()));      // Đầu máy
+            addPage("toatau", taoPanelVoiBo(new PnlToaTau()));      // Toa tàu
+            addPage("ga", taoPanelVoiBo(new PnlGa()));         // Ga
+            addPage("chuyentau", taoPanelVoiBo(new PnlChuyenTau())); // Chuyến tàu
+            addPage("timkiemct", taoPanelVoiBo(new PnlTimKiemChuyenTau())); // Tìm kiếm ct
+        }
 
         // Ticket-related auxiliary pages
-
-//        addPage("banggia", taoPanelVoiBo(createPlaceholderPanel("Bảng giá"))); // placeholder
-
-        addPage("banggia", taoPanelVoiBo(new PnlBangGia())); // Bảng giá
+        // Bảng giá (manager only)
+        if (taiKhoanHienTai.isManager()) {
+            addPage("banggia", taoPanelVoiBo(new PnlBangGia())); // Bảng giá
+        }
         // Invoice
         addPage("hoadon", taoPanelVoiBo(new PnlQuanLyVe(taiKhoanHienTai)));
         addPage("timhoadon", taoPanelVoiBo(new PnlTimHoaDon()));

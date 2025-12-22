@@ -31,11 +31,11 @@ Hệ thống hỗ trợ 2 loại người dùng chính:
 - **👤 Nhân viên bán vé (EMPLOYEE)**: 
   - Quản lý khách hàng
   - Đặt, đổi, hoàn vé
-  - Quản lý chuyến tàu
   - Xuất hóa đơn
 
 - **👨‍💼 Quản lý (ADMIN)**:
   - Tất cả quyền của nhân viên
+  - Quản lý chuyến tàu và bảng giá
   - Quản lý nhân viên và tài khoản
   - Xem thống kê doanh thu
   - Quản lý dữ liệu đã xóa
@@ -146,7 +146,7 @@ Thanh điều hướng màu xanh ở phía trên cùng bao gồm các menu chín
 - Lời chào mừng người dùng
 - Thông tin vai trò và chức danh
 
-#### 🚂 Chuyến tàu
+#### 🚂 Chuyến tàu (Chỉ Quản lý)
 Menu dropdown với các chức năng:
 - **Chuyến tàu**: Quản lý danh sách chuyến tàu
 - **Đầu máy**: Quản lý đầu máy tàu
@@ -156,7 +156,7 @@ Menu dropdown với các chức năng:
 
 #### 🎫 Quản lý vé
 Menu dropdown với các chức năng:
-- **Bảng giá**: Xem và cập nhật bảng giá vé
+- **Bảng giá**: Xem và cập nhật bảng giá vé (Chỉ Quản lý)
 - **Đặt vé**: Đặt vé mới cho khách hàng
 - **Tìm vé**: Tra cứu thông tin vé
 - **Đổi vé**: Đổi vé sang chuyến khác
@@ -268,6 +268,8 @@ Menu dropdown với:
 ---
 
 ## 6. Quản lý chuyến tàu
+
+**⚠️ Chức năng này chỉ dành cho QUẢN LÝ**
 
 ### 6.1. Xem danh sách chuyến tàu
 
@@ -949,7 +951,8 @@ Nếu bạn muốn đóng góp cho dự án:
 | Chức năng | Nhân viên | Quản lý |
 |-----------|-----------|---------|
 | Quản lý khách hàng | ✅ | ✅ |
-| Quản lý chuyến tàu | ✅ | ✅ |
+| Quản lý chuyến tàu | ❌ | ✅ |
+| Quản lý bảng giá | ❌ | ✅ |
 | Đặt vé | ✅ | ✅ |
 | Đổi vé | ✅ | ✅ |
 | Hoàn vé (yêu cầu) | ✅ | ✅ |
