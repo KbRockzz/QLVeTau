@@ -32,21 +32,28 @@ public class NavigationBar extends JPanel {
         JButton homeBtn = createNavButton("Trang chủ", "home");
         leftPanel.add(homeBtn);
 
+        // Chuyến tàu - Tất cả nhân viên nhìn thấy nút, nhưng chỉ quản lý thấy các tùy chọn quản lý
         JButton tripManagementBtn = createNavButton("Chuyến tàu", null);
         JPopupMenu tripMenu = new JPopupMenu();
-        tripMenu.add(createMenuItem("Chuyến tàu", "chuyentau"));
-        tripMenu.add(createMenuItem("Đầu máy", "daumay"));
-        tripMenu.add(createMenuItem("Toa tàu", "toatau"));
-        tripMenu.add(createMenuItem("Ga tàu","ga"));
-        tripMenu.addSeparator();
+        if (currentAccount.isManager()) {
+            tripMenu.add(createMenuItem("Chuyến tàu", "chuyentau"));
+            tripMenu.add(createMenuItem("Đầu máy", "daumay"));
+            tripMenu.add(createMenuItem("Toa tàu", "toatau"));
+            tripMenu.add(createMenuItem("Ga tàu","ga"));
+            tripMenu.addSeparator();
+        }
+        // Tìm kiếm - Luôn có cho tất cả nhân viên
         tripMenu.add(createMenuItem("Tìm kiếm", "timkiemct"));
         tripManagementBtn.addActionListener(e -> tripMenu.show(tripManagementBtn, 0, tripManagementBtn.getHeight()));
         leftPanel.add(tripManagementBtn);
 
-        JButton ticketManagementBtn = createNavButton("Quản lý vé", null);
+        JButton ticketManagementBtn = createNavButton("Vé", null);
         JPopupMenu ticketManagementMenu = new JPopupMenu();
-        ticketManagementMenu.add(createMenuItem("Bảng giá", "banggia"));
-        ticketManagementMenu.addSeparator();
+        // Bảng giá - Chỉ quản lý
+        if (currentAccount.isManager()) {
+            ticketManagementMenu.add(createMenuItem("Bảng giá", "banggia"));
+            ticketManagementMenu.addSeparator();
+        }
         ticketManagementMenu.add(createMenuItem("Đặt vé","bookticket"));
         ticketManagementMenu.add(createMenuItem("Tìm vé", "searchticket"));
         ticketManagementMenu.add(createMenuItem("Đổi vé", "changeticket"));
@@ -125,7 +132,7 @@ public class NavigationBar extends JPanel {
         button.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        int buttonWidth = Math.max(80, text.length() * 12 + 10);
+        int buttonWidth = Math.max(100, text.length() * 12 + 10);
         button.setPreferredSize(new Dimension(buttonWidth, 40));
         button.setMargin(new Insets(5, 15, 5, 15));
 

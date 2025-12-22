@@ -56,18 +56,22 @@ public class FrmChinh extends JFrame {
         addPage("khachhang", taoPanelVoiBo(new PnlKhachHang()));
         addPage("searchcustomer", taoPanelVoiBo(new PnlTimKhachHang()));
 
-        // Stations / trains
-        addPage("daumay", taoPanelVoiBo(new PnlDauMay()));      // Đầu máy
-        addPage("toatau", taoPanelVoiBo(new PnlToaTau()));      // Toa tàu
-        addPage("ga", taoPanelVoiBo(new PnlGa()));         // Ga
-        addPage("chuyentau", taoPanelVoiBo(new PnlChuyenTau())); // Chuyến tàu
+        // Train search - available to all employees
         addPage("timkiemct", taoPanelVoiBo(new PnlTimKiemChuyenTau())); // Tìm kiếm ct
 
+        // Stations / trains (manager only)
+        if (taiKhoanHienTai.isManager()) {
+            addPage("daumay", taoPanelVoiBo(new PnlDauMay()));      // Đầu máy
+            addPage("toatau", taoPanelVoiBo(new PnlToaTau()));      // Toa tàu
+            addPage("ga", taoPanelVoiBo(new PnlGa()));         // Ga
+            addPage("chuyentau", taoPanelVoiBo(new PnlChuyenTau())); // Chuyến tàu
+        }
+
         // Ticket-related auxiliary pages
-
-//        addPage("banggia", taoPanelVoiBo(createPlaceholderPanel("Bảng giá"))); // placeholder
-
-        addPage("banggia", taoPanelVoiBo(new PnlBangGia())); // Bảng giá
+        // Bảng giá (manager only)
+        if (taiKhoanHienTai.isManager()) {
+            addPage("banggia", taoPanelVoiBo(new PnlBangGia())); // Bảng giá
+        }
         // Invoice
         addPage("hoadon", taoPanelVoiBo(new PnlQuanLyVe(taiKhoanHienTai)));
         addPage("timhoadon", taoPanelVoiBo(new PnlTimHoaDon()));
@@ -136,7 +140,12 @@ public class FrmChinh extends JFrame {
         if (!taiKhoanHienTai.isManager() &&
                 (trang.equals("nhanvien") || trang.equals("employee") || trang.equals("taikhoan")
                         || trang.equals("account") || trang.equals("statistics")
-                        || trang.startsWith("deleted_") )
+                        || trang.startsWith("deleted_")
+                        // Train management pages (excluding search)
+                        || trang.equals("chuyentau") || trang.equals("daumay") || trang.equals("toatau")
+                        || trang.equals("ga")
+                        // Price table
+                        || trang.equals("banggia") )
         ) {
             JOptionPane.showMessageDialog(this,
                     "Bạn không có quyền truy cập trang này!\nChỉ quản lý mới có thể truy cập.",
