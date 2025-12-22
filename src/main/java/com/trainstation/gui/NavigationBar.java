@@ -47,7 +47,7 @@ public class NavigationBar extends JPanel {
         tripManagementBtn.addActionListener(e -> tripMenu.show(tripManagementBtn, 0, tripManagementBtn.getHeight()));
         leftPanel.add(tripManagementBtn);
 
-        JButton ticketManagementBtn = createNavButton("Quản lý vé", null);
+        JButton ticketManagementBtn = createNavButton("Vé", null);
         JPopupMenu ticketManagementMenu = new JPopupMenu();
         // Bảng giá - Chỉ quản lý
         if (currentAccount.isManager()) {
@@ -132,7 +132,7 @@ public class NavigationBar extends JPanel {
         button.setFont(MaterialInitializer.createFont(Font.PLAIN, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        int buttonWidth = Math.max(80, text.length() * 12 + 10);
+        int buttonWidth = Math.max(100, text.length() * 12 + 10);
         button.setPreferredSize(new Dimension(buttonWidth, 40));
         button.setMargin(new Insets(5, 15, 5, 15));
 
