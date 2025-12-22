@@ -40,11 +40,13 @@ public class NavigationBar extends JPanel {
             tripMenu.add(createMenuItem("Đầu máy", "daumay"));
             tripMenu.add(createMenuItem("Toa tàu", "toatau"));
             tripMenu.add(createMenuItem("Ga tàu","ga"));
-            tripMenu.addSeparator();
-            tripMenu.add(createMenuItem("Tìm kiếm", "timkiemct"));
             tripManagementBtn.addActionListener(e -> tripMenu.show(tripManagementBtn, 0, tripManagementBtn.getHeight()));
             leftPanel.add(tripManagementBtn);
         }
+
+        // Tìm kiếm chuyến tàu - Tất cả nhân viên
+        JButton searchTripBtn = createNavButton("Tìm chuyến", "timkiemct");
+        leftPanel.add(searchTripBtn);
 
         JButton ticketManagementBtn = createNavButton("Quản lý vé", null);
         JPopupMenu ticketManagementMenu = new JPopupMenu();

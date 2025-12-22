@@ -56,13 +56,15 @@ public class FrmChinh extends JFrame {
         addPage("khachhang", taoPanelVoiBo(new PnlKhachHang()));
         addPage("searchcustomer", taoPanelVoiBo(new PnlTimKhachHang()));
 
+        // Train search - available to all employees
+        addPage("timkiemct", taoPanelVoiBo(new PnlTimKiemChuyenTau())); // Tìm kiếm ct
+
         // Stations / trains (manager only)
         if (taiKhoanHienTai.isManager()) {
             addPage("daumay", taoPanelVoiBo(new PnlDauMay()));      // Đầu máy
             addPage("toatau", taoPanelVoiBo(new PnlToaTau()));      // Toa tàu
             addPage("ga", taoPanelVoiBo(new PnlGa()));         // Ga
             addPage("chuyentau", taoPanelVoiBo(new PnlChuyenTau())); // Chuyến tàu
-            addPage("timkiemct", taoPanelVoiBo(new PnlTimKiemChuyenTau())); // Tìm kiếm ct
         }
 
         // Ticket-related auxiliary pages
@@ -139,9 +141,9 @@ public class FrmChinh extends JFrame {
                 (trang.equals("nhanvien") || trang.equals("employee") || trang.equals("taikhoan")
                         || trang.equals("account") || trang.equals("statistics")
                         || trang.startsWith("deleted_")
-                        // Train management pages
+                        // Train management pages (excluding search)
                         || trang.equals("chuyentau") || trang.equals("daumay") || trang.equals("toatau")
-                        || trang.equals("ga") || trang.equals("timkiemct")
+                        || trang.equals("ga")
                         // Price table
                         || trang.equals("banggia") )
         ) {
