@@ -607,10 +607,22 @@ public class PnlDatVe extends JPanel {
     }
 
     /**
+     * Định dạng nhãn ghế ngắn gọn từ mã ghế (vd: G_TOA001_01 -> Ghế 01)
+     */
+    private String formatSeatLabel(String maGhe) {
+        if (maGhe == null || maGhe.isEmpty()) {
+            return "Ghế";
+        }
+        int idx = maGhe.lastIndexOf('_');
+        String seatCode = (idx >= 0 && idx < maGhe.length() - 1) ? maGhe.substring(idx + 1) : maGhe;
+        return "Ghế " + seatCode;
+    }
+
+    /**
      * Tạo nút ghế với thiết kế hiện đại theo Material Design (matching DlgDoiVe)
      */
     private JButton taoNutGhe(Ghe ghe) {
-        JButton btnGhe = new SeatButton(ghe.getMaGhe());
+        JButton btnGhe = new SeatButton(formatSeatLabel(ghe.getMaGhe()));
         // Modern styling with rounded corners
         btnGhe.setPreferredSize(new Dimension(85, 45));
         btnGhe.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -628,7 +640,7 @@ public class PnlDatVe extends JPanel {
                     COLOR_BOOKED,
                     Color.WHITE,
                     false,
-                    createTooltip(ICON_BOOKED, maGhe,
+                    createTooltip(ICON_BOOKED, formatSeatLabel(maGhe),
                             trangThai != null ? trangThai : "Đã đặt")
             );
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
@@ -646,7 +658,7 @@ public class PnlDatVe extends JPanel {
                     COLOR_SELECTED,
                     Color.WHITE,
                     false, // không cho click lại
-                    createTooltip(ICON_HELD, maGhe, "Đang giữ (chưa thanh toán)")
+                    createTooltip(ICON_HELD, formatSeatLabel(maGhe), "Đang giữ (chưa thanh toán)")
             );
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(COLOR_SELECTED_BORDER, 2),
@@ -663,7 +675,7 @@ public class PnlDatVe extends JPanel {
                     COLOR_AVAILABLE,
                     Color.WHITE,
                     true,
-                    createTooltip(ICON_AVAILABLE, maGhe, "Trống")
+                    createTooltip(ICON_AVAILABLE, formatSeatLabel(maGhe), "Trống")
             );
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(COLOR_AVAILABLE_BORDER, 1),
@@ -680,7 +692,7 @@ public class PnlDatVe extends JPanel {
                     COLOR_BOOKED,
                     Color.WHITE,
                     false,
-                    createTooltip(ICON_BOOKED, maGhe,
+                    createTooltip(ICON_BOOKED, formatSeatLabel(maGhe),
                             trangThai != null ? trangThai : "Không khả dụng")
             );
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
