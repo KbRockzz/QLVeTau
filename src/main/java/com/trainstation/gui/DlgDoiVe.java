@@ -200,6 +200,18 @@ public class DlgDoiVe extends JDialog {
         panel.add(new JLabel(text));
         return panel;
     }
+
+    /**
+     * Định dạng nhãn ghế ngắn gọn từ mã ghế (vd: G_TOA001_01 -> Ghế 01)
+     */
+    private String formatSeatLabel(String maGhe) {
+        if (maGhe == null || maGhe.isEmpty()) {
+            return "Ghế";
+        }
+        int idx = maGhe.lastIndexOf('_');
+        String seatCode = (idx >= 0 && idx < maGhe.length() - 1) ? maGhe.substring(idx + 1) : maGhe;
+        return "Ghế " + seatCode;
+    }
     
     private void loadThongTinVeGoc() {
         if (veGoc == null) return;
@@ -211,7 +223,7 @@ public class DlgDoiVe extends JDialog {
         txtGaDiGoc.setText(veGoc.getTenGaDi());
         txtGaDenGoc.setText(veGoc.getTenGaDen());
         txtGioDiGoc.setText(veGoc.getGioDi() != null ? veGoc.getGioDi().format(formatter) : "");
-        txtGheGoc.setText(veGoc.getMaSoGhe());
+        txtGheGoc.setText(formatSeatLabel(veGoc.getMaSoGhe()));
         txtToaGoc.setText(veGoc.getSoToa() != null ? veGoc.getSoToa().toString() : "");
         txtTrangThaiGoc.setText(veGoc.getTrangThai());
     }
@@ -293,7 +305,8 @@ public class DlgDoiVe extends JDialog {
      * Tạo nút ghế với thiết kế hiện đại theo Material Design
      */
     private JButton taoNutGhe(Ghe ghe) {
-        JButton btnGhe = new JButton(ghe.getMaGhe());
+        JButton btnGhe = new JButton(formatSeatLabel(ghe.getMaGhe()));
+        btnGhe.putClientProperty("seatCode", ghe.getMaGhe());
         
         // Modern styling with rounded corners
         btnGhe.setPreferredSize(new Dimension(85, 45));
@@ -311,8 +324,8 @@ public class DlgDoiVe extends JDialog {
         if (ghe.getMaGhe() != null && veGoc.getMaSoGhe() != null && 
             ghe.getMaGhe().equals(veGoc.getMaSoGhe())) {
             // Ghế hiện tại - màu tím với outline và shadow nổi bật
-            styleSeatButton(btnGhe, COLOR_CURRENT, Color.WHITE, false, 
-                ICON_CURRENT + " " + ghe.getMaGhe() + " - Ghế hiện tại");
+            styleSeatButton(btnGhe, COLOR_CURRENT, Color.WHITE, false,
+                ICON_CURRENT + " " + formatSeatLabel(ghe.getMaGhe()) + " - Ghế hiện tại");
             // Add prominent outline with shadow for current seat
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createCompoundBorder(
@@ -329,8 +342,8 @@ public class DlgDoiVe extends JDialog {
             
             // Check if this is the selected seat
             if (maGhe.equals(gheChon)) {
-                styleSeatButton(btnGhe, COLOR_SELECTED, Color.WHITE, true, 
-                    ICON_AVAILABLE + " " + ghe.getMaGhe() + " - Đang chọn");
+                styleSeatButton(btnGhe, COLOR_SELECTED, Color.WHITE, true,
+                    ICON_AVAILABLE + " " + formatSeatLabel(ghe.getMaGhe()) + " - Đang chọn");
                 // Outline for selected seat
                 btnGhe.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(COLOR_SELECTED_BORDER, 2),
@@ -339,8 +352,8 @@ public class DlgDoiVe extends JDialog {
                 // Enhanced shadow for selected seat
                 btnGhe.putClientProperty("FlatLaf.style", "shadowColor: rgba(33,150,243,89); shadowWidth: 4");
             } else {
-                styleSeatButton(btnGhe, COLOR_AVAILABLE, Color.WHITE, true, 
-                    ICON_AVAILABLE + " " + ghe.getMaGhe() + " - Trống");
+                styleSeatButton(btnGhe, COLOR_AVAILABLE, Color.WHITE, true,
+                    ICON_AVAILABLE + " " + formatSeatLabel(ghe.getMaGhe()) + " - Trống");
                 // Subtle outline and shadow for available seats
                 btnGhe.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(COLOR_AVAILABLE_BORDER, 1),
@@ -358,8 +371,8 @@ public class DlgDoiVe extends JDialog {
             });
         } else {
             // Ghế đã đặt - màu đỏ với outline và shadow
-            styleSeatButton(btnGhe, COLOR_BOOKED, Color.WHITE, false, 
-                ICON_BOOKED + " " + ghe.getMaGhe() + " - Đã đặt");
+            styleSeatButton(btnGhe, COLOR_BOOKED, Color.WHITE, false,
+                ICON_BOOKED + " " + formatSeatLabel(ghe.getMaGhe()) + " - Đã đặt");
             // Outline for booked seats
             btnGhe.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_BOOKED_BORDER, 1),
@@ -416,10 +429,17 @@ public class DlgDoiVe extends JDialog {
         for (Component comp : components) {
             if (comp instanceof JButton) {
                 JButton btn = (JButton) comp;
-                String btnText = btn.getText();
-                
-                // Extract seat code (button text is just the seat code, no emoji prefix)
-                String maGhe = btnText;
+                String maGhe = (String) btn.getClientProperty("seatCode");
+                if (maGhe == null) {
+                    String txt = btn.getText();
+                    // Fallback: extract raw seat code from formatted label "Ghế XX"
+                    if (txt != null && txt.trim().toLowerCase().startsWith("ghế")) {
+                        String[] parts = txt.trim().split("\\s+");
+                        maGhe = parts.length > 1 ? parts[1] : txt.trim();
+                    } else {
+                        maGhe = txt;
+                    }
+                }
                 
                 // Skip current seat (always cyan) and disabled seats
                 if (maGhe.equals(veGoc.getMaSoGhe()) || !btn.isEnabled()) {
@@ -430,7 +450,7 @@ public class DlgDoiVe extends JDialog {
                 if (maGhe.equals(gheChon)) {
                     btn.setBackground(COLOR_SELECTED);
                     btn.setForeground(Color.WHITE);
-                    btn.setToolTipText(ICON_AVAILABLE + " " + maGhe + " - Đang chọn");
+                    btn.setToolTipText(ICON_AVAILABLE + " " + formatSeatLabel(maGhe) + " - Đang chọn");
                     // Add outline and enhanced shadow for selected
                     btn.setBorder(BorderFactory.createCompoundBorder(
                         BorderFactory.createLineBorder(COLOR_SELECTED_BORDER, 2),
@@ -441,7 +461,7 @@ public class DlgDoiVe extends JDialog {
                     // Reset to green for available seats
                     btn.setBackground(COLOR_AVAILABLE);
                     btn.setForeground(Color.WHITE);
-                    btn.setToolTipText(ICON_AVAILABLE + " " + maGhe + " - Trống");
+                    btn.setToolTipText(ICON_AVAILABLE + " " + formatSeatLabel(maGhe) + " - Trống");
                     // Reset to subtle outline and shadow
                     btn.setBorder(BorderFactory.createCompoundBorder(
                         BorderFactory.createLineBorder(COLOR_AVAILABLE_BORDER, 1),
