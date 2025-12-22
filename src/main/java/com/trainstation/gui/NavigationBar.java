@@ -32,21 +32,20 @@ public class NavigationBar extends JPanel {
         JButton homeBtn = createNavButton("Trang chủ", "home");
         leftPanel.add(homeBtn);
 
-        // Chuyến tàu - Chỉ quản lý
+        // Chuyến tàu - Tất cả nhân viên nhìn thấy nút, nhưng chỉ quản lý thấy các tùy chọn quản lý
+        JButton tripManagementBtn = createNavButton("Chuyến tàu", null);
+        JPopupMenu tripMenu = new JPopupMenu();
         if (currentAccount.isManager()) {
-            JButton tripManagementBtn = createNavButton("Chuyến tàu", null);
-            JPopupMenu tripMenu = new JPopupMenu();
             tripMenu.add(createMenuItem("Chuyến tàu", "chuyentau"));
             tripMenu.add(createMenuItem("Đầu máy", "daumay"));
             tripMenu.add(createMenuItem("Toa tàu", "toatau"));
             tripMenu.add(createMenuItem("Ga tàu","ga"));
-            tripManagementBtn.addActionListener(e -> tripMenu.show(tripManagementBtn, 0, tripManagementBtn.getHeight()));
-            leftPanel.add(tripManagementBtn);
+            tripMenu.addSeparator();
         }
-
-        // Tìm kiếm chuyến tàu - Tất cả nhân viên
-        JButton searchTripBtn = createNavButton("Tìm chuyến", "timkiemct");
-        leftPanel.add(searchTripBtn);
+        // Tìm kiếm - Luôn có cho tất cả nhân viên
+        tripMenu.add(createMenuItem("Tìm kiếm", "timkiemct"));
+        tripManagementBtn.addActionListener(e -> tripMenu.show(tripManagementBtn, 0, tripManagementBtn.getHeight()));
+        leftPanel.add(tripManagementBtn);
 
         JButton ticketManagementBtn = createNavButton("Quản lý vé", null);
         JPopupMenu ticketManagementMenu = new JPopupMenu();
