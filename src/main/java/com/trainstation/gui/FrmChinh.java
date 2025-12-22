@@ -138,7 +138,12 @@ public class FrmChinh extends JFrame {
         if (!taiKhoanHienTai.isManager() &&
                 (trang.equals("nhanvien") || trang.equals("employee") || trang.equals("taikhoan")
                         || trang.equals("account") || trang.equals("statistics")
-                        || trang.startsWith("deleted_") )
+                        || trang.startsWith("deleted_")
+                        // Train management pages
+                        || trang.equals("chuyentau") || trang.equals("daumay") || trang.equals("toatau")
+                        || trang.equals("ga") || trang.equals("timkiemct")
+                        // Price table
+                        || trang.equals("banggia") )
         ) {
             JOptionPane.showMessageDialog(this,
                     "Bạn không có quyền truy cập trang này!\nChỉ quản lý mới có thể truy cập.",
