@@ -85,7 +85,7 @@ ON DUPLICATE KEY UPDATE moTa = VALUES(moTa);
 
 -- Chuyến Tàu
 INSERT INTO ChuyenTau (maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai) VALUES
-('CT001', 'DM001', 'NV001', 'GA001', 'GA002', '2024-06-01 06:00:00', '2024-06-01 30:00:00', 1726, 'CH003', 'active'),
+('CT001', 'DM001', 'NV001', 'GA001', 'GA002', '2024-06-01 06:00:00', '2024-06-02 06:00:00', 1726, 'CH003', 'active'),
 ('CT002', 'DM002', 'NV002', 'GA001', 'GA003', '2024-06-02 08:00:00', '2024-06-02 22:00:00', 791, 'CH002', 'active'),
 ('CT003', 'DM003', 'NV003', 'GA002', 'GA003', '2024-06-03 07:00:00', '2024-06-03 18:00:00', 935, 'CH002', 'active')
 ON DUPLICATE KEY UPDATE trangThai = VALUES(trangThai);

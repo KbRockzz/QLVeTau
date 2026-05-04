@@ -14,12 +14,12 @@ import java.util.List;
 
 public class VeServiceImpl implements IVeService {
     private static VeServiceImpl instance;
-    private final VeService veService;
+    private final VeService legacyVeService;
     private final VeDAO veDAO;
     private final VeMapper mapper;
 
     private VeServiceImpl() {
-        this.veService = VeService.getInstance();
+        this.legacyVeService = VeService.getInstance();
         this.veDAO = VeDAO.getInstance();
         this.mapper = JacksonVeMapper.getInstance();
     }
@@ -50,7 +50,7 @@ public class VeServiceImpl implements IVeService {
 
     @Override
     public Ve taoVe(Ve ve) {
-        return veService.taoVe(ve);
+        return legacyVeService.taoVe(ve);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class VeServiceImpl implements IVeService {
     @Override
     public VeDTO taoVeTuRequest(CreateVeRequest request) {
         Ve ve = mapper.fromCreateRequest(request, generateVeId());
-        Ve created = veService.taoVe(ve);
+        Ve created = legacyVeService.taoVe(ve);
         return created != null ? mapper.toDTO(created) : null;
     }
 
