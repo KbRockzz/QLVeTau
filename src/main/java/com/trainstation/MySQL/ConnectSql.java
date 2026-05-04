@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 /**
  * ConnectSql: cung cấp Connection mới mỗi lần gọi getConnection().
- * Tránh giữ 1 Connection singleton chia sẻ giữa nhiều DAO để không bị lỗi "The connection is closed".
+ * Đã chuyển sang MariaDB JDBC driver.
  *
  * Lưu ý:
  * - Caller phải đóng Connection sau khi dùng (ví dụ bằng try-with-resources).
@@ -15,33 +15,27 @@ import java.sql.SQLException;
 public class ConnectSql {
     private static ConnectSql instance;
 
-    // SQL Server connection parameters
+    // MariaDB connection parameters
     private static final String SERVER = "localhost";
-    private static final String PORT = "1433";
+    private static final String PORT = "3306";
     private static final String DATABASE = "QLTauHoa";
-    private static final String USERNAME = "sa";
-    private static final String PASSWORD = "sapassword";
+    private static final String USERNAME = "root";
+    private static final String PASSWORD = "rootpassword";
 
-    // Connection string for SQL Server
+    // Connection string for MariaDB
     private static final String CONNECTION_URL =
-            "jdbc:sqlserver://" + SERVER + ":" + PORT +
-                    ";databaseName=" + DATABASE +
-                    ";encrypt=true;trustServerCertificate=true";
+            "jdbc:mariadb://" + SERVER + ":" + PORT + "/" + DATABASE
+                    + "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh";
 
     private ConnectSql() {
         try {
-            // Load SQL Server JDBC driver once
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Class.forName("org.mariadb.jdbc.Driver");
         } catch (ClassNotFoundException e) {
-            System.err.println("Không tìm thấy SQL Server JDBC Driver!");
+            System.err.println("Không tìm thấy MariaDB JDBC Driver!");
             e.printStackTrace();
         }
     }
 
-    /**
-     * Get singleton instance of ConnectSql
-     * @return ConnectSql instance
-     */
     public static synchronized ConnectSql getInstance() {
         if (instance == null) {
             instance = new ConnectSql();
@@ -49,15 +43,8 @@ public class ConnectSql {
         return instance;
     }
 
-    /**
-     * Get a new database connection.
-     * IMPORTANT: caller phải đóng Connection sau khi dùng (try-with-resources).
-     * @return a new Connection
-     * @throws RuntimeException if cannot get connection
-     */
     public Connection getConnection() {
         try {
-            // Always return a fresh connection (or from pool in future)
             return DriverManager.getConnection(CONNECTION_URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
             System.err.println("Lỗi khi lấy kết nối!");
@@ -66,10 +53,6 @@ public class ConnectSql {
         }
     }
 
-    /**
-     * Helper test connection: thử mở và đóng ngay để kiểm tra cấu hình.
-     * @return true nếu có thể kết nối
-     */
     public boolean testConnection() {
         try (Connection conn = getConnection()) {
             return conn != null && conn.isValid(5);

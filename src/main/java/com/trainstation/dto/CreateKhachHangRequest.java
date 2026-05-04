@@ -1,7 +1,6 @@
-package com.trainstation.model;
+package com.trainstation.dto;
 
 import lombok.*;
-import java.io.Serializable;
 
 @Getter
 @Setter
@@ -9,10 +8,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 @ToString
-public class KhachHang implements Serializable {
-    private String maKhachHang;
+public class CreateKhachHangRequest {
     private String tenKhachHang;
     private String email;
     private String soDienThoai;
 }
-

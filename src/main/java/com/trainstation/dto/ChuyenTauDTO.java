@@ -1,7 +1,6 @@
-package com.trainstation.model;
+package com.trainstation.dto;
 
 import lombok.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
@@ -10,7 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @ToString
-public class ChuyenTau implements Serializable {
+public class ChuyenTauDTO {
     private String maChuyen;
     private String maDauMay;
     private String maNV;
