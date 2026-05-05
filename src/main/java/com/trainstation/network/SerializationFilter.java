@@ -1,6 +1,8 @@
 package com.trainstation.network;
 
+import java.io.IOException;
 import java.io.ObjectInputFilter;
+import java.io.ObjectInputStream;
 
 /**
  * Whitelist-based deserialization filter to prevent unsafe deserialization attacks.
@@ -39,7 +41,7 @@ public class SerializationFilter implements ObjectInputFilter {
 
     /** ObjectInputStream that installs the whitelist filter immediately on construction. */
     public static final class FilteredObjectInputStream extends ObjectInputStream {
-        public FilteredObjectInputStream(java.io.InputStream in) throws java.io.IOException {
+        public FilteredObjectInputStream(java.io.InputStream in) throws IOException {
             super(in);
             setObjectInputFilter(INSTANCE);
         }

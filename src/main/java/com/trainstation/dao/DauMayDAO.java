@@ -134,7 +134,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
      * Dừng hoạt động đầu máy
      */
     public boolean dungHoatDongDauMay(String maDauMay) {
-        String sql = "UPDATE DauMay SET trangThai = N'Dừng hoạt động' WHERE maDauMay = ? and isActive = 1";
+        String sql = "UPDATE DauMay SET trangThai = 'Dừng hoạt động' WHERE maDauMay = ? and isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maDauMay);

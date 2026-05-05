@@ -27,18 +27,18 @@ public class ThongKeDAO {
 
     public Map<String, Double> thongKeDoanhThu(LocalDate tuNgay, LocalDate denNgay) {
         Map<String, Double> result = new HashMap<>();
-        String sql = "SELECT CAST(hd.ngayLap AS DATE) as ngay, SUM(ct.giaDaKM) as tongDoanhThu " +
+        String sql = "SELECT DATE(hd.ngayLap) as ngay, SUM(ct.giaDaKM) as tongDoanhThu " +
                 "FROM HoaDon hd " +
                 "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
                 "JOIN Ve v ON ct.maVe = v.maVe " +
-                "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
-                "AND hd.trangThai = N'Hoàn tất' " +
+                "WHERE DATE(hd.ngayLap) BETWEEN ? AND ? " +
+                "AND hd.trangThai = 'Hoàn tất' " +
                 "AND hd.isActive = 1 " +
                 "AND ct.isActive = 1 " +
                 "AND v.isActive = 1 " +
-                "AND v.trangThai != N'Đã đổi' " +
-                "GROUP BY CAST(hd.ngayLap AS DATE) " +
-                "ORDER BY CAST(hd.ngayLap AS DATE)";
+                "AND v.trangThai != 'Đã đổi' " +
+                "GROUP BY DATE(hd.ngayLap) " +
+                "ORDER BY DATE(hd.ngayLap)";
 
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -65,12 +65,12 @@ public class ThongKeDAO {
                 "FROM HoaDon hd " +
                 "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
                 "JOIN Ve v ON ct.maVe = v.maVe " +
-                "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
-                "AND hd.trangThai = N'Hoàn tất' " +
+                "WHERE DATE(hd.ngayLap) BETWEEN ? AND ? " +
+                "AND hd.trangThai = 'Hoàn tất' " +
                 "AND hd.isActive = 1 " +
                 "AND ct.isActive = 1 " +
                 "AND v.isActive = 1 " +
-                "AND v.trangThai != N'Đã đổi' " +
+                "AND v.trangThai != 'Đã đổi' " +
                 "GROUP BY hd.maHoaDon, hd.ngayLap " +
                 "ORDER BY hd.ngayLap DESC";
 
@@ -103,12 +103,12 @@ public class ThongKeDAO {
                 "JOIN ChiTietHoaDon ct ON hd.maHoaDon = ct.maHoaDon " +
                 "JOIN Ve v ON ct.maVe = v.maVe " +
                 "JOIN LoaiVe lv ON ct.maLoaiVe = lv.maLoaiVe " +
-                "WHERE CAST(hd.ngayLap AS DATE) BETWEEN ? AND ? " +
-                "AND hd.trangThai = N'Hoàn tất' " +
+                "WHERE DATE(hd.ngayLap) BETWEEN ? AND ? " +
+                "AND hd.trangThai = 'Hoàn tất' " +
                 "AND hd.isActive = 1 " +
                 "AND ct.isActive = 1 " +
                 "AND v.isActive = 1 " +
-                "AND v.trangThai != N'Đã đổi' " +
+                "AND v.trangThai != 'Đã đổi' " +
                 "AND lv.isActive = 1 " +
                 "GROUP BY lv.tenLoai " +
                 "ORDER BY soLuong DESC";
@@ -137,15 +137,15 @@ public class ThongKeDAO {
         List<Map<String, Object>> result = new ArrayList<>();
         String sql = "SELECT v.maVe, ct.maHoaDon, v.ngayIn, " +
                 "CASE " +
-                "  WHEN v.trangThai = N'Đã hoàn' THEN N'Hoàn vé' " +
-                "  WHEN v.trangThai = N'Đã đổi' THEN N'Đổi vé' " +
+                "  WHEN v.trangThai = 'Đã hoàn' THEN 'Hoàn vé' " +
+                "  WHEN v.trangThai = 'Đã đổi' THEN 'Đổi vé' " +
                 "  ELSE v.trangThai " +
                 "END as hinhThuc, " +
                 "v.trangThai " +
                 "FROM Ve v " +
                 "JOIN ChiTietHoaDon ct ON v.maVe = ct.maVe " +
-                "WHERE CAST(v.ngayIn AS DATE) BETWEEN ? AND ? " +
-                "AND (v.trangThai = N'Đã hoàn' OR v.trangThai = N'Đã đổi') " +
+                "WHERE DATE(v.ngayIn) BETWEEN ? AND ? " +
+                "AND (v.trangThai = 'Đã hoàn' OR v.trangThai = 'Đã đổi') " +
                 "AND v.isActive = 1 " +
                 "AND ct.isActive = 1 " +
                 "ORDER BY v.ngayIn DESC";
@@ -182,13 +182,13 @@ public class ThongKeDAO {
                 "ct.gioDi, " +
                 "COALESCE((SELECT SUM(sucChua) FROM ChiTietChuyenTau WHERE maChuyenTau = ct.maChuyen AND isActive = 1), 0) as tongSoGhe, " +
                 "COALESCE((SELECT COUNT(*) FROM Ve WHERE maChuyen = ct.maChuyen " +
-                "   AND trangThai IN (N'Đã thanh toán', N'Đã đổi') " +
+                "   AND trangThai IN ('Đã thanh toán', 'Đã đổi') " +
                 "   AND isActive = 1 " +
-                "   AND CAST(ngayIn AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)), 0) as soGheBan " +
+                "   AND DATE(ngayIn) BETWEEN ? AND ?), 0) as soGheBan " +
                 "FROM ChuyenTau ct " +
                 "LEFT JOIN Ga gdi ON ct.maGaDi = gdi.maGa " +
                 "LEFT JOIN Ga gden ON ct.maGaDen = gden.maGa " +
-                "WHERE CAST(ct.gioDi AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE) " +
+                "WHERE DATE(ct.gioDi) BETWEEN ? AND ? " +
                 "AND ct.isActive = 1 " +
                 "AND gdi.isActive = 1 " +
                 "AND gden.isActive = 1 " +
