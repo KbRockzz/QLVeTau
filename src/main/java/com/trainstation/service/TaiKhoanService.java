@@ -3,6 +3,11 @@ package com.trainstation.service;
 import com.trainstation.dao.TaiKhoanDAO;
 import com.trainstation.model.NhanVien;
 import com.trainstation.model.TaiKhoan;
+import com.trainstation.network.AppClient;
+import com.trainstation.network.AppRequest;
+import com.trainstation.network.AppResponse;
+import com.trainstation.network.NetworkConfig;
+import com.trainstation.network.RequestType;
 import java.util.List;
 
 /**
@@ -27,6 +32,11 @@ public class TaiKhoanService {
      * Xác thực đăng nhập
      */
     public TaiKhoan xacThuc(String tenTaiKhoan, String matKhau) {
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.DANG_NHAP, tenTaiKhoan, matKhau));
+            if (resp.isSuccess()) return (TaiKhoan) resp.getData();
+            return null;
+        }
         List<TaiKhoan> danhSach = taiKhoanDAO.getAll();
         for (TaiKhoan tk : danhSach) {
             if (tk.getTenTaiKhoan().equals(tenTaiKhoan) && 
@@ -64,6 +74,11 @@ public class TaiKhoanService {
      * Lấy tất cả tài khoản
      */
     public List<TaiKhoan> layTatCaTaiKhoan() {
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.GET_ALL_TAIKHOAN));
+            if (resp.isSuccess() && resp.getData() != null) return (List<TaiKhoan>) resp.getData();
+            return java.util.Collections.emptyList();
+        }
         return taiKhoanDAO.getAll();
     }
 
@@ -78,6 +93,11 @@ public class TaiKhoanService {
      * Thêm tài khoản mới
      */
     public boolean themTaiKhoan(TaiKhoan tk) {
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.INSERT_TAIKHOAN, tk));
+            if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
+            return false;
+        }
         return taiKhoanDAO.insert(tk);
     }
 
@@ -85,6 +105,11 @@ public class TaiKhoanService {
      * Cập nhật thông tin tài khoản
      */
     public boolean capNhatTaiKhoan(TaiKhoan tk) {
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.UPDATE_TAIKHOAN, tk));
+            if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
+            return false;
+        }
         return taiKhoanDAO.update(tk);
     }
 
@@ -104,6 +129,11 @@ public class TaiKhoanService {
      * Xóa tài khoản
      */
     public boolean xoaTaiKhoan(String maTK) {
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.DELETE_TAIKHOAN, maTK));
+            if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
+            return false;
+        }
         return taiKhoanDAO.delete(maTK);
     }
 }

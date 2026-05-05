@@ -172,70 +172,14 @@ public class ChuyenTauDAO implements GenericDAO<ChuyenTau> {
      * Tìm kiếm chuyến theo điều kiện tương tự mã cũ.
      */
     public List<ChuyenTau> timKiemChuyenTau(String maGaDi, String maGaDen, LocalDate ngayDi, LocalTime gioDi) {
-        List<ChuyenTau> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE 1=1");
-
-        // Điều kiện tìm kiếm được thêm tùy thuộc vào dữ liệu đầu vào
-        if (maGaDi != null && !maGaDi.trim().isEmpty()) {
-            sql.append(" AND maGaDi = ?");
-        }
-        if (maGaDen != null && !maGaDen.trim().isEmpty()) {
-            sql.append(" AND maGaDen = ?");
-        }
-        if (ngayDi != null) {
-            sql.append(" AND CAST(gioDi AS DATE) = ?");
-        }
-        if (gioDi != null) {
-            sql.append(" AND gioDi >= ?");
-        }
-
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql.toString())) {
-            int paramIndex = 1;
-
-            // Truyền giá trị vào câu lệnh SQL
-            if (maGaDi != null && !maGaDi.trim().isEmpty()) {
-                pst.setString(paramIndex++, maGaDi);
-            }
-            if (maGaDen != null && !maGaDen.trim().isEmpty()) {
-                pst.setString(paramIndex++, maGaDen);
-            }
-            if (ngayDi != null) {
-                pst.setDate(paramIndex++, Date.valueOf(ngayDi));
-            }
-            if (gioDi != null) {
-                // Tạo giá trị datetime nếu chỉ có giờ đi hoặc phải dựa vào ngày hiện tại
-                LocalDateTime searchDateTime = LocalDateTime.of(ngayDi != null ? ngayDi : LocalDate.now(), gioDi);
-                pst.setTimestamp(paramIndex++, Timestamp.valueOf(searchDateTime));
-            }
-
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    LocalDateTime gioDiDT = null, gioDenDT = null;
-                    Timestamp ts1 = rs.getTimestamp("gioDi");
-                    if (ts1 != null) gioDiDT = ts1.toLocalDateTime();
-                    Timestamp ts2 = rs.getTimestamp("gioDen");
-                    if (ts2 != null) gioDenDT = ts2.toLocalDateTime();
-
-                    ChuyenTau ct = new ChuyenTau(
-                            rs.getString("maChuyen"),
-                            rs.getString("maDauMay"),
-                            rs.getString("maNV"),
-                            rs.getString("maGaDi"),
-                            rs.getString("maGaDen"),
-                            gioDiDT,
-                            gioDenDT,
-                            rs.getObject("soKm", Integer.class),
-                            rs.getString("maChang"),
-                            rs.getString("trangThai")
-                    );
-                    list.add(ct);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
+        return getAll().stream()
+            .filter(ct -> maGaDi == null || maGaDi.isBlank() || maGaDi.equals(ct.getMaGaDi()))
+            .filter(ct -> maGaDen == null || maGaDen.isBlank() || maGaDen.equals(ct.getMaGaDen()))
+            .filter(ct -> ngayDi == null || (ct.getGioDi() != null && ct.getGioDi().toLocalDate().equals(ngayDi)))
+            .filter(ct -> gioDi == null || (ct.getGioDi() != null &&
+                !ct.getGioDi().isBefore(
+                    LocalDateTime.of(ngayDi != null ? ngayDi : ct.getGioDi().toLocalDate(), gioDi))))
+            .collect(java.util.stream.Collectors.toList());
     }
 
     public List<String> getDistinctStations() {

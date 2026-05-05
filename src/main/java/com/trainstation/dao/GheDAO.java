@@ -48,27 +48,31 @@ public class GheDAO {
         return list;
     }
 
-    public Ghe findById(String maGhe) {
-        String sql = "SELECT maGhe, maToa, trangThai, loaiGhe FROM Ghe WHERE maGhe = ?";
+    public List<Ghe> getAll() {
+        List<Ghe> list = new ArrayList<>();
+        String sql = "SELECT maGhe, maToa, trangThai, loaiGhe FROM Ghe ORDER BY maGhe";
         try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, maGhe);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    Ghe g = new Ghe();
-                    g.setMaGhe(rs.getString("maGhe"));
-                    g.setMaToa(rs.getString("maToa"));
-                    g.setTrangThai(rs.getString("trangThai"));
-                    try {
-                        g.setLoaiGhe(rs.getString("loaiGhe"));
-                    } catch (Throwable ignored) {}
-                    return g;
-                }
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                Ghe g = new Ghe();
+                g.setMaGhe(rs.getString("maGhe"));
+                g.setMaToa(rs.getString("maToa"));
+                g.setTrangThai(rs.getString("trangThai"));
+                try { g.setLoaiGhe(rs.getString("loaiGhe")); } catch (Throwable ignored) {}
+                list.add(g);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return list;
+    }
+
+    public Ghe findById(String maGhe) {
+        return getAll().stream()
+            .filter(g -> maGhe != null && maGhe.equals(g.getMaGhe()))
+            .findFirst()
+            .orElse(null);
     }
 
 
