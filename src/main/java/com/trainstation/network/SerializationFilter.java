@@ -36,4 +36,12 @@ public class SerializationFilter implements ObjectInputFilter {
         }
         return Status.REJECTED;
     }
+
+    /** ObjectInputStream that installs the whitelist filter immediately on construction. */
+    public static final class FilteredObjectInputStream extends ObjectInputStream {
+        public FilteredObjectInputStream(java.io.InputStream in) throws java.io.IOException {
+            super(in);
+            setObjectInputFilter(INSTANCE);
+        }
+    }
 }

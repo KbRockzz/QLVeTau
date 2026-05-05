@@ -37,14 +37,13 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         String clientAddr = socket.getInetAddress().getHostAddress();
-        try (ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
-            in.setObjectInputFilter(SerializationFilter.INSTANCE);
-            try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-                AppRequest req = (AppRequest) in.readObject();
-                AppResponse resp = dispatch(req);
-                out.writeObject(resp);
-                out.flush();
-            }
+        try (SerializationFilter.FilteredObjectInputStream in =
+                     new SerializationFilter.FilteredObjectInputStream(socket.getInputStream());
+             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+            AppRequest req = (AppRequest) in.readObject();
+            AppResponse resp = dispatch(req);
+            out.writeObject(resp);
+            out.flush();
         } catch (Exception e) {
             LOG.warning("Error handling client " + clientAddr + ": " + e.getMessage());
         } finally {
