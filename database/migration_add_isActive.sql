@@ -1,0 +1,54 @@
+-- Migration: Add isActive column to all tables that are missing it
+-- Run this script against an existing QLTauHoa database
+-- Safe to run multiple times (uses IF NOT EXISTS pattern via ALTER IGNORE)
+
+USE QLTauHoa;
+
+-- LoaiNV
+ALTER TABLE LoaiNV ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- NhanVien
+ALTER TABLE NhanVien ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- TaiKhoan
+ALTER TABLE TaiKhoan ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- KhachHang
+ALTER TABLE KhachHang ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- Ga
+ALTER TABLE Ga ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- DauMay
+ALTER TABLE DauMay ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- ToaTau
+ALTER TABLE ToaTau ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- LoaiGhe
+ALTER TABLE LoaiGhe ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- ChangTau
+ALTER TABLE ChangTau ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- ChuyenTau
+ALTER TABLE ChuyenTau ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- ChiTietChuyenTau
+ALTER TABLE ChiTietChuyenTau ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- LoaiVe
+ALTER TABLE LoaiVe ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- BangGia
+ALTER TABLE BangGia ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- HoaDon
+ALTER TABLE HoaDon ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- ChiTietHoaDon
+ALTER TABLE ChiTietHoaDon ADD COLUMN IF NOT EXISTS isActive TINYINT(1) NOT NULL DEFAULT 1;
+
+-- Ve already has isActive, no action needed
+
+SELECT 'Migration completed: isActive column added to all required tables.' AS status;

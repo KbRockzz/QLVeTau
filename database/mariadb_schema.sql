@@ -11,7 +11,8 @@ USE QLTauHoa;
 CREATE TABLE IF NOT EXISTS LoaiNV (
     maLoai VARCHAR(10) PRIMARY KEY,
     tenLoai VARCHAR(100) NOT NULL,
-    moTa VARCHAR(255)
+    moTa VARCHAR(255),
+    isActive TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Bảng NhanVien (Nhân Viên)
@@ -23,6 +24,7 @@ CREATE TABLE IF NOT EXISTS NhanVien (
     ngaySinh DATE,
     maLoaiNV VARCHAR(10),
     trangThai VARCHAR(20) DEFAULT 'active',
+    isActive TINYINT(1) DEFAULT 1,
     FOREIGN KEY (maLoaiNV) REFERENCES LoaiNV(maLoai)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -33,6 +35,7 @@ CREATE TABLE IF NOT EXISTS TaiKhoan (
     tenTaiKhoan VARCHAR(50) NOT NULL UNIQUE,
     matKhau VARCHAR(255) NOT NULL,
     trangThai VARCHAR(20) DEFAULT 'active',
+    isActive TINYINT(1) DEFAULT 1,
     FOREIGN KEY (maNV) REFERENCES NhanVien(maNV)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -41,7 +44,8 @@ CREATE TABLE IF NOT EXISTS KhachHang (
     maKhachHang VARCHAR(20) PRIMARY KEY,
     tenKhachHang VARCHAR(100) NOT NULL,
     email VARCHAR(100),
-    soDienThoai VARCHAR(20)
+    soDienThoai VARCHAR(20),
+    isActive TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Bảng Ga (Ga Tàu)
@@ -50,7 +54,8 @@ CREATE TABLE IF NOT EXISTS Ga (
     tenGa VARCHAR(100) NOT NULL,
     moTa VARCHAR(255),
     tinhTrang VARCHAR(20),
-    diaChi VARCHAR(255)
+    diaChi VARCHAR(255),
+    isActive TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Bảng DauMay (Đầu Máy)
@@ -60,7 +65,8 @@ CREATE TABLE IF NOT EXISTS DauMay (
     tenDauMay VARCHAR(100),
     namSX INT,
     lanBaoTriGanNhat DATETIME,
-    trangThai VARCHAR(20)
+    trangThai VARCHAR(20),
+    isActive TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Bảng ToaTau (Toa Tàu)
@@ -69,14 +75,16 @@ CREATE TABLE IF NOT EXISTS ToaTau (
     loaiToa VARCHAR(50),
     samSX INT,
     trangThai VARCHAR(20),
-    sucChua INT
+    sucChua INT,
+    isActive TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Bảng LoaiGhe (Loại Ghế)
 CREATE TABLE IF NOT EXISTS LoaiGhe (
     maLoai VARCHAR(20) PRIMARY KEY,
     tenLoai VARCHAR(100) NOT NULL,
-    moTa VARCHAR(255)
+    moTa VARCHAR(255),
+    isActive TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Bảng Ghe (Ghế)
@@ -94,7 +102,8 @@ CREATE TABLE IF NOT EXISTS ChangTau (
     soKMToiThieu INT,
     soKMToiDa INT,
     moTa VARCHAR(255),
-    giaTien FLOAT
+    giaTien FLOAT,
+    isActive TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Bảng ChuyenTau (Chuyến Tàu)
@@ -109,6 +118,7 @@ CREATE TABLE IF NOT EXISTS ChuyenTau (
     soKm INT,
     maChang VARCHAR(20),
     trangThai VARCHAR(20),
+    isActive TINYINT(1) DEFAULT 1,
     FOREIGN KEY (maDauMay) REFERENCES DauMay(maDauMay),
     FOREIGN KEY (maNV) REFERENCES NhanVien(maNV),
     FOREIGN KEY (maGaDi) REFERENCES Ga(maGa),
@@ -122,6 +132,7 @@ CREATE TABLE IF NOT EXISTS ChiTietChuyenTau (
     maToaTau VARCHAR(20),
     soThuTuToa INT,
     sucChua INT,
+    isActive TINYINT(1) DEFAULT 1,
     PRIMARY KEY (maChuyenTau, maToaTau),
     FOREIGN KEY (maChuyenTau) REFERENCES ChuyenTau(maChuyen),
     FOREIGN KEY (maToaTau) REFERENCES ToaTau(maToa)
@@ -132,7 +143,8 @@ CREATE TABLE IF NOT EXISTS LoaiVe (
     maLoaiVe VARCHAR(20) PRIMARY KEY,
     tenLoai VARCHAR(100) NOT NULL,
     heSoGia DECIMAL(5,2),
-    moTa VARCHAR(255)
+    moTa VARCHAR(255),
+    isActive TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Bảng BangGia (Bảng Giá)
@@ -143,6 +155,7 @@ CREATE TABLE IF NOT EXISTS BangGia (
     giaCoBan FLOAT,
     ngayBatDau DATETIME,
     ngayKetThuc DATETIME,
+    isActive TINYINT(1) DEFAULT 1,
     FOREIGN KEY (maChang) REFERENCES ChangTau(maChang)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -156,6 +169,7 @@ CREATE TABLE IF NOT EXISTS HoaDon (
     ngayLap DATETIME,
     phuongThucThanhToan VARCHAR(50),
     trangThai VARCHAR(20),
+    isActive TINYINT(1) DEFAULT 1,
     FOREIGN KEY (maNV) REFERENCES NhanVien(maNV),
     FOREIGN KEY (maKH) REFERENCES KhachHang(maKhachHang)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -193,6 +207,7 @@ CREATE TABLE IF NOT EXISTS ChiTietHoaDon (
     giaGoc FLOAT,
     giaDaKM FLOAT,
     moTa VARCHAR(255),
+    isActive TINYINT(1) DEFAULT 1,
     PRIMARY KEY (maHoaDon, maVe),
     FOREIGN KEY (maHoaDon) REFERENCES HoaDon(maHoaDon),
     FOREIGN KEY (maVe) REFERENCES Ve(maVe)
