@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS TaiKhoan (
     trangThai VARCHAR(20) DEFAULT 'Hoạt động',
     isActive TINYINT(1) DEFAULT 1,
     FOREIGN KEY (maNV) REFERENCES NhanVien(maNV)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Bảng KhachHang (Khách Hàng)
 CREATE TABLE IF NOT EXISTS KhachHang (
