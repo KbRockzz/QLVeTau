@@ -37,11 +37,11 @@ public class TaiKhoanService {
             if (resp.isSuccess()) return (TaiKhoan) resp.getData();
             return null;
         }
+        // getAll() already filters isActive=1, so no need to re-check trangThai here
         List<TaiKhoan> danhSach = taiKhoanDAO.getAll();
         for (TaiKhoan tk : danhSach) {
-            if (tk.getTenTaiKhoan().equals(tenTaiKhoan) && 
-                tk.getMatKhau().equals(matKhau) &&
-                "Hoạt động".equals(tk.getTrangThai())) {
+            if (tk.getTenTaiKhoan().equals(tenTaiKhoan) &&
+                tk.getMatKhau().equals(matKhau)) {
                 return tk;
             }
         }

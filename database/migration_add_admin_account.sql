@@ -4,6 +4,9 @@
 
 USE QLTauHoa;
 
+-- Fix trangThai values that were inserted with default 'active' instead of 'Hoạt động'
+UPDATE TaiKhoan SET trangThai = 'Hoạt động' WHERE trangThai = 'active' OR trangThai IS NULL;
+
 -- Ensure required LoaiNV entries exist
 INSERT IGNORE INTO LoaiNV (maLoai, tenLoai, moTa) VALUES
     ('LNV01', 'Nhân viên quầy', 'Bán vé, đổi hoàn vé'),
