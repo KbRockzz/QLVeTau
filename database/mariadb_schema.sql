@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS NhanVien (
     diaChi VARCHAR(255),
     ngaySinh DATE,
     maLoaiNV VARCHAR(10),
-    trangThai VARCHAR(20) DEFAULT 'Hoạt động',
+    trangThai VARCHAR(20) DEFAULT 'Đang hoạt động',
     isActive TINYINT(1) DEFAULT 1,
     FOREIGN KEY (maLoaiNV) REFERENCES LoaiNV(maLoai)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -224,7 +224,7 @@ INSERT IGNORE INTO LoaiNV (maLoai, tenLoai, moTa) VALUES
 
 -- Nhân viên admin mặc định
 INSERT IGNORE INTO NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai) VALUES
-    ('NV00', 'Quản trị viên', '0900000000', 'Hệ thống', '2000-01-01', 'LNV03', 'Hoạt động');
+    ('NV00', 'Quản trị viên', '0900000000', 'Hệ thống', '2000-01-01', 'LNV03', 'Đang hoạt động');
 
 -- Tài khoản admin mặc định (username: admin, password: admin123)
 INSERT IGNORE INTO TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai) VALUES
