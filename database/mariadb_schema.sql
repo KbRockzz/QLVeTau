@@ -212,3 +212,21 @@ CREATE TABLE IF NOT EXISTS ChiTietHoaDon (
     FOREIGN KEY (maHoaDon) REFERENCES HoaDon(maHoaDon),
     FOREIGN KEY (maVe) REFERENCES Ve(maVe)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
+-- Seed data mặc định
+-- ============================================================
+
+-- Loại nhân viên
+INSERT IGNORE INTO LoaiNV (maLoai, tenLoai, moTa) VALUES
+    ('LNV01', 'Nhân viên quầy', 'Bán vé, đổi hoàn vé'),
+    ('LNV02', 'Quản lý ca', 'Duyệt hoàn, xem báo cáo'),
+    ('LNV03', 'Admin hệ thống', 'Quản trị cấu hình');
+
+-- Nhân viên admin mặc định
+INSERT IGNORE INTO NhanVien (maNV, tenNV, soDienThoai, diaChi, ngaySinh, maLoaiNV, trangThai) VALUES
+    ('NV00', 'Quản trị viên', '0900000000', 'Hệ thống', '2000-01-01', 'LNV03', 'active');
+
+-- Tài khoản admin mặc định (username: admin, password: admin123)
+INSERT IGNORE INTO TaiKhoan (maTK, maNV, tenTaiKhoan, matKhau, trangThai) VALUES
+    ('TK00', 'NV00', 'admin', 'admin123', 'Hoạt động');
