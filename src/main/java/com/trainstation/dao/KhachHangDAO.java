@@ -149,4 +149,27 @@ public class KhachHangDAO implements GenericDAO<KhachHang> {
                 .findFirst()
                 .orElse(null);
     }
+
+    /**
+     * Generate the next available customer ID in the format KHxx (e.g. KH09, KH10).
+     * Looks at the current max numeric suffix across all rows (active and inactive).
+     */
+    public String generateNextMaKH() {
+        String sql = "SELECT MAX(CAST(SUBSTRING(maKhachHang, 3) AS UNSIGNED)) FROM KhachHang"
+                   + " WHERE maKhachHang REGEXP '^KH[0-9]+$'";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            int max = 0;
+            if (rs.next()) {
+                int v = rs.getInt(1);
+                if (!rs.wasNull()) max = v;
+            }
+            return String.format("KH%02d", max + 1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Fallback: use timestamp-based suffix to avoid collisions
+            return "KH" + System.currentTimeMillis() % 10000;
+        }
+    }
 }
