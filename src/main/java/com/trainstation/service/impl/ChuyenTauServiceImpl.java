@@ -78,7 +78,7 @@ public class ChuyenTauServiceImpl implements IChuyenTauService {
                 }).max().orElse(0);
         String newId = String.format("CT%03d", maxId + 1);
         ChuyenTau ct = mapper.fromCreateRequest(request, newId);
-        ct.setTrangThai("active");
+        ct.setTrangThai("Chưa khởi hành");
         if (chuyenTauDAO.insert(ct)) {
             return mapper.toDTO(ct);
         }
