@@ -88,4 +88,64 @@ public class GheDAO {
             return false;
         }
     }
-}
+
+    /**
+     * Count seats already existing for a given toa.
+     */
+    public int countByToa(String maToa) {
+        String sql = "SELECT COUNT(*) FROM Ghe WHERE maToa = ?";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maToa);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Auto-generate `count` seats for the given toa, picking up from the current
+     * global max seat number so IDs remain unique (format GH001, GH002, …).
+     * Only generates seats up to the requested count if some already exist.
+     */
+    public boolean insertBatch(String maToa, String loaiGhe, int count) {
+        if (count <= 0) return true;
+        int existing = countByToa(maToa);
+        int toAdd = count - existing;
+        if (toAdd <= 0) return true; // already has enough seats
+
+        // Find the current global max seat number
+        int maxNum = 0;
+        String sqlMax = "SELECT MAX(CAST(SUBSTRING(maGhe, 3) AS UNSIGNED)) FROM Ghe WHERE maGhe REGEXP '^GH[0-9]+$'";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sqlMax);
+             ResultSet rs = pst.executeQuery()) {
+            if (rs.next()) {
+                int v = rs.getInt(1);
+                if (!rs.wasNull()) maxNum = v;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        String sql = "INSERT IGNORE INTO Ghe (maGhe, maToa, loaiGhe, trangThai) VALUES (?, ?, ?, 'Rảnh')";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            for (int i = 1; i <= toAdd; i++) {
+                String maGhe = String.format("GH%03d", maxNum + i);
+                pst.setString(1, maGhe);
+                pst.setString(2, maToa);
+                if (loaiGhe != null) pst.setString(3, loaiGhe); else pst.setNull(3, java.sql.Types.VARCHAR);
+                pst.addBatch();
+            }
+            pst.executeBatch();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }}

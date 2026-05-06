@@ -79,7 +79,7 @@ public class ToaTauDAO implements GenericDAO<ToaTau> {
             if (t.getSamSX() != null) pst.setInt(2, t.getSamSX()); else pst.setNull(2, Types.INTEGER);
             pst.setString(3, t.getTrangThai());
             if (t.getSucChua() != null) pst.setInt(4, t.getSucChua()); else pst.setNull(4, Types.INTEGER);
-            pst.setString(6, t.getMaToa());
+            pst.setString(5, t.getMaToa());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
