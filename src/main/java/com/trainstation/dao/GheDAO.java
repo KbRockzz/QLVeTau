@@ -107,15 +107,42 @@ public class GheDAO {
     }
 
     /**
-     * Auto-generate `count` seats for the given toa, picking up from the current
-     * global max seat number so IDs remain unique (format GH001, GH002, …).
+     * Resolve a seat-type value to a LoaiGhe code. If the value already looks
+     * like a code (e.g. "LG001"), return it unchanged. Otherwise look up the
+     * matching maLoai from the LoaiGhe table by tenLoai.
+     */
+    private String resolveLoaiGheCode(String loaiGhe) {
+        if (loaiGhe == null) return null;
+        if (loaiGhe.matches("^LG\\d+$")) return loaiGhe; // already a code
+        String sqlLookup = "SELECT maLoai FROM LoaiGhe WHERE tenLoai = ? LIMIT 1";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sqlLookup)) {
+            pst.setString(1, loaiGhe);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) return rs.getString("maLoai");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; // unknown type name, leave null
+    }
+
+    /**
+     * Auto-generate {@code count} seats for the given toa, picking up from the
+     * current global max seat number so IDs remain unique (format GH001, GH002, …).
      * Only generates seats up to the requested count if some already exist.
+     * The {@code loaiGhe} parameter may be either a LoaiGhe code (e.g. "LG001")
+     * or a type name (e.g. "Ghế ngồi cứng"); the latter is resolved to its code
+     * automatically.
      */
     public boolean insertBatch(String maToa, String loaiGhe, int count) {
         if (count <= 0) return true;
         int existing = countByToa(maToa);
         int toAdd = count - existing;
         if (toAdd <= 0) return true; // already has enough seats
+
+        // Resolve name → code before any INSERT
+        String resolvedLoaiGhe = resolveLoaiGheCode(loaiGhe);
 
         // Find the current global max seat number
         int maxNum = 0;
@@ -139,7 +166,8 @@ public class GheDAO {
                 String maGhe = String.format("GH%03d", maxNum + i);
                 pst.setString(1, maGhe);
                 pst.setString(2, maToa);
-                if (loaiGhe != null) pst.setString(3, loaiGhe); else pst.setNull(3, java.sql.Types.VARCHAR);
+                if (resolvedLoaiGhe != null) pst.setString(3, resolvedLoaiGhe);
+                else pst.setNull(3, java.sql.Types.VARCHAR);
                 pst.addBatch();
             }
             pst.executeBatch();

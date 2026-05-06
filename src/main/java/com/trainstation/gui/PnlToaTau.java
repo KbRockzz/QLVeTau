@@ -226,7 +226,7 @@ public class PnlToaTau extends JPanel {
             if (toaTauDAO.insert(toa)) {
                 // Auto-generate seats for the new coach
                 if (sucChua != null && sucChua > 0) {
-                    gheDAO.insertBatch(maToa, null, sucChua);
+                    gheDAO.insertBatch(maToa, loaiToa, sucChua);
                 }
                 JOptionPane.showMessageDialog(this,
                         "Đã thêm toa tàu mới thành công!",
@@ -297,7 +297,7 @@ public class PnlToaTau extends JPanel {
             if (toaTauDAO.update(toa)) {
                 // Add any missing seats if capacity was increased
                 if (sucChua != null && sucChua > 0) {
-                    gheDAO.insertBatch(maToa, null, sucChua);
+                    gheDAO.insertBatch(maToa, loaiToa, sucChua);
                 }
                 JOptionPane.showMessageDialog(this,
                         "Cập nhật thông tin toa tàu thành công!",

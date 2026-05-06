@@ -30,7 +30,12 @@ ON DUPLICATE KEY UPDATE tenTaiKhoan = VALUES(tenTaiKhoan);
 INSERT INTO KhachHang (maKhachHang, tenKhachHang, email, soDienThoai) VALUES
 ('KH01', 'Phạm Văn Dũng', 'dungpv@email.com', '0934567890'),
 ('KH02', 'Nguyễn Thị Em', 'emnt@email.com', '0945678901'),
-('KH03', 'Hoàng Văn Phúc', 'phuchv@email.com', '0956789012')
+('KH03', 'Hoàng Văn Phúc', 'phuchv@email.com', '0956789012'),
+('KH04', 'Trần Minh Hiếu', 'hieu.tran@email.com', '0967890123'),
+('KH05', 'Lê Thị Lan', 'lan.le@email.com', '0978901234'),
+('KH06', 'Võ Thanh Tùng', 'tung.vo@email.com', '0989012345'),
+('KH07', 'Nguyễn Thành Đạt', 'dat.nguyen@email.com', '0990123456'),
+('KH08', 'Phạm Thị Hoa', 'hoa.pham@email.com', '0901234560')
 ON DUPLICATE KEY UPDATE tenKhachHang = VALUES(tenKhachHang);
 
 -- Ga Tàu
@@ -324,9 +329,9 @@ ON DUPLICATE KEY UPDATE moTa = VALUES(moTa);
 
 -- Chuyến Tàu
 INSERT INTO ChuyenTau (maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai) VALUES
-('CT001', 'DM001', 'NV001', 'GA001', 'GA002', '2024-06-01 06:00:00', '2024-06-02 06:00:00', 1726, 'CH003', 'Chưa khởi hành'),
-('CT002', 'DM002', 'NV002', 'GA001', 'GA003', '2024-06-02 08:00:00', '2024-06-02 22:00:00', 791, 'CH002', 'Chưa khởi hành'),
-('CT003', 'DM003', 'NV003', 'GA002', 'GA003', '2024-06-03 07:00:00', '2024-06-03 18:00:00', 935, 'CH002', 'Chưa khởi hành')
+('CT001', 'DM001', 'NV001', 'GA001', 'GA002', '2024-06-01 06:00:00', '2024-06-02 06:00:00', 1726, 'CH003', 'Đã đến'),
+('CT002', 'DM002', 'NV002', 'GA001', 'GA003', '2024-06-02 08:00:00', '2024-06-02 22:00:00', 791, 'CH002', 'Đã đến'),
+('CT003', 'DM003', 'NV003', 'GA002', 'GA003', '2024-06-03 07:00:00', '2024-06-03 18:00:00', 935, 'CH002', 'Đã đến')
 ON DUPLICATE KEY UPDATE trangThai = VALUES(trangThai);
 
 -- Loại Vé
@@ -451,3 +456,138 @@ INSERT INTO ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa) VALU
 ('HD006', 'VE009', 'LV001', 600000, 600000, 'Vé HN-SG giường nằm mềm, chuyến 12/5/2026 (thường)'),
 ('HD006', 'VE011', 'LV001', 200000, 200000, 'Vé HN-ĐN ghế ngồi cứng, chuyến 12/5/2026 (thường)')
 ON DUPLICATE KEY UPDATE moTa = VALUES(moTa);
+
+-- ====================================================================
+-- Dữ liệu bổ sung: chuyến tàu quá khứ 2025 + vé hoàn/đổi cho thống kê
+-- ====================================================================
+
+-- Chuyến tàu quá khứ năm 2025 (Đã đến)
+INSERT INTO ChuyenTau (maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai) VALUES
+('CT006', 'DM001', 'NV001', 'GA001', 'GA002', '2025-01-15 06:00:00', '2025-01-16 06:00:00', 1726, 'CH003', 'Đã đến'),
+('CT007', 'DM002', 'NV002', 'GA001', 'GA003', '2025-02-20 07:00:00', '2025-02-20 21:00:00', 791,  'CH002', 'Đã đến'),
+('CT008', 'DM003', 'NV003', 'GA002', 'GA001', '2025-03-10 08:00:00', '2025-03-11 08:00:00', 1726, 'CH003', 'Đã đến'),
+('CT009', 'DM001', 'NV001', 'GA001', 'GA004', '2025-04-05 06:30:00', '2025-04-05 18:00:00', 688,  'CH002', 'Đã đến'),
+('CT010', 'DM002', 'NV003', 'GA003', 'GA005', '2025-05-20 09:00:00', '2025-05-20 15:00:00', 524,  'CH002', 'Đã đến')
+ON DUPLICATE KEY UPDATE trangThai = VALUES(trangThai);
+
+-- Chi tiết chuyến tàu mới
+INSERT INTO ChiTietChuyenTau (maChuyenTau, maToaTau, soThuTuToa, sucChua) VALUES
+('CT006', 'TT001', 1, 100), ('CT006', 'TT003', 2, 48), ('CT006', 'TT004', 3, 32),
+('CT007', 'TT002', 1, 64),  ('CT007', 'TT003', 2, 48),
+('CT008', 'TT001', 1, 100), ('CT008', 'TT002', 2, 64),
+('CT009', 'TT001', 1, 100), ('CT009', 'TT003', 2, 48),
+('CT010', 'TT002', 1, 64),  ('CT010', 'TT004', 2, 32)
+ON DUPLICATE KEY UPDATE sucChua = VALUES(sucChua);
+
+-- Bảng giá 2025 bổ sung cho chặng CH002 và loại ghế LG002
+INSERT INTO BangGia (maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc) VALUES
+('BG012', 'CH002', 'LG002', 240000, '2025-01-01 00:00:00', '2026-12-31 23:59:59'),
+('BG013', 'CH003', 'LG002', 420000, '2025-01-01 00:00:00', '2026-12-31 23:59:59')
+ON DUPLICATE KEY UPDATE giaCoBan = VALUES(giaCoBan);
+
+-- ====================================================================
+-- Vé cho các chuyến 2025
+-- ====================================================================
+INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen,
+                ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) VALUES
+-- CT006: HN→SG 15/01/2025 – VE013..VE018
+('VE013','CT006','LV001','GH010','GA001','GA002','Ga Hà Nội','Ga Sài Gòn',
+ '2025-01-10 09:00:00','Đã thanh toán','2025-01-15 06:00:00','2025-01-16 06:00:00',1,'LG001','LV001','BG007',350000,1),
+('VE014','CT006','LV002','GH011','GA001','GA002','Ga Hà Nội','Ga Sài Gòn',
+ '2025-01-10 09:10:00','Đã thanh toán','2025-01-15 06:00:00','2025-01-16 06:00:00',1,'LG001','LV002','BG007',262500,1),
+('VE015','CT006','LV001','GH170','GA001','GA002','Ga Hà Nội','Ga Sài Gòn',
+ '2025-01-11 10:00:00','Đã hoàn','2025-01-15 06:00:00','2025-01-16 06:00:00',2,'LG003','LV001','BG011',520000,1),
+('VE016','CT006','LV001','GH213','GA001','GA002','Ga Hà Nội','Ga Sài Gòn',
+ '2025-01-11 10:05:00','Đã đổi','2025-01-15 06:00:00','2025-01-16 06:00:00',3,'LG004','LV001','BG008',600000,1),
+('VE017','CT006','LV003','GH012','GA001','GA002','Ga Hà Nội','Ga Sài Gòn',
+ '2025-01-12 08:00:00','Đã thanh toán','2025-01-15 06:00:00','2025-01-16 06:00:00',1,'LG001','LV003','BG007',280000,1),
+('VE018','CT006','LV001','GH013','GA001','GA002','Ga Hà Nội','Ga Sài Gòn',
+ '2025-01-12 08:05:00','Đã hoàn','2025-01-15 06:00:00','2025-01-16 06:00:00',1,'LG001','LV001','BG007',350000,1),
+
+-- CT007: HN→ĐN 20/02/2025 – VE019..VE023
+('VE019','CT007','LV001','GH101','GA001','GA003','Ga Hà Nội','Ga Đà Nẵng',
+ '2025-02-15 09:00:00','Đã thanh toán','2025-02-20 07:00:00','2025-02-20 21:00:00',1,'LG002','LV001','BG012',240000,1),
+('VE020','CT007','LV002','GH102','GA001','GA003','Ga Hà Nội','Ga Đà Nẵng',
+ '2025-02-15 09:10:00','Đã thanh toán','2025-02-20 07:00:00','2025-02-20 21:00:00',1,'LG002','LV002','BG012',180000,1),
+('VE021','CT007','LV001','GH165','GA001','GA003','Ga Hà Nội','Ga Đà Nẵng',
+ '2025-02-16 10:00:00','Đã đổi','2025-02-20 07:00:00','2025-02-20 21:00:00',2,'LG003','LV001','BG010',290000,1),
+('VE022','CT007','LV001','GH103','GA001','GA003','Ga Hà Nội','Ga Đà Nẵng',
+ '2025-02-17 08:00:00','Đã hoàn','2025-02-20 07:00:00','2025-02-20 21:00:00',1,'LG002','LV001','BG012',240000,1),
+('VE023','CT007','LV004','GH104','GA001','GA003','Ga Hà Nội','Ga Đà Nẵng',
+ '2025-02-17 08:05:00','Đã thanh toán','2025-02-20 07:00:00','2025-02-20 21:00:00',1,'LG002','LV004','BG012',120000,1),
+
+-- CT008: SG→HN 10/03/2025 – VE024..VE027
+('VE024','CT008','LV001','GH020','GA002','GA001','Ga Sài Gòn','Ga Hà Nội',
+ '2025-03-05 10:00:00','Đã thanh toán','2025-03-10 08:00:00','2025-03-11 08:00:00',1,'LG001','LV001','BG007',350000,1),
+('VE025','CT008','LV002','GH021','GA002','GA001','Ga Sài Gòn','Ga Hà Nội',
+ '2025-03-05 10:10:00','Đã thanh toán','2025-03-10 08:00:00','2025-03-11 08:00:00',1,'LG001','LV002','BG007',262500,1),
+('VE026','CT008','LV001','GH214','GA002','GA001','Ga Sài Gòn','Ga Hà Nội',
+ '2025-03-06 09:00:00','Đã hoàn','2025-03-10 08:00:00','2025-03-11 08:00:00',2,'LG004','LV001','BG008',600000,1),
+('VE027','CT008','LV001','GH022','GA002','GA001','Ga Sài Gòn','Ga Hà Nội',
+ '2025-03-07 11:00:00','Đã đổi','2025-03-10 08:00:00','2025-03-11 08:00:00',1,'LG001','LV001','BG007',350000,1),
+
+-- CT009: HN→Huế 05/04/2025 – VE028..VE030
+('VE028','CT009','LV001','GH030','GA001','GA004','Ga Hà Nội','Ga Huế',
+ '2025-04-01 08:00:00','Đã thanh toán','2025-04-05 06:30:00','2025-04-05 18:00:00',1,'LG001','LV001','BG009',200000,1),
+('VE029','CT009','LV002','GH031','GA001','GA004','Ga Hà Nội','Ga Huế',
+ '2025-04-01 08:05:00','Đã thanh toán','2025-04-05 06:30:00','2025-04-05 18:00:00',1,'LG001','LV002','BG009',150000,1),
+('VE030','CT009','LV001','GH171','GA001','GA004','Ga Hà Nội','Ga Huế',
+ '2025-04-02 09:00:00','Đã hoàn','2025-04-05 06:30:00','2025-04-05 18:00:00',2,'LG003','LV001','BG010',290000,1)
+ON DUPLICATE KEY UPDATE trangThai = VALUES(trangThai);
+
+-- ====================================================================
+-- Hóa Đơn bổ sung (chuyến 2025)
+-- ====================================================================
+INSERT INTO HoaDon (maHoaDon, maNV, maKH, tenKH, soDienThoai, ngayLap, phuongThucThanhToan, trangThai) VALUES
+('HD007','NV001','KH04','Trần Minh Hiếu',  '0967890123','2025-01-10 09:15:00','Tiền mặt',    'Hoàn tất'),
+('HD008','NV003','KH05','Lê Thị Lan',       '0978901234','2025-01-11 10:10:00','Chuyển khoản','Hoàn tất'),
+('HD009','NV001','KH06','Võ Thanh Tùng',   '0989012345','2025-01-12 08:10:00','Tiền mặt',    'Hoàn tất'),
+('HD010','NV002','KH04','Trần Minh Hiếu',  '0967890123','2025-02-15 09:15:00','Chuyển khoản','Hoàn tất'),
+('HD011','NV001','KH07','Nguyễn Thành Đạt','0990123456','2025-02-17 08:10:00','Tiền mặt',    'Hoàn tất'),
+('HD012','NV003','KH05','Lê Thị Lan',       '0978901234','2025-03-05 10:15:00','Chuyển khoản','Hoàn tất'),
+('HD013','NV001','KH08','Phạm Thị Hoa',    '0901234560','2025-03-06 09:05:00','Tiền mặt',    'Hoàn tất'),
+('HD014','NV002','KH06','Võ Thanh Tùng',   '0989012345','2025-04-01 08:10:00','Chuyển khoản','Hoàn tất'),
+('HD015','NV001','KH07','Nguyễn Thành Đạt','0990123456','2025-04-02 09:05:00','Tiền mặt',    'Hoàn tất')
+ON DUPLICATE KEY UPDATE trangThai = VALUES(trangThai);
+
+-- ====================================================================
+-- Chi Tiết Hóa Đơn bổ sung
+-- ====================================================================
+INSERT INTO ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa) VALUES
+-- HD007: KH04 mua VE013+VE014 CT006 HN→SG
+('HD007','VE013','LV001',350000,350000,'Vé HN-SG ghế ngồi cứng (thường)'),
+('HD007','VE014','LV002',350000,262500,'Vé HN-SG ghế ngồi cứng (học sinh -25%)'),
+-- HD008: KH05 mua VE015 (hoàn) + VE016 (đổi) CT006 HN→SG
+('HD008','VE015','LV001',520000,520000,'Vé HN-SG giường nằm cứng (thường) – đã hoàn'),
+('HD008','VE016','LV001',600000,600000,'Vé HN-SG giường nằm mềm (thường) – đã đổi'),
+-- HD009: KH06 mua VE017+VE018 CT006 HN→SG
+('HD009','VE017','LV003',350000,280000,'Vé HN-SG ghế ngồi cứng (cao tuổi -20%)'),
+('HD009','VE018','LV001',350000,350000,'Vé HN-SG ghế ngồi cứng (thường) – đã hoàn'),
+-- HD010: KH04 mua VE019+VE020 CT007 HN→ĐN
+('HD010','VE019','LV001',240000,240000,'Vé HN-ĐN ghế ngồi mềm (thường)'),
+('HD010','VE020','LV002',240000,180000,'Vé HN-ĐN ghế ngồi mềm (học sinh -25%)'),
+-- HD011: KH07 mua VE021+VE022+VE023 CT007 HN→ĐN
+('HD011','VE021','LV001',290000,290000,'Vé HN-ĐN giường nằm cứng (thường) – đã đổi'),
+('HD011','VE022','LV001',240000,240000,'Vé HN-ĐN ghế ngồi mềm (thường) – đã hoàn'),
+('HD011','VE023','LV004',240000,120000,'Vé HN-ĐN ghế ngồi mềm (trẻ em -50%)'),
+-- HD012: KH05 mua VE024+VE025 CT008 SG→HN
+('HD012','VE024','LV001',350000,350000,'Vé SG-HN ghế ngồi cứng (thường)'),
+('HD012','VE025','LV002',350000,262500,'Vé SG-HN ghế ngồi cứng (học sinh -25%)'),
+-- HD013: KH08 mua VE026 (hoàn) + VE027 (đổi) CT008 SG→HN
+('HD013','VE026','LV001',600000,600000,'Vé SG-HN giường nằm mềm (thường) – đã hoàn'),
+('HD013','VE027','LV001',350000,350000,'Vé SG-HN ghế ngồi cứng (thường) – đã đổi'),
+-- HD014: KH06 mua VE028+VE029 CT009 HN→Huế
+('HD014','VE028','LV001',200000,200000,'Vé HN-Huế ghế ngồi cứng (thường)'),
+('HD014','VE029','LV002',200000,150000,'Vé HN-Huế ghế ngồi cứng (học sinh -25%)'),
+-- HD015: KH07 mua VE030 CT009 HN→Huế (hoàn)
+('HD015','VE030','LV001',290000,290000,'Vé HN-Huế giường nằm cứng (thường) – đã hoàn')
+ON DUPLICATE KEY UPDATE moTa = VALUES(moTa);
+
+-- ====================================================================
+-- Sửa loaiGhe sai (tên → mã) trong bảng Ghe (nếu tồn tại từ lần chạy cũ)
+-- ====================================================================
+UPDATE Ghe SET loaiGhe = 'LG001' WHERE loaiGhe = 'Ghế ngồi cứng';
+UPDATE Ghe SET loaiGhe = 'LG002' WHERE loaiGhe = 'Ghế ngồi mềm';
+UPDATE Ghe SET loaiGhe = 'LG003' WHERE loaiGhe = 'Giường nằm cứng';
+UPDATE Ghe SET loaiGhe = 'LG004' WHERE loaiGhe = 'Giường nằm mềm';
+UPDATE Ghe SET loaiGhe = 'LG005' WHERE loaiGhe = 'VIP';
