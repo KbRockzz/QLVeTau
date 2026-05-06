@@ -535,6 +535,13 @@ public class PnlDatVe extends JPanel {
         pnlSoDoGhe.removeAll();
         List<Ghe> danhSachGhe = gheDAO.getByToa(maToa);
 
+        // Auto-generate missing seats when DB has fewer seats than the coach capacity
+        if (toaDuocChon != null && toaDuocChon.getSucChua() != null
+                && danhSachGhe.size() < toaDuocChon.getSucChua()) {
+            gheDAO.insertBatch(maToa, toaDuocChon.getLoaiToa(), toaDuocChon.getSucChua());
+            danhSachGhe = gheDAO.getByToa(maToa);
+        }
+
         if (danhSachGhe.isEmpty()) {
             pnlSoDoGhe.setLayout(new FlowLayout());
             pnlSoDoGhe.add(new JLabel("Không có ghế nào trong toa này"));
