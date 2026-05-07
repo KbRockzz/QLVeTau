@@ -12,6 +12,5 @@ public class TaiKhoanDTO {
     private String maTK;
     private String maNV;
     private String tenTaiKhoan;
-    private String matKhau;
     private String trangThai;
 }
