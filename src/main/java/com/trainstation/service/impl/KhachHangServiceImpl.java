@@ -1,23 +1,24 @@
 package com.trainstation.service.impl;
 
-import com.trainstation.dao.KhachHangDAO;
 import com.trainstation.dto.CreateKhachHangRequest;
 import com.trainstation.dto.KhachHangDTO;
 import com.trainstation.dto.UpdateKhachHangRequest;
 import com.trainstation.mapper.JacksonKhachHangMapper;
 import com.trainstation.mapper.KhachHangMapper;
 import com.trainstation.model.KhachHang;
+import com.trainstation.repository.IKhachHangRepository;
+import com.trainstation.repository.impl.KhachHangRepositoryImpl;
 import com.trainstation.service.iface.IKhachHangService;
 
 import java.util.List;
 
 public class KhachHangServiceImpl implements IKhachHangService {
     private static KhachHangServiceImpl instance;
-    private final KhachHangDAO khachHangDAO;
+    private final IKhachHangRepository khachHangRepository;
     private final KhachHangMapper mapper;
 
     private KhachHangServiceImpl() {
-        this.khachHangDAO = KhachHangDAO.getInstance();
+        this.khachHangRepository = KhachHangRepositoryImpl.getInstance();
         this.mapper = JacksonKhachHangMapper.getInstance();
     }
 
@@ -30,37 +31,37 @@ public class KhachHangServiceImpl implements IKhachHangService {
 
     @Override
     public List<KhachHang> layTatCaKhachHang() {
-        return khachHangDAO.getAll();
+        return khachHangRepository.getAll();
     }
 
     @Override
     public KhachHang timKhachHangTheoMa(String maKH) {
-        return khachHangDAO.findById(maKH);
+        return khachHangRepository.findById(maKH);
     }
 
     @Override
     public KhachHang timKhachHangTheoSoDienThoai(String soDienThoai) {
-        return khachHangDAO.timTheoSoDienThoai(soDienThoai);
+        return khachHangRepository.findBySoDienThoai(soDienThoai);
     }
 
     @Override
     public boolean themKhachHang(KhachHang kh) {
-        return khachHangDAO.insert(kh);
+        return khachHangRepository.insert(kh);
     }
 
     @Override
     public boolean capNhatKhachHang(KhachHang kh) {
-        return khachHangDAO.update(kh);
+        return khachHangRepository.update(kh);
     }
 
     @Override
     public boolean xoaKhachHang(String maKH) {
-        return khachHangDAO.delete(maKH);
+        return khachHangRepository.delete(maKH);
     }
 
     @Override
     public String taoMaKhachHang() {
-        List<KhachHang> danhSach = khachHangDAO.getAll();
+        List<KhachHang> danhSach = khachHangRepository.getAll();
         int maxId = 0;
         for (KhachHang kh : danhSach) {
             String maKH = kh.getMaKhachHang();
@@ -78,7 +79,7 @@ public class KhachHangServiceImpl implements IKhachHangService {
     public KhachHangDTO taoKhachHangTuRequest(CreateKhachHangRequest request) {
         String maKH = taoMaKhachHang();
         KhachHang kh = mapper.fromCreateRequest(request, maKH);
-        if (khachHangDAO.insert(kh)) {
+        if (khachHangRepository.insert(kh)) {
             return mapper.toDTO(kh);
         }
         return null;
@@ -86,12 +87,12 @@ public class KhachHangServiceImpl implements IKhachHangService {
 
     @Override
     public KhachHangDTO capNhatKhachHangTuRequest(UpdateKhachHangRequest request) {
-        KhachHang kh = khachHangDAO.findById(request.getMaKhachHang());
+        KhachHang kh = khachHangRepository.findById(request.getMaKhachHang());
         if (kh == null) return null;
         kh.setTenKhachHang(request.getTenKhachHang());
         kh.setEmail(request.getEmail());
         kh.setSoDienThoai(request.getSoDienThoai());
-        if (khachHangDAO.update(kh)) {
+        if (khachHangRepository.update(kh)) {
             return mapper.toDTO(kh);
         }
         return null;

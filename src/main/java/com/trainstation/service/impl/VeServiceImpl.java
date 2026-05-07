@@ -1,12 +1,13 @@
 package com.trainstation.service.impl;
 
-import com.trainstation.dao.VeDAO;
 import com.trainstation.dto.CreateVeRequest;
 import com.trainstation.dto.UpdateVeRequest;
 import com.trainstation.dto.VeDTO;
 import com.trainstation.mapper.JacksonVeMapper;
 import com.trainstation.mapper.VeMapper;
 import com.trainstation.model.Ve;
+import com.trainstation.repository.IVeRepository;
+import com.trainstation.repository.impl.VeRepositoryImpl;
 import com.trainstation.service.VeService;
 import com.trainstation.service.iface.IVeService;
 
@@ -15,12 +16,12 @@ import java.util.List;
 public class VeServiceImpl implements IVeService {
     private static VeServiceImpl instance;
     private final VeService legacyVeService;
-    private final VeDAO veDAO;
+    private final IVeRepository veRepository;
     private final VeMapper mapper;
 
     private VeServiceImpl() {
         this.legacyVeService = VeService.getInstance();
-        this.veDAO = VeDAO.getInstance();
+        this.veRepository = VeRepositoryImpl.getInstance();
         this.mapper = JacksonVeMapper.getInstance();
     }
 
@@ -33,19 +34,17 @@ public class VeServiceImpl implements IVeService {
 
     @Override
     public List<Ve> layTatCaVe() {
-        return veDAO.getAll();
+        return veRepository.getAll();
     }
 
     @Override
     public Ve timVeTheoMa(String maVe) {
-        return veDAO.findById(maVe);
+        return veRepository.findById(maVe);
     }
 
     @Override
     public List<Ve> layVeTheoChuyen(String maChuyen) {
-        return veDAO.getAll().stream()
-                .filter(v -> maChuyen.equals(v.getMaChuyen()))
-                .toList();
+        return veRepository.findByChuyen(maChuyen);
     }
 
     @Override
@@ -55,12 +54,12 @@ public class VeServiceImpl implements IVeService {
 
     @Override
     public boolean capNhatVe(Ve ve) {
-        return veDAO.update(ve);
+        return veRepository.update(ve);
     }
 
     @Override
     public boolean xoaVe(String maVe) {
-        return veDAO.delete(maVe);
+        return veRepository.delete(maVe);
     }
 
     @Override
@@ -72,18 +71,18 @@ public class VeServiceImpl implements IVeService {
 
     @Override
     public VeDTO capNhatVeTuRequest(UpdateVeRequest request) {
-        Ve ve = veDAO.findById(request.getMaVe());
+        Ve ve = veRepository.findById(request.getMaVe());
         if (ve == null) return null;
         if (request.getTrangThai() != null) ve.setTrangThai(request.getTrangThai());
         if (request.getGiaThanhToan() != null) ve.setGiaThanhToan(request.getGiaThanhToan());
-        if (veDAO.update(ve)) {
+        if (veRepository.update(ve)) {
             return mapper.toDTO(ve);
         }
         return null;
     }
 
     private String generateVeId() {
-        List<Ve> all = veDAO.getAll();
+        List<Ve> all = veRepository.getAll();
         int maxId = all.stream()
                 .filter(v -> v.getMaVe() != null && v.getMaVe().startsWith("VE"))
                 .mapToInt(v -> {
