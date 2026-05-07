@@ -10,4 +10,5 @@ public interface INhanVienRepository {
     boolean insert(NhanVien entity);
     boolean update(NhanVien entity);
     boolean delete(String id);
+    String generateNextMaNV();
 }

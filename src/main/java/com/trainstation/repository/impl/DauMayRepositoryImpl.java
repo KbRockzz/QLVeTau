@@ -55,4 +55,9 @@ public class DauMayRepositoryImpl implements IDauMayRepository {
     public List<DauMay> layDauMayHoatDong() {
         return dauMayDAO.layDauMayHoatDong();
     }
+
+    @Override
+    public String generateNextMaDauMay() {
+        return dauMayDAO.generateNextMaDauMay();
+    }
 }

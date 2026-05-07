@@ -56,20 +56,7 @@ public class NhanVienServiceImpl implements INhanVienService {
 
     @Override
     public String taoMaNhanVien() {
-        List<NhanVien> danhSach = nhanVienRepository.getAll();
-        int maxId = 0;
-        for (NhanVien nv : danhSach) {
-            String maNV = nv.getMaNV();
-            if (maNV != null && maNV.startsWith("NV")) {
-                try {
-                    int id = Integer.parseInt(maNV.substring(2));
-                    if (id > maxId) {
-                        maxId = id;
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
-        }
-        return String.format("NV%02d", maxId + 1);
+        return nhanVienRepository.generateNextMaNV();
     }
 
     @Override

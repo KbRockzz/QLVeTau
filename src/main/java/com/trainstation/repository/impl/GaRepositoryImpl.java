@@ -55,4 +55,9 @@ public class GaRepositoryImpl implements IGaRepository {
     public boolean restoreStation(String id) {
         return gaDAO.restoreStation(id);
     }
+
+    @Override
+    public String generateNextMaGa() {
+        return gaDAO.generateNextMaGa();
+    }
 }

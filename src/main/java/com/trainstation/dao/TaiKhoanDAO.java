@@ -145,4 +145,44 @@ public class TaiKhoanDAO implements GenericDAO<TaiKhoan> {
             return false;
         }
     }
+
+    public TaiKhoan findByTenTaiKhoan(String tenTaiKhoan) {
+        String sql = "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai FROM TaiKhoan WHERE tenTaiKhoan = ? AND isActive = 1";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, tenTaiKhoan);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return new TaiKhoan(
+                            rs.getString("maTK"),
+                            rs.getString("maNV"),
+                            rs.getString("tenTaiKhoan"),
+                            rs.getString("matKhau"),
+                            rs.getString("trangThai")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String generateNextMaTK() {
+        String sql = "SELECT MAX(CAST(SUBSTRING(maTK, 3) AS UNSIGNED)) FROM TaiKhoan"
+                + " WHERE maTK REGEXP '^TK[0-9]+$'";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            int max = 0;
+            if (rs.next()) {
+                int v = rs.getInt(1);
+                if (!rs.wasNull()) max = v;
+            }
+            return String.format("TK%02d", max + 1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "TK" + (System.currentTimeMillis() % 100);
+        }
+    }
 }

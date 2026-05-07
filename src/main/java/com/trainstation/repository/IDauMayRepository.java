@@ -12,4 +12,5 @@ public interface IDauMayRepository {
     boolean delete(String id);
     boolean dungHoatDongDauMay(String maDauMay);
     List<DauMay> layDauMayHoatDong();
+    String generateNextMaDauMay();
 }

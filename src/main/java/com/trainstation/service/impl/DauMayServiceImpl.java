@@ -56,20 +56,7 @@ public class DauMayServiceImpl implements IDauMayService {
 
     @Override
     public String taoMaDauMay() {
-        List<DauMay> danhSach = dauMayRepository.getAll();
-        int maxId = 0;
-        for (DauMay dauMay : danhSach) {
-            String maDauMay = dauMay.getMaDauMay();
-            if (maDauMay != null && maDauMay.startsWith("DM")) {
-                try {
-                    int id = Integer.parseInt(maDauMay.substring(2));
-                    if (id > maxId) {
-                        maxId = id;
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
-        }
-        return String.format("DM%03d", maxId + 1);
+        return dauMayRepository.generateNextMaDauMay();
     }
 
     @Override

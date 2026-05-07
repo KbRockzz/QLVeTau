@@ -12,4 +12,5 @@ public interface IGaRepository {
     boolean delete(String id);
     List<Ga> getDeletedStations();
     boolean restoreStation(String id);
+    String generateNextMaGa();
 }

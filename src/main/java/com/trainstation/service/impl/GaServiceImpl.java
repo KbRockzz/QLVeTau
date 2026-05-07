@@ -56,20 +56,7 @@ public class GaServiceImpl implements IGaService {
 
     @Override
     public String taoMaGa() {
-        List<Ga> danhSach = gaRepository.getAll();
-        int maxId = 0;
-        for (Ga ga : danhSach) {
-            String maGa = ga.getMaGa();
-            if (maGa != null && maGa.startsWith("GA")) {
-                try {
-                    int id = Integer.parseInt(maGa.substring(2));
-                    if (id > maxId) {
-                        maxId = id;
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
-        }
-        return String.format("GA%03d", maxId + 1);
+        return gaRepository.generateNextMaGa();
     }
 
     @Override

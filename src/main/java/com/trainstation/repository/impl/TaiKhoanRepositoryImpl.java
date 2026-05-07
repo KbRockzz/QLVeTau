@@ -32,6 +32,11 @@ public class TaiKhoanRepositoryImpl implements ITaiKhoanRepository {
     }
 
     @Override
+    public TaiKhoan findByTenTaiKhoan(String tenTaiKhoan) {
+        return taiKhoanDAO.findByTenTaiKhoan(tenTaiKhoan);
+    }
+
+    @Override
     public boolean insert(TaiKhoan entity) {
         return taiKhoanDAO.insert(entity);
     }
@@ -44,5 +49,10 @@ public class TaiKhoanRepositoryImpl implements ITaiKhoanRepository {
     @Override
     public boolean delete(String id) {
         return taiKhoanDAO.delete(id);
+    }
+
+    @Override
+    public String generateNextMaTK() {
+        return taiKhoanDAO.generateNextMaTK();
     }
 }

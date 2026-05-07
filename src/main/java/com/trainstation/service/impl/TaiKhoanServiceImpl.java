@@ -10,6 +10,8 @@ import com.trainstation.repository.ITaiKhoanRepository;
 import com.trainstation.repository.impl.TaiKhoanRepositoryImpl;
 import com.trainstation.service.iface.ITaiKhoanService;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.List;
 
 public class TaiKhoanServiceImpl implements ITaiKhoanService {
@@ -31,32 +33,18 @@ public class TaiKhoanServiceImpl implements ITaiKhoanService {
 
     @Override
     public TaiKhoan xacThuc(String tenTaiKhoan, String matKhau) {
-        List<TaiKhoan> danhSach = taiKhoanRepository.getAll();
-        for (TaiKhoan tk : danhSach) {
-            if (tk.getTenTaiKhoan().equals(tenTaiKhoan) &&
-                    tk.getMatKhau().equals(matKhau)) {
-                return tk;
-            }
-        }
-        return null;
+        TaiKhoan tk = taiKhoanRepository.findByTenTaiKhoan(tenTaiKhoan);
+        if (tk == null || tk.getMatKhau() == null || matKhau == null) return null;
+        boolean matched = MessageDigest.isEqual(
+                tk.getMatKhau().getBytes(StandardCharsets.UTF_8),
+                matKhau.getBytes(StandardCharsets.UTF_8)
+        );
+        return matched ? tk : null;
     }
 
     @Override
     public String taoMaTaiKhoan() {
-        List<TaiKhoan> danhSach = taiKhoanRepository.getAll();
-        int maxId = 0;
-        for (TaiKhoan tk : danhSach) {
-            String maTK = tk.getMaTK();
-            if (maTK != null && maTK.startsWith("TK")) {
-                try {
-                    int id = Integer.parseInt(maTK.substring(2));
-                    if (id > maxId) {
-                        maxId = id;
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
-        }
-        return String.format("TK%02d", maxId + 1);
+        return taiKhoanRepository.generateNextMaTK();
     }
 
     @Override

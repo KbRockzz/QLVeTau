@@ -45,4 +45,9 @@ public class NhanVienRepositoryImpl implements INhanVienRepository {
     public boolean delete(String id) {
         return nhanVienDAO.delete(id);
     }
+
+    @Override
+    public String generateNextMaNV() {
+        return nhanVienDAO.generateNextMaNV();
+    }
 }
