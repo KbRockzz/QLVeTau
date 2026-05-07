@@ -9,8 +9,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class VeRepositoryImpl implements IVeRepository {
+    private static final Logger LOG = Logger.getLogger(VeRepositoryImpl.class.getName());
     private static VeRepositoryImpl instance;
     private final VeDAO veDAO;
 
@@ -45,7 +47,7 @@ public class VeRepositoryImpl implements IVeRepository {
         try (Connection conn = ConnectSql.getInstance().getConnection()) {
             return veDAO.getByChuyen(conn, maChuyen);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.severe("Failed to retrieve tickets for trip '" + maChuyen + "': " + e.getMessage());
             return new ArrayList<>();
         }
     }

@@ -3,15 +3,12 @@ package com.trainstation.network;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
 import java.io.Serializable;
 
 public class AppResponse implements Serializable {
     private static final long serialVersionUID = 1L;
-    private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
     private final boolean success;
     private final Object data;
     private final String message;
@@ -33,10 +30,10 @@ public class AppResponse implements Serializable {
     public String getMessage() { return message; }
 
     public String toJson() throws JsonProcessingException {
-        return MAPPER.writeValueAsString(this);
+        return JsonMapperProvider.getMapper().writeValueAsString(this);
     }
 
     public static AppResponse fromJson(String json) throws IOException {
-        return MAPPER.readValue(json, AppResponse.class);
+        return JsonMapperProvider.getMapper().readValue(json, AppResponse.class);
     }
 }
