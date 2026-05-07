@@ -34,11 +34,12 @@ public class ChuyenTauRepositoryImpl implements IChuyenTauRepository {
 
     @Override
     public List<ChuyenTau> search(String keyword) {
+        List<ChuyenTau> all = chuyenTauDAO.getAll();
         if (keyword == null || keyword.trim().isEmpty()) {
-            return chuyenTauDAO.getAll();
+            return all;
         }
         String lower = keyword.toLowerCase().trim();
-        return chuyenTauDAO.getAll().stream()
+        return all.stream()
                 .filter(ct -> (ct.getMaChuyen() != null && ct.getMaChuyen().toLowerCase().contains(lower))
                         || (ct.getMaGaDi() != null && ct.getMaGaDi().toLowerCase().contains(lower))
                         || (ct.getMaGaDen() != null && ct.getMaGaDen().toLowerCase().contains(lower)))
