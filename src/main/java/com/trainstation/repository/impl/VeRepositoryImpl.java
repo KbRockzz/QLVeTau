@@ -47,7 +47,7 @@ public class VeRepositoryImpl implements IVeRepository {
         try (Connection conn = ConnectSql.getInstance().getConnection()) {
             return veDAO.getByChuyen(conn, maChuyen);
         } catch (SQLException e) {
-            LOG.severe("Failed to retrieve tickets for trip '" + maChuyen + "': " + e.getMessage());
+            LOG.severe("Failed to retrieve tickets for trip " + maChuyen + ": " + e.getMessage());
             return new ArrayList<>();
         }
     }
