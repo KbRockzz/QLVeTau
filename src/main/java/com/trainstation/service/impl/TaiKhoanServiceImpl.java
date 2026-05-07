@@ -9,9 +9,8 @@ import com.trainstation.model.TaiKhoan;
 import com.trainstation.repository.ITaiKhoanRepository;
 import com.trainstation.repository.impl.TaiKhoanRepositoryImpl;
 import com.trainstation.service.iface.ITaiKhoanService;
+import com.trainstation.util.PasswordUtil;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.List;
 
 public class TaiKhoanServiceImpl implements ITaiKhoanService {
@@ -34,11 +33,7 @@ public class TaiKhoanServiceImpl implements ITaiKhoanService {
     @Override
     public TaiKhoan xacThuc(String tenTaiKhoan, String matKhau) {
         TaiKhoan tk = taiKhoanRepository.findByTenTaiKhoan(tenTaiKhoan);
-        if (tk == null || tk.getMatKhau() == null || matKhau == null) return null;
-        boolean matched = MessageDigest.isEqual(
-                tk.getMatKhau().getBytes(StandardCharsets.UTF_8),
-                matKhau.getBytes(StandardCharsets.UTF_8)
-        );
+        boolean matched = tk != null && PasswordUtil.verifyPassword(matKhau, tk.getMatKhau());
         return matched ? tk : null;
     }
 
@@ -59,11 +54,17 @@ public class TaiKhoanServiceImpl implements ITaiKhoanService {
 
     @Override
     public boolean themTaiKhoan(TaiKhoan tk) {
+        if (tk != null) {
+            tk.setMatKhau(PasswordUtil.hashIfNeeded(tk.getMatKhau()));
+        }
         return taiKhoanRepository.insert(tk);
     }
 
     @Override
     public boolean capNhatTaiKhoan(TaiKhoan tk) {
+        if (tk != null) {
+            tk.setMatKhau(PasswordUtil.hashIfNeeded(tk.getMatKhau()));
+        }
         return taiKhoanRepository.update(tk);
     }
 
@@ -71,7 +72,7 @@ public class TaiKhoanServiceImpl implements ITaiKhoanService {
     public boolean doiMatKhau(String maTK, String matKhauMoi) {
         TaiKhoan tk = taiKhoanRepository.findById(maTK);
         if (tk == null) return false;
-        tk.setMatKhau(matKhauMoi);
+        tk.setMatKhau(PasswordUtil.hashIfNeeded(matKhauMoi));
         return taiKhoanRepository.update(tk);
     }
 
@@ -84,6 +85,7 @@ public class TaiKhoanServiceImpl implements ITaiKhoanService {
     public TaiKhoanDTO taoTaiKhoanTuRequest(CreateTaiKhoanRequest request) {
         String maTK = taoMaTaiKhoan();
         TaiKhoan tk = mapper.fromCreateRequest(request, maTK);
+        tk.setMatKhau(PasswordUtil.hashIfNeeded(tk.getMatKhau()));
         if (taiKhoanRepository.insert(tk)) {
             return mapper.toDTO(tk);
         }
@@ -96,7 +98,7 @@ public class TaiKhoanServiceImpl implements ITaiKhoanService {
         if (tk == null) return null;
         tk.setMaNV(request.getMaNV());
         tk.setTenTaiKhoan(request.getTenTaiKhoan());
-        tk.setMatKhau(request.getMatKhau());
+        tk.setMatKhau(PasswordUtil.hashIfNeeded(request.getMatKhau()));
         tk.setTrangThai(request.getTrangThai());
         if (taiKhoanRepository.update(tk)) {
             return mapper.toDTO(tk);
