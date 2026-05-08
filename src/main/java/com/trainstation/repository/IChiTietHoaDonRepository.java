@@ -10,5 +10,6 @@ public interface IChiTietHoaDonRepository {
     boolean insert(ChiTietHoaDon entity);
     boolean update(ChiTietHoaDon entity);
     boolean delete(String id);
+    boolean deleteByHoaDonAndVe(String maHoaDon, String maVe);
     List<ChiTietHoaDon> findByHoaDon(String maHoaDon);
 }

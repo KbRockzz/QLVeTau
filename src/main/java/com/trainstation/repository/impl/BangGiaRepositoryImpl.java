@@ -7,8 +7,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BangGiaRepositoryImpl implements IBangGiaRepository {
+    private static final Logger LOG = Logger.getLogger(BangGiaRepositoryImpl.class.getName());
     private static BangGiaRepositoryImpl instance;
 
     private BangGiaRepositoryImpl() {
@@ -55,6 +58,7 @@ public class BangGiaRepositoryImpl implements IBangGiaRepository {
             return true;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) tx.rollback();
+            LOG.log(Level.SEVERE, "Không thể thêm bảng giá", e);
             return false;
         }
     }
@@ -70,6 +74,7 @@ public class BangGiaRepositoryImpl implements IBangGiaRepository {
             return true;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) tx.rollback();
+            LOG.log(Level.SEVERE, "Không thể cập nhật bảng giá", e);
             return false;
         }
     }
@@ -87,6 +92,7 @@ public class BangGiaRepositoryImpl implements IBangGiaRepository {
             return updated > 0;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) tx.rollback();
+            LOG.log(Level.SEVERE, "Không thể xóa mềm bảng giá", e);
             return false;
         }
     }

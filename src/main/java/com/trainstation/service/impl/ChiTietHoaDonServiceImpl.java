@@ -51,7 +51,7 @@ public class ChiTietHoaDonServiceImpl implements IChiTietHoaDonService {
 
     @Override
     public boolean xoaChiTiet(String maHoaDon, String maVe) {
-        return chiTietHoaDonRepository.delete(maVe);
+        return chiTietHoaDonRepository.deleteByHoaDonAndVe(maHoaDon, maVe);
     }
 
     @Override
