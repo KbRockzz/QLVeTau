@@ -207,7 +207,7 @@ public class ClientHandler implements Runnable {
                 case GET_ALL_HOADON:
                     return AppResponse.ok(hoaDonServiceImpl.layTatCaHoaDon());
                 case INSERT_HOADON:
-                    return AppResponse.ok(hoaDonServiceImpl.taoHoaDon((HoaDon) p[0]) != null);
+                    return AppResponse.ok(hoaDonServiceImpl.taoHoaDon((HoaDon) p[0]));
 
                 // ── ThongKe ────────────────────────────────────────────────
                 case THONG_KE_TONG_DOANH_THU:

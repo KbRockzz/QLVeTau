@@ -98,6 +98,25 @@ public class VeRepositoryImpl implements IVeRepository {
     }
 
     @Override
+    public List<Ve> findByTrangThai(String trangThai) {
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            List<Ve> result = em.createNativeQuery(
+                            "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, " +
+                                    "gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan " +
+                                    "FROM Ve WHERE trangThai = ? AND isActive = 1",
+                            Ve.class
+                    )
+                    .setParameter(1, trangThai)
+                    .getResultList();
+            result.forEach(this::ensureStationNames);
+            return result;
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Không thể lấy danh sách vé theo trạng thái " + trangThai, e);
+            return List.of();
+        }
+    }
+
+    @Override
     public boolean insert(Ve entity) {
         EntityTransaction tx = null;
         try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {

@@ -44,6 +44,10 @@ public class VeServiceImpl implements IVeService {
         return veRepository.findByChuyen(maChuyen);
     }
 
+    public List<Ve> layVeTheoTrangThai(String trangThai) {
+        return veRepository.findByTrangThai(trangThai);
+    }
+
     @Override
     public Ve taoVe(Ve ve) {
         return veRepository.insert(ve) ? ve : null;

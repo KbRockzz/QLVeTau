@@ -243,9 +243,7 @@ public class VeService {
             if (resp.isSuccess() && resp.getData() != null) return (List<Ve>) resp.getData();
             return java.util.Collections.emptyList();
         }
-        return layTatCaVe().stream()
-                .filter(v -> v.getTrangThai() != null && v.getTrangThai().equals(trangThai))
-                .collect(Collectors.toList());
+        return veServiceImpl.layVeTheoTrangThai(trangThai);
     }
 
     /**

@@ -46,6 +46,9 @@ public class BangGiaService {
     }
     
     public BangGia timBangGiaTheoMa(String maBG) {
+        if (!NetworkConfig.isClientMode()) {
+            return bangGiaServiceImpl.timBangGiaTheoMa(maBG);
+        }
         return layTatCaBangGia().stream()
                 .filter(bg -> maBG != null && maBG.equals(bg.getMaBangGia()))
                 .findFirst()
