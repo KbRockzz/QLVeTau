@@ -557,8 +557,26 @@ public class VeService {
 
 
     public Ve thucHienDoiVe(String maVeCu, String maGheMoi, String lyDo) {
+        Ve veCu = null;
+        Ve veMoi = null;
+        Ghe gheCu = null;
+        Ghe gheMoi = null;
+        ChiTietHoaDon chiTietCu = null;
+
+        String trangThaiGheCuBanDau = null;
+        String trangThaiGheMoiBanDau = null;
+        String trangThaiVeCuBanDau = null;
+        String moTaChiTietCuBanDau = null;
+
+        boolean daCapNhatGheCu = false;
+        boolean daCapNhatGheMoi = false;
+        boolean daTaoVeMoi = false;
+        boolean daCapNhatVeCu = false;
+        boolean daCapNhatChiTietCu = false;
+        boolean daTaoChiTietMoi = false;
+
         try {
-            Ve veCu = veDAO.findById(maVeCu);
+            veCu = veDAO.findById(maVeCu);
             if (veCu == null) {
                 throw new IllegalArgumentException("Không tìm thấy vé cũ");
             }
@@ -582,12 +600,12 @@ public class VeService {
                 throw new IllegalStateException("Vé không có ghế được chỉ định");
             }
 
-            Ghe gheCu = gheDAO.findById(veCu.getMaSoGhe());
+            gheCu = gheDAO.findById(veCu.getMaSoGhe());
             if (gheCu == null) {
                 throw new IllegalArgumentException("Không tìm thấy ghế cũ");
             }
 
-            Ghe gheMoi = gheDAO.findById(maGheMoi);
+            gheMoi = gheDAO.findById(maGheMoi);
             if (gheMoi == null) {
                 throw new IllegalArgumentException("Không tìm thấy ghế mới");
             }
@@ -603,21 +621,25 @@ public class VeService {
                 throw new IllegalStateException("Ghế đã bị đặt");
             }
 
+            trangThaiGheCuBanDau = gheCu.getTrangThai();
             gheCu.setTrangThai("Rảnh");
             if (!gheDAO.update(gheCu)) {
-                throw new RuntimeException("Không thể cập nhật ghế cũ");
+                throw new RuntimeException("Không thể cập nhật ghế cũ: " + gheCu.getMaGhe());
             }
+            daCapNhatGheCu = true;
 
+            trangThaiGheMoiBanDau = gheMoi.getTrangThai();
             gheMoi.setTrangThai("Đã đặt");
             if (!gheDAO.update(gheMoi)) {
-                throw new RuntimeException("Không thể cập nhật ghế mới");
+                throw new RuntimeException("Không thể cập nhật ghế mới: " + gheMoi.getMaGhe());
             }
+            daCapNhatGheMoi = true;
 
             // 9. Tạo mã vé mới
             String maVeMoi = "VE_" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
 
             // 10. Tạo đối tượng Ve mới (trong bộ nhớ)
-            Ve veMoi = new Ve(
+            veMoi = new Ve(
                     maVeMoi,
                     veCu.getMaChuyen(),
                     veCu.getMaLoaiVe(),
@@ -638,21 +660,26 @@ public class VeService {
             );
 
             if (!veDAO.insert(veMoi)) {
-                throw new RuntimeException("Không thể tạo vé mới");
+                throw new RuntimeException("Không thể tạo vé mới với mã: " + veMoi.getMaVe());
             }
+            daTaoVeMoi = true;
 
+            trangThaiVeCuBanDau = veCu.getTrangThai();
             veCu.setTrangThai("Đã đổi");
             if (!veDAO.update(veCu)) {
-                throw new RuntimeException("Không thể cập nhật trạng thái vé cũ");
+                throw new RuntimeException("Không thể cập nhật trạng thái vé cũ: " + veCu.getMaVe());
             }
+            daCapNhatVeCu = true;
 
-            ChiTietHoaDon chiTietCu = chiTietHoaDonDAO.findById(maVeCu);
+            chiTietCu = chiTietHoaDonDAO.findById(maVeCu);
             if (chiTietCu != null) {
                 String moTaCu = "Đã đổi sang " + maVeMoi;
+                moTaChiTietCuBanDau = chiTietCu.getMoTa();
                 chiTietCu.setMoTa(moTaCu);
                 if (!chiTietHoaDonDAO.update(chiTietCu)) {
                     throw new RuntimeException("Không thể cập nhật chi tiết hóa đơn vé cũ");
                 }
+                daCapNhatChiTietCu = true;
 
                 ChiTietHoaDon chiTietMoi = new ChiTietHoaDon();
                 chiTietMoi.setMaHoaDon(chiTietCu.getMaHoaDon());
@@ -670,11 +697,38 @@ public class VeService {
                 if (!chiTietHoaDonDAO.insert(chiTietMoi)) {
                     throw new RuntimeException("Không thể tạo chi tiết hóa đơn vé mới");
                 }
+                daTaoChiTietMoi = true;
             }
 
             return veMoi;
 
         } catch (Exception e) {
+            // Best-effort rollback để tránh trạng thái dở dang khi có lỗi giữa chừng
+            try {
+                if (daTaoChiTietMoi && veMoi != null) {
+                    chiTietHoaDonDAO.delete(veMoi.getMaVe());
+                }
+                if (daCapNhatChiTietCu && chiTietCu != null) {
+                    chiTietCu.setMoTa(moTaChiTietCuBanDau);
+                    chiTietHoaDonDAO.update(chiTietCu);
+                }
+                if (daCapNhatVeCu && veCu != null) {
+                    veCu.setTrangThai(trangThaiVeCuBanDau);
+                    veDAO.update(veCu);
+                }
+                if (daTaoVeMoi && veMoi != null) {
+                    veDAO.delete(veMoi.getMaVe());
+                }
+                if (daCapNhatGheMoi && gheMoi != null) {
+                    gheMoi.setTrangThai(trangThaiGheMoiBanDau);
+                    gheDAO.update(gheMoi);
+                }
+                if (daCapNhatGheCu && gheCu != null) {
+                    gheCu.setTrangThai(trangThaiGheCuBanDau);
+                    gheDAO.update(gheCu);
+                }
+            } catch (Exception ignored) {
+            }
             throw new RuntimeException("Lỗi khi đổi vé: " + e.getMessage(), e);
         }
     }
