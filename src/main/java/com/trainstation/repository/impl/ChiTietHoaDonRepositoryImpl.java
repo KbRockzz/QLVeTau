@@ -1,17 +1,17 @@
 package com.trainstation.repository.impl;
 
-import com.trainstation.dao.ChiTietHoaDonDAO;
 import com.trainstation.model.ChiTietHoaDon;
+import com.trainstation.persistence.JpaEntityManagerProvider;
 import com.trainstation.repository.IChiTietHoaDonRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
 import java.util.List;
 
 public class ChiTietHoaDonRepositoryImpl implements IChiTietHoaDonRepository {
     private static ChiTietHoaDonRepositoryImpl instance;
-    private final ChiTietHoaDonDAO chiTietHoaDonDAO;
 
     private ChiTietHoaDonRepositoryImpl() {
-        this.chiTietHoaDonDAO = ChiTietHoaDonDAO.getInstance();
     }
 
     public static synchronized ChiTietHoaDonRepositoryImpl getInstance() {
@@ -23,31 +23,84 @@ public class ChiTietHoaDonRepositoryImpl implements IChiTietHoaDonRepository {
 
     @Override
     public List<ChiTietHoaDon> getAll() {
-        return chiTietHoaDonDAO.getAll();
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            return em.createNativeQuery(
+                    "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa " +
+                            "FROM ChiTietHoaDon WHERE isActive = 1",
+                    ChiTietHoaDon.class
+            ).getResultList();
+        }
     }
 
     @Override
     public ChiTietHoaDon findById(String id) {
-        return chiTietHoaDonDAO.findById(id);
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            List<ChiTietHoaDon> result = em.createNativeQuery(
+                            "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa " +
+                                    "FROM ChiTietHoaDon WHERE maVe = ? AND isActive = 1 LIMIT 1",
+                            ChiTietHoaDon.class
+                    ).setParameter(1, id)
+                    .getResultList();
+            return result.isEmpty() ? null : result.get(0);
+        }
     }
 
     @Override
     public boolean insert(ChiTietHoaDon entity) {
-        return chiTietHoaDonDAO.insert(entity);
+        EntityTransaction tx = null;
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            tx = em.getTransaction();
+            tx.begin();
+            em.persist(entity);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) tx.rollback();
+            return false;
+        }
     }
 
     @Override
     public boolean update(ChiTietHoaDon entity) {
-        return chiTietHoaDonDAO.update(entity);
+        EntityTransaction tx = null;
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            tx = em.getTransaction();
+            tx.begin();
+            em.merge(entity);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) tx.rollback();
+            return false;
+        }
     }
 
     @Override
     public boolean delete(String id) {
-        return chiTietHoaDonDAO.delete(id);
+        EntityTransaction tx = null;
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            tx = em.getTransaction();
+            tx.begin();
+            int updated = em.createNativeQuery("UPDATE ChiTietHoaDon SET isActive = 0 WHERE maVe = ?")
+                    .setParameter(1, id)
+                    .executeUpdate();
+            tx.commit();
+            return updated > 0;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) tx.rollback();
+            return false;
+        }
     }
 
     @Override
     public List<ChiTietHoaDon> findByHoaDon(String maHoaDon) {
-        return chiTietHoaDonDAO.findByHoaDon(maHoaDon);
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            return em.createNativeQuery(
+                            "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa " +
+                                    "FROM ChiTietHoaDon WHERE maHoaDon = ? AND isActive = 1",
+                            ChiTietHoaDon.class
+                    ).setParameter(1, maHoaDon)
+                    .getResultList();
+        }
     }
 }

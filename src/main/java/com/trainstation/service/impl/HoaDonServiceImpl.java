@@ -8,19 +8,16 @@ import com.trainstation.mapper.JacksonHoaDonMapper;
 import com.trainstation.model.HoaDon;
 import com.trainstation.repository.IHoaDonRepository;
 import com.trainstation.repository.impl.HoaDonRepositoryImpl;
-import com.trainstation.service.HoaDonService;
 import com.trainstation.service.iface.IHoaDonService;
 
 import java.util.List;
 
 public class HoaDonServiceImpl implements IHoaDonService {
     private static HoaDonServiceImpl instance;
-    private final HoaDonService legacyHoaDonService;
     private final IHoaDonRepository hoaDonRepository;
     private final HoaDonMapper mapper;
 
     private HoaDonServiceImpl() {
-        this.legacyHoaDonService = HoaDonService.getInstance();
         this.hoaDonRepository = HoaDonRepositoryImpl.getInstance();
         this.mapper = JacksonHoaDonMapper.getInstance();
     }
@@ -34,7 +31,7 @@ public class HoaDonServiceImpl implements IHoaDonService {
 
     @Override
     public HoaDon taoHoaDon(HoaDon hoaDon) {
-        return legacyHoaDonService.taoHoaDon(hoaDon);
+        return hoaDonRepository.insert(hoaDon) ? hoaDon : null;
     }
 
     @Override
@@ -60,8 +57,7 @@ public class HoaDonServiceImpl implements IHoaDonService {
     @Override
     public HoaDonDTO taoHoaDonTuRequest(CreateHoaDonRequest request) {
         HoaDon hoaDon = mapper.fromCreateRequest(request, generateHoaDonId());
-        HoaDon created = legacyHoaDonService.taoHoaDon(hoaDon);
-        return created != null ? mapper.toDTO(created) : null;
+        return hoaDonRepository.insert(hoaDon) ? mapper.toDTO(hoaDon) : null;
     }
 
     @Override

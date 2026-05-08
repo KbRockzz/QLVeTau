@@ -8,19 +8,16 @@ import com.trainstation.mapper.JacksonChiTietHoaDonMapper;
 import com.trainstation.model.ChiTietHoaDon;
 import com.trainstation.repository.IChiTietHoaDonRepository;
 import com.trainstation.repository.impl.ChiTietHoaDonRepositoryImpl;
-import com.trainstation.service.ChiTietHoaDonService;
 import com.trainstation.service.iface.IChiTietHoaDonService;
 
 import java.util.List;
 
 public class ChiTietHoaDonServiceImpl implements IChiTietHoaDonService {
     private static ChiTietHoaDonServiceImpl instance;
-    private final ChiTietHoaDonService legacyChiTietHoaDonService;
     private final IChiTietHoaDonRepository chiTietHoaDonRepository;
     private final ChiTietHoaDonMapper mapper;
 
     private ChiTietHoaDonServiceImpl() {
-        this.legacyChiTietHoaDonService = ChiTietHoaDonService.getInstance();
         this.chiTietHoaDonRepository = ChiTietHoaDonRepositoryImpl.getInstance();
         this.mapper = JacksonChiTietHoaDonMapper.getInstance();
     }
@@ -34,7 +31,7 @@ public class ChiTietHoaDonServiceImpl implements IChiTietHoaDonService {
 
     @Override
     public ChiTietHoaDon themChiTiet(ChiTietHoaDon chiTiet) {
-        return legacyChiTietHoaDonService.themChiTiet(chiTiet);
+        return chiTietHoaDonRepository.insert(chiTiet) ? chiTiet : null;
     }
 
     @Override
@@ -54,14 +51,13 @@ public class ChiTietHoaDonServiceImpl implements IChiTietHoaDonService {
 
     @Override
     public boolean xoaChiTiet(String maHoaDon, String maVe) {
-        return legacyChiTietHoaDonService.xoaChiTiet(maHoaDon, maVe);
+        return chiTietHoaDonRepository.delete(maVe);
     }
 
     @Override
     public ChiTietHoaDonDTO taoChiTietHoaDonTuRequest(CreateChiTietHoaDonRequest request) {
         ChiTietHoaDon chiTiet = mapper.fromCreateRequest(request);
-        ChiTietHoaDon created = legacyChiTietHoaDonService.themChiTiet(chiTiet);
-        return created != null ? mapper.toDTO(created) : null;
+        return chiTietHoaDonRepository.insert(chiTiet) ? mapper.toDTO(chiTiet) : null;
     }
 
     @Override

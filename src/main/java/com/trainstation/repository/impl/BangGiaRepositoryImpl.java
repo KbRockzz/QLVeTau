@@ -1,17 +1,17 @@
 package com.trainstation.repository.impl;
 
-import com.trainstation.dao.BangGiaDAO;
 import com.trainstation.model.BangGia;
+import com.trainstation.persistence.JpaEntityManagerProvider;
 import com.trainstation.repository.IBangGiaRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
 import java.util.List;
 
 public class BangGiaRepositoryImpl implements IBangGiaRepository {
     private static BangGiaRepositoryImpl instance;
-    private final BangGiaDAO bangGiaDAO;
 
     private BangGiaRepositoryImpl() {
-        this.bangGiaDAO = BangGiaDAO.getInstance();
     }
 
     public static synchronized BangGiaRepositoryImpl getInstance() {
@@ -23,26 +23,71 @@ public class BangGiaRepositoryImpl implements IBangGiaRepository {
 
     @Override
     public List<BangGia> getAll() {
-        return bangGiaDAO.getAll();
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            return em.createNativeQuery(
+                    "SELECT maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc FROM BangGia WHERE isActive = 1",
+                    BangGia.class
+            ).getResultList();
+        }
     }
 
     @Override
     public BangGia findById(String id) {
-        return bangGiaDAO.findById(id);
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            List<BangGia> result = em.createNativeQuery(
+                            "SELECT maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc " +
+                                    "FROM BangGia WHERE maBangGia = ? AND isActive = 1",
+                            BangGia.class
+                    ).setParameter(1, id)
+                    .getResultList();
+            return result.isEmpty() ? null : result.get(0);
+        }
     }
 
     @Override
     public boolean insert(BangGia entity) {
-        return bangGiaDAO.insert(entity);
+        EntityTransaction tx = null;
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            tx = em.getTransaction();
+            tx.begin();
+            em.persist(entity);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) tx.rollback();
+            return false;
+        }
     }
 
     @Override
     public boolean update(BangGia entity) {
-        return bangGiaDAO.update(entity);
+        EntityTransaction tx = null;
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            tx = em.getTransaction();
+            tx.begin();
+            em.merge(entity);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) tx.rollback();
+            return false;
+        }
     }
 
     @Override
     public boolean delete(String id) {
-        return bangGiaDAO.delete(id);
+        EntityTransaction tx = null;
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            tx = em.getTransaction();
+            tx.begin();
+            int updated = em.createNativeQuery("UPDATE BangGia SET isActive = 0 WHERE maBangGia = ?")
+                    .setParameter(1, id)
+                    .executeUpdate();
+            tx.commit();
+            return updated > 0;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) tx.rollback();
+            return false;
+        }
     }
 }
