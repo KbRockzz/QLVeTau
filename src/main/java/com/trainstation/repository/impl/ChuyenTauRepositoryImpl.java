@@ -1,18 +1,21 @@
 package com.trainstation.repository.impl;
 
-import com.trainstation.dao.ChuyenTauDAO;
 import com.trainstation.model.ChuyenTau;
+import com.trainstation.persistence.JpaEntityManagerProvider;
 import com.trainstation.repository.IChuyenTauRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ChuyenTauRepositoryImpl implements IChuyenTauRepository {
+    private static final Logger LOG = Logger.getLogger(ChuyenTauRepositoryImpl.class.getName());
     private static ChuyenTauRepositoryImpl instance;
-    private final ChuyenTauDAO chuyenTauDAO;
 
     private ChuyenTauRepositoryImpl() {
-        this.chuyenTauDAO = ChuyenTauDAO.getInstance();
     }
 
     public static synchronized ChuyenTauRepositoryImpl getInstance() {
@@ -24,17 +27,31 @@ public class ChuyenTauRepositoryImpl implements IChuyenTauRepository {
 
     @Override
     public List<ChuyenTau> getAll() {
-        return chuyenTauDAO.getAll();
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            return em.createNativeQuery(
+                    "SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai FROM ChuyenTau WHERE isActive = 1",
+                    ChuyenTau.class
+            ).getResultList();
+        }
     }
 
     @Override
     public ChuyenTau findById(String id) {
-        return chuyenTauDAO.findById(id);
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            List<ChuyenTau> result = em.createNativeQuery(
+                            "SELECT maChuyen, maDauMay, maNV, maGaDi, maGaDen, gioDi, gioDen, soKm, maChang, trangThai " +
+                                    "FROM ChuyenTau WHERE maChuyen = ? AND isActive = 1",
+                            ChuyenTau.class
+                    )
+                    .setParameter(1, id)
+                    .getResultList();
+            return result.isEmpty() ? null : result.get(0);
+        }
     }
 
     @Override
     public List<ChuyenTau> search(String keyword) {
-        List<ChuyenTau> all = chuyenTauDAO.getAll();
+        List<ChuyenTau> all = getAll();
         if (keyword == null || keyword.trim().isEmpty()) {
             return all;
         }
@@ -48,16 +65,51 @@ public class ChuyenTauRepositoryImpl implements IChuyenTauRepository {
 
     @Override
     public boolean insert(ChuyenTau entity) {
-        return chuyenTauDAO.insert(entity);
+        EntityTransaction tx = null;
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            tx = em.getTransaction();
+            tx.begin();
+            em.persist(entity);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) tx.rollback();
+            LOG.log(Level.SEVERE, "Không thể thêm chuyến tàu", e);
+            return false;
+        }
     }
 
     @Override
     public boolean update(ChuyenTau entity) {
-        return chuyenTauDAO.update(entity);
+        EntityTransaction tx = null;
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            tx = em.getTransaction();
+            tx.begin();
+            em.merge(entity);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) tx.rollback();
+            LOG.log(Level.SEVERE, "Không thể cập nhật chuyến tàu", e);
+            return false;
+        }
     }
 
     @Override
     public boolean delete(String id) {
-        return chuyenTauDAO.delete(id);
+        EntityTransaction tx = null;
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            tx = em.getTransaction();
+            tx.begin();
+            int deleted = em.createNativeQuery("DELETE FROM ChuyenTau WHERE maChuyen = ?")
+                    .setParameter(1, id)
+                    .executeUpdate();
+            tx.commit();
+            return deleted > 0;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) tx.rollback();
+            LOG.log(Level.SEVERE, "Không thể xóa chuyến tàu", e);
+            return false;
+        }
     }
 }

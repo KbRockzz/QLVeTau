@@ -8,6 +8,13 @@
         <class>com.trainstation.model.HoaDon</class>
         <class>com.trainstation.model.ChiTietHoaDon</class>
         <class>com.trainstation.model.ChiTietHoaDonId</class>
+        <class>com.trainstation.model.KhachHang</class>
+        <class>com.trainstation.model.NhanVien</class>
+        <class>com.trainstation.model.Ga</class>
+        <class>com.trainstation.model.DauMay</class>
+        <class>com.trainstation.model.TaiKhoan</class>
+        <class>com.trainstation.model.ChuyenTau</class>
+        <class>com.trainstation.model.Ve</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver"/>

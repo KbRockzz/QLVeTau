@@ -1,5 +1,9 @@
 package com.trainstation.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -8,23 +12,59 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @ToString
+@Entity
+@Table(name = "Ve")
 public class Ve implements Serializable {
+    @Id
+    @Column(name = "maVe")
     private String maVe;
+
+    @Column(name = "maChuyen")
     private String maChuyen;
+
+    @Column(name = "maLoaiVe")
     private String maLoaiVe;
+
+    @Column(name = "maSoGhe")
     private String maSoGhe;
+
+    @Column(name = "maGaDi")
     private String maGaDi;
+
+    @Column(name = "maGaDen")
     private String maGaDen;
+
+    @Column(name = "tenGaDi")
     private String tenGaDi;
+
+    @Column(name = "tenGaDen")
     private String tenGaDen;
+
+    @Column(name = "ngayIn")
     private LocalDateTime ngayIn;
+
+    @Column(name = "trangThai")
     private String trangThai;
+
+    @Column(name = "gioDi")
     private LocalDateTime gioDi;
+
+    @Column(name = "gioDenDuKien")
     private LocalDateTime gioDenDuKien;
+
+    @Column(name = "soToa")
     private Integer soToa;
+
+    @Column(name = "loaiCho")
     private String loaiCho;
+
+    @Column(name = "loaiVe")
     private String loaiVe;
+
+    @Column(name = "maBangGia")
     private String maBangGia;
+
+    @Column(name = "giaThanhToan")
     private Float giaThanhToan;
 
     @Getter(AccessLevel.NONE)

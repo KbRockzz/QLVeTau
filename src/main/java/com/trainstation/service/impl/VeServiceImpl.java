@@ -8,19 +8,16 @@ import com.trainstation.mapper.VeMapper;
 import com.trainstation.model.Ve;
 import com.trainstation.repository.IVeRepository;
 import com.trainstation.repository.impl.VeRepositoryImpl;
-import com.trainstation.service.VeService;
 import com.trainstation.service.iface.IVeService;
 
 import java.util.List;
 
 public class VeServiceImpl implements IVeService {
     private static VeServiceImpl instance;
-    private final VeService legacyVeService;
     private final IVeRepository veRepository;
     private final VeMapper mapper;
 
     private VeServiceImpl() {
-        this.legacyVeService = VeService.getInstance();
         this.veRepository = VeRepositoryImpl.getInstance();
         this.mapper = JacksonVeMapper.getInstance();
     }
@@ -49,7 +46,7 @@ public class VeServiceImpl implements IVeService {
 
     @Override
     public Ve taoVe(Ve ve) {
-        return legacyVeService.taoVe(ve);
+        return veRepository.insert(ve) ? ve : null;
     }
 
     @Override
@@ -65,8 +62,7 @@ public class VeServiceImpl implements IVeService {
     @Override
     public VeDTO taoVeTuRequest(CreateVeRequest request) {
         Ve ve = mapper.fromCreateRequest(request, generateVeId());
-        Ve created = legacyVeService.taoVe(ve);
-        return created != null ? mapper.toDTO(created) : null;
+        return veRepository.insert(ve) ? mapper.toDTO(ve) : null;
     }
 
     @Override
