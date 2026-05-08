@@ -16,7 +16,13 @@ public final class JpaEntityManagerProvider {
 
     private static EntityManagerFactory createFactory() {
         Map<String, Object> props = new HashMap<>();
-        putIfPresent(props, "jakarta.persistence.jdbc.url", "DB_URL");
+        props.put(
+                "jakarta.persistence.jdbc.url",
+                System.getenv().getOrDefault(
+                        "DB_URL",
+                        "jdbc:mariadb://localhost:3306/QLTauHoa?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh"
+                )
+        );
         putIfPresent(props, "jakarta.persistence.jdbc.user", "DB_USERNAME");
         putIfPresent(props, "jakarta.persistence.jdbc.password", "DB_PASSWORD");
 
@@ -38,5 +44,11 @@ public final class JpaEntityManagerProvider {
 
     public static EntityManager createEntityManager() {
         return ENTITY_MANAGER_FACTORY.createEntityManager();
+    }
+
+    public static void close() {
+        if (ENTITY_MANAGER_FACTORY.isOpen()) {
+            ENTITY_MANAGER_FACTORY.close();
+        }
     }
 }

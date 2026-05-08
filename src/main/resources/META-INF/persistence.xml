@@ -11,7 +11,6 @@
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:mariadb://localhost:3306/QLTauHoa?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Ho_Chi_Minh"/>
 
             <property name="hibernate.dialect" value="org.hibernate.dialect.MariaDBDialect"/>
             <property name="hibernate.hbm2ddl.auto" value="none"/>

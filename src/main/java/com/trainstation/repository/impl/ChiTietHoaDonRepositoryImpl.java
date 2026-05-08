@@ -49,6 +49,20 @@ public class ChiTietHoaDonRepositoryImpl implements IChiTietHoaDonRepository {
     }
 
     @Override
+    public ChiTietHoaDon findById(String maHoaDon, String maVe) {
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            List<ChiTietHoaDon> result = em.createNativeQuery(
+                            "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa " +
+                                    "FROM ChiTietHoaDon WHERE maHoaDon = ? AND maVe = ? AND isActive = 1",
+                            ChiTietHoaDon.class
+                    ).setParameter(1, maHoaDon)
+                    .setParameter(2, maVe)
+                    .getResultList();
+            return result.isEmpty() ? null : result.get(0);
+        }
+    }
+
+    @Override
     public boolean insert(ChiTietHoaDon entity) {
         EntityTransaction tx = null;
         try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {

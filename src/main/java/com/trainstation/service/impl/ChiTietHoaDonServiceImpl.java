@@ -62,7 +62,7 @@ public class ChiTietHoaDonServiceImpl implements IChiTietHoaDonService {
 
     @Override
     public ChiTietHoaDonDTO capNhatChiTietHoaDonTuRequest(UpdateChiTietHoaDonRequest request) {
-        ChiTietHoaDon chiTiet = chiTietHoaDonRepository.findById(request.getMaVe());
+        ChiTietHoaDon chiTiet = chiTietHoaDonRepository.findById(request.getMaHoaDon(), request.getMaVe());
         if (chiTiet == null) return null;
         chiTiet.setMaLoaiVe(request.getMaLoaiVe());
         chiTiet.setGiaGoc(request.getGiaGoc());
