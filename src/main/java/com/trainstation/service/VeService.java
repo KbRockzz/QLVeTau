@@ -13,6 +13,7 @@ import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
+import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.dao.VeDAO;
 import com.trainstation.dao.GheDAO;
 import com.trainstation.dao.ChuyenTauDAO;
@@ -28,6 +29,8 @@ import com.trainstation.model.HoaDon;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -557,26 +560,12 @@ public class VeService {
 
 
     public Ve thucHienDoiVe(String maVeCu, String maGheMoi, String lyDo) {
-        Ve veCu = null;
-        Ve veMoi = null;
-        Ghe gheCu = null;
-        Ghe gheMoi = null;
-        ChiTietHoaDon chiTietCu = null;
-
-        String trangThaiGheCuBanDau = null;
-        String trangThaiGheMoiBanDau = null;
-        String trangThaiVeCuBanDau = null;
-        String moTaChiTietCuBanDau = null;
-
-        boolean daCapNhatGheCu = false;
-        boolean daCapNhatGheMoi = false;
-        boolean daTaoVeMoi = false;
-        boolean daCapNhatVeCu = false;
-        boolean daCapNhatChiTietCu = false;
-        boolean daTaoChiTietMoi = false;
-
+        Connection conn = null;
         try {
-            veCu = veDAO.findById(maVeCu);
+            conn = ConnectSql.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            Ve veCu = veDAO.findById(maVeCu, conn);
             if (veCu == null) {
                 throw new IllegalArgumentException("Không tìm thấy vé cũ");
             }
@@ -600,12 +589,12 @@ public class VeService {
                 throw new IllegalStateException("Vé không có ghế được chỉ định");
             }
 
-            gheCu = gheDAO.findById(veCu.getMaSoGhe());
+            Ghe gheCu = gheDAO.findById(veCu.getMaSoGhe(), conn);
             if (gheCu == null) {
                 throw new IllegalArgumentException("Không tìm thấy ghế cũ");
             }
 
-            gheMoi = gheDAO.findById(maGheMoi);
+            Ghe gheMoi = gheDAO.findById(maGheMoi, conn);
             if (gheMoi == null) {
                 throw new IllegalArgumentException("Không tìm thấy ghế mới");
             }
@@ -621,25 +610,21 @@ public class VeService {
                 throw new IllegalStateException("Ghế đã bị đặt");
             }
 
-            trangThaiGheCuBanDau = gheCu.getTrangThai();
             gheCu.setTrangThai("Rảnh");
-            if (!gheDAO.update(gheCu)) {
+            if (!gheDAO.update(gheCu, conn)) {
                 throw new RuntimeException("Không thể cập nhật ghế cũ: " + gheCu.getMaGhe());
             }
-            daCapNhatGheCu = true;
 
-            trangThaiGheMoiBanDau = gheMoi.getTrangThai();
             gheMoi.setTrangThai("Đã đặt");
-            if (!gheDAO.update(gheMoi)) {
+            if (!gheDAO.update(gheMoi, conn)) {
                 throw new RuntimeException("Không thể cập nhật ghế mới: " + gheMoi.getMaGhe());
             }
-            daCapNhatGheMoi = true;
 
             // 9. Tạo mã vé mới
             String maVeMoi = "VE_" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
 
             // 10. Tạo đối tượng Ve mới (trong bộ nhớ)
-            veMoi = new Ve(
+            Ve veMoi = new Ve(
                     maVeMoi,
                     veCu.getMaChuyen(),
                     veCu.getMaLoaiVe(),
@@ -659,27 +644,21 @@ public class VeService {
                     veCu.getGiaThanhToan()
             );
 
-            if (!veDAO.insert(veMoi)) {
+            if (!veDAO.insert(veMoi, conn)) {
                 throw new RuntimeException("Không thể tạo vé mới với mã: " + veMoi.getMaVe());
             }
-            daTaoVeMoi = true;
 
-            trangThaiVeCuBanDau = veCu.getTrangThai();
             veCu.setTrangThai("Đã đổi");
-            if (!veDAO.update(veCu)) {
+            if (!veDAO.update(veCu, conn)) {
                 throw new RuntimeException("Không thể cập nhật trạng thái vé cũ: " + veCu.getMaVe());
             }
-            daCapNhatVeCu = true;
 
-            chiTietCu = chiTietHoaDonDAO.findById(maVeCu);
+            ChiTietHoaDon chiTietCu = chiTietHoaDonDAO.findById(maVeCu, conn);
             if (chiTietCu != null) {
                 String moTaCu = "Đã đổi sang " + maVeMoi;
-                moTaChiTietCuBanDau = chiTietCu.getMoTa();
-                chiTietCu.setMoTa(moTaCu);
-                if (!chiTietHoaDonDAO.update(chiTietCu)) {
+                if (!chiTietHoaDonDAO.updateMoTa(chiTietCu.getMaHoaDon(), maVeCu, moTaCu, conn)) {
                     throw new RuntimeException("Không thể cập nhật chi tiết hóa đơn vé cũ");
                 }
-                daCapNhatChiTietCu = true;
 
                 ChiTietHoaDon chiTietMoi = new ChiTietHoaDon();
                 chiTietMoi.setMaHoaDon(chiTietCu.getMaHoaDon());
@@ -694,42 +673,41 @@ public class VeService {
                 }
                 chiTietMoi.setMoTa(moTaMoi);
 
-                if (!chiTietHoaDonDAO.insert(chiTietMoi)) {
+                if (!chiTietHoaDonDAO.insert(chiTietMoi, conn)) {
                     throw new RuntimeException("Không thể tạo chi tiết hóa đơn vé mới");
                 }
-                daTaoChiTietMoi = true;
             }
 
+            conn.commit();
             return veMoi;
 
-        } catch (Exception e) {
-            // Best-effort rollback để tránh trạng thái dở dang khi có lỗi giữa chừng
-            try {
-                if (daTaoChiTietMoi && veMoi != null) {
-                    chiTietHoaDonDAO.delete(veMoi.getMaVe());
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    throw new RuntimeException("Lỗi rollback khi đổi vé: " + rollbackEx.getMessage(), rollbackEx);
                 }
-                if (daCapNhatChiTietCu && chiTietCu != null) {
-                    chiTietCu.setMoTa(moTaChiTietCuBanDau);
-                    chiTietHoaDonDAO.update(chiTietCu);
-                }
-                if (daCapNhatVeCu && veCu != null) {
-                    veCu.setTrangThai(trangThaiVeCuBanDau);
-                    veDAO.update(veCu);
-                }
-                if (daTaoVeMoi && veMoi != null) {
-                    veDAO.delete(veMoi.getMaVe());
-                }
-                if (daCapNhatGheMoi && gheMoi != null) {
-                    gheMoi.setTrangThai(trangThaiGheMoiBanDau);
-                    gheDAO.update(gheMoi);
-                }
-                if (daCapNhatGheCu && gheCu != null) {
-                    gheCu.setTrangThai(trangThaiGheCuBanDau);
-                    gheDAO.update(gheCu);
-                }
-            } catch (Exception ignored) {
             }
             throw new RuntimeException("Lỗi khi đổi vé: " + e.getMessage(), e);
+        } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    throw new RuntimeException("Lỗi rollback khi đổi vé: " + rollbackEx.getMessage(), rollbackEx);
+                }
+            }
+            throw new RuntimeException("Lỗi khi đổi vé: " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    throw new RuntimeException("Lỗi đóng kết nối sau đổi vé: " + closeEx.getMessage(), closeEx);
+                }
+            }
         }
     }
 }

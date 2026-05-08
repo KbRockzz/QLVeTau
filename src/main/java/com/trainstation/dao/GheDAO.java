@@ -76,6 +76,32 @@ public class GheDAO {
     }
 
 
+    public Ghe findById(String maGhe, Connection conn) throws SQLException {
+        String sql = "SELECT maGhe, maToa, trangThai, loaiGhe FROM Ghe WHERE maGhe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maGhe);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (!rs.next()) return null;
+                Ghe g = new Ghe();
+                g.setMaGhe(rs.getString("maGhe"));
+                g.setMaToa(rs.getString("maToa"));
+                g.setTrangThai(rs.getString("trangThai"));
+                try { g.setLoaiGhe(rs.getString("loaiGhe")); } catch (Throwable ignored) {}
+                return g;
+            }
+        }
+    }
+
+    public boolean update(Ghe ghe, Connection conn) throws SQLException {
+        String sql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, ghe.getTrangThai());
+            pst.setString(2, ghe.getMaGhe());
+            return pst.executeUpdate() > 0;
+        }
+    }
+
+
     public boolean update(Ghe ghe) {
         String sql = "UPDATE Ghe SET trangThai = ? WHERE maGhe = ?";
         try (Connection conn = ConnectSql.getInstance().getConnection();
