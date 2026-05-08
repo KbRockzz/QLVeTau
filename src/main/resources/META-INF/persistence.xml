@@ -15,6 +15,14 @@
         <class>com.trainstation.model.TaiKhoan</class>
         <class>com.trainstation.model.ChuyenTau</class>
         <class>com.trainstation.model.Ve</class>
+        <class>com.trainstation.model.ChangTau</class>
+        <class>com.trainstation.model.ChiTietChuyenTau</class>
+        <class>com.trainstation.model.ChiTietChuyenTauId</class>
+        <class>com.trainstation.model.Ghe</class>
+        <class>com.trainstation.model.LoaiGhe</class>
+        <class>com.trainstation.model.LoaiNV</class>
+        <class>com.trainstation.model.LoaiVe</class>
+        <class>com.trainstation.model.ToaTau</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
