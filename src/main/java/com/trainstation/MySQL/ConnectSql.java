@@ -1,7 +1,12 @@
 package com.trainstation.MySQL;
 
+import com.trainstation.persistence.JpaEntityManagerProvider;
+import jakarta.persistence.EntityManager;
+import org.hibernate.Session;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
@@ -15,25 +20,7 @@ import java.sql.SQLException;
 public class ConnectSql {
     private static ConnectSql instance;
 
-    // MariaDB connection parameters
-    private static final String SERVER = "localhost";
-    private static final String PORT = "3306";
-    private static final String DATABASE = "QLTauHoa";
-    private static final String USERNAME = "root";
-    private static final String PASSWORD = "rootpassword";
-
-    // Connection string for MariaDB
-    private static final String CONNECTION_URL =
-            "jdbc:mariadb://" + SERVER + ":" + PORT + "/" + DATABASE
-                    + "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh";
-
     private ConnectSql() {
-        try {
-            Class.forName("org.mariadb.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            System.err.println("Không tìm thấy MariaDB JDBC Driver!");
-            e.printStackTrace();
-        }
     }
 
     public static synchronized ConnectSql getInstance() {
@@ -43,14 +30,53 @@ public class ConnectSql {
         return instance;
     }
 
+    /**
+     * Returns a JDBC {@link Connection} backed by persistence context.
+     * <p>
+     * Always close this connection (try-with-resources) so the underlying EntityManager is released.
+     */
     public Connection getConnection() {
+        EntityManager em = JpaEntityManagerProvider.createEntityManager();
         try {
-            return DriverManager.getConnection(CONNECTION_URL, USERNAME, PASSWORD);
-        } catch (SQLException e) {
+            Session session = em.unwrap(Session.class);
+            // Keep legacy JDBC callers working while routing connection acquisition through persistence.
+            Connection rawConnection = session.doReturningWork(connection -> connection);
+            return wrapJpaManagedConnection(rawConnection, em);
+        } catch (Exception e) {
+            if (em.isOpen()) {
+                em.close();
+            }
             System.err.println("Lỗi khi lấy kết nối!");
             e.printStackTrace();
             throw new RuntimeException("Không thể tạo kết nối tới DB", e);
         }
+    }
+
+    private Connection wrapJpaManagedConnection(Connection rawConnection, EntityManager em) {
+        return (Connection) Proxy.newProxyInstance(
+                Connection.class.getClassLoader(),
+                new Class[]{Connection.class},
+                (proxy, method, args) -> {
+                    String methodName = method.getName();
+                    if ("close".equals(methodName)) {
+                        if (em.isOpen()) {
+                            em.close();
+                        }
+                        return null;
+                    }
+                    if ("isClosed".equals(methodName)) {
+                        return !em.isOpen() ? true : (boolean) method.invoke(rawConnection, args);
+                    }
+                    if (!em.isOpen()) {
+                        throw new SQLException("Cannot perform operation: EntityManager is closed");
+                    }
+                    try {
+                        return method.invoke(rawConnection, args);
+                    } catch (InvocationTargetException ex) {
+                        throw ex.getCause();
+                    }
+                }
+        );
     }
 
     public boolean testConnection() {
