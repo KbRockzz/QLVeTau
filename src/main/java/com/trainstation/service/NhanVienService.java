@@ -7,6 +7,7 @@ import com.trainstation.network.AppRequest;
 import com.trainstation.network.AppResponse;
 import com.trainstation.network.NetworkConfig;
 import com.trainstation.network.RequestType;
+import com.trainstation.service.impl.NhanVienServiceImpl;
 import java.util.List;
 
 /**
@@ -15,9 +16,11 @@ import java.util.List;
 public class NhanVienService {
     private static NhanVienService instance;
     private final NhanVienDAO nhanVienDAO;
+    private final NhanVienServiceImpl nhanVienServiceImpl;
 
     private NhanVienService() {
         this.nhanVienDAO = NhanVienDAO.getInstance();
+        this.nhanVienServiceImpl = NhanVienServiceImpl.getInstance();
     }
 
     public static synchronized NhanVienService getInstance() {
@@ -36,7 +39,7 @@ public class NhanVienService {
             if (resp.isSuccess() && resp.getData() != null) return (List<NhanVien>) resp.getData();
             return java.util.Collections.emptyList();
         }
-        return nhanVienDAO.getAll();
+        return nhanVienServiceImpl.layTatCaNhanVien();
     }
 
     /**
@@ -48,7 +51,7 @@ public class NhanVienService {
             if (resp.isSuccess()) return (NhanVien) resp.getData();
             return null;
         }
-        return nhanVienDAO.findById(maNV);
+        return nhanVienServiceImpl.timNhanVienTheoMa(maNV);
     }
 
     /**
@@ -60,7 +63,7 @@ public class NhanVienService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return nhanVienDAO.insert(nv);
+        return nhanVienServiceImpl.themNhanVien(nv);
     }
 
     /**
@@ -72,7 +75,7 @@ public class NhanVienService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return nhanVienDAO.update(nv);
+        return nhanVienServiceImpl.capNhatNhanVien(nv);
     }
 
     /**
@@ -84,28 +87,13 @@ public class NhanVienService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return nhanVienDAO.delete(maNV);
+        return nhanVienServiceImpl.xoaNhanVien(maNV);
     }
 
     /**
      * Tạo mã nhân viên tự động
      */
     public String taoMaNhanVien() {
-        List<NhanVien> danhSach = nhanVienDAO.getAll();
-        int maxId = 0;
-        for (NhanVien nv : danhSach) {
-            String maNV = nv.getMaNV();
-            if (maNV != null && maNV.startsWith("NV")) {
-                try {
-                    int id = Integer.parseInt(maNV.substring(2));
-                    if (id > maxId) {
-                        maxId = id;
-                    }
-                } catch (NumberFormatException e) {
-                    // Ignore invalid IDs
-                }
-            }
-        }
-        return String.format("NV%02d", maxId + 1);
+        return nhanVienServiceImpl.taoMaNhanVien();
     }
 }

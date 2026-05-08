@@ -8,6 +8,7 @@ import com.trainstation.network.AppRequest;
 import com.trainstation.network.AppResponse;
 import com.trainstation.network.NetworkConfig;
 import com.trainstation.network.RequestType;
+import com.trainstation.service.impl.TaiKhoanServiceImpl;
 import java.util.List;
 
 /**
@@ -16,9 +17,11 @@ import java.util.List;
 public class TaiKhoanService {
     private static TaiKhoanService instance;
     private final TaiKhoanDAO taiKhoanDAO;
+    private final TaiKhoanServiceImpl taiKhoanServiceImpl;
 
     private TaiKhoanService() {
         this.taiKhoanDAO = TaiKhoanDAO.getInstance();
+        this.taiKhoanServiceImpl = TaiKhoanServiceImpl.getInstance();
     }
 
     public static synchronized TaiKhoanService getInstance() {
@@ -37,37 +40,14 @@ public class TaiKhoanService {
             if (resp.isSuccess()) return (TaiKhoan) resp.getData();
             return null;
         }
-        // getAll() already filters isActive=1, so no need to re-check trangThai here
-        List<TaiKhoan> danhSach = taiKhoanDAO.getAll();
-        for (TaiKhoan tk : danhSach) {
-            if (tk.getTenTaiKhoan().equals(tenTaiKhoan) &&
-                tk.getMatKhau().equals(matKhau)) {
-                return tk;
-            }
-        }
-        return null;
+        return taiKhoanServiceImpl.xacThuc(tenTaiKhoan, matKhau);
     }
 
     /**
      * Tạo mã tài khoản tự động
      */
     public String taoMaTaiKhoan() {
-        List<TaiKhoan> danhSach = taiKhoanDAO.getAll();
-        int maxId = 0;
-        for (TaiKhoan tk : danhSach) {
-            String maTK = tk.getMaTK();
-            if (maTK != null && maTK.startsWith("TK")) {
-                try {
-                    int id = Integer.parseInt(maTK.substring(2));
-                    if (id > maxId) {
-                        maxId = id;
-                    }
-                } catch (NumberFormatException e) {
-                    // Ignore invalid IDs
-                }
-            }
-        }
-        return String.format("TK%02d", maxId + 1);
+        return taiKhoanServiceImpl.taoMaTaiKhoan();
     }
 
     /**
@@ -79,14 +59,14 @@ public class TaiKhoanService {
             if (resp.isSuccess() && resp.getData() != null) return (List<TaiKhoan>) resp.getData();
             return java.util.Collections.emptyList();
         }
-        return taiKhoanDAO.getAll();
+        return taiKhoanServiceImpl.layTatCaTaiKhoan();
     }
 
     /**
      * Tìm tài khoản theo mã
      */
     public TaiKhoan timTaiKhoanTheoMa(String maTK) {
-        return taiKhoanDAO.findById(maTK);
+        return taiKhoanServiceImpl.timTaiKhoanTheoMa(maTK);
     }
 
     /**
@@ -98,7 +78,7 @@ public class TaiKhoanService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return taiKhoanDAO.insert(tk);
+        return taiKhoanServiceImpl.themTaiKhoan(tk);
     }
 
     /**
@@ -110,19 +90,14 @@ public class TaiKhoanService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return taiKhoanDAO.update(tk);
+        return taiKhoanServiceImpl.capNhatTaiKhoan(tk);
     }
 
     /**
      * Đổi mật khẩu
      */
     public boolean doiMatKhau(String maTK, String matKhauMoi) {
-        TaiKhoan tk = taiKhoanDAO.findById(maTK);
-        if (tk != null) {
-            tk.setMatKhau(matKhauMoi);
-            return taiKhoanDAO.update(tk);
-        }
-        return false;
+        return taiKhoanServiceImpl.doiMatKhau(maTK, matKhauMoi);
     }
 
     /**
@@ -134,6 +109,6 @@ public class TaiKhoanService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return taiKhoanDAO.delete(maTK);
+        return taiKhoanServiceImpl.xoaTaiKhoan(maTK);
     }
 }

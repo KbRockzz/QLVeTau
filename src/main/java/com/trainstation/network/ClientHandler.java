@@ -3,6 +3,9 @@ package com.trainstation.network;
 import com.trainstation.dao.*;
 import com.trainstation.model.*;
 import com.trainstation.service.*;
+import com.trainstation.service.impl.BangGiaServiceImpl;
+import com.trainstation.service.impl.ChuyenTauServiceImpl;
+import com.trainstation.service.impl.HoaDonServiceImpl;
 
 import java.io.*;
 import java.net.Socket;
@@ -23,11 +26,12 @@ public class ClientHandler implements Runnable {
     private final VeService veService = VeService.getInstance();
     private final ThongKeService thongKeService = ThongKeService.getInstance();
     private final ChuyenTauDAO chuyenTauDAO = ChuyenTauDAO.getInstance();
+    private final ChuyenTauServiceImpl chuyenTauServiceImpl = ChuyenTauServiceImpl.getInstance();
     private final ToaTauDAO toaTauDAO = ToaTauDAO.getInstance();
     private final GheDAO gheDAO = GheDAO.getInstance();
-    private final BangGiaDAO bangGiaDAO = BangGiaDAO.getInstance();
+    private final BangGiaServiceImpl bangGiaServiceImpl = BangGiaServiceImpl.getInstance();
     private final ChangTauDAO changTauDAO = ChangTauDAO.getInstance();
-    private final HoaDonDAO hoaDonDAO = HoaDonDAO.getInstance();
+    private final HoaDonServiceImpl hoaDonServiceImpl = HoaDonServiceImpl.getInstance();
     private final KhachHangDAO khachHangDAO = KhachHangDAO.getInstance();
 
     public ClientHandler(Socket socket) {
@@ -130,15 +134,15 @@ public class ClientHandler implements Runnable {
 
                 // ── ChuyenTau ──────────────────────────────────────────────
                 case GET_ALL_CHUYENTAU:
-                    return AppResponse.ok(chuyenTauDAO.getAll());
+                    return AppResponse.ok(chuyenTauServiceImpl.layTatCaChuyenTau());
                 case FIND_CHUYENTAU_BY_ID:
-                    return AppResponse.ok(chuyenTauDAO.findById((String) p[0]));
+                    return AppResponse.ok(chuyenTauServiceImpl.timChuyenTauTheoMa((String) p[0]));
                 case INSERT_CHUYENTAU:
-                    return AppResponse.ok(chuyenTauDAO.insert((ChuyenTau) p[0]));
+                    return AppResponse.ok(chuyenTauServiceImpl.themChuyenTau((ChuyenTau) p[0]));
                 case UPDATE_CHUYENTAU:
-                    return AppResponse.ok(chuyenTauDAO.update((ChuyenTau) p[0]));
+                    return AppResponse.ok(chuyenTauServiceImpl.capNhatChuyenTau((ChuyenTau) p[0]));
                 case DELETE_CHUYENTAU:
-                    return AppResponse.ok(chuyenTauDAO.delete((String) p[0]));
+                    return AppResponse.ok(chuyenTauServiceImpl.xoaChuyenTau((String) p[0]));
                 case TIM_KIEM_CHUYENTAU:
                     return AppResponse.ok(chuyenTauDAO.timKiemChuyenTau(
                         (String) p[0], (String) p[1], (LocalDate) p[2], (LocalTime) p[3]));
@@ -181,13 +185,13 @@ public class ClientHandler implements Runnable {
 
                 // ── BangGia ────────────────────────────────────────────────
                 case GET_ALL_BANGGIA:
-                    return AppResponse.ok(bangGiaDAO.getAll());
+                    return AppResponse.ok(bangGiaServiceImpl.layTatCaBangGia());
                 case INSERT_BANGGIA:
-                    return AppResponse.ok(bangGiaDAO.insert((BangGia) p[0]));
+                    return AppResponse.ok(bangGiaServiceImpl.themBangGia((BangGia) p[0]));
                 case UPDATE_BANGGIA:
-                    return AppResponse.ok(bangGiaDAO.update((BangGia) p[0]));
+                    return AppResponse.ok(bangGiaServiceImpl.capNhatBangGia((BangGia) p[0]));
                 case DELETE_BANGGIA:
-                    return AppResponse.ok(bangGiaDAO.delete((String) p[0]));
+                    return AppResponse.ok(bangGiaServiceImpl.xoaBangGia((String) p[0]));
 
                 // ── ChangTau ───────────────────────────────────────────────
                 case GET_ALL_CHANG:
@@ -201,9 +205,9 @@ public class ClientHandler implements Runnable {
 
                 // ── HoaDon ─────────────────────────────────────────────────
                 case GET_ALL_HOADON:
-                    return AppResponse.ok(hoaDonDAO.getAll());
+                    return AppResponse.ok(hoaDonServiceImpl.layTatCaHoaDon());
                 case INSERT_HOADON:
-                    return AppResponse.ok(hoaDonDAO.insert((HoaDon) p[0]));
+                    return AppResponse.ok(hoaDonServiceImpl.taoHoaDon((HoaDon) p[0]) != null);
 
                 // ── ThongKe ────────────────────────────────────────────────
                 case THONG_KE_TONG_DOANH_THU:

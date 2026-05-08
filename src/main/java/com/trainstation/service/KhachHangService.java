@@ -8,6 +8,7 @@ import com.trainstation.network.AppRequest;
 import com.trainstation.network.AppResponse;
 import com.trainstation.network.NetworkConfig;
 import com.trainstation.network.RequestType;
+import com.trainstation.service.impl.KhachHangServiceImpl;
 
 import java.util.List;
 
@@ -17,9 +18,11 @@ import java.util.List;
 public class KhachHangService {
     private static KhachHangService instance;
     private final KhachHangDAO khachHangDAO;
+    private final KhachHangServiceImpl khachHangServiceImpl;
 
     private KhachHangService() {
         this.khachHangDAO = KhachHangDAO.getInstance();
+        this.khachHangServiceImpl = KhachHangServiceImpl.getInstance();
     }
 
     public static synchronized KhachHangService getInstance() {
@@ -35,7 +38,7 @@ public class KhachHangService {
             if (resp.isSuccess() && resp.getData() != null) return (List<KhachHang>) resp.getData();
             return java.util.Collections.emptyList();
         }
-        return khachHangDAO.getAll();
+        return khachHangServiceImpl.layTatCaKhachHang();
     }
 
     public KhachHang timKhachHangTheoMa(String maKH) {
@@ -44,7 +47,7 @@ public class KhachHangService {
             if (resp.isSuccess()) return (KhachHang) resp.getData();
             return null;
         }
-        return khachHangDAO.findById(maKH);
+        return khachHangServiceImpl.timKhachHangTheoMa(maKH);
     }
 
     public boolean themKhachHang(KhachHang kh) {
@@ -53,7 +56,7 @@ public class KhachHangService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return khachHangDAO.insert(kh);
+        return khachHangServiceImpl.themKhachHang(kh);
     }
 
     public boolean capNhatKhachHang(KhachHang kh) {
@@ -62,7 +65,7 @@ public class KhachHangService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return khachHangDAO.update(kh);
+        return khachHangServiceImpl.capNhatKhachHang(kh);
     }
 
     public boolean xoaKhachHang(String maKH) {
@@ -71,7 +74,7 @@ public class KhachHangService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return khachHangDAO.delete(maKH);
+        return khachHangServiceImpl.xoaKhachHang(maKH);
     }
 
     public KhachHang timKhachHangTheoSoDienThoai(String soDienThoai) {
@@ -80,7 +83,7 @@ public class KhachHangService {
             if (resp.isSuccess()) return (KhachHang) resp.getData();
             return null;
         }
-        return khachHangDAO.timTheoSoDienThoai(soDienThoai);
+        return khachHangServiceImpl.timKhachHangTheoSoDienThoai(soDienThoai);
     }
 
     /**
@@ -92,21 +95,6 @@ public class KhachHangService {
             if (resp.isSuccess() && resp.getData() != null) return (String) resp.getData();
             return null;
         }
-        List<KhachHang> danhSach = khachHangDAO.getAll();
-        int maxId = 0;
-        for (KhachHang kh : danhSach) {
-            String maKH = kh.getMaKhachHang();
-            if (maKH != null && maKH.startsWith("KH")) {
-                try {
-                    int id = Integer.parseInt(maKH.substring(2));
-                    if (id > maxId) {
-                        maxId = id;
-                    }
-                } catch (NumberFormatException e) {
-                    // Bỏ qua các mã không hợp lệ
-                }
-            }
-        }
-        return String.format("KH%02d", maxId + 1);
+        return khachHangServiceImpl.taoMaKhachHang();
     }
 }

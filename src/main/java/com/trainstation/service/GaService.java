@@ -7,6 +7,7 @@ import com.trainstation.network.AppRequest;
 import com.trainstation.network.AppResponse;
 import com.trainstation.network.NetworkConfig;
 import com.trainstation.network.RequestType;
+import com.trainstation.service.impl.GaServiceImpl;
 import java.util.List;
 
 /**
@@ -15,9 +16,11 @@ import java.util.List;
 public class GaService {
     private static GaService instance;
     private final GaDAO gaDAO;
+    private final GaServiceImpl gaServiceImpl;
 
     private GaService() {
         this.gaDAO = GaDAO.getInstance();
+        this.gaServiceImpl = GaServiceImpl.getInstance();
     }
 
     public static synchronized GaService getInstance() {
@@ -33,7 +36,7 @@ public class GaService {
             if (resp.isSuccess() && resp.getData() != null) return (List<Ga>) resp.getData();
             return java.util.Collections.emptyList();
         }
-        return gaDAO.getAll();
+        return gaServiceImpl.layTatCaGa();
     }
 
     public Ga timGaTheoMa(String maGa) {
@@ -42,26 +45,11 @@ public class GaService {
             if (resp.isSuccess()) return (Ga) resp.getData();
             return null;
         }
-        return gaDAO.findById(maGa);
+        return gaServiceImpl.timGaTheoMa(maGa);
     }
 
     public String taoMaGa() {
-        List<Ga> danhSach = gaDAO.getAll();
-        int maxId = 0;
-        for (Ga ga : danhSach) {
-            String maGa = ga.getMaGa();
-            if (maGa != null && maGa.startsWith("GA")) {
-                try {
-                    int id = Integer.parseInt(maGa.substring(2));
-                    if (id > maxId) {
-                        maxId = id;
-                    }
-                } catch (NumberFormatException e) {
-                    // Ignore invalid IDs
-                }
-            }
-        }
-        return String.format("GA%03d", maxId + 1);
+        return gaServiceImpl.taoMaGa();
     }
 
     public boolean themGa(Ga ga) {
@@ -70,7 +58,7 @@ public class GaService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return gaDAO.insert(ga);
+        return gaServiceImpl.themGa(ga);
     }
 
     public boolean capNhatGa(Ga ga) {
@@ -79,7 +67,7 @@ public class GaService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return gaDAO.update(ga);
+        return gaServiceImpl.capNhatGa(ga);
     }
 
     public boolean xoaGa(String maGa) {
@@ -88,7 +76,7 @@ public class GaService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return gaDAO.delete(maGa);
+        return gaServiceImpl.xoaGa(maGa);
     }
 
     public List<Ga> layGaDaXoa() {
@@ -97,7 +85,7 @@ public class GaService {
             if (resp.isSuccess() && resp.getData() != null) return (List<Ga>) resp.getData();
             return java.util.Collections.emptyList();
         }
-        return gaDAO.getDeletedStations();
+        return gaServiceImpl.layGaDaXoa();
     }
 
     public boolean khoiPhucGa(String maGa) {
@@ -106,6 +94,6 @@ public class GaService {
             if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
             return false;
         }
-        return gaDAO.restoreStation(maGa);
+        return gaServiceImpl.khoiPhucGa(maGa);
     }
 }

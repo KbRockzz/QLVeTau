@@ -42,6 +42,13 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.trainstation.network.AppClient;
+import com.trainstation.network.AppRequest;
+import com.trainstation.network.AppResponse;
+import com.trainstation.network.NetworkConfig;
+import com.trainstation.network.RequestType;
+import com.trainstation.repository.impl.VeRepositoryImpl;
+import com.trainstation.service.impl.VeServiceImpl;
 
 /**
  * Service xử lý nghiệp vụ liên quan đến Vé
@@ -54,6 +61,7 @@ public class VeService {
     private final BangGiaDAO bangGiaDAO;
     private final ChiTietHoaDonDAO chiTietHoaDonDAO;
     private final HoaDonDAO hoaDonDAO;
+    private final VeServiceImpl veServiceImpl;
     
     // Thời gian tối thiểu trước khi tàu chạy (phút)
     private static final int MINIMUM_MINUTES_BEFORE_DEPARTURE = 30;
@@ -67,6 +75,7 @@ public class VeService {
         this.bangGiaDAO = BangGiaDAO.getInstance();
         this.chiTietHoaDonDAO = ChiTietHoaDonDAO.getInstance();
         this.hoaDonDAO = HoaDonDAO.getInstance();
+        this.veServiceImpl = VeServiceImpl.getInstance();
     }
 
     public static synchronized VeService getInstance() {
@@ -77,14 +86,23 @@ public class VeService {
     }
     
     public Ve taoVe(Ve ve) {
-        if (veDAO.insert(ve)) {
-            return ve;
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.INSERT_VE, ve));
+            if (resp.isSuccess()) return (Ve) resp.getData();
+            throw new RuntimeException(resp.getMessage());
         }
+        Ve created = veServiceImpl.taoVe(ve);
+        if (created != null) return created;
         throw new RuntimeException("Không thể tạo vé");
     }
     
     public boolean capNhatVe(Ve ve) {
-        return veDAO.update(ve);
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.UPDATE_VE, ve));
+            if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
+            return false;
+        }
+        return veServiceImpl.capNhatVe(ve);
     }
     
     public boolean huyVe(String maVe) {
@@ -187,27 +205,45 @@ public class VeService {
     }
     
     public List<Ve> layTatCaVe() {
-        return veDAO.getAll();
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.GET_ALL_VE));
+            if (resp.isSuccess() && resp.getData() != null) return (List<Ve>) resp.getData();
+            return java.util.Collections.emptyList();
+        }
+        return veServiceImpl.layTatCaVe();
     }
     
     public Ve timVeTheoMa(String maVe) {
-        return veDAO.findById(maVe);
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.FIND_VE_BY_ID, maVe));
+            if (resp.isSuccess()) return (Ve) resp.getData();
+            return null;
+        }
+        return veServiceImpl.timVeTheoMa(maVe);
     }
 
     /**
      * Lấy danh sách vé theo chuyến tàu
      */
     public List<Ve> layVeTheoChuyenTau(String maChuyen) {
-        return veDAO.getAll().stream()
-                .filter(v -> v.getMaChuyen() != null && v.getMaChuyen().equals(maChuyen))
-                .collect(Collectors.toList());
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.GET_VE_BY_CHUYEN, maChuyen));
+            if (resp.isSuccess() && resp.getData() != null) return (List<Ve>) resp.getData();
+            return java.util.Collections.emptyList();
+        }
+        return veServiceImpl.layVeTheoChuyen(maChuyen);
     }
 
     /**
      * Lấy danh sách vé theo trạng thái
      */
     public List<Ve> layVeTheoTrangThai(String trangThai) {
-        return veDAO.getAll().stream()
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.GET_VE_BY_TRANGTHAI, trangThai));
+            if (resp.isSuccess() && resp.getData() != null) return (List<Ve>) resp.getData();
+            return java.util.Collections.emptyList();
+        }
+        return layTatCaVe().stream()
                 .filter(v -> v.getTrangThai() != null && v.getTrangThai().equals(trangThai))
                 .collect(Collectors.toList());
     }
@@ -220,11 +256,21 @@ public class VeService {
     }
     
     public boolean xoaVe(String maVe) {
-        return veDAO.delete(maVe);
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.DELETE_VE, maVe));
+            if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
+            return false;
+        }
+        return veServiceImpl.xoaVe(maVe);
     }
     
     public List<Ve> layVeTheoKhachHang(String maKH) {
-        return veDAO.getByKhachHang(maKH);
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.GET_VE_BY_KHACHHANG, maKH));
+            if (resp.isSuccess() && resp.getData() != null) return (List<Ve>) resp.getData();
+            return java.util.Collections.emptyList();
+        }
+        return VeRepositoryImpl.getInstance().findByKhachHang(maKH);
     }
 
     /**
