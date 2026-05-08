@@ -36,11 +36,12 @@ public class ChiTietHoaDonRepositoryImpl implements IChiTietHoaDonRepository {
     }
 
     @Override
+    @Deprecated
     public ChiTietHoaDon findById(String id) {
         try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
             List<ChiTietHoaDon> result = em.createNativeQuery(
                             "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa " +
-                                    "FROM ChiTietHoaDon WHERE maVe = ? AND isActive = 1 LIMIT 1",
+                                    "FROM ChiTietHoaDon WHERE maVe = ? AND isActive = 1 ORDER BY maHoaDon DESC LIMIT 1",
                             ChiTietHoaDon.class
                     ).setParameter(1, id)
                     .getResultList();
@@ -95,21 +96,13 @@ public class ChiTietHoaDonRepositoryImpl implements IChiTietHoaDonRepository {
     }
 
     @Override
+    @Deprecated
     public boolean delete(String id) {
-        EntityTransaction tx = null;
-        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
-            tx = em.getTransaction();
-            tx.begin();
-            int updated = em.createNativeQuery("UPDATE ChiTietHoaDon SET isActive = 0 WHERE maVe = ?")
-                    .setParameter(1, id)
-                    .executeUpdate();
-            tx.commit();
-            return updated > 0;
-        } catch (Exception e) {
-            if (tx != null && tx.isActive()) tx.rollback();
-            LOG.log(Level.SEVERE, "Không thể xóa mềm chi tiết hóa đơn theo mã vé", e);
+        ChiTietHoaDon chiTietHoaDon = findById(id);
+        if (chiTietHoaDon == null) {
             return false;
         }
+        return deleteByHoaDonAndVe(chiTietHoaDon.getMaHoaDon(), chiTietHoaDon.getMaVe());
     }
 
     @Override
