@@ -7,6 +7,7 @@ import java.util.List;
 public interface IHoaDonRepository {
     List<HoaDon> getAll();
     HoaDon findById(String id);
+    String generateNextMaHoaDon();
     boolean insert(HoaDon entity);
     boolean update(HoaDon entity);
     boolean delete(String id);

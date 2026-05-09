@@ -7,6 +7,7 @@ public interface IKhachHangRepository {
     List<KhachHang> getAll();
     KhachHang findById(String id);
     KhachHang findBySoDienThoai(String soDienThoai);
+    String generateNextMaKhachHang();
     boolean insert(KhachHang entity);
     boolean update(KhachHang entity);
     boolean delete(String id);

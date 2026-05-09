@@ -78,16 +78,6 @@ public class HoaDonServiceImpl implements IHoaDonService {
     }
 
     private String generateHoaDonId() {
-        List<HoaDon> all = hoaDonRepository.getAll();
-        int maxId = all.stream()
-                .filter(hd -> hd.getMaHoaDon() != null && hd.getMaHoaDon().startsWith("HD"))
-                .mapToInt(hd -> {
-                    try {
-                        return Integer.parseInt(hd.getMaHoaDon().substring(2));
-                    } catch (NumberFormatException e) {
-                        return 0;
-                    }
-                }).max().orElse(0);
-        return String.format("HD%03d", maxId + 1);
+        return hoaDonRepository.generateNextMaHoaDon();
     }
 }

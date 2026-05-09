@@ -7,6 +7,7 @@ import java.util.List;
 public interface IBangGiaRepository {
     List<BangGia> getAll();
     BangGia findById(String id);
+    String generateNextMaBangGia();
     boolean insert(BangGia entity);
     boolean update(BangGia entity);
     boolean delete(String id);

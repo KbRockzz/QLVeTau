@@ -63,6 +63,21 @@ public class KhachHangRepositoryImpl implements IKhachHangRepository {
     }
 
     @Override
+    public String generateNextMaKhachHang() {
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            Number max = (Number) em.createNativeQuery(
+                            "SELECT MAX(CAST(SUBSTRING(maKhachHang, 3) AS UNSIGNED)) FROM KhachHang " +
+                                    "WHERE maKhachHang REGEXP '^KH[0-9]+$'"
+                    )
+                    .getSingleResult();
+            return String.format("KH%02d", max == null ? 1 : max.intValue() + 1);
+        } catch (Exception e) {
+            LOG.log(Level.WARNING, "Không thể sinh mã khách hàng tiếp theo", e);
+            return "KH" + (System.currentTimeMillis() % 10000);
+        }
+    }
+
+    @Override
     public boolean insert(KhachHang entity) {
         EntityTransaction tx = null;
         try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
