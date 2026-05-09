@@ -127,7 +127,7 @@ public class VeRepositoryImpl implements IVeRepository {
             return String.format("VE%04d", max == null ? 1 : max.intValue() + 1);
         } catch (Exception e) {
             LOG.log(Level.WARNING, "Không thể sinh mã vé tiếp theo", e);
-            return "VE" + (System.currentTimeMillis() % 10000);
+            return "VE" + System.currentTimeMillis();
         }
     }
 

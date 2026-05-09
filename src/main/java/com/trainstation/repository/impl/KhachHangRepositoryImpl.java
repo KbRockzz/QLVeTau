@@ -73,7 +73,7 @@ public class KhachHangRepositoryImpl implements IKhachHangRepository {
             return String.format("KH%02d", max == null ? 1 : max.intValue() + 1);
         } catch (Exception e) {
             LOG.log(Level.WARNING, "Không thể sinh mã khách hàng tiếp theo", e);
-            return "KH" + (System.currentTimeMillis() % 10000);
+            return "KH" + System.currentTimeMillis();
         }
     }
 
