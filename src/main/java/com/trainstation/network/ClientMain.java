@@ -29,7 +29,7 @@ public class ClientMain {
         AppClient client = AppClient.getInstance();
         if (client.isServerReachable()) {
             LOG.info("Connected to server " + host + ":" + port);
-            MainApplication.main(new String[]{"--client", host + ":" + port});
+            MainApplication.launchClientMode(host, port);
         } else {
             LOG.severe("Cannot connect to server " + host + ":" + port);
             System.exit(1);

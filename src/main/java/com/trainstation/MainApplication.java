@@ -28,7 +28,6 @@ public class MainApplication {
                     startServer(port);
                     return;
                 case "--client":
-                    NetworkConfig.setClientMode(true);
                     if (i + 1 < args.length && !args[i + 1].startsWith("--")) {
                         String[] hostPort = args[++i].split(":");
                         host = hostPort[0];
@@ -36,14 +35,24 @@ public class MainApplication {
                             try { port = Integer.parseInt(hostPort[1]); } catch (NumberFormatException ignored) {}
                         }
                     }
-                    NetworkConfig.setServerHost(host);
-                    NetworkConfig.setServerPort(port);
+                    launchClientMode(host, port);
                     break;
                 default:
                     break;
             }
         }
 
+        launchUi();
+    }
+
+    public static void launchClientMode(String host, int port) {
+        NetworkConfig.setClientMode(true);
+        NetworkConfig.setServerHost(host);
+        NetworkConfig.setServerPort(port);
+        launchUi();
+    }
+
+    private static void launchUi() {
         // Khởi tạo Material Professional Light theme trước khi tạo UI
         MaterialInitializer.initUI();
 
