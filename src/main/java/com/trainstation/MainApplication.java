@@ -36,7 +36,7 @@ public class MainApplication {
                         }
                     }
                     launchClientMode(host, port);
-                    break;
+                    return;
                 default:
                     break;
             }
@@ -45,6 +45,7 @@ public class MainApplication {
         launchUi();
     }
 
+    /** Configure and start GUI in client mode with remote server host/port. */
     public static void launchClientMode(String host, int port) {
         NetworkConfig.setClientMode(true);
         NetworkConfig.setServerHost(host);
