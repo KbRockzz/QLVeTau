@@ -59,7 +59,7 @@ public class HoaDonRepositoryImpl implements IHoaDonRepository {
             return String.format("HD%03d", max == null ? 1 : max.intValue() + 1);
         } catch (Exception e) {
             LOG.log(Level.WARNING, "Không thể sinh mã hóa đơn tiếp theo", e);
-            return "HD" + System.currentTimeMillis();
+            throw new IllegalStateException("Không thể sinh mã hóa đơn tiếp theo", e);
         }
     }
 

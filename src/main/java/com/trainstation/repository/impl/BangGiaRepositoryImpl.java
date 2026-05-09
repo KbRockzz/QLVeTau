@@ -58,7 +58,7 @@ public class BangGiaRepositoryImpl implements IBangGiaRepository {
             return String.format("BG%03d", max == null ? 1 : max.intValue() + 1);
         } catch (Exception e) {
             LOG.log(Level.WARNING, "Không thể sinh mã bảng giá tiếp theo", e);
-            return "BG" + System.currentTimeMillis();
+            throw new IllegalStateException("Không thể sinh mã bảng giá tiếp theo", e);
         }
     }
 
