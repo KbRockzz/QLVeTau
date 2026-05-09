@@ -374,7 +374,7 @@ public class HoaDonService {
                         if (ve.getSoToa() != null) pstInsertVe.setInt(13, ve.getSoToa());
                         else pstInsertVe.setNull(13, Types.INTEGER);
                         pstInsertVe.setString(14, ve.getLoaiCho());
-                        pstInsertVe.setString(15, ve.getLoaiVe());
+                        pstInsertVe.setString(15, loaiVeForPersist(connection, ve));
                         if (maBangGiaToPersist != null) pstInsertVe.setString(16, maBangGiaToPersist); else pstInsertVe.setNull(16, Types.VARCHAR);
                         if (ve.getGiaThanhToan() != null) pstInsertVe.setFloat(17, ve.getGiaThanhToan()); else pstInsertVe.setNull(17, Types.FLOAT);
                         pstInsertVe.setBoolean(18, true);
@@ -522,7 +522,7 @@ public class HoaDonService {
                     if (ve.getSoToa() != null) pst.setInt(13, ve.getSoToa());
                     else pst.setNull(13, Types.INTEGER);
                     pst.setString(14, ve.getLoaiCho());
-                    pst.setString(15, ve.getLoaiVe());
+                    pst.setString(15, loaiVeForPersist(connection, ve));
 
                     String maBangGiaToPersist = ve.getMaBangGia();
                     if ((maBangGiaToPersist == null || maBangGiaToPersist.trim().isEmpty()) && kq != null) maBangGiaToPersist = kq.maBangGia;
@@ -588,5 +588,49 @@ public class HoaDonService {
                 try { connection.close(); } catch (SQLException ignored) {}
             }
         }
+    }
+
+    private String loaiVeForPersist(Connection connection, Ve ve) throws SQLException {
+        if (ve == null) {
+            return null;
+        }
+
+        String tenLoaiVe = normalizeForPersist(ve.getLoaiVe());
+        String maLoaiVe = normalizeForPersist(ve.getMaLoaiVe());
+        String value = tenLoaiVe != null ? tenLoaiVe : maLoaiVe;
+        if (value == null) {
+            return null;
+        }
+
+        int maxLength = getColumnLength(connection, "Ve", "loaiVe", 20);
+        if (value.length() <= maxLength) {
+            return value;
+        }
+        if (maLoaiVe != null && maLoaiVe.length() <= maxLength) {
+            return maLoaiVe;
+        }
+        return value.substring(0, maxLength);
+    }
+
+    private String normalizeForPersist(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private int getColumnLength(Connection connection, String tableName, String columnName, int defaultLength) throws SQLException {
+        try (ResultSet rs = connection.getMetaData().getColumns(connection.getCatalog(), null, tableName, columnName)) {
+            if (rs.next()) {
+                return rs.getInt("COLUMN_SIZE");
+            }
+        }
+        try (ResultSet rs = connection.getMetaData().getColumns(connection.getCatalog(), null, tableName.toLowerCase(), columnName)) {
+            if (rs.next()) {
+                return rs.getInt("COLUMN_SIZE");
+            }
+        }
+        return defaultLength;
     }
 }

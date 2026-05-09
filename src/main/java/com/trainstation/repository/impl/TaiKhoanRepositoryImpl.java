@@ -27,10 +27,12 @@ public class TaiKhoanRepositoryImpl implements ITaiKhoanRepository {
     @Override
     public List<TaiKhoan> getAll() {
         try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
-            return em.createNativeQuery(
+            List<TaiKhoan> accounts = em.createNativeQuery(
                     "SELECT maTK, maNV, tenTaiKhoan, matKhau, trangThai FROM TaiKhoan WHERE isActive = 1",
                     TaiKhoan.class
             ).getResultList();
+            accounts.forEach(account -> populateMaLoaiNV(em, account));
+            return accounts;
         }
     }
 
@@ -43,7 +45,10 @@ public class TaiKhoanRepositoryImpl implements ITaiKhoanRepository {
                     )
                     .setParameter(1, id)
                     .getResultList();
-            return result.isEmpty() ? null : result.get(0);
+            if (result.isEmpty()) return null;
+            TaiKhoan account = result.get(0);
+            populateMaLoaiNV(em, account);
+            return account;
         }
     }
 
@@ -57,7 +62,10 @@ public class TaiKhoanRepositoryImpl implements ITaiKhoanRepository {
                     )
                     .setParameter(1, tenTaiKhoan)
                     .getResultList();
-            return result.isEmpty() ? null : result.get(0);
+            if (result.isEmpty()) return null;
+            TaiKhoan account = result.get(0);
+            populateMaLoaiNV(em, account);
+            return account;
         }
     }
 
@@ -123,5 +131,19 @@ public class TaiKhoanRepositoryImpl implements ITaiKhoanRepository {
             LOG.log(Level.WARNING, "Không thể sinh mã tài khoản tiếp theo", e);
             return "TK" + (System.currentTimeMillis() % 100);
         }
+    }
+
+    private void populateMaLoaiNV(EntityManager em, TaiKhoan account) {
+        if (account == null || account.getMaNV() == null) {
+            return;
+        }
+        Object maLoaiNV = em.createNativeQuery(
+                        "SELECT maLoaiNV FROM NhanVien WHERE maNV = ? AND isActive = 1"
+                )
+                .setParameter(1, account.getMaNV())
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+        account.setMaLoaiNV(maLoaiNV != null ? maLoaiNV.toString() : null);
     }
 }

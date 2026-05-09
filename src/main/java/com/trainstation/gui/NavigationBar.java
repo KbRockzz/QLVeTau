@@ -86,7 +86,9 @@ public class NavigationBar extends JPanel {
         invoiceMenu.add(createMenuItem("Hóa đơn", "hoadon"));
         invoiceMenu.addSeparator();
         invoiceMenu.add(createMenuItem("Tìm kiếm hóa đơn", "timhoadon"));
-        invoiceMenu.add(createMenuItem("Thống kê", "thongke"));
+        if (currentAccount.isManager()) {
+            invoiceMenu.add(createMenuItem("Thống kê", "thongke"));
+        }
         invoiceManagementBtn.addActionListener(e -> invoiceMenu.show(invoiceManagementBtn, 0, invoiceManagementBtn.getHeight()));
         leftPanel.add(invoiceManagementBtn);
 

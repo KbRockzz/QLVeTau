@@ -8,6 +8,17 @@ import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 public class FrmChinh extends JFrame {
+    private static final Set<String> MANAGER_ONLY_PAGES = Set.of(
+            "nhanvien",
+            "employee",
+            "timkiemnv-tk",
+            "taikhoan",
+            "account",
+            "thongke",
+            "statistics",
+            "deleteddata"
+    );
+
     private TaiKhoan taiKhoanHienTai;
     private JPanel pnlNoiDung;
     private CardLayout cardLayout;
@@ -71,13 +82,13 @@ public class FrmChinh extends JFrame {
         // Invoice
         addPage("hoadon", taoPanelVoiBo(new PnlQuanLyVe(taiKhoanHienTai)));
         addPage("timhoadon", taoPanelVoiBo(new PnlTimHoaDon()));
-        addPage("thongke", taoPanelVoiBo(new PnlThongKe()));
 
         // Employee / account pages (manager only)
         if (taiKhoanHienTai.isManager()) {
             addPage("nhanvien", taoPanelVoiBo(new PnlNhanVien()));
             addPage("timkiemnv-tk", taoPanelVoiBo(new PnlTimKiemNVTK()));
             addPage("taikhoan", taoPanelVoiBo(new PnlTaiKhoan()));
+            addPage("thongke", taoPanelVoiBo(new PnlThongKe()));
 
             // Deleted-data management (manager only). Reuse generic deleted-data panel if specific ones don't exist.
 
@@ -133,11 +144,7 @@ public class FrmChinh extends JFrame {
      */
     public void dieuHuongDenTrang(String trang) {
         // Validate manager-only access for sensitive pages
-        if (!taiKhoanHienTai.isManager() &&
-                (trang.equals("nhanvien") || trang.equals("employee") || trang.equals("taikhoan")
-                        || trang.equals("account") || trang.equals("statistics")
-                        || trang.startsWith("deleted_") )
-        ) {
+        if (!taiKhoanHienTai.isManager() && isManagerOnlyPage(trang)) {
             JOptionPane.showMessageDialog(this,
                     "Bạn không có quyền truy cập trang này!\nChỉ quản lý mới có thể truy cập.",
                     "Từ chối truy cập",
@@ -160,6 +167,13 @@ public class FrmChinh extends JFrame {
                     "Lỗi",
                     JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private boolean isManagerOnlyPage(String trang) {
+        if (trang == null) {
+            return false;
+        }
+        return MANAGER_ONLY_PAGES.contains(trang) || trang.startsWith("deleted_");
     }
 
     /**
