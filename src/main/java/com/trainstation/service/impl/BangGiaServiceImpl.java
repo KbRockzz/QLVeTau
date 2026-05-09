@@ -41,21 +41,7 @@ public class BangGiaServiceImpl implements IBangGiaService {
 
     @Override
     public String taoMaBangGia() {
-        List<BangGia> danhSach = bangGiaRepository.getAll();
-        int maxId = 0;
-        for (BangGia bg : danhSach) {
-            String maBG = bg.getMaBangGia();
-            if (maBG != null && maBG.startsWith("BG")) {
-                try {
-                    int id = Integer.parseInt(maBG.substring(2));
-                    if (id > maxId) {
-                        maxId = id;
-                    }
-                } catch (NumberFormatException ignored) {
-                }
-            }
-        }
-        return String.format("BG%03d", maxId + 1);
+        return bangGiaRepository.generateNextMaBangGia();
     }
 
     @Override

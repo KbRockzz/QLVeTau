@@ -49,6 +49,21 @@ public class HoaDonRepositoryImpl implements IHoaDonRepository {
     }
 
     @Override
+    public String generateNextMaHoaDon() {
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            Number max = (Number) em.createNativeQuery(
+                            "SELECT MAX(CAST(SUBSTRING(maHoaDon, 3) AS UNSIGNED)) FROM HoaDon " +
+                                    "WHERE maHoaDon REGEXP '^HD[0-9]+$'"
+                    )
+                    .getSingleResult();
+            return String.format("HD%03d", max == null ? 1 : max.intValue() + 1);
+        } catch (Exception e) {
+            LOG.log(Level.WARNING, "Không thể sinh mã hóa đơn tiếp theo", e);
+            throw new IllegalStateException("Không thể sinh mã hóa đơn tiếp theo", e);
+        }
+    }
+
+    @Override
     public boolean insert(HoaDon entity) {
         EntityTransaction tx = null;
         try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {

@@ -61,18 +61,7 @@ public class KhachHangServiceImpl implements IKhachHangService {
 
     @Override
     public String taoMaKhachHang() {
-        List<KhachHang> danhSach = khachHangRepository.getAll();
-        int maxId = 0;
-        for (KhachHang kh : danhSach) {
-            String maKH = kh.getMaKhachHang();
-            if (maKH != null && maKH.startsWith("KH")) {
-                try {
-                    int id = Integer.parseInt(maKH.substring(2));
-                    if (id > maxId) maxId = id;
-                } catch (NumberFormatException ignored) {}
-            }
-        }
-        return String.format("KH%02d", maxId + 1);
+        return khachHangRepository.generateNextMaKhachHang();
     }
 
     @Override

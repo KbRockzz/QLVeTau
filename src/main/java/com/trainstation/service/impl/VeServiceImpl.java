@@ -82,13 +82,6 @@ public class VeServiceImpl implements IVeService {
     }
 
     private String generateVeId() {
-        List<Ve> all = veRepository.getAll();
-        int maxId = all.stream()
-                .filter(v -> v.getMaVe() != null && v.getMaVe().startsWith("VE"))
-                .mapToInt(v -> {
-                    try { return Integer.parseInt(v.getMaVe().substring(2)); }
-                    catch (NumberFormatException e) { return 0; }
-                }).max().orElse(0);
-        return String.format("VE%04d", maxId + 1);
+        return veRepository.generateNextMaVe();
     }
 }

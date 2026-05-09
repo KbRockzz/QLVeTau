@@ -48,6 +48,21 @@ public class BangGiaRepositoryImpl implements IBangGiaRepository {
     }
 
     @Override
+    public String generateNextMaBangGia() {
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            Number max = (Number) em.createNativeQuery(
+                            "SELECT MAX(CAST(SUBSTRING(maBangGia, 3) AS UNSIGNED)) FROM BangGia " +
+                                    "WHERE maBangGia REGEXP '^BG[0-9]+$'"
+                    )
+                    .getSingleResult();
+            return String.format("BG%03d", max == null ? 1 : max.intValue() + 1);
+        } catch (Exception e) {
+            LOG.log(Level.WARNING, "Không thể sinh mã bảng giá tiếp theo", e);
+            throw new IllegalStateException("Không thể sinh mã bảng giá tiếp theo", e);
+        }
+    }
+
+    @Override
     public boolean insert(BangGia entity) {
         EntityTransaction tx = null;
         try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {

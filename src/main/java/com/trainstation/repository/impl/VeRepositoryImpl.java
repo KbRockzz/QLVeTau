@@ -117,6 +117,21 @@ public class VeRepositoryImpl implements IVeRepository {
     }
 
     @Override
+    public String generateNextMaVe() {
+        try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
+            Number max = (Number) em.createNativeQuery(
+                            "SELECT MAX(CAST(SUBSTRING(maVe, 3) AS UNSIGNED)) FROM Ve " +
+                                    "WHERE maVe REGEXP '^VE[0-9]+$'"
+                    )
+                    .getSingleResult();
+            return String.format("VE%04d", max == null ? 1 : max.intValue() + 1);
+        } catch (Exception e) {
+            LOG.log(Level.WARNING, "Không thể sinh mã vé tiếp theo", e);
+            throw new IllegalStateException("Không thể sinh mã vé tiếp theo", e);
+        }
+    }
+
+    @Override
     public boolean insert(Ve entity) {
         EntityTransaction tx = null;
         try (EntityManager em = JpaEntityManagerProvider.createEntityManager()) {
