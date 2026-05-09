@@ -1,5 +1,7 @@
 package com.trainstation.network;
 
+import com.trainstation.MainApplication;
+
 import java.util.logging.Logger;
 
 public class ClientMain {
@@ -27,6 +29,7 @@ public class ClientMain {
         AppClient client = AppClient.getInstance();
         if (client.isServerReachable()) {
             LOG.info("Connected to server " + host + ":" + port);
+            MainApplication.main(new String[]{"--client", host + ":" + port});
         } else {
             LOG.severe("Cannot connect to server " + host + ":" + port);
             System.exit(1);
