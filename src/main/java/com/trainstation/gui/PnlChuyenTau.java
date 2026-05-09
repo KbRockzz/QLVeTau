@@ -247,9 +247,12 @@ public class PnlChuyenTau extends JPanel {
         JPanel rightPanel = new JPanel(new BorderLayout());
         rightPanel.add(form, BorderLayout.NORTH);
         rightPanel.add(compPanel, BorderLayout.CENTER);
+        JScrollPane rightScroll = new JScrollPane(rightPanel);
+        rightScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        rightScroll.getVerticalScrollBar().setUnitIncrement(16);
 
         // Split pane: left = main list, right = form + composition
-        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp, rightPanel);
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp, rightScroll);
         split.setResizeWeight(0.65);
         add(split, BorderLayout.CENTER);
 
