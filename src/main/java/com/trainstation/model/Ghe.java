@@ -1,60 +1,32 @@
 package com.trainstation.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.*;
 import java.io.Serializable;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
+@Entity
+@Table(name = "Ghe")
 public class Ghe implements Serializable {
+    @Id
+    @Column(name = "maGhe")
     private String maGhe;
+
+    @Column(name = "maToa")
     private String maToa;
+
+    @Column(name = "loaiGhe")
     private String loaiGhe;
+
+    @Column(name = "trangThai")
     private String trangThai;
-
-    public Ghe() {
-    }
-
-    public Ghe(String maGhe, String maToa, String loaiGhe, String trangThai) {
-        this.maGhe = maGhe;
-        this.maToa = maToa;
-        this.loaiGhe = loaiGhe;
-        this.trangThai = trangThai;    }
-
-    public String getMaGhe() {
-        return maGhe;
-    }
-
-    public void setMaGhe(String maGhe) {
-        this.maGhe = maGhe;
-    }
-
-    public String getMaToa() {
-        return maToa;
-    }
-
-    public void setMaToa(String maToa) {
-        this.maToa = maToa;
-    }
-
-    public String getLoaiGhe() {
-        return loaiGhe;
-    }
-
-    public void setLoaiGhe(String loaiGhe) {
-        this.loaiGhe = loaiGhe;
-    }
-
-    public String getTrangThai() {
-        return trangThai;
-    }
-
-    public void setTrangThai(String trangThai) {
-        this.trangThai = trangThai;
-    }    @Override
-    public String toString() {
-        return "Ghe{" +
-                "maGhe='" + maGhe + '\'' +
-                ", maToa='" + maToa + '\'' +
-                ", loaiGhe='" + loaiGhe + '\'' +
-                ", trangThai='" + trangThai + '\'' + +
-                '}';
-    }
 }
 

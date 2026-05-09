@@ -54,6 +54,24 @@ public class ChiTietHoaDonDAO implements GenericDAO<ChiTietHoaDon> {
                 .orElse(null);
     }
 
+    public ChiTietHoaDon findById(String id, Connection conn) throws SQLException {
+        String sql = "SELECT maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa FROM ChiTietHoaDon WHERE maVe = ? AND isActive = 1";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (!rs.next()) return null;
+                ChiTietHoaDon ct = new ChiTietHoaDon();
+                ct.setMaHoaDon(rs.getString("maHoaDon"));
+                ct.setMaVe(rs.getString("maVe"));
+                ct.setMaLoaiVe(rs.getString("maLoaiVe"));
+                ct.setGiaGoc(rs.getFloat("giaGoc"));
+                ct.setGiaDaKM(rs.getFloat("giaDaKM"));
+                ct.setMoTa(rs.getString("moTa"));
+                return ct;
+            }
+        }
+    }
+
     @Override
     public boolean insert(ChiTietHoaDon ct) {
         String sql = "INSERT INTO ChiTietHoaDon (maHoaDon, maVe, maLoaiVe, giaGoc, giaDaKM, moTa) VALUES (?, ?, ?, ?, ?, ?)";

@@ -1,62 +1,34 @@
 package com.trainstation.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
+import lombok.*;
 import java.io.Serializable;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
+@Entity
+@Table(name = "ChiTietChuyenTau")
+@IdClass(ChiTietChuyenTauId.class)
 public class ChiTietChuyenTau implements Serializable {
+    @Id
+    @Column(name = "maChuyenTau")
     private String maChuyenTau;
+
+    @Id
+    @Column(name = "maToaTau")
     private String maToaTau;
+
+    @Column(name = "soThuTuToa")
     private Integer soThuTuToa;
+
+    @Column(name = "sucChua")
     private Integer sucChua;
-
-    public ChiTietChuyenTau() {
-    }
-
-    public ChiTietChuyenTau(String maChuyenTau, String maToaTau, Integer soThuTuToa, Integer sucChua) {
-        this.maChuyenTau = maChuyenTau;
-        this.maToaTau = maToaTau;
-        this.soThuTuToa = soThuTuToa;
-        this.sucChua = sucChua;
-    }
-
-    public String getMaChuyenTau() {
-        return maChuyenTau;
-    }
-
-    public void setMaChuyenTau(String maChuyenTau) {
-        this.maChuyenTau = maChuyenTau;
-    }
-
-    public String getMaToaTau() {
-        return maToaTau;
-    }
-
-    public void setMaToaTau(String maToaTau) {
-        this.maToaTau = maToaTau;
-    }
-
-    public Integer getSoThuTuToa() {
-        return soThuTuToa;
-    }
-
-    public void setSoThuTuToa(Integer soThuTuToa) {
-        this.soThuTuToa = soThuTuToa;
-    }
-
-    public Integer getSucChua() {
-        return sucChua;
-    }
-
-    public void setSucChua(Integer sucChua) {
-        this.sucChua = sucChua;
-    }
-
-    @Override
-    public String toString() {
-        return "ChiTietChuyenTau{" +
-                "maChuyenTau='" + maChuyenTau + '\'' +
-                ", maToaTau='" + maToaTau + '\'' +
-                ", soThuTuToa=" + soThuTuToa +
-                ", sucChua=" + sucChua +
-                '}';
-    }
 }

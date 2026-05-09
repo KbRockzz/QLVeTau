@@ -6,6 +6,10 @@ import com.trainstation.service.*;
 import com.trainstation.dao.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -120,6 +124,24 @@ public class PnlDatVe extends JPanel {
 
         pnlTimKhachHang.add(new JLabel("Số điện thoại:"));
         txtSoDienThoai = new JTextField(15);
+        // Only allow digits, max 11 characters
+        ((AbstractDocument) txtSoDienThoai.getDocument()).setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr)
+                    throws BadLocationException {
+                if (text == null) return;
+                String newText = fb.getDocument().getText(0, fb.getDocument().getLength()) + text;
+                if (newText.matches("\\d{0,11}")) super.insertString(fb, offset, text, attr);
+            }
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attr)
+                    throws BadLocationException {
+                if (text == null) text = "";
+                String current = fb.getDocument().getText(0, fb.getDocument().getLength());
+                String newText = current.substring(0, offset) + text + current.substring(offset + length);
+                if (newText.matches("\\d{0,11}")) super.replace(fb, offset, length, text, attr);
+            }
+        });
         pnlTimKhachHang.add(txtSoDienThoai);
 
         btnTimKhachHang = new JButton("Tìm khách hàng");
@@ -535,6 +557,13 @@ public class PnlDatVe extends JPanel {
         pnlSoDoGhe.removeAll();
         List<Ghe> danhSachGhe = gheDAO.getByToa(maToa);
 
+        // Auto-generate missing seats when DB has fewer seats than the coach capacity
+        if (toaDuocChon != null && toaDuocChon.getSucChua() != null
+                && danhSachGhe.size() < toaDuocChon.getSucChua()) {
+            gheDAO.insertBatch(maToa, toaDuocChon.getLoaiToa(), toaDuocChon.getSucChua());
+            danhSachGhe = gheDAO.getByToa(maToa);
+        }
+
         if (danhSachGhe.isEmpty()) {
             pnlSoDoGhe.setLayout(new FlowLayout());
             pnlSoDoGhe.add(new JLabel("Không có ghế nào trong toa này"));
@@ -847,13 +876,44 @@ public class PnlDatVe extends JPanel {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JTextField txtMaKH = new JTextField(20);
+        // Mã KH: auto-generated, non-editable
+        String autoMaKH = khachHangDAO.generateNextMaKH();
+        JTextField txtMaKH = new JTextField(autoMaKH, 20);
         txtMaKH.setPreferredSize(new Dimension(250, 32));
+        txtMaKH.setEditable(false);
+        txtMaKH.setBackground(new Color(240, 240, 240));
+        txtMaKH.setToolTipText("Mã khách hàng được tạo tự động");
+
+        // Họ tên: only Vietnamese letters and spaces
         JTextField txtTenKH = new JTextField(20);
         txtTenKH.setPreferredSize(new Dimension(250, 32));
+        ((AbstractDocument) txtTenKH.getDocument()).setDocumentFilter(new DocumentFilter() {
+            private static final String NAME_REGEX =
+                    "[\\p{L}\\s]*"; // Unicode letters (including Vietnamese) + spaces
+            @Override
+            public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr)
+                    throws BadLocationException {
+                if (text != null && text.matches(NAME_REGEX))
+                    super.insertString(fb, offset, text, attr);
+            }
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attr)
+                    throws BadLocationException {
+                if (text == null) text = "";
+                if (text.matches(NAME_REGEX))
+                    super.replace(fb, offset, length, text, attr);
+            }
+        });
+
+        // Số điện thoại: pre-filled, non-editable
         JTextField txtSDT = new JTextField(20);
         txtSDT.setPreferredSize(new Dimension(250, 32));
-        txtSDT.setText(soDienThoai); // Pre-fill with searched phone
+        txtSDT.setText(soDienThoai);
+        txtSDT.setEditable(false);
+        txtSDT.setBackground(new Color(240, 240, 240));
+        txtSDT.setToolTipText("Số điện thoại lấy từ ô tìm kiếm");
+
+        // Email
         JTextField txtEmail = new JTextField(20);
         txtEmail.setPreferredSize(new Dimension(250, 32));
 
@@ -868,7 +928,7 @@ public class PnlDatVe extends JPanel {
 
         gbc.gridx = 0; gbc.gridy = 1;
         gbc.weightx = 0.0;
-        pnlForm.add(new JLabel("Họ tên:"), gbc);
+        pnlForm.add(new JLabel("Họ tên: *"), gbc);
         gbc.gridx = 1;
         gbc.weightx = 1.0;
         pnlForm.add(txtTenKH, gbc);
@@ -899,18 +959,22 @@ public class PnlDatVe extends JPanel {
             String sdt = txtSDT.getText().trim();
             String email = txtEmail.getText().trim();
 
-            if (maKH.isEmpty() || tenKH.isEmpty() || sdt.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Vui lòng nhập đầy đủ thông tin bắt buộc (Mã KH, Họ tên, SĐT)!",
+            if (tenKH.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Vui lòng nhập họ tên khách hàng!",
                         "Lỗi", JOptionPane.ERROR_MESSAGE);
+                txtTenKH.requestFocus();
                 return;
             }
 
-            if (khachHangDAO.findById(maKH) != null) {
-                JOptionPane.showMessageDialog(dialog, "Mã khách hàng đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            // Validate email format if provided
+            if (!email.isEmpty() && !email.matches("^[\\w.+\\-]+@[\\w\\-]+(\\.[\\w\\-]+)+$")) {
+                JOptionPane.showMessageDialog(dialog, "Địa chỉ email không hợp lệ!",
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+                txtEmail.requestFocus();
                 return;
             }
 
-            KhachHang kh = new KhachHang(maKH, tenKH, email, sdt);
+            KhachHang kh = new KhachHang(maKH, tenKH, email.isEmpty() ? null : email, sdt);
 
             if (khachHangDAO.insert(kh)) {
                 JOptionPane.showMessageDialog(dialog, "Thêm khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);

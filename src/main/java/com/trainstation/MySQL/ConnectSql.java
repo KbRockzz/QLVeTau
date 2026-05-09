@@ -1,12 +1,17 @@
 package com.trainstation.MySQL;
 
+import com.trainstation.persistence.JpaEntityManagerProvider;
+import jakarta.persistence.EntityManager;
+import org.hibernate.Session;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
  * ConnectSql: cung cấp Connection mới mỗi lần gọi getConnection().
- * Tránh giữ 1 Connection singleton chia sẻ giữa nhiều DAO để không bị lỗi "The connection is closed".
+ * Đã chuyển sang MariaDB JDBC driver.
  *
  * Lưu ý:
  * - Caller phải đóng Connection sau khi dùng (ví dụ bằng try-with-resources).
@@ -15,33 +20,9 @@ import java.sql.SQLException;
 public class ConnectSql {
     private static ConnectSql instance;
 
-    // SQL Server connection parameters
-    private static final String SERVER = "localhost";
-    private static final String PORT = "1433";
-    private static final String DATABASE = "QLTauHoa";
-    private static final String USERNAME = "sa";
-    private static final String PASSWORD = "sapassword";
-
-    // Connection string for SQL Server
-    private static final String CONNECTION_URL =
-            "jdbc:sqlserver://" + SERVER + ":" + PORT +
-                    ";databaseName=" + DATABASE +
-                    ";encrypt=true;trustServerCertificate=true";
-
     private ConnectSql() {
-        try {
-            // Load SQL Server JDBC driver once
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } catch (ClassNotFoundException e) {
-            System.err.println("Không tìm thấy SQL Server JDBC Driver!");
-            e.printStackTrace();
-        }
     }
 
-    /**
-     * Get singleton instance of ConnectSql
-     * @return ConnectSql instance
-     */
     public static synchronized ConnectSql getInstance() {
         if (instance == null) {
             instance = new ConnectSql();
@@ -50,26 +31,54 @@ public class ConnectSql {
     }
 
     /**
-     * Get a new database connection.
-     * IMPORTANT: caller phải đóng Connection sau khi dùng (try-with-resources).
-     * @return a new Connection
-     * @throws RuntimeException if cannot get connection
+     * Returns a JDBC {@link Connection} backed by persistence context.
+     * <p>
+     * Always close this connection (try-with-resources) so the underlying EntityManager is released.
      */
     public Connection getConnection() {
+        EntityManager em = JpaEntityManagerProvider.createEntityManager();
         try {
-            // Always return a fresh connection (or from pool in future)
-            return DriverManager.getConnection(CONNECTION_URL, USERNAME, PASSWORD);
-        } catch (SQLException e) {
+            Session session = em.unwrap(Session.class);
+            // Keep legacy JDBC callers working while routing connection acquisition through persistence.
+            Connection rawConnection = session.doReturningWork(connection -> connection);
+            return wrapJpaManagedConnection(rawConnection, em);
+        } catch (Exception e) {
+            if (em.isOpen()) {
+                em.close();
+            }
             System.err.println("Lỗi khi lấy kết nối!");
             e.printStackTrace();
             throw new RuntimeException("Không thể tạo kết nối tới DB", e);
         }
     }
 
-    /**
-     * Helper test connection: thử mở và đóng ngay để kiểm tra cấu hình.
-     * @return true nếu có thể kết nối
-     */
+    private Connection wrapJpaManagedConnection(Connection rawConnection, EntityManager em) {
+        return (Connection) Proxy.newProxyInstance(
+                Connection.class.getClassLoader(),
+                new Class[]{Connection.class},
+                (proxy, method, args) -> {
+                    String methodName = method.getName();
+                    if ("close".equals(methodName)) {
+                        if (em.isOpen()) {
+                            em.close();
+                        }
+                        return null;
+                    }
+                    if ("isClosed".equals(methodName)) {
+                        return !em.isOpen() ? true : (boolean) method.invoke(rawConnection, args);
+                    }
+                    if (!em.isOpen()) {
+                        throw new SQLException("Cannot perform operation: EntityManager is closed");
+                    }
+                    try {
+                        return method.invoke(rawConnection, args);
+                    } catch (InvocationTargetException ex) {
+                        throw ex.getCause();
+                    }
+                }
+        );
+    }
+
     public boolean testConnection() {
         try (Connection conn = getConnection()) {
             return conn != null && conn.isValid(5);

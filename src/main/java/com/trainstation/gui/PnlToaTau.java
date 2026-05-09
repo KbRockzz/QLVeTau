@@ -1,6 +1,7 @@
 package com.trainstation.gui;
 
 import com.trainstation.config.MaterialInitializer;
+import com.trainstation.dao.GheDAO;
 import com.trainstation.dao.ToaTauDAO;
 import com.trainstation.model.ToaTau;
 
@@ -20,6 +21,7 @@ public class PnlToaTau extends JPanel {
     private static final Pattern PATTERN_TRANG_THAI = Pattern.compile("^[\\p{L}0-9\\s\\-]{0,50}$");
 
     private final ToaTauDAO toaTauDAO;
+    private final GheDAO gheDAO;
 
     private JTable bangToa;
     private DefaultTableModel modelBang;
@@ -29,6 +31,7 @@ public class PnlToaTau extends JPanel {
 
     public PnlToaTau() {
         this.toaTauDAO = ToaTauDAO.getInstance();
+        this.gheDAO = GheDAO.getInstance();
         initComponents();
         taiDuLieuToa();
         xoaForm(); // khởi tạo form rỗng
@@ -221,6 +224,10 @@ public class PnlToaTau extends JPanel {
             ToaTau toa = new ToaTau(maToa, loaiToa, namSX, trangThai, sucChua);
 
             if (toaTauDAO.insert(toa)) {
+                // Auto-generate seats for the new coach
+                if (sucChua != null && sucChua > 0) {
+                    gheDAO.insertBatch(maToa, loaiToa, sucChua);
+                }
                 JOptionPane.showMessageDialog(this,
                         "Đã thêm toa tàu mới thành công!",
                         "Thông báo",
@@ -288,6 +295,10 @@ public class PnlToaTau extends JPanel {
             ToaTau toa = new ToaTau(maToa, loaiToa, namSX, trangThai, sucChua);
 
             if (toaTauDAO.update(toa)) {
+                // Add any missing seats if capacity was increased
+                if (sucChua != null && sucChua > 0) {
+                    gheDAO.insertBatch(maToa, loaiToa, sucChua);
+                }
                 JOptionPane.showMessageDialog(this,
                         "Cập nhật thông tin toa tàu thành công!",
                         "Thông báo",

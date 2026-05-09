@@ -150,6 +150,45 @@ public class VeDAO implements GenericDAO<Ve> {
                 .orElse(null);
     }
 
+    public Ve findById(String id, Connection conn) throws SQLException {
+        String sql = "SELECT maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan FROM Ve WHERE maVe = ? AND isActive = 1";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (!rs.next()) return null;
+                LocalDateTime ngayIn = null, gioDi = null, gioDenDuKien = null;
+                Timestamp ts1 = rs.getTimestamp("ngayIn");
+                if (ts1 != null) ngayIn = ts1.toLocalDateTime();
+                Timestamp ts2 = rs.getTimestamp("gioDi");
+                if (ts2 != null) gioDi = ts2.toLocalDateTime();
+                Timestamp ts3 = rs.getTimestamp("gioDenDuKien");
+                if (ts3 != null) gioDenDuKien = ts3.toLocalDateTime();
+
+                Ve v = new Ve(
+                        rs.getString("maVe"),
+                        rs.getString("maChuyen"),
+                        rs.getString("maLoaiVe"),
+                        rs.getString("maSoGhe"),
+                        rs.getString("maGaDi"),
+                        rs.getString("maGaDen"),
+                        rs.getString("tenGaDi"),
+                        rs.getString("tenGaDen"),
+                        ngayIn,
+                        rs.getString("trangThai"),
+                        gioDi,
+                        gioDenDuKien,
+                        rs.getObject("soToa", Integer.class),
+                        rs.getString("loaiCho"),
+                        rs.getString("loaiVe"),
+                        rs.getString("maBangGia"),
+                        rs.getObject("giaThanhToan", Float.class)
+                );
+                ensureStationNames(v);
+                return v;
+            }
+        }
+    }
+
     @Override
     public boolean insert(Ve v) {
         String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, " +
@@ -252,6 +291,67 @@ public class VeDAO implements GenericDAO<Ve> {
         } finally {
             try { if (pst != null) pst.close(); } catch (Exception ignored) {}
             try { if (conn != null) conn.close(); } catch (Exception ignored) {}
+        }
+    }
+
+
+    public boolean insert(Ve v, Connection conn) throws SQLException {
+        String sql = "INSERT INTO Ve (maVe, maChuyen, maLoaiVe, maSoGhe, maGaDi, maGaDen, tenGaDi, tenGaDen, ngayIn, trangThai, gioDi, gioDenDuKien, soToa, loaiCho, loaiVe, maBangGia, giaThanhToan, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, v.getMaVe());
+            pst.setString(2, v.getMaChuyen());
+            pst.setString(3, v.getMaLoaiVe());
+            pst.setString(4, v.getMaSoGhe());
+            pst.setString(5, v.getMaGaDi());
+            pst.setString(6, v.getMaGaDen());
+            pst.setString(7, v.getTenGaDi());
+            pst.setString(8, v.getTenGaDen());
+            if (v.getNgayIn() != null) pst.setTimestamp(9, Timestamp.valueOf(v.getNgayIn()));
+            else pst.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+            pst.setString(10, v.getTrangThai());
+            if (v.getGioDi() != null) pst.setTimestamp(11, Timestamp.valueOf(v.getGioDi()));
+            else pst.setNull(11, Types.TIMESTAMP);
+            if (v.getGioDenDuKien() != null) pst.setTimestamp(12, Timestamp.valueOf(v.getGioDenDuKien()));
+            else pst.setNull(12, Types.TIMESTAMP);
+            if (v.getSoToa() != null) pst.setInt(13, v.getSoToa());
+            else pst.setNull(13, Types.INTEGER);
+            pst.setString(14, v.getLoaiCho());
+            pst.setString(15, v.getLoaiVe());
+            if (v.getMaBangGia() != null && !v.getMaBangGia().trim().isEmpty()) pst.setString(16, v.getMaBangGia());
+            else pst.setNull(16, Types.VARCHAR);
+            if (v.getGiaThanhToan() != null) pst.setFloat(17, v.getGiaThanhToan());
+            else pst.setNull(17, Types.FLOAT);
+            pst.setBoolean(18, true);
+            return pst.executeUpdate() > 0;
+        }
+    }
+
+    public boolean update(Ve v, Connection conn) throws SQLException {
+        String sql = "UPDATE Ve SET maChuyen = ?, maLoaiVe = ?, maSoGhe = ?, maGaDi = ?, maGaDen = ?, tenGaDi = ?, tenGaDen = ?, ngayIn = ?, trangThai = ?, gioDi = ?, gioDenDuKien = ?, soToa = ?, loaiCho = ?, loaiVe = ?, maBangGia = ?, giaThanhToan = ? WHERE maVe = ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, v.getMaChuyen());
+            pst.setString(2, v.getMaLoaiVe());
+            pst.setString(3, v.getMaSoGhe());
+            pst.setString(4, v.getMaGaDi());
+            pst.setString(5, v.getMaGaDen());
+            pst.setString(6, v.getTenGaDi());
+            pst.setString(7, v.getTenGaDen());
+            if (v.getNgayIn() != null) pst.setTimestamp(8, Timestamp.valueOf(v.getNgayIn()));
+            else pst.setNull(8, Types.TIMESTAMP);
+            pst.setString(9, v.getTrangThai());
+            if (v.getGioDi() != null) pst.setTimestamp(10, Timestamp.valueOf(v.getGioDi()));
+            else pst.setNull(10, Types.TIMESTAMP);
+            if (v.getGioDenDuKien() != null) pst.setTimestamp(11, Timestamp.valueOf(v.getGioDenDuKien()));
+            else pst.setNull(11, Types.TIMESTAMP);
+            if (v.getSoToa() != null) pst.setInt(12, v.getSoToa());
+            else pst.setNull(12, Types.INTEGER);
+            pst.setString(13, v.getLoaiCho());
+            pst.setString(14, v.getLoaiVe());
+            pst.setString(15, v.getMaBangGia());
+            if (v.getGiaThanhToan() != null) pst.setFloat(16, v.getGiaThanhToan());
+            else pst.setNull(16, Types.FLOAT);
+            pst.setString(17, v.getMaVe());
+            return pst.executeUpdate() > 0;
         }
     }
 

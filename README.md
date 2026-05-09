@@ -27,12 +27,19 @@ QLVeTau là một ứng dụng Java Swing để quản lý việc bán vé của
 - ✅ DAO hỗ trợ SQL Server cho các entity mới
 - ✅ Quản lý trạng thái ghế tự động
 
-### 💾 Kết nối SQL Server
-- ✅ SQL Server JDBC Driver (mssql-jdbc 12.4.1)
-- ✅ Schema SQL đầy đủ (`database_schema.sql`)
-- ✅ DAOs hỗ trợ SQL Server
-- ✅ Dữ liệu mẫu tự động
-- ✅ Hướng dẫn thiết lập chi tiết (`DATABASE_SETUP.md`)
+### 💾 Kết nối MariaDB
+- ✅ MariaDB JDBC Driver (`mariadb-java-client 3.4.1`)
+- ✅ Schema MariaDB đầy đủ (`database/mariadb_schema.sql`)
+- ✅ DAOs hỗ trợ MariaDB (port 3306)
+- ✅ Dữ liệu mẫu MariaDB (`seed/seed_mariadb.sql`)
+- ✅ Hướng dẫn thiết lập chi tiết (`MARIADB_SETUP.md`)
+
+### 🏗️ Kiến trúc phân tầng
+- ✅ **Model layer**: Lombok (`@Getter/@Setter/@Builder/@ToString`)
+- ✅ **DTO layer**: `CreateXRequest`, `UpdateXRequest`, `XDTO` cho KhachHang, ChuyenTau, Ve
+- ✅ **Mapper layer**: `XMapper` interface + `JacksonXMapper` implement dùng Jackson `ObjectMapper`
+- ✅ **Repository layer**: `IKhachHangRepository`, `IChuyenTauRepository`, `IVeRepository`
+- ✅ **Service layer**: interface + implement cho KhachHang, ChuyenTau, Ve
 
 ### 🔐 Phân quyền theo loại nhân viên (maLoai)
 - ✅ **LNV01**: Nhân viên thường - Truy cập cơ bản

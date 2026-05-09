@@ -15,6 +15,7 @@ import com.itextpdf.layout.properties.UnitValue;
 import com.trainstation.MySQL.ConnectSql;
 import com.trainstation.dao.*;
 import com.trainstation.model.*;
+import com.trainstation.service.impl.HoaDonServiceImpl;
 
 import java.io.File;
 import java.sql.*;
@@ -46,12 +47,14 @@ public class HoaDonService {
     private final KhachHangDAO khachHangDAO;
     private final VeDAO veDAO;
     private final TinhGiaService tinhGia = TinhGiaService.getInstance();
+    private final HoaDonServiceImpl hoaDonServiceImpl;
 
     private HoaDonService() {
         this.hoaDonDAO = HoaDonDAO.getInstance();
         this.chiTietHoaDonDAO = ChiTietHoaDonDAO.getInstance();
         this.khachHangDAO = KhachHangDAO.getInstance();
         this.veDAO = VeDAO.getInstance();
+        this.hoaDonServiceImpl = HoaDonServiceImpl.getInstance();
     }
 
     public static synchronized HoaDonService getInstance() {
@@ -60,20 +63,21 @@ public class HoaDonService {
     }
 
     public HoaDon taoHoaDon(HoaDon hoaDon) {
-        if (hoaDonDAO.insert(hoaDon)) return hoaDon;
+        HoaDon created = hoaDonServiceImpl.taoHoaDon(hoaDon);
+        if (created != null) return created;
         throw new RuntimeException("Không thể tạo hóa đơn");
     }
 
     public boolean capNhatHoaDon(HoaDon hoaDon) {
-        return hoaDonDAO.update(hoaDon);
+        return hoaDonServiceImpl.capNhatHoaDon(hoaDon);
     }
 
     public HoaDon timHoaDonTheoMa(String maHoaDon) {
-        return hoaDonDAO.findById(maHoaDon);
+        return hoaDonServiceImpl.timHoaDonTheoMa(maHoaDon);
     }
 
     public List<HoaDon> layTatCaHoaDon() {
-        return hoaDonDAO.getAll();
+        return hoaDonServiceImpl.layTatCaHoaDon();
     }
 
     public float capNhatTongTien(String maHoaDon) {

@@ -1,12 +1,13 @@
 package com.trainstation.service;
 
+import com.trainstation.model.DauMay;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 /**
- * Test for TauService
- * Note: These tests verify the service layer integration and new CRUD methods.
+ * Test for DauMayService (Locomotive/Engine Service)
+ * Note: These tests verify the service layer integration and CRUD methods.
  * Database connectivity is required for full integration tests.
  */
 public class DauMayServiceTest {
@@ -22,76 +23,60 @@ public class DauMayServiceTest {
     }
 
     @Test
-    public void testLayTauHoatDongMethodExists() {
-        // Test that the method to get active trains exists and is accessible
+    public void testLayDauMayDangHoatDongMethodExists() {
+        // Test that the method to get active locomotives exists and is accessible
         DauMayService service = DauMayService.getInstance();
         
         try {
-            // This will throw exception if method doesn't exist or database is not connected
-            // We're just testing method existence, not actual data
-            service.layTauHoatDong();
-            // If we get here without compilation error, the method exists
-            assertTrue("Method layTauHoatDong exists", true);
+            service.layDauMayDangHoatDong();
+            assertTrue("Method layDauMayDangHoatDong exists", true);
         } catch (Exception e) {
             // Expected if database is not connected
-            // But method still exists if we got here without compilation error
-            assertTrue("Method layTauHoatDong exists", true);
+            assertTrue("Method layDauMayDangHoatDong exists", true);
         }
     }
 
     @Test
-    public void testDungHoatDongTauMethodExists() {
+    public void testDungHoatDongDauMayMethodExists() {
         // Test that the soft delete method exists and is accessible
         DauMayService service = DauMayService.getInstance();
         
         try {
-            // This will throw exception if method doesn't exist or database is not connected
-            // We're just testing method existence, not actual data
-            service.dungHoatDongTau("TEST_TAU_001");
-            // If we get here without compilation error, the method exists
-            assertTrue("Method dungHoatDongTau exists", true);
+            service.dungHoatDongDauMay("TEST_DM_001");
+            assertTrue("Method dungHoatDongDauMay exists", true);
         } catch (Exception e) {
             // Expected if database is not connected
-            // But method still exists if we got here without compilation error
-            assertTrue("Method dungHoatDongTau exists", true);
+            assertTrue("Method dungHoatDongDauMay exists", true);
         }
     }
 
     @Test
-    public void testThemTauMethodExists() {
-        // Test that the add train method exists and is accessible
+    public void testThemDauMayMethodExists() {
+        // Test that the add locomotive method exists and is accessible
         DauMayService service = DauMayService.getInstance();
         
         try {
-            // This will throw exception if method doesn't exist or database is not connected
-            // We're just testing method existence, not actual data
-            Tau testTau = new Tau("TEST_TAU_002", 10, "Tàu Test", "Hoạt động");
-            service.themTau(testTau);
-            // If we get here without compilation error, the method exists
-            assertTrue("Method themTau exists", true);
+            DauMay testDauMay = new DauMay("TEST_DM_002", "Diesel", "Đầu máy Test", 2020, null, "Hoạt động");
+            service.themDauMay(testDauMay);
+            assertTrue("Method themDauMay exists", true);
         } catch (Exception e) {
             // Expected if database is not connected
-            // But method still exists if we got here without compilation error
-            assertTrue("Method themTau exists", true);
+            assertTrue("Method themDauMay exists", true);
         }
     }
 
     @Test
-    public void testCapNhatTauMethodExists() {
-        // Test that the update train method exists and is accessible
+    public void testCapNhatDauMayMethodExists() {
+        // Test that the update locomotive method exists and is accessible
         DauMayService service = DauMayService.getInstance();
         
         try {
-            // This will throw exception if method doesn't exist or database is not connected
-            // We're just testing method existence, not actual data
-            Tau testTau = new Tau("TEST_TAU_003", 15, "Tàu Test Updated", "Hoạt động");
-            service.capNhatTau(testTau);
-            // If we get here without compilation error, the method exists
-            assertTrue("Method capNhatTau exists", true);
+            DauMay testDauMay = new DauMay("TEST_DM_003", "Electric", "Đầu máy Updated", 2021, null, "Hoạt động");
+            service.capNhatDauMay(testDauMay);
+            assertTrue("Method capNhatDauMay exists", true);
         } catch (Exception e) {
             // Expected if database is not connected
-            // But method still exists if we got here without compilation error
-            assertTrue("Method capNhatTau exists", true);
+            assertTrue("Method capNhatDauMay exists", true);
         }
     }
 }

@@ -1,71 +1,35 @@
 package com.trainstation.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.*;
 import java.io.Serializable;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
+@Entity
+@Table(name = "ToaTau")
 public class ToaTau implements Serializable {
+    @Id
+    @Column(name = "maToa")
     private String maToa;
+
+    @Column(name = "loaiToa")
     private String loaiToa;
+
+    @Column(name = "samSX")
     private Integer samSX;
+
+    @Column(name = "trangThai")
     private String trangThai;
+
+    @Column(name = "sucChua")
     private Integer sucChua;
-
-    public ToaTau() {
-    }
-
-    public ToaTau(String maToa, String loaiToa, Integer samSX, String trangThai, Integer sucChua) {
-        this.maToa = maToa;
-        this.loaiToa = loaiToa;
-        this.samSX = samSX;
-        this.trangThai = trangThai;
-        this.sucChua = sucChua;    }
-
-    public String getMaToa() {
-        return maToa;
-    }
-
-    public void setMaToa(String maToa) {
-        this.maToa = maToa;
-    }
-
-    public String getLoaiToa() {
-        return loaiToa;
-    }
-
-    public void setLoaiToa(String loaiToa) {
-        this.loaiToa = loaiToa;
-    }
-
-    public Integer getSamSX() {
-        return samSX;
-    }
-
-    public void setSamSX(Integer samSX) {
-        this.samSX = samSX;
-    }
-
-    public String getTrangThai() {
-        return trangThai;
-    }
-
-    public void setTrangThai(String trangThai) {
-        this.trangThai = trangThai;
-    }
-
-    public Integer getSucChua() {
-        return sucChua;
-    }
-
-    public void setSucChua(Integer sucChua) {
-        this.sucChua = sucChua;
-    }    @Override
-    public String toString() {
-        return "ToaTau{" +
-                "maToa='" + maToa + '\'' +
-                ", loaiToa='" + loaiToa + '\'' +
-                ", samSX=" + samSX +
-                ", trangThai='" + trangThai + '\'' +
-                ", sucChua=" + sucChua + +
-                '}';
-    }
 }
 

@@ -1,82 +1,38 @@
 package com.trainstation.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
+@Entity
+@Table(name = "BangGia")
 public class BangGia implements Serializable {
+    @Id
+    @Column(name = "maBangGia")
     private String maBangGia;
+
+    @Column(name = "maChang")
     private String maChang;
+
+    @Column(name = "loaiGhe")
     private String loaiGhe;
+
+    @Column(name = "giaCoBan")
     private Float giaCoBan;
+
+    @Column(name = "ngayBatDau")
     private LocalDateTime ngayBatDau;
+
+    @Column(name = "ngayKetThuc")
     private LocalDateTime ngayKetThuc;
-
-    public BangGia() {
-    }
-
-    public BangGia(String maBangGia, String maChang, String loaiGhe, Float giaCoBan, LocalDateTime ngayBatDau, LocalDateTime ngayKetThuc) {
-        this.maBangGia = maBangGia;
-        this.maChang = maChang;
-        this.loaiGhe = loaiGhe;
-        this.giaCoBan = giaCoBan;
-        this.ngayBatDau = ngayBatDau;
-        this.ngayKetThuc = ngayKetThuc;    }
-
-    public String getMaBangGia() {
-        return maBangGia;
-    }
-
-    public void setMaBangGia(String maBangGia) {
-        this.maBangGia = maBangGia;
-    }
-
-    public String getMaChang() {
-        return maChang;
-    }
-
-    public void setMaChang(String maChang) {
-        this.maChang = maChang;
-    }
-
-    public String getLoaiGhe() {
-        return loaiGhe;
-    }
-
-    public void setLoaiGhe(String loaiGhe) {
-        this.loaiGhe = loaiGhe;
-    }
-
-    public Float getGiaCoBan() {
-        return giaCoBan;
-    }
-
-    public void setGiaCoBan(Float giaCoBan) {
-        this.giaCoBan = giaCoBan;
-    }
-
-    public LocalDateTime getNgayBatDau() {
-        return ngayBatDau;
-    }
-
-    public void setNgayBatDau(LocalDateTime ngayBatDau) {
-        this.ngayBatDau = ngayBatDau;
-    }
-
-    public LocalDateTime getNgayKetThuc() {
-        return ngayKetThuc;
-    }
-
-    public void setNgayKetThuc(LocalDateTime ngayKetThuc) {
-        this.ngayKetThuc = ngayKetThuc;
-    }    @Override
-    public String toString() {
-        return "BangGia{" +
-                "maBangGia='" + maBangGia + '\'' +
-                ", maChang='" + maChang + '\'' +
-                ", loaiGhe='" + loaiGhe + '\'' +
-                ", giaCoBan=" + giaCoBan +
-                ", ngayBatDau=" + ngayBatDau +
-                ", ngayKetThuc=" + ngayKetThuc + +
-                '}';
-    }
 }

@@ -1,70 +1,34 @@
 package com.trainstation.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.*;
 import java.io.Serializable;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
+@Entity
+@Table(name = "Ga")
 public class Ga implements Serializable {
+    @Id
+    @Column(name = "maGa")
     private String maGa;
+
+    @Column(name = "tenGa")
     private String tenGa;
+
+    @Column(name = "moTa")
     private String moTa;
+
+    @Column(name = "tinhTrang")
     private String tinhTrang;
+
+    @Column(name = "diaChi")
     private String diaChi;
-
-    public Ga() {
-    }
-
-    public Ga(String maGa, String tenGa, String moTa, String tinhTrang, String diaChi) {
-        this.maGa = maGa;
-        this.tenGa = tenGa;
-        this.moTa = moTa;
-        this.tinhTrang = tinhTrang;
-        this.diaChi = diaChi;    }
-
-    public String getMaGa() {
-        return maGa;
-    }
-
-    public void setMaGa(String maGa) {
-        this.maGa = maGa;
-    }
-
-    public String getTenGa() {
-        return tenGa;
-    }
-
-    public void setTenGa(String tenGa) {
-        this.tenGa = tenGa;
-    }
-
-    public String getMoTa() {
-        return moTa;
-    }
-
-    public void setMoTa(String moTa) {
-        this.moTa = moTa;
-    }
-
-    public String getTinhTrang() {
-        return tinhTrang;
-    }
-
-    public void setTinhTrang(String tinhTrang) {
-        this.tinhTrang = tinhTrang;
-    }
-
-    public String getDiaChi() {
-        return diaChi;
-    }
-
-    public void setDiaChi(String diaChi) {
-        this.diaChi = diaChi;
-    }    @Override
-    public String toString() {
-        return "Ga{" +
-                "maGa='" + maGa + '\'' +
-                ", tenGa='" + tenGa + '\'' +
-                ", moTa='" + moTa + '\'' +
-                ", tinhTrang='" + tinhTrang + '\'' +
-                ", diaChi='" + diaChi + '\'' + +
-                '}';
-    }
 }

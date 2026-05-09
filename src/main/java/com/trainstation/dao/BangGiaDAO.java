@@ -10,6 +10,7 @@ import com.trainstation.model.Ghe;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -118,39 +119,12 @@ public class BangGiaDAO implements GenericDAO<BangGia> {
     }
     public BangGia findApplicable(String maChang, String loaiGhe, LocalDateTime refDate) {
         if (maChang == null || loaiGhe == null || refDate == null) return null;
-        // NOTE: Use SQL Server compatible TOP 1 instead of MySQL LIMIT
-        String sql = "SELECT TOP 1 maBangGia, maChang, loaiGhe, giaCoBan, ngayBatDau, ngayKetThuc " +
-                "FROM BangGia " +
-                "WHERE maChang = ? AND loaiGhe = ? AND ngayBatDau <= ? AND ngayKetThuc >= ? " +
-                "ORDER BY ngayBatDau DESC";
-        try (Connection conn = ConnectSql.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            Timestamp ts = Timestamp.valueOf(refDate);
-            pst.setString(1, maChang);
-            pst.setString(2, loaiGhe);
-            pst.setTimestamp(3, ts);
-            pst.setTimestamp(4, ts);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    LocalDateTime ngayBatDau = null, ngayKetThuc = null;
-                    Timestamp t1 = rs.getTimestamp("ngayBatDau");
-                    if (t1 != null) ngayBatDau = t1.toLocalDateTime();
-                    Timestamp t2 = rs.getTimestamp("ngayKetThuc");
-                    if (t2 != null) ngayKetThuc = t2.toLocalDateTime();
-
-                    return new BangGia(
-                            rs.getString("maBangGia"),
-                            rs.getString("maChang"),
-                            rs.getString("loaiGhe"),
-                            rs.getFloat("giaCoBan"),
-                            ngayBatDau,
-                            ngayKetThuc
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return getAll().stream()
+            .filter(bg -> maChang.equals(bg.getMaChang()))
+            .filter(bg -> loaiGhe.equals(bg.getLoaiGhe()))
+            .filter(bg -> bg.getNgayBatDau() != null && !bg.getNgayBatDau().isAfter(refDate))
+            .filter(bg -> bg.getNgayKetThuc() == null || !bg.getNgayKetThuc().isBefore(refDate))
+            .max(Comparator.comparing(BangGia::getNgayBatDau))
+            .orElse(null);
     }
 }

@@ -2,6 +2,12 @@ package com.trainstation.service;
 
 import com.trainstation.dao.NhanVienDAO;
 import com.trainstation.model.NhanVien;
+import com.trainstation.network.AppClient;
+import com.trainstation.network.AppRequest;
+import com.trainstation.network.AppResponse;
+import com.trainstation.network.NetworkConfig;
+import com.trainstation.network.RequestType;
+import com.trainstation.service.impl.NhanVienServiceImpl;
 import java.util.List;
 
 /**
@@ -10,9 +16,11 @@ import java.util.List;
 public class NhanVienService {
     private static NhanVienService instance;
     private final NhanVienDAO nhanVienDAO;
+    private final NhanVienServiceImpl nhanVienServiceImpl;
 
     private NhanVienService() {
         this.nhanVienDAO = NhanVienDAO.getInstance();
+        this.nhanVienServiceImpl = NhanVienServiceImpl.getInstance();
     }
 
     public static synchronized NhanVienService getInstance() {
@@ -26,56 +34,66 @@ public class NhanVienService {
      * Lấy tất cả nhân viên
      */
     public List<NhanVien> layTatCaNhanVien() {
-        return nhanVienDAO.getAll();
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.GET_ALL_NHANVIEN));
+            if (resp.isSuccess() && resp.getData() != null) return (List<NhanVien>) resp.getData();
+            return java.util.Collections.emptyList();
+        }
+        return nhanVienServiceImpl.layTatCaNhanVien();
     }
 
     /**
      * Tìm nhân viên theo mã
      */
     public NhanVien timNhanVienTheoMa(String maNV) {
-        return nhanVienDAO.findById(maNV);
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.FIND_NHANVIEN_BY_ID, maNV));
+            if (resp.isSuccess()) return (NhanVien) resp.getData();
+            return null;
+        }
+        return nhanVienServiceImpl.timNhanVienTheoMa(maNV);
     }
 
     /**
      * Thêm nhân viên mới
      */
     public boolean themNhanVien(NhanVien nv) {
-        return nhanVienDAO.insert(nv);
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.INSERT_NHANVIEN, nv));
+            if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
+            return false;
+        }
+        return nhanVienServiceImpl.themNhanVien(nv);
     }
 
     /**
      * Cập nhật thông tin nhân viên
      */
     public boolean capNhatNhanVien(NhanVien nv) {
-        return nhanVienDAO.update(nv);
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.UPDATE_NHANVIEN, nv));
+            if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
+            return false;
+        }
+        return nhanVienServiceImpl.capNhatNhanVien(nv);
     }
 
     /**
      * Xóa nhân viên
      */
     public boolean xoaNhanVien(String maNV) {
-        return nhanVienDAO.delete(maNV);
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.DELETE_NHANVIEN, maNV));
+            if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
+            return false;
+        }
+        return nhanVienServiceImpl.xoaNhanVien(maNV);
     }
 
     /**
      * Tạo mã nhân viên tự động
      */
     public String taoMaNhanVien() {
-        List<NhanVien> danhSach = nhanVienDAO.getAll();
-        int maxId = 0;
-        for (NhanVien nv : danhSach) {
-            String maNV = nv.getMaNV();
-            if (maNV != null && maNV.startsWith("NV")) {
-                try {
-                    int id = Integer.parseInt(maNV.substring(2));
-                    if (id > maxId) {
-                        maxId = id;
-                    }
-                } catch (NumberFormatException e) {
-                    // Ignore invalid IDs
-                }
-            }
-        }
-        return String.format("NV%02d", maxId + 1);
+        return nhanVienServiceImpl.taoMaNhanVien();
     }
 }

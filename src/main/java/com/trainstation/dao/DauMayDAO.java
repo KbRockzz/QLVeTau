@@ -134,7 +134,7 @@ public class DauMayDAO implements GenericDAO<DauMay> {
      * Dừng hoạt động đầu máy
      */
     public boolean dungHoatDongDauMay(String maDauMay) {
-        String sql = "UPDATE DauMay SET trangThai = N'Dừng hoạt động' WHERE maDauMay = ? and isActive = 1";
+        String sql = "UPDATE DauMay SET trangThai = 'Dừng hoạt động' WHERE maDauMay = ? and isActive = 1";
         try (Connection conn = ConnectSql.getInstance().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maDauMay);
@@ -156,5 +156,23 @@ public class DauMayDAO implements GenericDAO<DauMay> {
                 .filter(dauMay -> "Hoạt động".equals(dauMay.getTrangThai()))
                 .forEach(activeList::add);
         return activeList;
+    }
+
+    public String generateNextMaDauMay() {
+        String sql = "SELECT MAX(CAST(SUBSTRING(maDauMay, 3) AS UNSIGNED)) FROM DauMay"
+                + " WHERE maDauMay REGEXP '^DM[0-9]+$'";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            int max = 0;
+            if (rs.next()) {
+                int v = rs.getInt(1);
+                if (!rs.wasNull()) max = v;
+            }
+            return String.format("DM%03d", max + 1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "DM" + (System.currentTimeMillis() % 1000);
+        }
     }
 }

@@ -8,7 +8,12 @@ package com.trainstation.service;
 
 import com.trainstation.dao.BangGiaDAO;
 import com.trainstation.model.BangGia;
-import com.trainstation.model.Ga;
+import com.trainstation.network.AppClient;
+import com.trainstation.network.AppRequest;
+import com.trainstation.network.AppResponse;
+import com.trainstation.network.NetworkConfig;
+import com.trainstation.network.RequestType;
+import com.trainstation.service.impl.BangGiaServiceImpl;
 
 import java.util.List;
 
@@ -20,7 +25,8 @@ import java.util.List;
  */
 public class BangGiaService {
     private static BangGiaService instance;
-    private BangGiaDAO bangGiaDao = BangGiaDAO.getInstance();
+    private final BangGiaDAO bangGiaDao = BangGiaDAO.getInstance();
+    private final BangGiaServiceImpl bangGiaServiceImpl = BangGiaServiceImpl.getInstance();
 
     private BangGiaService() {
     }
@@ -31,26 +37,39 @@ public class BangGiaService {
         return instance;
     }
     public List<BangGia> layTatCaBangGia(){
-        return bangGiaDao.getAll();
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.GET_ALL_BANGGIA));
+            if (resp.isSuccess() && resp.getData() != null) return (List<BangGia>) resp.getData();
+            return java.util.Collections.emptyList();
+        }
+        return bangGiaServiceImpl.layTatCaBangGia();
     }
     
     public BangGia timBangGiaTheoMa(String maBG) {
-        return bangGiaDao.findById(maBG);
+        if (!NetworkConfig.isClientMode()) {
+            return bangGiaServiceImpl.timBangGiaTheoMa(maBG);
+        }
+        return layTatCaBangGia().stream()
+                .filter(bg -> maBG != null && maBG.equals(bg.getMaBangGia()))
+                .findFirst()
+                .orElse(null);
     }
 
     public String taoMaBangGia() {
-        List<BangGia> danhSach = bangGiaDao.getAll();
+        if (!NetworkConfig.isClientMode()) {
+            return bangGiaServiceImpl.taoMaBangGia();
+        }
+        List<BangGia> danhSach = layTatCaBangGia();
         int maxId = 0;
         for (BangGia bg : danhSach) {
-            String maBG = bg.getMaBangGia();
-            if (maBG != null && maBG.startsWith("BG")) {
+            String currentMaBG = bg.getMaBangGia();
+            if (currentMaBG != null && currentMaBG.startsWith("BG")) {
                 try {
-                    int id = Integer.parseInt(maBG.substring(2));
+                    int id = Integer.parseInt(currentMaBG.substring(2));
                     if (id > maxId) {
                         maxId = id;
                     }
-                } catch (NumberFormatException e) {
-                    // Ignore invalid IDs
+                } catch (NumberFormatException ignored) {
                 }
             }
         }
@@ -58,14 +77,28 @@ public class BangGiaService {
     }
     
     public boolean themBangGia(BangGia bg) {
-        return bangGiaDao.insert(bg);
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.INSERT_BANGGIA, bg));
+            if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
+            return false;
+        }
+        return bangGiaServiceImpl.themBangGia(bg);
     }
     public boolean capNhatBangGia(BangGia bg) {
-        return bangGiaDao.update(bg);
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.UPDATE_BANGGIA, bg));
+            if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
+            return false;
+        }
+        return bangGiaServiceImpl.capNhatBangGia(bg);
     }
     public boolean xoaBangGia(String maBG) {
-        return bangGiaDao.delete(maBG);
+        if (NetworkConfig.isClientMode()) {
+            AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.DELETE_BANGGIA, maBG));
+            if (resp.isSuccess() && resp.getData() != null) return (Boolean) resp.getData();
+            return false;
+        }
+        return bangGiaServiceImpl.xoaBangGia(maBG);
     }
     
 }
-

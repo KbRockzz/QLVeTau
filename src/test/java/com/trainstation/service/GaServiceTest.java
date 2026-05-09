@@ -66,7 +66,7 @@ public class GaServiceTest {
         try {
             // This will throw exception if method doesn't exist or database is not connected
             // We're just testing method existence, not actual data
-            Ga testGa = new Ga("GA001", "Ga Test", "Mô tả test", "Hoạt động", "Địa chỉ test", true);
+            Ga testGa = new Ga("GA001", "Ga Test", "Mô tả test", "Hoạt động", "Địa chỉ test");
             service.themGa(testGa);
             // If we get here without compilation error, the method exists
             assertTrue("Method themGa exists", true);
@@ -85,7 +85,7 @@ public class GaServiceTest {
         try {
             // This will throw exception if method doesn't exist or database is not connected
             // We're just testing method existence, not actual data
-            Ga testGa = new Ga("GA001", "Ga Updated", "Mô tả updated", "Hoạt động", "Địa chỉ updated", true);
+            Ga testGa = new Ga("GA001", "Ga Updated", "Mô tả updated", "Hoạt động", "Địa chỉ updated");
             service.capNhatGa(testGa);
             // If we get here without compilation error, the method exists
             assertTrue("Method capNhatGa exists", true);

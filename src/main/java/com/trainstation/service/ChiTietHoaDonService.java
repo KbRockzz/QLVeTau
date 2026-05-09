@@ -2,6 +2,7 @@ package com.trainstation.service;
 
 import com.trainstation.dao.ChiTietHoaDonDAO;
 import com.trainstation.model.ChiTietHoaDon;
+import com.trainstation.service.impl.ChiTietHoaDonServiceImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,9 +13,11 @@ import java.util.stream.Collectors;
 public class ChiTietHoaDonService {
     private static ChiTietHoaDonService instance;
     private final ChiTietHoaDonDAO chiTietHoaDonDAO;
+    private final ChiTietHoaDonServiceImpl chiTietHoaDonServiceImpl;
 
     private ChiTietHoaDonService() {
         this.chiTietHoaDonDAO = ChiTietHoaDonDAO.getInstance();
+        this.chiTietHoaDonServiceImpl = ChiTietHoaDonServiceImpl.getInstance();
     }
 
     public static synchronized ChiTietHoaDonService getInstance() {
@@ -28,9 +31,8 @@ public class ChiTietHoaDonService {
      * Thêm chi tiết hóa đơn mới
      */
     public ChiTietHoaDon themChiTiet(ChiTietHoaDon chiTiet) {
-        if (chiTietHoaDonDAO.insert(chiTiet)) {
-            return chiTiet;
-        }
+        ChiTietHoaDon created = chiTietHoaDonServiceImpl.themChiTiet(chiTiet);
+        if (created != null) return created;
         throw new RuntimeException("Không thể thêm chi tiết hóa đơn");
     }
 
@@ -38,29 +40,27 @@ public class ChiTietHoaDonService {
      * Cập nhật chi tiết hóa đơn
      */
     public boolean capNhatChiTiet(ChiTietHoaDon chiTiet) {
-        return chiTietHoaDonDAO.update(chiTiet);
+        return chiTietHoaDonServiceImpl.capNhatChiTiet(chiTiet);
     }
 
     /**
      * Lấy danh sách chi tiết theo mã hóa đơn
      */
     public List<ChiTietHoaDon> getByHoaDon(String maHoaDon) {
-        return chiTietHoaDonDAO.getAll().stream()
-                .filter(ct -> ct.getMaHoaDon().equals(maHoaDon))
-                .collect(Collectors.toList());
+        return chiTietHoaDonServiceImpl.getByHoaDon(maHoaDon);
     }
 
     /**
      * Lấy tất cả chi tiết hóa đơn
      */
     public List<ChiTietHoaDon> layTatCa() {
-        return chiTietHoaDonDAO.getAll();
+        return chiTietHoaDonServiceImpl.layTatCa();
     }
 
     /**
      * Xóa chi tiết hóa đơn
      */
     public boolean xoaChiTiet(String maHoaDon, String maVe) {
-        return chiTietHoaDonDAO.delete(maHoaDon + "," + maVe);
+        return chiTietHoaDonServiceImpl.xoaChiTiet(maHoaDon, maVe);
     }
 }

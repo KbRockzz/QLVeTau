@@ -142,4 +142,22 @@ public class GaDAO implements GenericDAO<Ga> {
                 rs.getString("diaChi")
         );
     }
+
+    public String generateNextMaGa() {
+        String sql = "SELECT MAX(CAST(SUBSTRING(maGa, 3) AS UNSIGNED)) FROM Ga"
+                + " WHERE maGa REGEXP '^GA[0-9]+$'";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            int max = 0;
+            if (rs.next()) {
+                int v = rs.getInt(1);
+                if (!rs.wasNull()) max = v;
+            }
+            return String.format("GA%03d", max + 1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "GA" + (System.currentTimeMillis() % 1000);
+        }
+    }
 }

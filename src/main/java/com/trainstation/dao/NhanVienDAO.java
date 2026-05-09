@@ -183,4 +183,22 @@ public class NhanVienDAO implements GenericDAO<NhanVien> {
                 .orElse(null);
         return nv.getMaLoaiNV();
     }
+
+    public String generateNextMaNV() {
+        String sql = "SELECT MAX(CAST(SUBSTRING(maNV, 3) AS UNSIGNED)) FROM NhanVien"
+                + " WHERE maNV REGEXP '^NV[0-9]+$'";
+        try (Connection conn = ConnectSql.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            int max = 0;
+            if (rs.next()) {
+                int v = rs.getInt(1);
+                if (!rs.wasNull()) max = v;
+            }
+            return String.format("NV%02d", max + 1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "NV" + (System.currentTimeMillis() % 100);
+        }
+    }
 }

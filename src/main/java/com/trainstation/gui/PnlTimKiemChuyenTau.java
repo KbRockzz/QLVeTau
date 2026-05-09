@@ -47,6 +47,7 @@ public class PnlTimKiemChuyenTau extends JPanel {
     private final JComboBox<String> cbFilterTrangThai = new JComboBox<>();
     private final JSpinner spDateFrom;
     private final JSpinner spDateTo;
+    private final JCheckBox chkEnableDate = new JCheckBox("Lọc theo ngày");
     private final DefaultTableModel modelChuyen;
     private final JTable tblChuyen;
 
@@ -123,6 +124,14 @@ public class PnlTimKiemChuyenTau extends JPanel {
         gc.gridx = 2; filterChuyen.add(new JLabel("đến:"), gc);
         gc.gridx = 3; filterChuyen.add(spDateTo, gc);
         r++;
+        gc.gridx = 0; gc.gridy = r; gc.gridwidth = 4; filterChuyen.add(chkEnableDate, gc); gc.gridwidth = 1;
+
+        spDateFrom.setEnabled(false);
+        spDateTo.setEnabled(false);
+        chkEnableDate.addItemListener(e -> {
+            spDateFrom.setEnabled(chkEnableDate.isSelected());
+            spDateTo.setEnabled(chkEnableDate.isSelected());
+        });
 
         JPanel btnsChuyen = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         JButton btnSearchChuyen = new JButton("Tìm");
@@ -271,6 +280,7 @@ public class PnlTimKiemChuyenTau extends JPanel {
             cbFilterGaDen.setSelectedItem("");
             cbFilterDauMay.setSelectedItem("");
             cbFilterTrangThai.setSelectedItem("");
+            chkEnableDate.setSelected(false);
             spDateFrom.setValue(new Date());
             spDateTo.setValue(new Date());
             modelChuyen.setRowCount(0);
@@ -354,8 +364,9 @@ public class PnlTimKiemChuyenTau extends JPanel {
         final String gaDen = nonEmpty(cbFilterGaDen.getSelectedItem());
         final String dauMay = nonEmpty(cbFilterDauMay.getSelectedItem());
         final String trangThai = nonEmpty(cbFilterTrangThai.getSelectedItem());
-        final Date fromDate = (Date) spDateFrom.getValue();
-        final Date toDate = (Date) spDateTo.getValue();
+        final boolean useDateFilter = chkEnableDate.isSelected();
+        final Date fromDate = useDateFilter ? (Date) spDateFrom.getValue() : null;
+        final Date toDate = useDateFilter ? (Date) spDateTo.getValue() : null;
 
         modelChuyen.setRowCount(0);
 

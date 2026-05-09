@@ -1,105 +1,44 @@
 package com.trainstation.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
+@Entity
+@Table(name = "HoaDon")
 public class HoaDon implements Serializable {
+    @Id
+    @Column(name = "maHoaDon")
     private String maHoaDon;
+
+    @Column(name = "maNV")
     private String maNV;
+
+    @Column(name = "maKH")
     private String maKH;
+
+    @Column(name = "tenKH")
     private String tenKH;
+
+    @Column(name = "soDienThoai")
     private String soDienThoai;
+
+    @Column(name = "ngayLap")
     private LocalDateTime ngayLap;
+
+    @Column(name = "phuongThucThanhToan")
     private String phuongThucThanhToan;
+
+    @Column(name = "trangThai")
     private String trangThai;
-
-    public HoaDon() {
-    }
-
-    public HoaDon(String maHoaDon, String maNV, String maKH, String tenKH, String soDienThoai,
-                  LocalDateTime ngayLap, String phuongThucThanhToan, String trangThai) {
-        this.maHoaDon = maHoaDon;
-        this.maNV = maNV;
-        this.maKH = maKH;
-        this.tenKH = tenKH;
-        this.soDienThoai = soDienThoai;
-        this.ngayLap = ngayLap;
-        this.phuongThucThanhToan = phuongThucThanhToan;
-        this.trangThai = trangThai;    }
-
-    public String getMaHoaDon() {
-        return maHoaDon;
-    }
-
-    public void setMaHoaDon(String maHoaDon) {
-        this.maHoaDon = maHoaDon;
-    }
-
-    public String getMaNV() {
-        return maNV;
-    }
-
-    public void setMaNV(String maNV) {
-        this.maNV = maNV;
-    }
-
-    public String getMaKH() {
-        return maKH;
-    }
-
-    public void setMaKH(String maKH) {
-        this.maKH = maKH;
-    }
-
-    public String getTenKH() {
-        return tenKH;
-    }
-
-    public void setTenKH(String tenKH) {
-        this.tenKH = tenKH;
-    }
-
-    public String getSoDienThoai() {
-        return soDienThoai;
-    }
-
-    public void setSoDienThoai(String soDienThoai) {
-        this.soDienThoai = soDienThoai;
-    }
-
-    public LocalDateTime getNgayLap() {
-        return ngayLap;
-    }
-
-    public void setNgayLap(LocalDateTime ngayLap) {
-        this.ngayLap = ngayLap;
-    }
-
-    public String getPhuongThucThanhToan() {
-        return phuongThucThanhToan;
-    }
-
-    public void setPhuongThucThanhToan(String phuongThucThanhToan) {
-        this.phuongThucThanhToan = phuongThucThanhToan;
-    }
-
-    public String getTrangThai() {
-        return trangThai;
-    }
-
-    public void setTrangThai(String trangThai) {
-        this.trangThai = trangThai;
-    }    @Override
-    public String toString() {
-        return "HoaDon{" +
-                "maHoaDon='" + maHoaDon + '\'' +
-                ", maNV='" + maNV + '\'' +
-                ", maKH='" + maKH + '\'' +
-                ", tenKH='" + tenKH + '\'' +
-                ", soDienThoai='" + soDienThoai + '\'' +
-                ", ngayLap=" + ngayLap +
-                ", phuongThucThanhToan='" + phuongThucThanhToan + '\'' +
-                ", trangThai='" + trangThai + '\'' + +
-                '}';
-    }
 }

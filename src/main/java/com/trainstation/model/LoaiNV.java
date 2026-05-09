@@ -1,48 +1,32 @@
 package com.trainstation.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.*;
 import java.io.Serializable;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "LoaiNV")
 public class LoaiNV implements Serializable {
+    @Id
+    @Column(name = "maLoai")
     private String maLoai;
+
+    @Column(name = "tenLoai")
     private String tenLoai;
+
+    @Column(name = "moTa")
     private String moTa;
 
-    public LoaiNV() {
-    }
-
-    public LoaiNV(String maLoai, String tenLoai, String moTa) {
-        this.maLoai = maLoai;
-        this.tenLoai = tenLoai;
-        this.moTa = moTa;    }
-
-    public String getMaLoai() {
-        return maLoai;
-    }
-
-    public void setMaLoai(String maLoai) {
-        this.maLoai = maLoai;
-    }
-
-    public String getTenLoai() {
-        return tenLoai;
-    }
-
-    public void setTenLoai(String tenLoai) {
-        this.tenLoai = tenLoai;
-    }
-
-    public String getMoTa() {
-        return moTa;
-    }
-
-    public void setMoTa(String moTa) {
-        this.moTa = moTa;
-    }    @Override
+    @Override
     public String toString() {
-        return "LoaiNV{" +
-                "maLoai='" + maLoai + '\'' +
-                ", tenLoai='" + tenLoai + '\'' +
-                ", moTa='" + moTa + '\'' + +
-                '}';
+        return tenLoai;
     }
 }
