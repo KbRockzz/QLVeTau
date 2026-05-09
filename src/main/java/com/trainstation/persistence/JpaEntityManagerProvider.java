@@ -23,8 +23,8 @@ public final class JpaEntityManagerProvider {
                         "jdbc:mariadb://localhost:3306/QLTauHoa?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh"
                 )
         );
-        putIfPresent(props, "jakarta.persistence.jdbc.user", "DB_USERNAME");
-        putIfPresent(props, "jakarta.persistence.jdbc.password", "DB_PASSWORD");
+        putIfPresent(props, "jakarta.persistence.jdbc.user", "root");
+        putIfPresent(props, "jakarta.persistence.jdbc.password", "sapassword");
 
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, props);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
