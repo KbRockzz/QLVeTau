@@ -103,7 +103,7 @@ public class VeService {
         if (NetworkConfig.isClientMode()) {
             AppResponse resp = AppClient.getInstance().sendRequest(new AppRequest(RequestType.INSERT_VE, ve));
             if (resp.isSuccess()) return (Ve) resp.getData();
-            throw new RuntimeException(resp.getMessage());
+            throw new RuntimeException("Không thể tạo vé: " + resp.getMessage());
         }
         Ve created = veServiceImpl.taoVe(ve);
         if (created != null) return created;
@@ -138,6 +138,8 @@ public class VeService {
         Object lock = seatLocks.computeIfAbsent(maGhe, k -> new Object());
 
         synchronized (lock) {
+            LocalDateTime bookingTime = LocalDateTime.now();
+
             ChuyenTau chuyenTauDb = chuyenTauDAO.findById(chuyenTau.getMaChuyen());
             if (chuyenTauDb == null) {
                 throw new IllegalStateException("Không tìm thấy chuyến tàu");
@@ -145,7 +147,7 @@ public class VeService {
             if (chuyenTauDb.getGioDi() == null) {
                 throw new IllegalStateException("Chuyến tàu không có thời gian khởi hành");
             }
-            if (!chuyenTauDb.getGioDi().isAfter(LocalDateTime.now())) {
+            if (!chuyenTauDb.getGioDi().isAfter(bookingTime)) {
                 throw new IllegalStateException("Không thể đặt vé cho chuyến đã khởi hành");
             }
 
@@ -177,12 +179,12 @@ public class VeService {
                 throw new IllegalStateException("Không xác định được loại ghế để áp dụng bảng giá");
             }
 
-            BangGia bangGia = bangGiaDAO.findApplicable(maChang, loaiGheKey.trim(), LocalDateTime.now());
+            BangGia bangGia = bangGiaDAO.findApplicable(maChang, loaiGheKey.trim(), bookingTime);
             if (bangGia == null) {
                 throw new IllegalStateException("Không tìm thấy bảng giá phù hợp");
             }
 
-            String maVeMoi = "VE" + System.currentTimeMillis();
+            String maVeMoi = generateTicketId();
             Ve ve = new Ve();
             ve.setMaVe(maVeMoi);
             ve.setMaChuyen(chuyenTauDb.getMaChuyen());
@@ -192,7 +194,7 @@ public class VeService {
             ve.setMaGaDen(chuyenTauDb.getMaGaDen());
             ve.setTenGaDi(resolveTenGa(chuyenTauDb.getMaGaDi()));
             ve.setTenGaDen(resolveTenGa(chuyenTauDb.getMaGaDen()));
-            ve.setNgayIn(LocalDateTime.now());
+            ve.setNgayIn(bookingTime);
             ve.setTrangThai("Đã đặt");
             ve.setGioDi(chuyenTauDb.getGioDi());
             ve.setGioDenDuKien(chuyenTauDb.getGioDen());
@@ -241,6 +243,10 @@ public class VeService {
         if (maGa == null || maGa.trim().isEmpty()) return null;
         Ga ga = gaDAO.findById(maGa);
         return ga != null ? ga.getTenGa() : maGa;
+    }
+
+    private String generateTicketId() {
+        return "VE_" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
     }
     
     public boolean huyVe(String maVe) {
@@ -322,7 +328,7 @@ public class VeService {
                 if (!"Trống".equals(gheMoi.getTrangThai())) {
                     throw new IllegalStateException("Ghế mới đã được đặt");
                 }
-                gheMoi.setTrangThai("Bận");
+                gheMoi.setTrangThai("Đã đặt");
                 gheDAO.update(gheMoi);
             }
         }
@@ -759,7 +765,7 @@ public class VeService {
             }
 
             // 9. Tạo mã vé mới
-            String maVeMoi = "VE_" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
+            String maVeMoi = generateTicketId();
 
             // 10. Tạo đối tượng Ve mới (trong bộ nhớ)
             Ve veMoi = new Ve(
