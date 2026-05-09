@@ -190,7 +190,7 @@ CREATE TABLE IF NOT EXISTS Ve (
     gioDenDuKien DATETIME,
     soToa INT,
     loaiCho VARCHAR(20),
-    loaiVe VARCHAR(20),
+    loaiVe VARCHAR(100),
     maBangGia VARCHAR(20),
     giaThanhToan FLOAT,
     isActive TINYINT(1) DEFAULT 1,
