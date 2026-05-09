@@ -33,8 +33,18 @@ public class TaiKhoanServiceImpl implements ITaiKhoanService {
     @Override
     public TaiKhoan xacThuc(String tenTaiKhoan, String matKhau) {
         TaiKhoan tk = taiKhoanRepository.findByTenTaiKhoan(tenTaiKhoan);
-        boolean matched = tk != null && PasswordUtil.verifyPassword(matKhau, tk.getMatKhau());
+        boolean matched = tk != null && isAccountEnabled(tk)
+                && PasswordUtil.verifyPassword(matKhau, tk.getMatKhau());
         return matched ? tk : null;
+    }
+
+    private boolean isAccountEnabled(TaiKhoan tk) {
+        String trangThai = tk.getTrangThai();
+        if (trangThai == null || trangThai.isBlank()) {
+            return true;
+        }
+        String normalized = trangThai.trim();
+        return "Hoạt động".equalsIgnoreCase(normalized) || "active".equalsIgnoreCase(normalized);
     }
 
     @Override
